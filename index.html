@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Step 3</title>
+    <title>Clinic Master System - Step 4</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -21,20 +21,20 @@
         .auth-form { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; text-align: left; }
         .field-label { font-size: 0.82rem; color: #475569; margin-bottom: 6px; font-weight: 700; display: block; }
         .input-wrapper { background-color: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 4px 10px; }
-        .input-wrapper input, .input-wrapper select { width: 100%; border: none; outline: none; padding: 8px 0; font-size: 0.92rem; font-weight: 600; color: #0f172a; background: transparent; }
+        .input-wrapper input, .input-wrapper select, .input-wrapper textarea { width: 100%; border: none; outline: none; padding: 8px 0; font-size: 0.92rem; font-weight: 600; color: #0f172a; background: transparent; }
         .btn-main { width: 100%; background: #0d9488; color: white; border: none; border-radius: 14px; padding: 14px; font-size: 0.98rem; font-weight: 700; cursor: pointer; margin-top: 10px; }
         .header { background: #0f172a; color: white; padding: 20px; text-align: center; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; position: relative; }
         .content { padding: 20px; flex: 1; overflow-y: auto; }
         .menu-card { background: #fff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
         .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 14px; text-align: left; }
         .back-btn { position: absolute; top: 20px; left: 15px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; }
-        .patient-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .patient-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .visit-card { background: #fff; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 14px; margin-bottom: 14px; text-align: left; }
     </style>
 </head>
 <body>
 
 <div class="mobile-container">
-    <!-- شاشة تسجيل الدخول -->
     <div id="authScreen" class="auth-screen">
         <div class="activ-icon"><i class="fa-solid fa-user-doctor"></i></div>
         <div class="activ-title">تسجيل دخول المؤسس</div>
@@ -53,7 +53,6 @@
         </div>
     </div>
 
-    <!-- لوحة التحكم -->
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column;">
         <div class="header">
             <button id="backBtn" class="back-btn" onclick="showMainMenu()" style="display: none;"><i class="fa-solid fa-arrow-left"></i> الرئيسية</button>
@@ -62,7 +61,6 @@
         </div>
 
         <div class="content">
-            <!-- القائمة الرئيسية -->
             <div id="mainMenuScreen" class="main-menu">
                 <div class="menu-card" onclick="openAddPatient()">
                     <i class="fa-solid fa-user-plus" style="font-size: 24px; color: #0d9488;"></i>
@@ -83,7 +81,6 @@
                 <button class="btn-main" style="background: #ef4444; margin-top: 20px;" onclick="executeLogout()">تسجيل الخروج</button>
             </div>
 
-            <!-- شاشة إضافة مريض -->
             <div id="addPatientScreen" style="display: none;">
                 <form onsubmit="savePatient(event)">
                     <div class="group-card">
@@ -116,16 +113,28 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-main"><i class="fa-solid fa-floppy-disk"></i> حفظ المريض</button>
+                    <button type="submit" class="btn-main"><i class="fa-solid fa-floppy-disk"></i> حفظ المريض وفتح سجله</button>
                 </form>
             </div>
 
-            <!-- شاشة أرشيف المرضى -->
             <div id="archiveScreen" style="display: none;">
                 <div class="field-box" style="margin-bottom: 14px;">
                     <div class="input-wrapper"><input type="text" id="searchInput" placeholder="🔍 بحث بالاسم أو رقم الهاتف..." oninput="filterPatients()"></div>
                 </div>
                 <div id="patientsListContainer"></div>
+            </div>
+
+            <div id="medicalRecordScreen" style="display: none;">
+                <div class="group-card" style="background: #f0fdfa; border-color: #99f6e4;">
+                    <h3 id="recPatientName" style="color: #0f766e; margin-bottom: 4px;">—</h3>
+                    <p id="recPatientMeta" style="font-size: 0.78rem; color: #334155;"></p>
+                </div>
+
+                <button class="btn-main" style="background: #0284c7; margin-bottom: 14px;" onclick="addNewVisit()">
+                    <i class="fa-solid fa-calendar-plus"></i> إضافة زيارة جديدة
+                </button>
+
+                <div id="visitsContainer"></div>
             </div>
         </div>
     </div>
@@ -148,10 +157,8 @@
 
     const auth = firebase.auth();
     const FOUNDER_EMAIL = "musqaqa009@gmail.com";
-    let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [
-        { id: 1, name: "أحمد علي", age: 35, gender: "ذكر", phone: "07701234567" },
-        { id: 2, name: "فاطمة حسن", age: 28, gender: "أنثى", phone: "07809876543" }
-    ];
+    let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
+    let currentPatientId = null;
 
     auth.onAuthStateChanged(user => {
         if (user && user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
@@ -189,6 +196,7 @@
     function openAddPatient() {
         document.getElementById('mainMenuScreen').style.display = 'none';
         document.getElementById('archiveScreen').style.display = 'none';
+        document.getElementById('medicalRecordScreen').style.display = 'none';
         document.getElementById('addPatientScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'block';
         document.getElementById('headerTitle').innerText = 'تسجيل مريض جديد';
@@ -197,6 +205,7 @@
     function openArchive() {
         document.getElementById('mainMenuScreen').style.display = 'none';
         document.getElementById('addPatientScreen').style.display = 'none';
+        document.getElementById('medicalRecordScreen').style.display = 'none';
         document.getElementById('archiveScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'block';
         document.getElementById('headerTitle').innerText = 'أرشيف المرضى';
@@ -204,8 +213,10 @@
     }
 
     function showMainMenu() {
+        autoSaveRecord();
         document.getElementById('addPatientScreen').style.display = 'none';
         document.getElementById('archiveScreen').style.display = 'none';
+        document.getElementById('medicalRecordScreen').style.display = 'none';
         document.getElementById('mainMenuScreen').style.display = 'flex';
         document.getElementById('backBtn').style.display = 'none';
         document.getElementById('headerTitle').innerText = 'لوحة تحكم العيادة';
@@ -218,16 +229,97 @@
             name: document.getElementById('pName').value,
             age: Number(document.getElementById('pAge').value),
             gender: document.getElementById('pGender').value,
-            phone: document.getElementById('pPhone').value || 'بدون هاتف'
+            phone: document.getElementById('pPhone').value || 'بدون هاتف',
+            visits: [
+                { visitId: Date.now(), date: new Date().toISOString().substring(0, 10), bp: '', notes: '', drugs: '— ' }
+            ]
         };
 
         patients.unshift(newP);
         localStorage.setItem('clinic_patients', JSON.stringify(patients));
-        alert('تم حفظ المريض بنجاح!');
         document.getElementById('pName').value = '';
         document.getElementById('pAge').value = '';
         document.getElementById('pPhone').value = '';
-        showMainMenu();
+        openMedicalRecord(newP.id);
+    }
+
+    function openMedicalRecord(id) {
+        currentPatientId = id;
+        const patient = patients.find(p => p.id === id);
+        if (!patient) return;
+
+        document.getElementById('mainMenuScreen').style.display = 'none';
+        document.getElementById('archiveScreen').style.display = 'none';
+        document.getElementById('addPatientScreen').style.display = 'none';
+        document.getElementById('medicalRecordScreen').style.display = 'block';
+        document.getElementById('backBtn').style.display = 'block';
+
+        document.getElementById('headerTitle').innerText = 'سجل المريض الطبي';
+        document.getElementById('recPatientName').innerText = patient.name;
+        document.getElementById('recPatientMeta').innerText = `العمر: ${patient.age} سنة | الجنس: ${patient.gender} | الهاتف: ${patient.phone}`;
+
+        renderVisits(patient.visits || []);
+    }
+
+    function renderVisits(visits) {
+        const container = document.getElementById('visitsContainer');
+        container.innerHTML = visits.map(v => `
+            <div class="visit-card" data-visit-id="${v.visitId}">
+                <div style="background: #0f172a; color: #fff; padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; margin-bottom: 10px; display:flex; justify-content:space-between;">
+                    <span>📅 تاريخ الزيارة: ${v.date}</span>
+                </div>
+                <div class="field-box" style="margin-bottom: 8px;">
+                    <span class="field-label">ضغط الدم (BP)</span>
+                    <div class="input-wrapper"><input type="text" class="v-bp" value="${v.bp || ''}" placeholder="120/80" oninput="autoSaveRecord()"></div>
+                </div>
+                <div class="field-box" style="margin-bottom: 8px;">
+                    <span class="field-label">العلاجات والأدوية (RX)</span>
+                    <div class="input-wrapper"><textarea class="v-drugs" rows="2" placeholder="الأدوية..." oninput="autoSaveRecord()">${v.drugs || ''}</textarea></div>
+                </div>
+                <div class="field-box" style="margin-bottom: 0;">
+                    <span class="field-label">ملاحظات وتشخيص</span>
+                    <div class="input-wrapper"><textarea class="v-notes" rows="2" placeholder="ملاحظات..." oninput="autoSaveRecord()">${v.notes || ''}</textarea></div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function addNewVisit() {
+        autoSaveRecord();
+        const patient = patients.find(p => p.id === currentPatientId);
+        if (!patient) return;
+
+        const newV = {
+            visitId: Date.now(),
+            date: new Date().toISOString().substring(0, 10),
+            bp: '',
+            notes: '',
+            drugs: '— '
+        };
+
+        if (!patient.visits) patient.visits = [];
+        patient.visits.unshift(newV);
+        localStorage.setItem('clinic_patients', JSON.stringify(patients));
+        renderVisits(patient.visits);
+    }
+
+    function autoSaveRecord() {
+        if (!currentPatientId) return;
+        const patient = patients.find(p => p.id === currentPatientId);
+        if (!patient) return;
+
+        const cards = document.querySelectorAll('.visit-card');
+        cards.forEach(card => {
+            const vId = Number(card.getAttribute('data-visit-id'));
+            const vObj = patient.visits.find(v => v.visitId === vId);
+            if (vObj) {
+                vObj.bp = card.querySelector('.v-bp').value;
+                vObj.drugs = card.querySelector('.v-drugs').value;
+                vObj.notes = card.querySelector('.v-notes').value;
+            }
+        });
+
+        localStorage.setItem('clinic_patients', JSON.stringify(patients));
     }
 
     function renderPatientsList(list) {
@@ -238,7 +330,7 @@
         }
 
         container.innerHTML = list.map(p => `
-            <div class="patient-card">
+            <div class="patient-card" onclick="openMedicalRecord(${p.id})">
                 <div>
                     <h4 style="font-size: 1rem; color: #0f172a; margin-bottom: 2px;">${p.name}</h4>
                     <p style="font-size: 0.78rem; color: #64748b;"><i class="fa-solid fa-phone"></i> ${p.phone} | العمر: ${p.age} سنة</p>
