@@ -1871,9 +1871,17 @@
                 heightLeft -= pageHeight;
             }
 
-            const pdfBlob = pdf.output('blob');
-            const blobUrl = URL.createObjectURL(pdfBlob);
-            window.open(blobUrl, '_blank');
+            // الحفظ المباشر المتوافق كلياً مع المتصفحات وتطبيقات الأندرويد APK
+            try {
+                pdf.save(`Prescription_${Date.now()}.pdf`);
+            } catch (e) {
+                const pdfBlob = pdf.output('blob');
+                const blobUrl = URL.createObjectURL(pdfBlob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = `Prescription_${Date.now()}.pdf`;
+                link.click();
+            }
         }).catch(err => {
             alert('حدث خطأ أثناء توليد ملف الـ PDF: ' + err.message);
         });
