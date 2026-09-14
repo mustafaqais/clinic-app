@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.42</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.43</title>
     
     <link rel="manifest" href="data:application/manifest+json,{
       %22name%22: %22نظام إدارة العيادة الطبية%22,
@@ -184,18 +184,18 @@
         <div class="activ-title" id="authTitle">User Login</div>
         <div class="activ-sub">Sign in with your email and password securely</div>
 
-        <form id="authForm" class="auth-form" onsubmit="handleAuthSubmit(event)" autocomplete="on">
+        <div id="authForm" class="auth-form">
             <div class="field-box" style="text-align: left;">
                 <span class="field-label">Email Address</span>
-                <div class="input-wrapper"><input type="email" id="authEmail" placeholder="user@clinic.com" autocomplete="username" required></div>
+                <div class="input-wrapper"><input type="email" id="authEmail" placeholder="user@clinic.com" autocomplete="username"></div>
             </div>
             <div class="field-box" style="text-align: left;">
                 <span class="field-label">Password</span>
-                <div class="input-wrapper"><input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password" required></div>
+                <div class="input-wrapper"><input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password"></div>
             </div>
             <div class="forgot-pass" id="forgotPassBtn" onclick="resetPassword()">Forgot Password?</div>
-            <button type="submit" class="btn-main" id="authSubmitBtn">Login</button>
-        </form>
+            <button type="button" class="btn-main" id="authSubmitBtn" onclick="handleAuthSubmit()">Login</button>
+        </div>
 
         <div class="auth-switch" id="authSwitchText">
             Don't have an account? <span onclick="toggleAuthMode()">Register Now</span>
@@ -453,7 +453,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.42 (Robust Indexing)</div>
+        <div class="footer">Clinic Master Network v16.43 (Robust Indexing)</div>
     </div>
 </div>
 
@@ -831,10 +831,16 @@
             'Don\'t have an account? <span onclick="toggleAuthMode()">Register Now</span>';
     }
 
-    function handleAuthSubmit(e) {
-        e.preventDefault();
-        const email = document.getElementById('authEmail').value.trim();
-        const pass = document.getElementById('authPassword').value;
+    function handleAuthSubmit() {
+        const emailInput = document.getElementById('authEmail');
+        const passInput = document.getElementById('authPassword');
+        const email = emailInput.value.trim();
+        const pass = passInput.value;
+
+        if (!email || !pass) {
+            alert('الرجاء إدخال البريد الإلكتروني وكلمة المرور.');
+            return;
+        }
 
         if (isRegisterMode) {
             auth.createUserWithEmailAndPassword(email, pass)
@@ -1800,6 +1806,4 @@
                 const deletedPatient = patients.splice(index, 1)[0];
                 trashBin.unshift({ type: 'patient', data: deletedPatient, deletedAt: new Date().toISOString() });
                 if (currentUserId) {
-                    db.collection('users_data').doc(currentUserId).collection('patients').doc(String(patientId)).delete();
-                }
-                loca
+                    db.collec
