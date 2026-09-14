@@ -317,13 +317,13 @@
                         <div class="group-title" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:12px; color:#0f172a;"><i class="fa-solid fa-id-card"></i> Personal Information</div>
                         
                         <div class="field-box">
-                            <span class="field-label">Full Name</span>
+                            <span class="field-label">Full Name *</span>
                             <div class="input-wrapper"><input type="text" id="pName" placeholder="Enter patient full name..." required></div>
                         </div>
 
                         <div style="display: flex; gap: 10px;">
                             <div class="field-box" style="flex: 1;">
-                                <span class="field-label">Age</span>
+                                <span class="field-label">Age *</span>
                                 <div class="input-wrapper"><input type="number" id="pAge" placeholder="Age..." required></div>
                             </div>
 
@@ -436,11 +436,14 @@
             </div>
 
             <div id="medicalRecordScreen" style="display: none;">
-                <div class="group-card" style="background: #f0fdfa; border-color: #99f6e4;">
-                    <div class="field-box" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color: #0f766e; margin-bottom:4px;">
+                <div class="group-card" style="background: #f0fdfa; border-color: #99f6e4; position: relative;">
+                    <button type="button" onclick="openEditPatientModal()" style="position: absolute; top: 14px; right: 14px; background: #0d9488; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid fa-pen-to-square"></i> Edit Info
+                    </button>
+                    <div class="field-box" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color: #0f766e; margin-bottom:4px; padding-right: 70px;">
                         <i class="fa-solid fa-user-check"></i> <span id="recPatientName">—</span>
                     </div>
-                    <p style="font-size: 0.8rem; color: #334155;" id="recPatientMeta"></p>
+                    <p style="font-size: 0.8rem; color: #334155; line-height: 1.5;" id="recPatientMeta"></p>
                 </div>
 
                 <button class="btn-main btn-secondary" onclick="addNewVisit()">
@@ -477,6 +480,75 @@
         </div>
 
         <div class="footer">Clinic Master Network v16.37 (Robust Indexing)</div>
+    </div>
+</div>
+
+<!-- Modal تعديل معلومات المريض -->
+<div id="editPatientModal" class="modal-overlay">
+    <div class="modal-body">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-user-pen" style="color:#0d9488;"></i> Edit Patient Information</h3>
+            <button class="modal-close" onclick="closeEditPatientModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label">Full Name *</span>
+            <div class="input-wrapper"><input type="text" id="editPName" placeholder="Enter patient full name..." required></div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <div class="field-box" style="flex: 1;">
+                <span class="field-label">Age *</span>
+                <div class="input-wrapper"><input type="number" id="editPAge" placeholder="Age..." required></div>
+            </div>
+
+            <div class="field-box" style="flex: 1;">
+                <span class="field-label">Gender</span>
+                <div class="input-wrapper">
+                    <select id="editPGender">
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label">Marital Status</span>
+            <div class="input-wrapper">
+                <select id="editPMarital">
+                    <option value="">Select Status</option>
+                    <option value="Single">Single</option>
+                    <option value="Married">Married</option>
+                    <option value="Divorced">Divorced</option>
+                    <option value="Widow">Widow</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label">Occupation</span>
+            <div class="input-wrapper">
+                <select id="editPJob">
+                    <option value="">Select Occupation</option>
+                    <option value="Employee">Employee</option>
+                    <option value="Free Business">Free Business</option>
+                    <option value="Housewife">Housewife</option>
+                    <option value="Student">Student</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label">Phone Number</span>
+            <div class="input-wrapper"><input type="tel" id="editPPhone" placeholder="07XXXXXXXXX"></div>
+        </div>
+
+        <button class="btn-main" onclick="saveEditedPatient()" style="margin-top: 10px;">
+            <i class="fa-solid fa-check"></i> Save Changes
+        </button>
     </div>
 </div>
 
@@ -1239,6 +1311,54 @@
 
     function closeImagePreview() {
         document.getElementById('imagePreviewModal').style.display = 'none';
+    }
+
+    // --- Edit Patient Info Functions ---
+    function openEditPatientModal() {
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+
+        document.getElementById('editPName').value = patient.name || '';
+        document.getElementById('editPAge').value = patient.age || '';
+        document.getElementById('editPGender').value = patient.gender || '';
+        document.getElementById('editPMarital').value = patient.marital || '';
+        document.getElementById('editPJob').value = patient.job || '';
+        document.getElementById('editPPhone').value = patient.phone || '';
+
+        document.getElementById('editPatientModal').style.display = 'flex';
+    }
+
+    function closeEditPatientModal() {
+        document.getElementById('editPatientModal').style.display = 'none';
+    }
+
+    function saveEditedPatient() {
+        const name = document.getElementById('editPName').value.trim();
+        const age = Number(document.getElementById('editPAge').value);
+
+        if (!name || !age) {
+            alert('الاسم والعمر حقلان إجباريان!');
+            return;
+        }
+
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+
+        patient.name = name;
+        patient.age = age;
+        patient.gender = document.getElementById('editPGender').value || 'Unspecified';
+        patient.marital = document.getElementById('editPMarital').value || 'Single';
+        patient.job = document.getElementById('editPJob').value || 'Unspecified';
+        patient.phone = document.getElementById('editPPhone').value || 'N/A';
+
+        savePatientToCloudAndLocal(patient);
+        closeEditPatientModal();
+
+        // تحديث البيانات المعروضة في الشاشة
+        document.getElementById('recPatientName').innerText = patient.name;
+        document.getElementById('recPatientMeta').innerText = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
+        
+        alert('تم تعديل معلومات المريض بنجاح!');
     }
 
     function openMedHistoryModal(visitId) {
