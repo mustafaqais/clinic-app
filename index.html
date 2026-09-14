@@ -340,7 +340,14 @@
 
                         <div class="field-box">
                             <span class="field-label">Marital Status</span>
-                            <div class="input-wrapper"><input type="text" id="pMarital" placeholder="Single, Married, Divorced..."></div>
+                            <div class="input-wrapper">
+                                <select id="pMarital" required>
+                                    <option value="Single">Single</option>
+                                    <option value="Married">Married</option>
+                                    <option value="Divorced">Divorced</option>
+                                    <option value="Widow">Widow</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div class="field-box">
@@ -1518,7 +1525,7 @@
             name: document.getElementById('pName').value,
             age: Number(document.getElementById('pAge').value),
             gender: document.getElementById('pGender').value,
-            marital: document.getElementById('pMarital').value || 'Unspecified',
+            marital: document.getElementById('pMarital').value,
             job: document.getElementById('pJob').value,
             phone: document.getElementById('pPhone').value,
             visits: [
@@ -1609,7 +1616,7 @@
         document.getElementById('headerSub').innerText = 'View & update medical history';
 
         document.getElementById('recPatientName').innerText = patient.name;
-        document.getElementById('recPatientMeta').innerText = `Age: ${patient.age} | Gender: ${patient.gender} | Marital: ${patient.marital} | Job: ${patient.job} | Phone: ${patient.phone}`;
+        document.getElementById('recPatientMeta').innerText = `Age: ${patient.age} | Gender: ${patient.gender} | Marital: ${patient.marital || 'Single'} | Job: ${patient.job} | Phone: ${patient.phone}`;
 
         renderVisits(patient.visits || []);
     }
@@ -1794,4 +1801,3 @@
 
 </body>
 </html>
-
