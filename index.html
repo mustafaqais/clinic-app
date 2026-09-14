@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.43</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.44</title>
     
     <link rel="manifest" href="data:application/manifest+json,{
       %22name%22: %22نظام إدارة العيادة الطبية%22,
@@ -453,7 +453,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.43 (Robust Indexing)</div>
+        <div class="footer">Clinic Master Network v16.44 (Alert Debug Mode)</div>
     </div>
 </div>
 
@@ -832,10 +832,8 @@
     }
 
     function handleAuthSubmit() {
-        const emailInput = document.getElementById('authEmail');
-        const passInput = document.getElementById('authPassword');
-        const email = emailInput.value.trim();
-        const pass = passInput.value;
+        const email = document.getElementById('authEmail').value.trim();
+        const pass = document.getElementById('authPassword').value;
 
         if (!email || !pass) {
             alert('الرجاء إدخال البريد الإلكتروني وكلمة المرور.');
@@ -855,10 +853,10 @@
                         document.getElementById('activationScreen').style.display = 'flex';
                     }
                 })
-                .catch(err => alert(err.message));
+                .catch(err => alert('خطأ في التسجيل: ' + err.message));
         } else {
             auth.signInWithEmailAndPassword(email, pass)
-                .catch(err => alert(err.message));
+                .catch(err => alert('خطأ في تسجيل الدخول: ' + err.message));
         }
     }
 
@@ -1806,4 +1804,4 @@
                 const deletedPatient = patients.splice(index, 1)[0];
                 trashBin.unshift({ type: 'patient', data: deletedPatient, deletedAt: new Date().toISOString() });
                 if (currentUserId) {
-                    db.collec
+                    db.collection('users_data').doc(curre
