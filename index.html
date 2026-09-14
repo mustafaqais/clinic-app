@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.41</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.42</title>
     
     <link rel="manifest" href="data:application/manifest+json,{
       %22name%22: %22نظام إدارة العيادة الطبية%22,
@@ -184,14 +184,14 @@
         <div class="activ-title" id="authTitle">User Login</div>
         <div class="activ-sub">Sign in with your email and password securely</div>
 
-        <form id="authForm" class="auth-form" onsubmit="handleAuthSubmit(event)">
+        <form id="authForm" class="auth-form" onsubmit="handleAuthSubmit(event)" autocomplete="on">
             <div class="field-box" style="text-align: left;">
                 <span class="field-label">Email Address</span>
-                <div class="input-wrapper"><input type="email" id="authEmail" placeholder="user@clinic.com" required></div>
+                <div class="input-wrapper"><input type="email" id="authEmail" placeholder="user@clinic.com" autocomplete="username" required></div>
             </div>
             <div class="field-box" style="text-align: left;">
                 <span class="field-label">Password</span>
-                <div class="input-wrapper"><input type="password" id="authPassword" placeholder="••••••••" required></div>
+                <div class="input-wrapper"><input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password" required></div>
             </div>
             <div class="forgot-pass" id="forgotPassBtn" onclick="resetPassword()">Forgot Password?</div>
             <button type="submit" class="btn-main" id="authSubmitBtn">Login</button>
@@ -453,7 +453,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.41 (Robust Indexing)</div>
+        <div class="footer">Clinic Master Network v16.42 (Robust Indexing)</div>
     </div>
 </div>
 
@@ -1802,297 +1802,4 @@
                 if (currentUserId) {
                     db.collection('users_data').doc(currentUserId).collection('patients').doc(String(patientId)).delete();
                 }
-                localStorage.setItem(`clinic_patients_${currentUserId}`, JSON.stringify(patients));
-                localStorage.setItem('clinic_patients', JSON.stringify(patients));
-                saveTrashToCloudAndLocal();
-                renderPatientsList(patients);
-                alert('تم نقل المريض إلى سلة المحذوفات.');
-            }
-        }
-    }
-
-    function confirmDeleteVisit(visitId) {
-        if (confirm("هل أنت متأكد من حذف هذه المراجعة (الزيارة)؟ سيتم نقلها إلى سلة المحذوفات.")) {
-            const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-            if (!patient) return;
-            const vIndex = patient.visits.findIndex(v => Number(v.visitId) === Number(visitId));
-            if (vIndex !== -1) {
-                const deletedVisit = patient.visits.splice(vIndex, 1)[0];
-                trashBin.unshift({ type: 'visit', patientId: patient.id, data: deletedVisit, deletedAt: new Date().toISOString() });
-                savePatientToCloudAndLocal(patient);
-                saveTrashToCloudAndLocal();
-                renderVisits(patient.visits);
-                alert('تم نقل المراجعة إلى سلة المحذوفات.');
-            }
-        }
-    }
-
-    function renderTrashList() {
-        const container = document.getElementById('trashContainer');
-        if (trashBin.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b; margin-top:20px;">سلة المحذوفات فارغة.</p>';
-            return;
-        }
-
-        container.innerHTML = trashBin.map((item, index) => {
-            if (item.type === 'patient') {
-                return `
-                    <div class="patient-card" style="background:#fef2f2; border-color:#fecaca;">
-                        <div class="patient-info">
-                            <h4 style="color:#991b1b;">[مريض محذوف] ${item.data.name}</h4>
-                            <p>العمر: ${item.data.age} | هاتف: ${item.data.phone || 'بدون'}</p>
-                        </div>
-                        <div>
-                            <button class="btn-main" onclick="restoreFromTrash(${index})" style="padding:6px 12px; font-size:0.75rem; background:#16a34a;"><i class="fa-solid fa-rotate-left"></i> استرجاع</button>
-                        </div>
-                    </div>
-                `;
-            } else {
-                return `
-                    <div class="patient-card" style="background:#fef2f2; border-color:#fecaca;">
-                        <div class="patient-info">
-                            <h4 style="color:#991b1b;">[مراجعة/زيارة محذوفة] بتاريخ: ${item.data.date}</h4>
-                            <p>ملاحظات: ${item.data.notes || 'بدون ملاحظات'}</p>
-                        </div>
-                        <div>
-                            <button class="btn-main" onclick="restoreFromTrash(${index})" style="padding:6px 12px; font-size:0.75rem; background:#16a34a;"><i class="fa-solid fa-rotate-left"></i> استرجاع</button>
-                        </div>
-                    </div>
-                `;
-            }
-        }).join('');
-    }
-
-    function restoreFromTrash(index) {
-        const item = trashBin.splice(index, 1)[0];
-        if (item.type === 'patient') {
-            patients.unshift(item.data);
-            savePatientToCloudAndLocal(item.data);
-        } else if (item.type === 'visit') {
-            const patient = patients.find(p => Number(p.id) === Number(item.patientId));
-            if (patient) {
-                if (!patient.visits) patient.visits = [];
-                patient.visits.push(item.data);
-                savePatientToCloudAndLocal(patient);
-            } else {
-                alert('عذراً، المريض الأصلي لهذه الزيارة غير موجود أو تم حذفه نهائياً.');
-            }
-        }
-        saveTrashToCloudAndLocal();
-        renderTrashList();
-        alert('تم استرجاع العنصر إلى مكانه بنجاح!');
-    }
-
-    function filterPatients() {
-        const q = document.getElementById('searchInput').value.toLowerCase().trim();
-        const genderVal = document.getElementById('filterGender').value;
-        const ageGroupVal = document.getElementById('filterAgeGroup').value;
-
-        const filtered = patients.filter(p => {
-            const matchesText = !q || p.name.toLowerCase().includes(q) || (p.phone && p.phone.includes(q));
-            const matchesGender = !genderVal || p.gender === genderVal;
-
-            let matchesAge = true;
-            const age = Number(p.age) || 0;
-            if (ageGroupVal === 'child') matchesAge = age < 18;
-            else if (ageGroupVal === 'adult') matchesAge = age >= 18 && age <= 50;
-            else if (ageGroupVal === 'senior') matchesAge = age > 50;
-
-            return matchesText && matchesGender && matchesAge;
-        });
-
-        renderPatientsList(filtered);
-    }
-
-    function openMedicalRecord(id) {
-        const patient = patients.find(p => Number(p.id) === Number(id));
-        if (!patient) return;
-
-        currentPatientId = id;
-        document.getElementById('mainScreen').style.display = 'none';
-        document.getElementById('rxTemplateScreen').style.display = 'none';
-        document.getElementById('addPatientScreen').style.display = 'none';
-        document.getElementById('archiveScreen').style.display = 'none';
-        document.getElementById('trashScreen').style.display = 'none';
-        document.getElementById('dictScreen').style.display = 'none';
-        document.getElementById('networkScreen').style.display = 'none';
-        document.getElementById('medicalRecordScreen').style.display = 'block';
-        document.getElementById('backBtn').style.display = 'flex';
-
-        document.getElementById('headerTitle').innerText = 'Patient Medical Record';
-        document.getElementById('headerSub').innerText = 'View & update medical history';
-
-        document.getElementById('recPatientName').innerText = patient.name;
-        document.getElementById('recPatientMeta').innerText = `Age: ${patient.age} | Gender: ${patient.gender} | Marital: ${patient.marital || 'Single'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
-
-        renderVisits(patient.visits || []);
-    }
-
-    function renderVisits(visits) {
-        const container = document.getElementById('visitsContainer');
-        if (visits.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b;">No visits recorded yet.</p>';
-            return;
-        }
-
-        container.innerHTML = visits.map((v, index) => {
-            const vId = v.visitId || (Date.now() + index);
-            v.visitId = vId;
-            const mh = v.medHistory || {};
-            let summaryParts = [...(mh.chronicDiseases || [])];
-            if (mh.chronicOther) summaryParts.push(mh.chronicOther);
-            if (mh.drugAllergy) summaryParts.push(`Allergy: ${mh.drugAllergy}`);
-            if (mh.notes) summaryParts.push(mh.notes);
-
-            const mhStatusText = summaryParts.length > 0 ? summaryParts.join(' | ') : 'Tap to Configure Medical History';
-            const attachments = v.attachments || [];
-            const visitDateVal = v.date || getTodayFormatted();
-
-            return `
-            <div class="visit-card" id="visit-${vId}" data-visit-id="${vId}">
-                <div class="visit-header">
-                    <span><i class="fa-solid fa-clock-rotate-left"></i> Visit Date:</span>
-                    <div style="display:flex; align-items:center; gap:10px;">
-                        <input type="date" value="${visitDateVal}" class="visit-date-input" onchange="autoSaveMedicalRecord()" style="background:transparent; border:none; color:white; font-weight:700; outline:none; text-align:right;">
-                        <button type="button" onclick="confirmDeleteVisit(${vId})" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:4px 8px; font-size:0.75rem; cursor:pointer;"><i class="fa-solid fa-trash"></i> حذف الزيارة</button>
-                    </div>
-                </div>
-
-                <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History</span>
-                    <button type="button" class="btn-med-history" onclick="openMedHistoryModal(${vId})">
-                        <span id="mh-label-${vId}">${mhStatusText}</span>
-                        <i class="fa-solid fa-sliders"></i>
-                    </button>
-                </div>
-
-                <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-heart-pulse" style="color:#0d9488;"></i> Vital Signs</span>
-                    <div class="vital-box">
-                        <div class="vital-row">
-                            <div class="vital-item" style="grid-column: span 2;">
-                                <span class="vital-label">Blood Pressure (BP)</span>
-                                <div style="display: flex; align-items: center; gap: 8px;">
-                                    <div class="vital-inputs" style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:4px 8px; flex:1;"><input type="number" class="v-bp-sys" placeholder="SYS" value="${v.bpSystolic || ''}" oninput="autoSaveMedicalRecord()"></div>
-                                    <span style="font-weight:700; color:#94a3b8;">/</span>
-                                    <div class="vital-inputs" style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:4px 8px; flex:1;"><input type="number" class="v-bp-dia" placeholder="DIA" value="${v.bpDiastolic || ''}" oninput="autoSaveMedicalRecord()"></div>
-                                    <span style="font-size:0.75rem; font-weight:700; color:#0d9488;">mmHg</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="vital-row">
-                            <div class="vital-item">
-                                <span class="vital-label">SpO2</span>
-                                <div class="vital-inputs"><input type="number" class="v-spo2" placeholder="98" value="${v.spo2 || ''}" oninput="autoSaveMedicalRecord()"><span>%</span></div>
-                            </div>
-                            <div class="vital-item">
-                                <span class="vital-label">Heart Rate (HR)</span>
-                                <div class="vital-inputs"><input type="number" class="v-hr" placeholder="75" value="${v.hr || ''}" oninput="autoSaveMedicalRecord()"><span>bpm</span></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-vial" style="color:#0d9488;"></i> Lab Tests</span>
-                    <div class="input-wrapper">
-                        <textarea class="v-labs" rows="2" placeholder="Type lab tests..." oninput="handleLiveInput(this, 'labs', ${vId})" onblur="hideSuggestions('labs', ${vId})">${v.labs || ''}</textarea>
-                        <div class="suggestions-box" id="suggestions-labs-${vId}"></div>
-                        <div class="live-save-bar" id="save-bar-labs-${vId}">
-                            <span>Save: "<strong id="line-text-labs-${vId}"></strong>"</span>
-                            <button type="button" class="btn-live-save" id="btn-save-labs-${vId}" onmousedown="saveLineToDict(event, 'labs', ${vId})">Save</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-x-ray" style="color:#0d9488;"></i> Scans & Imaging</span>
-                    <div class="input-wrapper">
-                        <textarea class="v-scans" rows="2" placeholder="Type scans..." oninput="handleLiveInput(this, 'scans', ${vId})" onblur="hideSuggestions('scans', ${vId})">${v.scans || ''}</textarea>
-                        <div class="suggestions-box" id="suggestions-scans-${vId}"></div>
-                        <div class="live-save-bar" id="save-bar-scans-${vId}">
-                            <span>Save: "<strong id="line-text-scans-${vId}"></strong>"</span>
-                            <button type="button" class="btn-live-save" id="btn-save-scans-${vId}" onmousedown="saveLineToDict(event, 'scans', ${vId})">Save</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-pills" style="color:#0d9488;"></i> Medications & Treatment</span>
-                    <div class="input-wrapper">
-                        <textarea class="v-drugs" rows="3" placeholder="Type medications..." onfocus="handleDrugsInput(this, ${vId})" onkeydown="handleDrugsKeyDown(event, this, ${vId})" oninput="handleDrugsInput(this, ${vId})" onblur="hideSuggestions('drugs', ${vId})">${v.drugs || '— '}</textarea>
-                        <div class="suggestions-box" id="suggestions-drugs-${vId}"></div>
-                        <div class="live-save-bar" id="save-bar-drugs-${vId}">
-                            <span>Save: "<strong id="line-text-drugs-${vId}"></strong>"</span>
-                            <button type="button" class="btn-live-save" id="btn-save-drugs-${vId}" onmousedown="saveLineToDict(event, 'drugs', ${vId})">Save</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-clipboard-user" style="color:#0d9488;"></i> Diagnosis & Notes</span>
-                    <div class="input-wrapper">
-                        <textarea class="v-notes" rows="2" placeholder="Notes..." oninput="handleLiveInput(this, 'notes', ${vId})" onblur="hideSuggestions('notes', ${vId})">${v.notes || ''}</textarea>
-                        <div class="suggestions-box" id="suggestions-notes-${vId}"></div>
-                        <div class="live-save-bar" id="save-bar-notes-${vId}">
-                            <span>Save: "<strong id="line-text-notes-${vId}"></strong>"</span>
-                            <button type="button" class="btn-live-save" id="btn-save-notes-${vId}" onmousedown="saveLineToDict(event, 'notes', ${vId})">Save</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-paperclip" style="color:#0d9488;"></i> Attachments</span>
-                    <div class="attachments-container">
-                        ${attachments.map((imgSrc, imgIdx) => `
-                            <div class="attachment-thumb" onclick="previewAttachmentImage('${imgSrc}')">
-                                <img src="${imgSrc}" alt="Attachment">
-                                <button type="button" class="attachment-delete" onclick="event.stopPropagation(); confirmDeleteAttachment(${vId}, ${imgIdx})"><i class="fa-solid fa-xmark"></i></button>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div style="display: flex; gap: 6px; margin-top: 6px;">
-                        <label class="btn-upload-attach" style="flex: 1;"><i class="fa-solid fa-cloud-arrow-up"></i> Upload<input type="file" accept="image/*" style="display: none;" onchange="handleFileUpload(this, ${vId})"></label>
-                        <button type="button" class="btn-scan-attach" onclick="handleScannerScan(${vId})" style="flex: 1;"><i class="fa-solid fa-print"></i> Scan Document</button>
-                    </div>
-                </div>
-
-                <button type="button" class="btn-rx-action" onclick="openRxModal(${vId})">
-                    <i class="fa-solid fa-file-prescription"></i> Prescription (RX)
-                </button>
-            </div>
-        `}).join('');
-    }
-
-    function addNewVisit() {
-        autoSaveMedicalRecord();
-        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-        if (!patient) return;
-
-        const today = getTodayFormatted();
-        const newVisit = {
-            visitId: Date.now(),
-            date: today,
-            medHistory: {},
-            bpSystolic: '',
-            bpDiastolic: '',
-            spo2: '',
-            hr: '',
-            rr: '',
-            labs: '',
-            scans: '',
-            drugs: '— ',
-            notes: '',
-            attachments: []
-        };
-
-        if (!patient.visits) patient.visits = [];
-        patient.visits.unshift(newVisit);
-
-        savePatientToCloudAndLocal(patient);
-        renderVisits(patient.visits);
-    }
-</script>
-
-</body>
-</html>
+                loca
