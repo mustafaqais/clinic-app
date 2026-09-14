@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.41</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.43</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -510,7 +510,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.41 (Trash Bin Emptying Added)</div>
+        <div class="footer">Clinic Master Network v16.43</div>
     </div>
 </div>
 
@@ -1722,16 +1722,15 @@
             container.insertBefore(placeholder, container.firstChild);
         }
 
-        document.getElementById('rxDragPatientDetailsText').innerText = `Patient: ${patient.name}   |   Age: ${patient.age} yrs   |   Gender: ${patient.gender || 'N/A'}`;
+        document.getElementById('rxDragPatientDetailsText').innerText = `Patient: ${patient.name}   |   Age: ${patient.age} yrs`;
         document.getElementById('rxDragDateText').innerText = `Date: ${visit.date || getTodayFormatted()}`;
         
-        let vitalsArr = [];
-        if (visit.bpSystolic && visit.bpDiastolic) vitalsArr.push(`BP: ${visit.bpSystolic}/${visit.bpDiastolic} mmHg`);
-        if (visit.spo2) vitalsArr.push(`SpO2: ${visit.spo2}%`);
-        if (visit.hr) vitalsArr.push(`HR: ${visit.hr} bpm`);
-        if (visit.rr) vitalsArr.push(`RR: ${visit.rr} cpm`);
+        let bpVal = (visit.bpSystolic && visit.bpDiastolic) ? `${visit.bpSystolic}/${visit.bpDiastolic} mmHg` : '____ / ____ mmHg';
+        let spo2Val = visit.spo2 ? `${visit.spo2}%` : '____ %';
+        let hrVal = visit.hr ? `${visit.hr} bpm` : '____ bpm';
+        let rrVal = visit.rr ? `${visit.rr} cpm` : '____ cpm';
         
-        document.getElementById('rxDragVitalsText').innerText = vitalsArr.join('  |  ');
+        document.getElementById('rxDragVitalsText').innerText = `BP: ${bpVal}   |   SpO2: ${spo2Val}   |   HR: ${hrVal}   |   RR: ${rrVal}`;
         document.getElementById('rxDragTreatmentText').innerText = visit.drugs || '— ';
 
         loadSavedRxLayout();
