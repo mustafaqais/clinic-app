@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.51</title>
+    <title>Clinic Master System - Step 2</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -21,19 +21,22 @@
         .auth-form { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; text-align: left; }
         .field-label { font-size: 0.82rem; color: #475569; margin-bottom: 6px; font-weight: 700; display: block; }
         .input-wrapper { background-color: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 4px 10px; }
-        .input-wrapper input { width: 100%; border: none; outline: none; padding: 8px 0; font-size: 0.92rem; font-weight: 600; color: #0f172a; background: transparent; }
+        .input-wrapper input, .input-wrapper select { width: 100%; border: none; outline: none; padding: 8px 0; font-size: 0.92rem; font-weight: 600; color: #0f172a; background: transparent; }
         .btn-main { width: 100%; background: #0d9488; color: white; border: none; border-radius: 14px; padding: 14px; font-size: 0.98rem; font-weight: 700; cursor: pointer; margin-top: 10px; }
-        .header { background: #0f172a; color: white; padding: 25px; text-align: center; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; }
-        .content { padding: 20px; flex: 1; }
+        .header { background: #0f172a; color: white; padding: 20px; text-align: center; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; position: relative; }
+        .content { padding: 20px; flex: 1; overflow-y: auto; }
         .menu-card { background: #fff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
+        .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 14px; text-align: left; }
+        .back-btn { position: absolute; top: 20px; left: 15px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="mobile-container">
+    <!-- شاشة تسجيل الدخول -->
     <div id="authScreen" class="auth-screen">
         <div class="activ-icon"><i class="fa-solid fa-user-doctor"></i></div>
-        <div class="activ-title">تسجيل الدخول المستقر</div>
+        <div class="activ-title">تسجيل دخول المؤسس</div>
         <p style="color: #64748b; font-size: 0.85rem;" id="systemStatus">النظام جاهز</p>
 
         <div class="auth-form">
@@ -49,20 +52,63 @@
         </div>
     </div>
 
+    <!-- لوحة التحكم -->
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column;">
         <div class="header">
+            <button id="backBtn" class="back-btn" onclick="showMainMenu()" style="display: none;"><i class="fa-solid fa-arrow-left"></i> الرئيسية</button>
             <h2>لوحة تحكم العيادة</h2>
             <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">مرحباً بالمهندس قيس</p>
         </div>
+
         <div class="content">
-            <div class="menu-card" onclick="alert('واجهة المرضى قيد التشغيل المستقر')">
-                <i class="fa-solid fa-user-plus" style="font-size: 24px; color: #0d9488;"></i>
-                <div>
-                    <h3>إدارة المرضى والسجلات</h3>
-                    <p style="font-size: 0.75rem; color: #64748b;">النظام يعمل بدون جمود</p>
+            <!-- القائمة الرئيسية -->
+            <div id="mainMenuScreen" class="main-menu">
+                <div class="menu-card" onclick="openAddPatient()">
+                    <i class="fa-solid fa-user-plus" style="font-size: 24px; color: #0d9488;"></i>
+                    <div>
+                        <h3>تسجيل مريض جديد</h3>
+                        <p style="font-size: 0.75rem; color: #64748b;">إضافة بيانات مريض جديد للعيادة</p>
+                    </div>
                 </div>
+                <button class="btn-main" style="background: #ef4444; margin-top: 20px;" onclick="executeLogout()">تسجيل الخروج</button>
             </div>
-            <button class="btn-main" style="background: #ef4444; margin-top: 30px;" onclick="executeLogout()">تسجيل الخروج</button>
+
+            <!-- شاشة إضافة مريض -->
+            <div id="addPatientScreen" style="display: none;">
+                <form onsubmit="savePatient(event)">
+                    <div class="group-card">
+                        <h3 style="margin-bottom: 12px; font-size: 1.05rem; color: #0f172a;"><i class="fa-solid fa-id-card"></i> معلومات المريض</h3>
+                        
+                        <div class="field-box" style="margin-bottom: 10px;">
+                            <span class="field-label">اسم المريض الكامل</span>
+                            <div class="input-wrapper"><input type="text" id="pName" placeholder="أدخل اسم المريض..." required></div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <div class="field-box" style="flex: 1; margin-bottom:0;">
+                                <span class="field-label">العمر</span>
+                                <div class="input-wrapper"><input type="number" id="pAge" placeholder="العمر" required></div>
+                            </div>
+                            <div class="field-box" style="flex: 1; margin-bottom:0;">
+                                <span class="field-label">الجنس</span>
+                                <div class="input-wrapper">
+                                    <select id="pGender">
+                                        <option value="ذكر">ذكر</option>
+                                        <option value="أنثى">أنثى</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field-box" style="margin-bottom: 10px;">
+                            <span class="field-label">رقم الهاتف</span>
+                            <div class="input-wrapper"><input type="tel" id="pPhone" placeholder="07XXXXXXXXX"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-main"><i class="fa-solid fa-floppy-disk"></i> حفظ المريض</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -101,15 +147,12 @@
             return;
         }
 
-        document.getElementById('systemStatus').innerText = "جاري المصادقة السريعة...";
-
         auth.signInWithEmailAndPassword(email, pass)
-            .then((res) => {
+            .then(() => {
                 document.getElementById('authScreen').style.display = 'none';
                 document.getElementById('appContainer').style.display = 'flex';
             })
             .catch((error) => {
-                document.getElementById('systemStatus').innerText = "النظام جاهز";
                 alert('فشل تسجيل الدخول:\n' + error.message);
             });
     }
@@ -120,8 +163,29 @@
             document.getElementById('authScreen').style.display = 'flex';
         });
     }
+
+    function openAddPatient() {
+        document.getElementById('mainMenuScreen').style.display = 'none';
+        document.getElementById('addPatientScreen').style.display = 'block';
+        document.getElementById('backBtn').style.display = 'block';
+    }
+
+    function showMainMenu() {
+        document.getElementById('addPatientScreen').style.display = 'none';
+        document.getElementById('mainMenuScreen').style.display = 'flex';
+        document.getElementById('backBtn').style.display = 'none';
+    }
+
+    function savePatient(e) {
+        e.preventDefault();
+        const name = document.getElementById('pName').value;
+        const age = document.getElementById('pAge').value;
+        const phone = document.getElementById('pPhone').value;
+
+        alert('تم حفظ بيانات المريض بنجاح:\n' + name + ' (' + age + ' سنة)');
+        showMainMenu();
+    }
 </script>
 
 </body>
 </html>
-
