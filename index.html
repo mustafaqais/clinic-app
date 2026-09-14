@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Step 4</title>
+    <title>Clinic Master System - Step 5 (Final Base)</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -26,10 +26,13 @@
         .header { background: #0f172a; color: white; padding: 20px; text-align: center; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; position: relative; }
         .content { padding: 20px; flex: 1; overflow-y: auto; }
         .menu-card { background: #fff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
+        .menu-icon { width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; color: #0d9488; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
         .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 14px; text-align: left; }
         .back-btn { position: absolute; top: 20px; left: 15px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; }
         .patient-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .visit-card { background: #fff; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 14px; margin-bottom: 14px; text-align: left; }
+        .dict-tag { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #334155; }
+        .dict-tag button { background: #fee2e2; color: #ef4444; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 0.75rem; }
     </style>
 </head>
 <body>
@@ -63,7 +66,7 @@
         <div class="content">
             <div id="mainMenuScreen" class="main-menu">
                 <div class="menu-card" onclick="openAddPatient()">
-                    <i class="fa-solid fa-user-plus" style="font-size: 24px; color: #0d9488;"></i>
+                    <div class="menu-icon"><i class="fa-solid fa-user-plus"></i></div>
                     <div>
                         <h3>تسجيل مريض جديد</h3>
                         <p style="font-size: 0.75rem; color: #64748b;">إضافة بيانات مريض جديد للعيادة</p>
@@ -71,10 +74,18 @@
                 </div>
 
                 <div class="menu-card" onclick="openArchive()">
-                    <i class="fa-solid fa-address-book" style="font-size: 24px; color: #0284c7;"></i>
+                    <div class="menu-icon" style="background: #e0f2fe; color: #0284c7;"><i class="fa-solid fa-address-book"></i></div>
                     <div>
                         <h3>أرشيف المرضى</h3>
                         <p style="font-size: 0.75rem; color: #64748b;">عرض والبحث في قائمة المرضى</p>
+                    </div>
+                </div>
+
+                <div class="menu-card" onclick="openDictionaryManager()">
+                    <div class="menu-icon" style="background: #fef3c7; color: #d97706;"><i class="fa-solid fa-book-medical"></i></div>
+                    <div>
+                        <h3>القاموس الطبي</h3>
+                        <p style="font-size: 0.75rem; color: #64748b;">إدارة الأدوية والعبارات المحفوظة</p>
                     </div>
                 </div>
 
@@ -136,6 +147,22 @@
 
                 <div id="visitsContainer"></div>
             </div>
+
+            <div id="dictScreen" style="display: none;">
+                <div class="group-card">
+                    <div class="field-box">
+                        <span class="field-label">التصنيف</span>
+                        <div class="input-wrapper">
+                            <select id="dictCategorySelect" onchange="renderDictTerms()">
+                                <option value="drugs">الأدوية والجرعات</option>
+                                <option value="labs">الفحوصات المختبرية</option>
+                                <option value="notes">التشخيص والملاحظات</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="dictItemsList" style="margin-top: 15px;"></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -159,6 +186,11 @@
     const FOUNDER_EMAIL = "musqaqa009@gmail.com";
     let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
     let currentPatientId = null;
+    let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || {
+        drugs: ["Paracetamol 500mg 1x3", "Amoxicillin 500mg 1x3"],
+        labs: ["CBC", "RBS", "Lipid Profile"],
+        notes: ["Upper Respiratory Infection", "Acute Gastroenteritis"]
+    };
 
     auth.onAuthStateChanged(user => {
         if (user && user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
@@ -194,32 +226,42 @@
     }
 
     function openAddPatient() {
-        document.getElementById('mainMenuScreen').style.display = 'none';
-        document.getElementById('archiveScreen').style.display = 'none';
-        document.getElementById('medicalRecordScreen').style.display = 'none';
+        hideAllScreens();
         document.getElementById('addPatientScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'block';
         document.getElementById('headerTitle').innerText = 'تسجيل مريض جديد';
     }
 
     function openArchive() {
-        document.getElementById('mainMenuScreen').style.display = 'none';
-        document.getElementById('addPatientScreen').style.display = 'none';
-        document.getElementById('medicalRecordScreen').style.display = 'none';
+        hideAllScreens();
         document.getElementById('archiveScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'block';
         document.getElementById('headerTitle').innerText = 'أرشيف المرضى';
         renderPatientsList(patients);
     }
 
+    function openDictionaryManager() {
+        hideAllScreens();
+        document.getElementById('dictScreen').style.display = 'block';
+        document.getElementById('backBtn').style.display = 'block';
+        document.getElementById('headerTitle').innerText = 'القاموس الطبي';
+        renderDictTerms();
+    }
+
     function showMainMenu() {
         autoSaveRecord();
-        document.getElementById('addPatientScreen').style.display = 'none';
-        document.getElementById('archiveScreen').style.display = 'none';
-        document.getElementById('medicalRecordScreen').style.display = 'none';
+        hideAllScreens();
         document.getElementById('mainMenuScreen').style.display = 'flex';
         document.getElementById('backBtn').style.display = 'none';
         document.getElementById('headerTitle').innerText = 'لوحة تحكم العيادة';
+    }
+
+    function hideAllScreens() {
+        document.getElementById('mainMenuScreen').style.display = 'none';
+        document.getElementById('addPatientScreen').style.display = 'none';
+        document.getElementById('archiveScreen').style.display = 'none';
+        document.getElementById('medicalRecordScreen').style.display = 'none';
+        document.getElementById('dictScreen').style.display = 'none';
     }
 
     function savePatient(e) {
@@ -248,9 +290,7 @@
         const patient = patients.find(p => p.id === id);
         if (!patient) return;
 
-        document.getElementById('mainMenuScreen').style.display = 'none';
-        document.getElementById('archiveScreen').style.display = 'none';
-        document.getElementById('addPatientScreen').style.display = 'none';
+        hideAllScreens();
         document.getElementById('medicalRecordScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'block';
 
@@ -320,6 +360,30 @@
         });
 
         localStorage.setItem('clinic_patients', JSON.stringify(patients));
+    }
+
+    function renderDictTerms() {
+        const cat = document.getElementById('dictCategorySelect').value;
+        const container = document.getElementById('dictItemsList');
+        const items = medicalDict[cat] || [];
+
+        if (items.length === 0) {
+            container.innerHTML = '<p style="font-size:0.85rem; color:#64748b; text-align:center;">لا توجد عناصر محفوظة في هذا التصنيف.</p>';
+            return;
+        }
+
+        container.innerHTML = items.map((item, idx) => `
+            <div class="dict-tag">
+                <span>${item}</span>
+                <button onclick="removeDictTerm('${cat}', ${idx})"><i class="fa-solid fa-trash"></i> حذف</button>
+            </div>
+        `).join('');
+    }
+
+    function removeDictTerm(category, index) {
+        medicalDict[category].splice(index, 1);
+        localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
+        renderDictTerms();
     }
 
     function renderPatientsList(list) {
