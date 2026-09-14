@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Professional English Edition</title>
+    <title>Clinic Master Pro - Elite Medical Edition</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -11,43 +11,54 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700&family=Amiri:wght@400;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Amiri:wght@400;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
 
     <style>
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
-        body { background-color: #eef2f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .mobile-container { background: #ffffff; width: 100%; max-width: 430px; min-height: 100vh; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.12); display: flex; flex-direction: column; position: relative; }
-        .auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px 20px; flex: 1; text-align: center; }
-        .activ-icon { font-size: 50px; color: #0d9488; margin-bottom: 15px; }
-        .activ-title { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
-        .auth-form { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-top: 20px; text-align: left; }
-        .field-label { font-size: 0.82rem; color: #475569; margin-bottom: 6px; font-weight: 700; display: block; }
-        .input-wrapper { background-color: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 4px 10px; }
-        .input-wrapper input, .input-wrapper select, .input-wrapper textarea { width: 100%; border: none; outline: none; padding: 8px 0; font-size: 0.92rem; font-weight: 600; color: #0f172a; background: transparent; }
-        .btn-main { width: 100%; background: #0d9488; color: white; border: none; border-radius: 14px; padding: 14px; font-size: 0.98rem; font-weight: 700; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-danger { background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
-        .header { background: #0f172a; color: white; padding: 20px; text-align: center; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; position: relative; }
-        .header h2 { font-family: 'Playfair Display', serif; }
-        .content { padding: 20px; flex: 1; overflow-y: auto; }
-        .menu-card { background: #fff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
-        .menu-icon { width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; color: #0d9488; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
-        .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 14px; text-align: left; }
-        .back-btn { position: absolute; top: 20px; left: 15px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; }
-        .patient-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .visit-card { background: #fff; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 14px; margin-bottom: 14px; text-align: left; }
-        .dict-tag { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #334155; }
-        .dict-tag button { background: #fee2e2; color: #ef4444; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 0.75rem; }
-
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 999; display: none; justify-content: center; align-items: center; padding: 15px; }
-        .modal-body { background: #fff; width: 100%; max-width: 450px; max-height: 90vh; border-radius: 20px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; text-align: left; position: relative; }
-        .rx-canvas-container { position: relative; width: 100%; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; overflow: hidden; min-height: 420px; direction: ltr; text-align: left; }
-        .rx-bg-img { width: 100%; display: block; pointer-events: none; }
-        .rx-text-overlay { padding: 15px; direction: ltr; text-align: left; }
+        body { background-color: #0f172a; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .mobile-container { background: #f8fafc; width: 100%; max-width: 430px; min-height: 100vh; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); display: flex; flex-direction: column; position: relative; overflow: hidden; }
         
-        .rx-patient-info-text { font-family: 'Amiri', serif; font-size: 0.95rem; font-weight: 700; color: #b91c1c; margin-bottom: 8px; }
-        .rx-date-text { font-family: 'Cinzel', serif; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 12px; letter-spacing: 0.5px; }
-        .rx-title-text { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 900; color: #b91c1c; margin-bottom: 4px; letter-spacing: 1px; }
-        .rx-drugs-text { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; white-space: pre-wrap; color: #000; line-height: 1.6; }
+        .auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 35px 24px; flex: 1; text-align: center; background: #ffffff; }
+        .activ-icon { font-size: 54px; color: #0d9488; margin-bottom: 16px; background: #f0fdfa; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 10px 25px rgba(13, 148, 136, 0.15); }
+        .activ-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 900; color: #0f172a; margin-bottom: 6px; }
+        .auth-form { width: 100%; display: flex; flex-direction: column; gap: 14px; margin-top: 24px; text-align: left; }
+        .field-label { font-size: 0.8rem; color: #475569; margin-bottom: 6px; font-weight: 700; display: block; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-wrapper { background-color: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 14px; padding: 4px 12px; transition: all 0.3s ease; }
+        .input-wrapper:focus-within { border-color: #0d9488; background: #ffffff; box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.1); }
+        .input-wrapper input, .input-wrapper select, .input-wrapper textarea { width: 100%; border: none; outline: none; padding: 10px 0; font-size: 0.92rem; font-weight: 600; color: #0f172a; background: transparent; }
+        
+        .btn-main { width: 100%; background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%); color: white; border: none; border-radius: 14px; padding: 14px; font-size: 0.98rem; font-weight: 700; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 8px 20px rgba(13, 148, 136, 0.25); transition: transform 0.2s ease; }
+        .btn-main:active { transform: scale(0.98); }
+        .btn-danger { background: #ef4444; color: white; border: none; border-radius: 10px; padding: 8px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2); }
+        
+        .header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 25px 20px; text-align: center; border-bottom-left-radius: 30px; border-bottom-right-radius: 30px; position: relative; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2); }
+        .header h2 { font-family: 'Playfair Display', serif; font-size: 1.35rem; letter-spacing: 0.5px; }
+        .content { padding: 20px 18px; flex: 1; overflow-y: auto; }
+        
+        .menu-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px; cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .menu-card:hover { border-color: #0d9488; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(13, 148, 136, 0.08); }
+        .menu-icon { width: 48px; height: 48px; border-radius: 14px; background: #f0fdfa; color: #0d9488; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0; }
+        
+        .group-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 18px; padding: 18px; margin-bottom: 16px; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .back-btn { position: absolute; top: 20px; left: 15px; background: rgba(255, 255, 255, 0.12); color: #fff; border: 1px solid rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 10px; font-size: 0.75rem; font-weight: 600; cursor: pointer; }
+        
+        .patient-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .visit-card { background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 18px; padding: 16px; margin-bottom: 16px; text-align: left; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
+        
+        .dict-tag { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border: 1.5px solid #e2e8f0; padding: 10px 14px; border-radius: 12px; margin-bottom: 8px; font-size: 0.85rem; font-weight: 600; color: #334155; }
+        .dict-tag button { background: #fee2e2; color: #ef4444; border: none; border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 0.75rem; font-weight: 700; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(6px); z-index: 999; display: none; justify-content: center; align-items: center; padding: 15px; }
+        .modal-body { background: #ffffff; width: 100%; max-width: 450px; max-height: 90vh; border-radius: 24px; padding: 22px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; text-align: left; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        
+        .rx-canvas-container { position: relative; width: 100%; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 14px; overflow: hidden; min-height: 420px; direction: ltr; text-align: left; }
+        .rx-bg-img { width: 100%; display: block; pointer-events: none; }
+        .rx-text-overlay { padding: 20px; direction: ltr; text-align: left; }
+        
+        .rx-patient-info-text { font-family: 'Amiri', serif; font-size: 0.98rem; font-weight: 700; color: #b91c1c; margin-bottom: 8px; }
+        .rx-date-text { font-family: 'Cinzel', serif; font-size: 0.88rem; font-weight: 700; color: #1e293b; margin-bottom: 14px; letter-spacing: 0.5px; }
+        .rx-title-text { font-family: 'Playfair Display', serif; font-size: 1.3rem; font-weight: 900; color: #b91c1c; margin-bottom: 4px; letter-spacing: 1px; }
+        .rx-drugs-text { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; white-space: pre-wrap; color: #000; line-height: 1.7; }
     </style>
 </head>
 <body>
@@ -55,8 +66,8 @@
 <div class="mobile-container">
     <div id="authScreen" class="auth-screen">
         <div class="activ-icon"><i class="fa-solid fa-user-doctor"></i></div>
-        <div class="activ-title">Founder Secure Login</div>
-        <p style="color: #64748b; font-size: 0.85rem;" id="systemStatus">System Ready</p>
+        <div class="activ-title">Clinic Master Pro</div>
+        <p style="color: #64748b; font-size: 0.85rem; font-weight: 500;" id="systemStatus">Elite Secure Authentication</p>
 
         <div class="auth-form">
             <div class="field-box">
@@ -67,15 +78,15 @@
                 <span class="field-label">Password</span>
                 <div class="input-wrapper"><input type="password" id="authPassword" placeholder="Enter password"></div>
             </div>
-            <button type="button" class="btn-main" onclick="executeLogin()">Sign In</button>
+            <button type="button" class="btn-main" onclick="executeLogin()"><i class="fa-solid fa-right-to-bracket"></i> Sign In</button>
         </div>
     </div>
 
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column;">
         <div class="header">
-            <button id="backBtn" class="back-btn" onclick="showMainMenu()" style="display: none;"><i class="fa-solid fa-arrow-left"></i> Main Menu</button>
-            <h2 id="headerTitle">Clinic Master Dashboard</h2>
-            <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;" id="headerSub">Welcome, Dr. Qais</p>
+            <button id="backBtn" class="back-btn" onclick="showMainMenu()" style="display: none;"><i class="fa-solid fa-arrow-left"></i> Menu</button>
+            <h2 id="headerTitle">Clinic Dashboard</h2>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px; font-weight: 500;" id="headerSub">Dr. Qais - Professional Suite</p>
         </div>
 
         <div class="content">
@@ -83,57 +94,57 @@
                 <div class="menu-card" onclick="openAddPatient()">
                     <div class="menu-icon"><i class="fa-solid fa-user-plus"></i></div>
                     <div>
-                        <h3>Register New Patient</h3>
-                        <p style="font-size: 0.75rem; color: #64748b;">Add new patient records securely</p>
+                        <h3 style="font-size: 1.05rem; color: #0f172a; font-weight: 700;">Register New Patient</h3>
+                        <p style="font-size: 0.76rem; color: #64748b; font-weight: 500;">Add new patient records securely</p>
                     </div>
                 </div>
 
                 <div class="menu-card" onclick="openArchive()">
                     <div class="menu-icon" style="background: #e0f2fe; color: #0284c7;"><i class="fa-solid fa-address-book"></i></div>
                     <div>
-                        <h3>Patients Archive</h3>
-                        <p style="font-size: 0.75rem; color: #64748b;">Search and manage patient records</p>
+                        <h3 style="font-size: 1.05rem; color: #0f172a; font-weight: 700;">Patients Archive</h3>
+                        <p style="font-size: 0.76rem; color: #64748b; font-weight: 500;">Search and manage patient records</p>
                     </div>
                 </div>
 
                 <div class="menu-card" onclick="openTrashBin()">
                     <div class="menu-icon" style="background: #fee2e2; color: #ef4444;"><i class="fa-solid fa-trash-can"></i></div>
                     <div>
-                        <h3>Trash Bin</h3>
-                        <p style="font-size: 0.75rem; color: #64748b;">Restore deleted patients or visits</p>
+                        <h3 style="font-size: 1.05rem; color: #0f172a; font-weight: 700;">Trash Bin</h3>
+                        <p style="font-size: 0.76rem; color: #64748b; font-weight: 500;">Restore deleted patients or visits</p>
                     </div>
                 </div>
 
                 <div class="menu-card" onclick="openRxTemplateManager()">
                     <div class="menu-icon" style="background: #fae8ff; color: #c084fc;"><i class="fa-solid fa-file-prescription"></i></div>
                     <div>
-                        <h3>RX Template Manager</h3>
-                        <p style="font-size: 0.75rem; color: #64748b;">Upload & update clinic prescription header</p>
+                        <h3 style="font-size: 1.05rem; color: #0f172a; font-weight: 700;">RX Template Manager</h3>
+                        <p style="font-size: 0.76rem; color: #64748b; font-weight: 500;">Upload & update clinic prescription header</p>
                     </div>
                 </div>
 
                 <div class="menu-card" onclick="openDictionaryManager()">
                     <div class="menu-icon" style="background: #fef3c7; color: #d97706;"><i class="fa-solid fa-book-medical"></i></div>
                     <div>
-                        <h3>Medical Dictionary</h3>
-                        <p style="font-size: 0.75rem; color: #64748b;">Manage saved drugs, labs & phrases</p>
+                        <h3 style="font-size: 1.05rem; color: #0f172a; font-weight: 700;">Medical Dictionary</h3>
+                        <p style="font-size: 0.76rem; color: #64748b; font-weight: 500;">Manage saved drugs, labs & phrases</p>
                     </div>
                 </div>
 
-                <button class="btn-main" style="background: #ef4444; margin-top: 20px;" onclick="executeLogout()">Sign Out</button>
+                <button class="btn-main" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); margin-top: 24px; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);" onclick="executeLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</button>
             </div>
 
             <div id="addPatientScreen" style="display: none;">
                 <form onsubmit="savePatient(event)">
                     <div class="group-card">
-                        <h3 style="margin-bottom: 12px; font-size: 1.05rem; color: #0f172a;"><i class="fa-solid fa-id-card"></i> Patient Information</h3>
+                        <h3 style="margin-bottom: 14px; font-size: 1.1rem; color: #0f172a; font-family: 'Playfair Display', serif;"><i class="fa-solid fa-id-card" style="color: #0d9488;"></i> Patient Information</h3>
                         
-                        <div class="field-box" style="margin-bottom: 10px;">
+                        <div class="field-box" style="margin-bottom: 12px;">
                             <span class="field-label">Full Name</span>
                             <div class="input-wrapper"><input type="text" id="pName" placeholder="Enter patient full name..." required></div>
                         </div>
 
-                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
                             <div class="field-box" style="flex: 1; margin-bottom:0;">
                                 <span class="field-label">Age</span>
                                 <div class="input-wrapper"><input type="number" id="pAge" placeholder="Age" required></div>
@@ -149,7 +160,7 @@
                             </div>
                         </div>
 
-                        <div class="field-box" style="margin-bottom: 10px;">
+                        <div class="field-box" style="margin-bottom: 6px;">
                             <span class="field-label">Phone Number</span>
                             <div class="input-wrapper"><input type="tel" id="pPhone" placeholder="07XXXXXXXXX"></div>
                         </div>
@@ -160,7 +171,7 @@
             </div>
 
             <div id="archiveScreen" style="display: none;">
-                <div class="field-box" style="margin-bottom: 14px;">
+                <div class="field-box" style="margin-bottom: 16px;">
                     <div class="input-wrapper"><input type="text" id="searchInput" placeholder="🔍 Search by name or phone..." oninput="filterPatients()"></div>
                 </div>
                 <div id="patientsListContainer"></div>
@@ -168,19 +179,19 @@
 
             <div id="trashScreen" style="display: none;">
                 <div class="group-card" style="background: #fef2f2; border-color: #fecaca;">
-                    <h3 style="color: #991b1b; margin-bottom: 4px;"><i class="fa-solid fa-trash-can"></i> Trash Bin</h3>
-                    <p style="font-size: 0.78rem; color: #7f1d1d;">Deleted items with instant restore capability.</p>
+                    <h3 style="color: #991b1b; margin-bottom: 4px; font-family: 'Playfair Display', serif;"><i class="fa-solid fa-trash-can"></i> Trash Bin</h3>
+                    <p style="font-size: 0.78rem; color: #7f1d1d; font-weight: 500;">Deleted items with instant restore capability.</p>
                 </div>
                 <div id="trashContainer"></div>
             </div>
 
             <div id="medicalRecordScreen" style="display: none;">
                 <div class="group-card" style="background: #f0fdfa; border-color: #99f6e4;">
-                    <h3 id="recPatientName" style="color: #0f766e; margin-bottom: 4px;">—</h3>
-                    <p id="recPatientMeta" style="font-size: 0.78rem; color: #334155;"></p>
+                    <h3 id="recPatientName" style="color: #0f766e; margin-bottom: 4px; font-family: 'Playfair Display', serif; font-size: 1.2rem;">—</h3>
+                    <p id="recPatientMeta" style="font-size: 0.8rem; color: #334155; font-weight: 600;"></p>
                 </div>
 
-                <button class="btn-main" style="background: #0284c7; margin-bottom: 14px;" onclick="addNewVisit()">
+                <button class="btn-main" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); margin-bottom: 16px; box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25);" onclick="addNewVisit()">
                     <i class="fa-solid fa-calendar-plus"></i> Add New Visit
                 </button>
 
@@ -189,12 +200,12 @@
 
             <div id="rxTemplateScreen" style="display: none;">
                 <div class="group-card" style="text-align: center;">
-                    <h3 style="font-size: 1.1rem; color: #0f172a; margin-bottom: 8px;"><i class="fa-solid fa-prescription-bottle-medical"></i> RX Prescription Header</h3>
-                    <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 14px;">Upload your official clinic prescription header image.</p>
+                    <h3 style="font-size: 1.15rem; color: #0f172a; margin-bottom: 6px; font-family: 'Playfair Display', serif;"><i class="fa-solid fa-prescription-bottle-medical" style="color: #0d9488;"></i> RX Prescription Header</h3>
+                    <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 16px; font-weight: 500;">Upload your official clinic prescription header image.</p>
 
-                    <div id="rxPreviewBox" style="margin-bottom: 14px; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 10px; background: #fff; min-height: 120px; display: flex; align-items: center; justify-content: center;">
-                        <span style="font-size: 0.8rem; color: #94a3b8;" id="noRxText">No custom header uploaded yet.</span>
-                        <img id="rxImgTag" src="" alt="RX Header" style="max-width: 100%; border-radius: 8px; display: none;">
+                    <div id="rxPreviewBox" style="margin-bottom: 16px; border: 2px dashed #cbd5e1; border-radius: 14px; padding: 12px; background: #fff; min-height: 130px; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 0.82rem; color: #94a3b8; font-weight: 600;" id="noRxText">No custom header uploaded yet.</span>
+                        <img id="rxImgTag" src="" alt="RX Header" style="max-width: 100%; border-radius: 10px; display: none;">
                     </div>
 
                     <div class="field-box" style="text-align: left;">
@@ -202,7 +213,7 @@
                         <div class="input-wrapper" style="padding: 6px;"><input type="file" id="rxFileInput" accept="image/*" style="font-size: 0.8rem;"></div>
                     </div>
 
-                    <button class="btn-main" onclick="saveRxTemplate()" style="margin-top: 10px;"><i class="fa-solid fa-cloud-arrow-up"></i> Save RX Image</button>
+                    <button class="btn-main" onclick="saveRxTemplate()" style="margin-top: 12px;"><i class="fa-solid fa-cloud-arrow-up"></i> Save RX Image</button>
                 </div>
             </div>
 
@@ -218,7 +229,7 @@
                             </select>
                         </div>
                     </div>
-                    <div id="dictItemsList" style="margin-top: 15px;"></div>
+                    <div id="dictItemsList" style="margin-top: 16px;"></div>
                 </div>
             </div>
         </div>
@@ -227,9 +238,9 @@
 
 <div id="rxModal" class="modal-overlay">
     <div class="modal-body">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
-            <h3 style="font-size: 1.1rem; color: #0f172a;"><i class="fa-solid fa-file-prescription"></i> Prescription (RX)</h3>
-            <button onclick="closeRxModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:30px; height:30px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1.5px solid #f1f5f9; padding-bottom: 12px;">
+            <h3 style="font-size: 1.15rem; color: #0f172a; font-family: 'Playfair Display', serif;"><i class="fa-solid fa-file-prescription" style="color: #0d9488;"></i> Prescription (RX)</h3>
+            <button onclick="closeRxModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:34px; height:34px; cursor:pointer; color: #475569; font-weight: bold;"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div id="rxCanvasContainer" class="rx-canvas-container">
@@ -242,9 +253,9 @@
             </div>
         </div>
 
-        <div style="display: flex; gap: 8px; margin-top: 8px;">
-            <button class="btn-main" onclick="openPrescriptionPDF()" style="background: #0284c7; flex: 1;"><i class="fa-solid fa-file-pdf"></i> Open PDF</button>
-            <button class="btn-main" onclick="downloadPrescriptionImage()" style="background: #0d9488; flex: 1;"><i class="fa-solid fa-download"></i> Save as Image</button>
+        <div style="display: flex; gap: 10px; margin-top: 4px;">
+            <button class="btn-main" onclick="openPrescriptionPDF()" style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); flex: 1; box-shadow: 0 8px 20px rgba(2, 132, 199, 0.25);"><i class="fa-solid fa-file-pdf"></i> Open PDF</button>
+            <button class="btn-main" onclick="downloadPrescriptionImage()" style="flex: 1;"><i class="fa-solid fa-download"></i> Save Image</button>
         </div>
     </div>
 </div>
@@ -379,7 +390,7 @@
         hideAllScreens();
         document.getElementById('mainMenuScreen').style.display = 'flex';
         document.getElementById('backBtn').style.display = 'none';
-        document.getElementById('headerTitle').innerText = 'Clinic Master Dashboard';
+        document.getElementById('headerTitle').innerText = 'Clinic Dashboard';
     }
 
     function hideAllScreens() {
@@ -446,7 +457,7 @@
     function renderTrashList() {
         const container = document.getElementById('trashContainer');
         if (trashBin.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b; margin-top:20px;">Trash bin is empty.</p>';
+            container.innerHTML = '<p style="text-align:center; color:#64748b; margin-top:20px; font-weight: 500;">Trash bin is empty.</p>';
             return;
         }
 
@@ -456,9 +467,9 @@
                     <div class="patient-card" style="background:#fef2f2; border-color:#fecaca;">
                         <div>
                             <h4 style="font-size: 1rem; color: #991b1b; margin-bottom: 2px;">[Patient] ${item.data.name}</h4>
-                            <p style="font-size: 0.75rem; color: #7f1d1d;">Age: ${item.data.age} | Phone: ${item.data.phone}</p>
+                            <p style="font-size: 0.75rem; color: #7f1d1d; font-weight: 500;">Age: ${item.data.age} | Phone: ${item.data.phone}</p>
                         </div>
-                        <button class="btn-main" onclick="restoreFromTrash(${index})" style="background:#16a34a; padding:6px 10px; font-size:0.75rem; width:auto;"><i class="fa-solid fa-rotate-left"></i> Restore</button>
+                        <button class="btn-main" onclick="restoreFromTrash(${index})" style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 6px 12px; font-size: 0.75rem; width: auto; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);"><i class="fa-solid fa-rotate-left"></i> Restore</button>
                     </div>
                 `;
             } else {
@@ -466,9 +477,9 @@
                     <div class="patient-card" style="background:#fef2f2; border-color:#fecaca;">
                         <div>
                             <h4 style="font-size: 1rem; color: #991b1b; margin-bottom: 2px;">[Visit] Date: ${item.data.date}</h4>
-                            <p style="font-size: 0.75rem; color: #7f1d1d;">Notes: ${item.data.notes || 'No notes'}</p>
+                            <p style="font-size: 0.75rem; color: #7f1d1d; font-weight: 500;">Notes: ${item.data.notes || 'No notes'}</p>
                         </div>
-                        <button class="btn-main" onclick="restoreFromTrash(${index})" style="background:#16a34a; padding:6px 10px; font-size:0.75rem; width:auto;"><i class="fa-solid fa-rotate-left"></i> Restore</button>
+                        <button class="btn-main" onclick="restoreFromTrash(${index})" style="background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); padding: 6px 12px; font-size: 0.75rem; width: auto; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);"><i class="fa-solid fa-rotate-left"></i> Restore</button>
                     </div>
                 `;
             }
@@ -514,29 +525,29 @@
     function renderVisits(visits) {
         const container = document.getElementById('visitsContainer');
         if (visits.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b;">No visits recorded yet.</p>';
+            container.innerHTML = '<p style="text-align:center; color:#64748b; font-weight: 500;">No visits recorded yet.</p>';
             return;
         }
 
         container.innerHTML = visits.map(v => `
             <div class="visit-card" data-visit-id="${v.visitId}">
-                <div style="background: #0f172a; color: #fff; padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; margin-bottom: 10px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="background: #0f172a; color: #fff; padding: 8px 12px; border-radius: 10px; font-size: 0.8rem; margin-bottom: 12px; display:flex; justify-content:space-between; align-items:center; font-weight: 600;">
                     <span>📅 Visit Date: ${v.date}</span>
                     <button type="button" class="btn-danger" onclick="confirmDeleteVisit(${v.visitId})"><i class="fa-solid fa-trash"></i> Delete</button>
                 </div>
-                <div class="field-box" style="margin-bottom: 8px;">
+                <div class="field-box" style="margin-bottom: 10px;">
                     <span class="field-label">Blood Pressure (BP)</span>
                     <div class="input-wrapper"><input type="text" class="v-bp" value="${v.bp || ''}" placeholder="120/80" oninput="autoSaveRecord()"></div>
                 </div>
-                <div class="field-box" style="margin-bottom: 8px;">
+                <div class="field-box" style="margin-bottom: 10px;">
                     <span class="field-label">Medications & Treatment (RX)</span>
                     <div class="input-wrapper"><textarea class="v-drugs" rows="2" placeholder="Medications..." oninput="autoSaveRecord()">${v.drugs || ''}</textarea></div>
                 </div>
-                <div class="field-box" style="margin-bottom: 10px;">
+                <div class="field-box" style="margin-bottom: 14px;">
                     <span class="field-label">Diagnosis & Notes</span>
                     <div class="input-wrapper"><textarea class="v-notes" rows="2" placeholder="Notes..." oninput="autoSaveRecord()">${v.notes || ''}</textarea></div>
                 </div>
-                <button class="btn-main" onclick="openRxModal(${v.visitId})" style="background: #0f172a; font-size: 0.85rem; padding: 10px;"><i class="fa-solid fa-file-prescription"></i> Print / View Prescription (RX)</button>
+                <button class="btn-main" onclick="openRxModal(${v.visitId})" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); font-size: 0.85rem; padding: 12px; box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);"><i class="fa-solid fa-file-prescription"></i> Print / View Prescription (RX)</button>
             </div>
         `).join('');
     }
@@ -587,7 +598,7 @@
         if (!visit) return;
 
         const bgContainer = document.getElementById('rxModalBgContainer');
-        bgContainer.innerHTML = currentRxImage ? `<img src="${currentRxImage}" class="rx-bg-img" alt="RX Header">` : '<div style="padding:20px; text-align:center; color:#94a3b8; font-size:0.8rem;">(No custom RX header uploaded)</div>';
+        bgContainer.innerHTML = currentRxImage ? `<img src="${currentRxImage}" class="rx-bg-img" alt="RX Header">` : '<div style="padding:25px; text-align:center; color:#94a3b8; font-size:0.8rem; font-weight:500;">(No custom RX header uploaded)</div>';
 
         document.getElementById('rxModalPatientInfo').innerText = `Patient: ${patient.name} | Age: ${patient.age} yrs | Gender: ${patient.gender}`;
         document.getElementById('rxModalDate').innerText = `Date: ${visit.date}`;
@@ -631,7 +642,7 @@
         const items = medicalDict[cat] || [];
 
         if (items.length === 0) {
-            container.innerHTML = '<p style="font-size:0.85rem; color:#64748b; text-align:center;">No items found in this category.</p>';
+            container.innerHTML = '<p style="font-size:0.85rem; color:#64748b; text-align:center; font-weight: 500;">No items found in this category.</p>';
             return;
         }
 
@@ -652,18 +663,18 @@
     function renderPatientsList(list) {
         const container = document.getElementById('patientsListContainer');
         if (list.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b; margin-top:20px;">No patients found.</p>';
+            container.innerHTML = '<p style="text-align:center; color:#64748b; margin-top:20px; font-weight: 500;">No patients found.</p>';
             return;
         }
 
         container.innerHTML = list.map(p => `
             <div class="patient-card">
                 <div onclick="openMedicalRecord(${p.id})" style="flex:1; cursor:pointer;">
-                    <h4 style="font-size: 1rem; color: #0f172a; margin-bottom: 2px;">${p.name}</h4>
-                    <p style="font-size: 0.78rem; color: #64748b;"><i class="fa-solid fa-phone"></i> ${p.phone} | Age: ${p.age} yrs</p>
+                    <h4 style="font-size: 1rem; color: #0f172a; margin-bottom: 2px; font-weight: 700;">${p.name}</h4>
+                    <p style="font-size: 0.78rem; color: #64748b; font-weight: 500;"><i class="fa-solid fa-phone"></i> ${p.phone} | Age: ${p.age} yrs</p>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold;">${p.gender}</span>
+                    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700;">${p.gender}</span>
                     <button class="btn-danger" onclick="confirmDeletePatient(${p.id})"><i class="fa-solid fa-trash"></i></button>
                 </div>
             </div>
