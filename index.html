@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.37</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.38</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -47,8 +47,15 @@
         .menu-icon.dict-icon { background: #fef3c7; color: #d97706; }
         .menu-icon.network-icon { background: #f3e8ff; color: #9333ea; }
         .menu-icon.rx-icon { background: #fae8ff; color: #c084fc; }
+        .menu-icon.stats-icon { background: #ecfdf5; color: #059669; }
         .menu-info h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
         .menu-info p { font-size: 0.78rem; color: #64748b; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        .stat-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 6px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .stat-card.full-width { grid-column: span 2; }
+        .stat-value { font-size: 1.6rem; font-weight: 900; color: #0d9488; font-family: 'Playfair Display', serif; }
+        .stat-label { font-size: 0.78rem; font-weight: 700; color: #64748b; text-transform: uppercase; }
 
         .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 18px; margin-bottom: 16px; }
         .visit-card { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 20px; padding: 16px; margin-bottom: 20px; position: relative; }
@@ -99,7 +106,6 @@
         .btn-live-save.saved { background: #16a34a; }
 
         .btn-med-history { width: 100%; background: #f0fdfa; color: #0d9488; border: 1.5px dashed #0d9488; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
-        
         .btn-rx-action { width: 100%; background: #0f172a; color: #38bdf8; border: 2px solid #38bdf8; border-radius: 12px; padding: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; letter-spacing: 1px; }
 
         .attachments-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
@@ -141,65 +147,15 @@
         .filter-row { display: flex; gap: 8px; }
         .filter-row select { flex: 1; padding: 6px 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.78rem; font-weight: 600; outline: none; background: #fff; color: #0f172a; }
 
-        .rx-canvas-container {
-            position: relative;
-            width: 100%;
-            background: #ffffff;
-            border: 2px solid #cbd5e1;
-            border-radius: 14px;
-            overflow: hidden;
-            user-select: none;
-            min-height: 480px;
-        }
-        .rx-bg-img {
-            width: 100%;
-            display: block;
-            pointer-events: none;
-        }
-        .draggable-box {
-            position: absolute;
-            background: transparent;
-            border: 1px dashed transparent;
-            padding: 4px 8px;
-            cursor: move;
-            touch-action: none;
-            z-index: 10;
-        }
-        .draggable-box.config-mode {
-            border: 1px dashed #0d9488;
-            background: rgba(255, 255, 255, 0.85);
-        }
-        .draggable-box:hover {
-            border: 1px dashed #0d9488;
-            background: rgba(255, 255, 255, 0.6);
-        }
+        .rx-canvas-container { position: relative; width: 100%; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 14px; overflow: hidden; user-select: none; min-height: 480px; }
+        .rx-bg-img { width: 100%; display: block; pointer-events: none; }
+        .draggable-box { position: absolute; background: transparent; border: 1px dashed transparent; padding: 4px 8px; cursor: move; touch-action: none; z-index: 10; }
+        .draggable-box.config-mode { border: 1px dashed #0d9488; background: rgba(255, 255, 255, 0.85); }
+        .draggable-box:hover { border: 1px dashed #0d9488; background: rgba(255, 255, 255, 0.6); }
 
-        .box-font-controls {
-            display: none;
-            gap: 4px;
-            margin-bottom: 4px;
-            background: #f1f5f9;
-            padding: 2px 6px;
-            border-radius: 6px;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 0.7rem;
-            color: #0f172a;
-        }
-        .config-mode .box-font-controls {
-            display: flex;
-        }
-        .box-font-controls button {
-            background: #0d9488;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            width: 20px;
-            height: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 0.75rem;
-        }
+        .box-font-controls { display: none; gap: 4px; margin-bottom: 4px; background: #f1f5f9; padding: 2px 6px; border-radius: 6px; align-items: center; justify-content: space-between; font-size: 0.7rem; color: #0f172a; }
+        .config-mode .box-font-controls { display: flex; }
+        .box-font-controls button { background: #0d9488; color: white; border: none; border-radius: 4px; width: 20px; height: 20px; font-weight: bold; cursor: pointer; font-size: 0.75rem; }
 
         .rx-patient-details-text { color: #b91c1c; font-family: 'Amiri', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; } 
         .rx-date-text { color: #1e293b; font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; background: rgba(255,255,255,0.95); padding: 2px 6px; border-radius: 6px; border: 1px solid #cbd5e1; letter-spacing: 0.5px; }
@@ -286,6 +242,14 @@
                     </div>
                 </div>
 
+                <div class="menu-card" onclick="openAnalyticsDashboard()">
+                    <div class="menu-icon stats-icon"><i class="fa-solid fa-chart-line"></i></div>
+                    <div class="menu-info">
+                        <h3>Clinical Analytics</h3>
+                        <p>Monthly & daily clinic statistics</p>
+                    </div>
+                </div>
+
                 <div class="menu-card" onclick="openRxTemplateManager()">
                     <div class="menu-icon rx-icon"><i class="fa-solid fa-file-prescription"></i></div>
                     <div class="menu-info">
@@ -308,6 +272,26 @@
                         <h3>Hierarchical Network</h3>
                         <p>View connected users & credentials</p>
                     </div>
+                </div>
+            </div>
+
+            <div id="analyticsScreen" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="statTotalPatients">0</div>
+                        <div class="stat-label">Total Patients</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="statTodayVisits">0</div>
+                        <div class="stat-label">Today's Visits</div>
+                    </div>
+                    <div class="stat-card full-width">
+                        <div class="stat-value" id="statMonthVisits">0</div>
+                        <div class="stat-label">This Month's Total Visits</div>
+                    </div>
+                </div>
+                <div class="group-card" style="text-align: center; color: #64748b; font-size: 0.82rem;">
+                    <i class="fa-solid fa-circle-info" style="color: #0d9488;"></i> Statistics are calculated automatically from active patient visits.
                 </div>
             </div>
 
@@ -465,10 +449,11 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.37 (Robust Indexing)</div>
+        <div class="footer">Clinic Master Network v16.38 (Analytics Enabled)</div>
     </div>
 </div>
 
+<!-- ModalmedHistory & others remain same -->
 <div id="medHistoryModal" class="modal-overlay">
     <div class="modal-body">
         <div class="modal-header">
@@ -829,6 +814,48 @@
         });
     }
 
+    function openAnalyticsDashboard() {
+        autoSaveMedicalRecord();
+        document.getElementById('mainScreen').style.display = 'none';
+        document.getElementById('rxTemplateScreen').style.display = 'none';
+        document.getElementById('addPatientScreen').style.display = 'none';
+        document.getElementById('archiveScreen').style.display = 'none';
+        document.getElementById('medicalRecordScreen').style.display = 'none';
+        document.getElementById('dictScreen').style.display = 'none';
+        document.getElementById('networkScreen').style.display = 'none';
+        document.getElementById('analyticsScreen').style.display = 'block';
+        document.getElementById('backBtn').style.display = 'flex';
+        document.getElementById('headerTitle').innerText = 'Clinical Analytics';
+        document.getElementById('headerSub').innerText = 'Monthly & daily clinic statistics';
+
+        // Calculate statistics
+        const totalPatients = patients.length;
+        let todayVisitsCount = 0;
+        let monthVisitsCount = 0;
+
+        const todayStr = getTodayFormatted();
+        const currentYearMonth = todayStr.substring(0, 7); // "YYYY-MM"
+
+        patients.forEach(p => {
+            if (p.visits && Array.isArray(p.visits)) {
+                p.visits.forEach(v => {
+                    if (v.date) {
+                        if (v.date === todayStr) {
+                            todayVisitsCount++;
+                        }
+                        if (v.date.startsWith(currentYearMonth)) {
+                            monthVisitsCount++;
+                        }
+                    }
+                });
+            }
+        });
+
+        document.getElementById('statTotalPatients').innerText = totalPatients;
+        document.getElementById('statTodayVisits').innerText = todayVisitsCount;
+        document.getElementById('statMonthVisits').innerText = monthVisitsCount;
+    }
+
     function openRxTemplateManager() {
         autoSaveMedicalRecord();
         document.getElementById('mainScreen').style.display = 'none';
@@ -837,6 +864,7 @@
         document.getElementById('medicalRecordScreen').style.display = 'none';
         document.getElementById('dictScreen').style.display = 'none';
         document.getElementById('networkScreen').style.display = 'none';
+        document.getElementById('analyticsScreen').style.display = 'none';
         document.getElementById('rxTemplateScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'flex';
         document.getElementById('headerTitle').innerText = 'RX Template';
@@ -873,6 +901,7 @@
 
     function openNetworkHierarchy() {
         document.getElementById('mainScreen').style.display = 'none';
+        document.getElementById('analyticsScreen').style.display = 'none';
         document.getElementById('networkScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'flex';
         document.getElementById('headerTitle').innerText = 'Network Database';
@@ -1437,6 +1466,7 @@
         document.getElementById('medicalRecordScreen').style.display = 'none';
         document.getElementById('dictScreen').style.display = 'none';
         document.getElementById('networkScreen').style.display = 'none';
+        document.getElementById('analyticsScreen').style.display = 'none';
         document.getElementById('mainScreen').style.display = 'flex';
         document.getElementById('backBtn').style.display = 'none';
         document.getElementById('headerTitle').innerText = 'Clinic Master System';
@@ -1450,6 +1480,7 @@
         document.getElementById('medicalRecordScreen').style.display = 'none';
         document.getElementById('dictScreen').style.display = 'none';
         document.getElementById('networkScreen').style.display = 'none';
+        document.getElementById('analyticsScreen').style.display = 'none';
         document.getElementById('addPatientScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'flex';
         document.getElementById('headerTitle').innerText = 'Register New Patient';
@@ -1464,6 +1495,7 @@
         document.getElementById('medicalRecordScreen').style.display = 'none';
         document.getElementById('dictScreen').style.display = 'none';
         document.getElementById('networkScreen').style.display = 'none';
+        document.getElementById('analyticsScreen').style.display = 'none';
         document.getElementById('archiveScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'flex';
         document.getElementById('headerTitle').innerText = 'Smart Patients Archive';
@@ -1479,6 +1511,7 @@
         document.getElementById('archiveScreen').style.display = 'none';
         document.getElementById('medicalRecordScreen').style.display = 'none';
         document.getElementById('networkScreen').style.display = 'none';
+        document.getElementById('analyticsScreen').style.display = 'none';
         document.getElementById('dictScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'flex';
         document.getElementById('headerTitle').innerText = 'Dictionary Manager';
@@ -1602,6 +1635,7 @@
         document.getElementById('archiveScreen').style.display = 'none';
         document.getElementById('dictScreen').style.display = 'none';
         document.getElementById('networkScreen').style.display = 'none';
+        document.getElementById('analyticsScreen').style.display = 'none';
         document.getElementById('medicalRecordScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'flex';
 
@@ -1750,48 +1784,4 @@
                             <input type="file" accept="image/*" style="display: none;" onchange="handleFileUpload(this, ${vId})">
                         </label>
                         <button type="button" class="btn-scan-attach" onclick="handleScannerScan(${vId})" style="flex: 1;">
-                            <i class="fa-solid fa-print"></i> Scan Document
-                        </button>
-                    </div>
-                </div>
-
-                <button type="button" class="btn-rx-action" onclick="openRxModal(${vId})">
-                    <i class="fa-solid fa-file-prescription"></i> Prescription (RX)
-                </button>
-            </div>
-        `}).join('');
-    }
-
-    function addNewVisit() {
-        autoSaveMedicalRecord();
-        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-        if (!patient) return;
-
-        const today = getTodayFormatted();
-        const newVisit = {
-            visitId: Date.now(),
-            date: today,
-            medHistory: {},
-            bpSystolic: '',
-            bpDiastolic: '',
-            spo2: '',
-            hr: '',
-            rr: '',
-            labs: '',
-            scans: '',
-            drugs: '— ',
-            notes: '',
-            attachments: []
-        };
-
-        if (!patient.visits) patient.visits = [];
-        patient.visits.unshift(newVisit);
-
-        savePatientToCloudAndLocal(patient);
-        renderVisits(patient.visits);
-    }
-</script>
-
-</body>
-</html>
-
+         
