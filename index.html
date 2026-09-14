@@ -330,7 +330,8 @@
                             <div class="field-box" style="flex: 1;">
                                 <span class="field-label">Gender</span>
                                 <div class="input-wrapper">
-                                    <select id="pGender" required>
+                                    <select id="pGender">
+                                        <option value="">Select Gender</option>
                                         <option value="Male">Male</option>
                                         <option value="Female">Female</option>
                                     </select>
@@ -341,7 +342,8 @@
                         <div class="field-box">
                             <span class="field-label">Marital Status</span>
                             <div class="input-wrapper">
-                                <select id="pMarital" required>
+                                <select id="pMarital">
+                                    <option value="">Select Status</option>
                                     <option value="Single">Single</option>
                                     <option value="Married">Married</option>
                                     <option value="Divorced">Divorced</option>
@@ -354,6 +356,7 @@
                             <span class="field-label">Occupation</span>
                             <div class="input-wrapper">
                                 <select id="pJob">
+                                    <option value="">Select Occupation</option>
                                     <option value="Employee">Employee</option>
                                     <option value="Free Business">Free Business</option>
                                     <option value="Housewife">Housewife</option>
@@ -365,12 +368,12 @@
 
                         <div class="field-box">
                             <span class="field-label">Phone Number</span>
-                            <div class="input-wrapper"><input type="tel" id="pPhone" placeholder="07XXXXXXXXX" required></div>
+                            <div class="input-wrapper"><input type="tel" id="pPhone" placeholder="07XXXXXXXXX"></div>
                         </div>
 
                         <div class="field-box">
                             <span class="field-label">Initial Visit Date</span>
-                            <div class="input-wrapper"><input type="date" id="pDate" required></div>
+                            <div class="input-wrapper"><input type="date" id="pDate"></div>
                         </div>
                     </div>
 
@@ -1179,7 +1182,7 @@
             container.insertBefore(placeholder, container.firstChild);
         }
 
-        document.getElementById('rxDragPatientDetailsText').innerText = `Patient: ${patient.name}   |   Age: ${patient.age} yrs   |   Gender: ${patient.gender}`;
+        document.getElementById('rxDragPatientDetailsText').innerText = `Patient: ${patient.name}   |   Age: ${patient.age} yrs   |   Gender: ${patient.gender || 'N/A'}`;
         document.getElementById('rxDragDateText').innerText = `Date: ${visit.date || getTodayFormatted()}`;
         
         let vitalsArr = [];
@@ -1524,10 +1527,10 @@
             id: Date.now(),
             name: document.getElementById('pName').value,
             age: Number(document.getElementById('pAge').value),
-            gender: document.getElementById('pGender').value,
-            marital: document.getElementById('pMarital').value,
-            job: document.getElementById('pJob').value,
-            phone: document.getElementById('pPhone').value,
+            gender: document.getElementById('pGender').value || 'Unspecified',
+            marital: document.getElementById('pMarital').value || 'Single',
+            job: document.getElementById('pJob').value || 'Unspecified',
+            phone: document.getElementById('pPhone').value || 'N/A',
             visits: [
                 {
                     visitId: Date.now(),
@@ -1563,6 +1566,7 @@
 
         container.innerHTML = list.map(p => {
             const lastVisit = p.visits && p.visits.length > 0 ? p.visits[0].date : 'N/A';
+            const genderBadgeClass = p.gender === 'Male' ? 'gender-male' : (p.gender === 'Female' ? 'gender-female' : '');
             return `
                 <div class="patient-card" onclick="openMedicalRecord(${p.id})">
                     <div class="patient-info">
@@ -1570,7 +1574,7 @@
                         <p><i class="fa-solid fa-phone"></i> ${p.phone} | <i class="fa-solid fa-calendar"></i> ${lastVisit}</p>
                     </div>
                     <div>
-                        <span class="badge-gender ${p.gender === 'Male' ? 'gender-male' : 'gender-female'}">${p.gender}</span>
+                        ${p.gender && p.gender !== 'Unspecified' ? `<span class="badge-gender ${genderBadgeClass}">${p.gender}</span>` : ''}
                     </div>
                 </div>
             `;
@@ -1583,7 +1587,7 @@
         const ageGroupVal = document.getElementById('filterAgeGroup').value;
 
         const filtered = patients.filter(p => {
-            const matchesText = !q || p.name.toLowerCase().includes(q) || p.phone.includes(q);
+            const matchesText = !q || p.name.toLowerCase().includes(q) || (p.phone && p.phone.includes(q));
             const matchesGender = !genderVal || p.gender === genderVal;
 
             let matchesAge = true;
@@ -1616,7 +1620,7 @@
         document.getElementById('headerSub').innerText = 'View & update medical history';
 
         document.getElementById('recPatientName').innerText = patient.name;
-        document.getElementById('recPatientMeta').innerText = `Age: ${patient.age} | Gender: ${patient.gender} | Marital: ${patient.marital || 'Single'} | Job: ${patient.job} | Phone: ${patient.phone}`;
+        document.getElementById('recPatientMeta').innerText = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
 
         renderVisits(patient.visits || []);
     }
