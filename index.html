@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.39</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.41</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -246,12 +246,12 @@
     <div id="activationScreen" class="auth-screen" style="display: none;">
         <div class="activ-icon"><i class="fa-solid fa-shield-halved"></i></div>
         <div class="activ-title">Account Activation Required</div>
-        <div class="activ-sub">Please enter the 3-hour dynamic Founder code to activate your new account.</div>
+        <div class="activ-sub">Please enter the one-time activation code. Once used, it will expire permanently.</div>
         <div class="field-box" style="width: 100%; text-align: left;">
-            <span class="field-label">3-Hour Dynamic Founder Code</span>
+            <span class="field-label">One-Time Activation Code</span>
             <div class="input-wrapper"><input type="text" id="activationInput" placeholder="Enter code..." style="text-align: center; letter-spacing: 2px; text-transform: uppercase;"></div>
         </div>
-        <button class="btn-main" onclick="verifyDynamicCode()">Activate Account</button>
+        <button class="btn-main" onclick="verifyOneTimeCode()">Activate Account</button>
     </div>
 
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column;">
@@ -270,9 +270,9 @@
         <div class="content">
             <div id="mainScreen" class="main-menu">
                 <div class="founder-panel" id="founderControlPanel" style="display: none;">
-                    <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;">🔑 3-Hour Dynamic Founder Code:</span>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;">🔑 Single-Use Activation Code:</span>
                     <div class="founder-code-display" id="dynamicFounderCode">Loading...</div>
-                    <span style="font-size: 0.72rem; color: #64748b;">Give this changing code to new users for first-time activation.</span>
+                    <span style="font-size: 0.72rem; color: #64748b;">Give this code to a new user. It burns permanently after 1 use.</span>
                 </div>
 
                 <div class="menu-card" onclick="openAddPatient()">
@@ -450,8 +450,13 @@
 
             <div id="trashScreen" style="display: none;">
                 <div class="group-card">
-                    <div style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:10px; color:#ef4444;"><i class="fa-solid fa-trash-can"></i> Trash Bin (Deleted Records)</div>
-                    <p style="font-size:0.78rem; color:#64748b; margin-bottom:14px;">You can restore deleted patients or specific visits back to their original locations instantly.</p>
+                    <div style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:10px; color:#ef4444; display: flex; justify-content: space-between; align-items: center;">
+                        <span><i class="fa-solid fa-trash-can"></i> Trash Bin</span>
+                        <button type="button" id="emptyTrashBtn" onclick="confirmEmptyTrash()" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: none; align-items: center; gap: 4px;">
+                            <i class="fa-solid fa-trash-can-arrow-up"></i> Empty Trash
+                        </button>
+                    </div>
+                    <p style="font-size:0.78rem; color:#64748b; margin-bottom:14px;">You can restore deleted patients or specific visits back to their original locations instantly, or empty the trash completely.</p>
                     <div id="trashItemsContainer"></div>
                 </div>
             </div>
@@ -505,7 +510,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.39 (Trash Bin Enabled)</div>
+        <div class="footer">Clinic Master Network v16.41 (Trash Bin Emptying Added)</div>
     </div>
 </div>
 
@@ -815,17 +820,11 @@
         mh_history: ["Appendectomy", "Cholecystectomy", "Penicillin Allergy", "Cesarean Section"]
     };
 
-    function generateThreeHourCode() {
-        const now = Date.now();
-        const threeHoursMs = 3 * 60 * 60 * 1000;
-        const timeBlock = Math.floor(now / threeHoursMs);
+    function generateUniqueCode() {
         const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        let code = "FND-";
-        let seed = timeBlock;
+        let code = "ONCE-";
         for (let i = 0; i < 6; i++) {
-            seed = (seed * 9301 + 49297) % 233280;
-            let rnd = seed / 233280;
-            code += chars.charAt(Math.floor(rnd * chars.length));
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
         }
         return code;
     }
@@ -874,8 +873,18 @@
                 } else {
                     const isActivated = localStorage.getItem(`activated_${user.uid}`) === 'true';
                     if (!isActivated) {
-                        document.getElementById('authScreen').style.display = 'none';
-                        document.getElementById('activationScreen').style.display = 'flex';
+                        db.collection('network_hierarchy').doc(user.uid).get().then(docRef => {
+                            if (docRef.exists && docRef.data().isActivated === true) {
+                                localStorage.setItem(`activated_${user.uid}`, 'true');
+                                setupClientInterface();
+                            } else {
+                                document.getElementById('authScreen').style.display = 'none';
+                                document.getElementById('activationScreen').style.display = 'flex';
+                            }
+                        }).catch(() => {
+                            document.getElementById('authScreen').style.display = 'none';
+                            document.getElementById('activationScreen').style.display = 'flex';
+                        });
                     } else {
                         setupClientInterface();
                     }
@@ -970,35 +979,77 @@
         }
     }
 
-    function verifyDynamicCode() {
-        const inputCode = document.getElementById('activationInput').value.trim().toUpperCase();
-        const validCode = generateThreeHourCode();
-
-        if (inputCode === validCode) {
-            const user = auth.currentUser;
-            if (user) {
-                localStorage.setItem(`activated_${user.uid}`, 'true');
-                db.collection('network_hierarchy').doc(user.uid).set({
-                    email: user.email,
-                    password: pendingUserPass || 'Saved',
-                    role: 'Client Node',
-                    registeredAt: new Date().toISOString()
-                });
+    async function getOrInitActiveCode() {
+        const codeDocRef = db.collection('system_settings').doc('active_code');
+        try {
+            const doc = await codeDocRef.get();
+            if (doc.exists && doc.data().code && doc.data().isUsed === false) {
+                return doc.data().code;
+            } else {
+                const newCode = generateUniqueCode();
+                await codeDocRef.set({ code: newCode, isUsed: false, createdAt: new Date().toISOString() });
+                return newCode;
             }
-            document.getElementById('activationScreen').style.display = 'none';
-            setupClientInterface();
-        } else {
-            alert('الكود غير صحيح أو منتهي الصلاحية. يرجى مراجعة المؤسس للحصول على الكود الحالي.');
+        } catch (e) {
+            return "ONCE-EXPIRED";
         }
     }
 
-    function setupFounderInterface() {
+    async function verifyOneTimeCode() {
+        const inputCode = document.getElementById('activationInput').value.trim().toUpperCase();
+        const codeDocRef = db.collection('system_settings').doc('active_code');
+
+        try {
+            const doc = await codeDocRef.get();
+            if (!doc.exists) {
+                alert('خطأ في النظام: لم يتم العثور على كود التنشيط.');
+                return;
+            }
+
+            const data = doc.data();
+            if (data.isUsed === true || data.code !== inputCode) {
+                alert('هذا الكود غير صالح أو تم استخدامه مسبقاً من قبل شخص آخر ولا يمكن استخدامه مرتين مطلقاً!');
+                return;
+            }
+
+            const freshNewCode = generateUniqueCode();
+            await codeDocRef.update({
+                code: freshNewCode,
+                isUsed: true,
+                usedBy: auth.currentUser ? auth.currentUser.email : 'Unknown',
+                usedAt: new Date().toISOString()
+            });
+
+            const user = auth.currentUser;
+            if (user) {
+                localStorage.setItem(`activated_${user.uid}`, 'true');
+                await db.collection('network_hierarchy').doc(user.uid).set({
+                    email: user.email,
+                    password: pendingUserPass || 'Saved',
+                    role: 'Client Node',
+                    isActivated: true,
+                    registeredAt: new Date().toISOString()
+                }, { merge: true });
+            }
+
+            alert('تم تفعيل الحساب بنجاح وإحراق الكود نهائياً!');
+            document.getElementById('activationScreen').style.display = 'none';
+            setupClientInterface();
+
+        } catch (err) {
+            alert('حدث خطأ أثناء التحقق من الكود: ' + err.message);
+        }
+    }
+
+    async function setupFounderInterface() {
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('activationScreen').style.display = 'none';
         document.getElementById('appContainer').style.display = 'flex';
         document.getElementById('founderControlPanel').style.display = 'block';
         document.getElementById('networkMenuCard').style.display = 'flex';
-        document.getElementById('dynamicFounderCode').innerText = generateThreeHourCode();
+
+        const activeCode = await getOrInitActiveCode();
+        document.getElementById('dynamicFounderCode').innerText = activeCode;
     }
 
     function setupClientInterface() {
@@ -1408,7 +1459,6 @@
         alert('تم تعديل معلومات المريض بنجاح!');
     }
 
-    // --- Trash Bin & Deletion Management ---
     function confirmDeletePatientRecord() {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
@@ -1419,7 +1469,6 @@
                 const pIdStr = String(patients[idx].id);
                 const removedPatient = patients.splice(idx, 1)[0];
                 
-                // Add to Trash
                 trashBin.unshift({
                     type: 'patient',
                     deletedAt: new Date().toLocaleString(),
@@ -1480,10 +1529,15 @@
 
     function renderTrashItems() {
         const container = document.getElementById('trashItemsContainer');
+        const emptyBtn = document.getElementById('emptyTrashBtn');
+
         if (trashBin.length === 0) {
             container.innerHTML = '<p style="text-align:center; color:#64748b; margin-top:20px;">سلة المحذوفات فارغة تماماً.</p>';
+            if (emptyBtn) emptyBtn.style.display = 'none';
             return;
         }
+
+        if (emptyBtn) emptyBtn.style.display = 'flex';
 
         container.innerHTML = trashBin.map((item, index) => {
             if (item.type === 'patient') {
@@ -1555,6 +1609,16 @@
                 saveTrashToCloudAndLocal();
                 renderTrashItems();
             }
+        }
+    }
+
+    function confirmEmptyTrash() {
+        if (trashBin.length === 0) return;
+        if (confirm("هل أنت متأكد تماماً من تفريغ سلة المحذوفات نهائياً؟ لا يمكن التراجع عن هذه الخطوة وسيتم حذف العناصر للأبد.")) {
+            trashBin = [];
+            saveTrashToCloudAndLocal();
+            renderTrashItems();
+            alert('تم تفريغ سلة المحذوفات نهائياً بنجاح.');
         }
     }
 
@@ -2250,7 +2314,7 @@
             attachments: []
         };
 
-        if (!patient.visits) patient.visits = [];
+        if (!Array.isArray(patient.visits)) patient.visits = [];
         patient.visits.unshift(newVisit);
 
         savePatientToCloudAndLocal(patient);
