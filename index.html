@@ -3,20 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.42</title>
-    
-    <link rel="manifest" href="data:application/manifest+json,{
-      %22name%22: %22نظام إدارة العيادة الطبية%22,
-      %22short_name%22: %22العيادة%22,
-      %22description%22: %22تطبيق لإدارة بيانات المرضى والوصفات الطبية%22,
-      %22start_url%22: %22/clinic-app/%22,
-      %22scope%22: %22/clinic-app/%22,
-      %22id%22: %22/clinic-app/%22,
-      %22display%22: %22standalone%22,
-      %22background_color%22: %22%23ffffff%22,
-      %22theme_color%22: %22%230d9488%22
-    }">
-
+    <title>Clinic Master System - Cloud Ultimate Edition v16.37</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -43,7 +30,7 @@
         .forgot-pass { font-size: 0.78rem; color: #0284c7; text-align: right; cursor: pointer; margin-top: -6px; font-weight: 600; }
 
         .founder-panel { background: #f0fdfa; border: 2px dashed #0d9488; border-radius: 16px; padding: 14px; margin-bottom: 14px; text-align: center; }
-        .founder-code-display { font-size: 1.2rem; font-weight: 900; color: #0f766e; letter-spacing: 1px; margin: 6px 0; background: #fff; padding: 6px; border-radius: 8px; border: 1px solid #ccfbf1; word-break: break-all; }
+        .founder-code-display { font-size: 1.3rem; font-weight: 900; color: #0f766e; letter-spacing: 2px; margin: 6px 0; background: #fff; padding: 6px; border-radius: 8px; border: 1px solid #ccfbf1; }
 
         .header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 35px 20px 30px 20px; text-align: center; border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
         .header-icon { font-size: 42px; color: #0d9488; margin-bottom: 10px; }
@@ -53,18 +40,17 @@
         .back-btn { left: 15px; } .logout-btn { right: 15px; color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
 
         .content { padding: 20px 18px; flex: 1; overflow-y: auto; }
-        .main-menu { display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
-        .menu-card { background: #ffffff; border: 2px solid #e2e8f0; border-radius: 20px; padding: 16px; display: flex; align-items: center; gap: 16px; cursor: pointer; }
-        .menu-icon { width: 48px; height: 48px; border-radius: 16px; background: #ccfbf1; color: #0d9488; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0; }
+        .main-menu { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
+        .menu-card { background: #ffffff; border: 2px solid #e2e8f0; border-radius: 20px; padding: 18px; display: flex; align-items: center; gap: 16px; cursor: pointer; }
+        .menu-icon { width: 52px; height: 52px; border-radius: 16px; background: #ccfbf1; color: #0d9488; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
         .menu-icon.archive-icon { background: #e0f2fe; color: #0284c7; }
         .menu-icon.dict-icon { background: #fef3c7; color: #d97706; }
         .menu-icon.network-icon { background: #f3e8ff; color: #9333ea; }
-        .menu-icon.trash-icon { background: #fee2e2; color: #ef4444; }
         .menu-icon.rx-icon { background: #fae8ff; color: #c084fc; }
-        .menu-info h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #0f172a; margin-bottom: 2px; font-weight: 700; }
-        .menu-info p { font-size: 0.76rem; color: #64748b; }
+        .menu-info h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
+        .menu-info p { font-size: 0.78rem; color: #64748b; }
 
-        .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 18px; margin-bottom: 16px; position: relative; }
+        .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 18px; margin-bottom: 16px; }
         .visit-card { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 20px; padding: 16px; margin-bottom: 20px; position: relative; }
         .visit-header { background: #0f172a; color: #ffffff; padding: 8px 14px; border-radius: 12px; font-size: 0.88rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         
@@ -113,6 +99,7 @@
         .btn-live-save.saved { background: #16a34a; }
 
         .btn-med-history { width: 100%; background: #f0fdfa; color: #0d9488; border: 1.5px dashed #0d9488; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+        
         .btn-rx-action { width: 100%; background: #0f172a; color: #38bdf8; border: 2px solid #38bdf8; border-radius: 12px; padding: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; letter-spacing: 1px; }
 
         .attachments-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
@@ -134,7 +121,6 @@
 
         .btn-main { width: 100%; background: #0d9488; color: white; border: none; border-radius: 14px; padding: 14px; font-size: 0.98rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); }
         .btn-secondary { background: #0284c7; margin-bottom: 14px; }
-        .btn-danger { background: #ef4444; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25); }
 
         .patient-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .patient-info h4 { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
@@ -155,15 +141,65 @@
         .filter-row { display: flex; gap: 8px; }
         .filter-row select { flex: 1; padding: 6px 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.78rem; font-weight: 600; outline: none; background: #fff; color: #0f172a; }
 
-        .rx-canvas-container { position: relative; width: 100%; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 14px; overflow: hidden; user-select: none; min-height: 480px; }
-        .rx-bg-img { width: 100%; display: block; pointer-events: none; }
-        .draggable-box { position: absolute; background: transparent; border: 1px dashed transparent; padding: 4px 8px; cursor: move; touch-action: none; z-index: 10; }
-        .draggable-box.config-mode { border: 1px dashed #0d9488; background: rgba(255, 255, 255, 0.85); }
-        .draggable-box:hover { border: 1px dashed #0d9488; background: rgba(255, 255, 255, 0.6); }
+        .rx-canvas-container {
+            position: relative;
+            width: 100%;
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 14px;
+            overflow: hidden;
+            user-select: none;
+            min-height: 480px;
+        }
+        .rx-bg-img {
+            width: 100%;
+            display: block;
+            pointer-events: none;
+        }
+        .draggable-box {
+            position: absolute;
+            background: transparent;
+            border: 1px dashed transparent;
+            padding: 4px 8px;
+            cursor: move;
+            touch-action: none;
+            z-index: 10;
+        }
+        .draggable-box.config-mode {
+            border: 1px dashed #0d9488;
+            background: rgba(255, 255, 255, 0.85);
+        }
+        .draggable-box:hover {
+            border: 1px dashed #0d9488;
+            background: rgba(255, 255, 255, 0.6);
+        }
 
-        .box-font-controls { display: none; gap: 4px; margin-bottom: 4px; background: #f1f5f9; padding: 2px 6px; border-radius: 6px; align-items: center; justify-content: space-between; font-size: 0.7rem; color: #0f172a; }
-        .config-mode .box-font-controls { display: flex; }
-        .box-font-controls button { background: #0d9488; color: white; border: none; border-radius: 4px; width: 20px; height: 20px; font-weight: bold; cursor: pointer; font-size: 0.75rem; }
+        .box-font-controls {
+            display: none;
+            gap: 4px;
+            margin-bottom: 4px;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 6px;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: #0f172a;
+        }
+        .config-mode .box-font-controls {
+            display: flex;
+        }
+        .box-font-controls button {
+            background: #0d9488;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 20px;
+            height: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
 
         .rx-patient-details-text { color: #b91c1c; font-family: 'Amiri', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; } 
         .rx-date-text { color: #1e293b; font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; background: rgba(255,255,255,0.95); padding: 2px 6px; border-radius: 6px; border: 1px solid #cbd5e1; letter-spacing: 0.5px; }
@@ -184,14 +220,14 @@
         <div class="activ-title" id="authTitle">User Login</div>
         <div class="activ-sub">Sign in with your email and password securely</div>
 
-        <form id="authForm" class="auth-form" onsubmit="handleAuthSubmit(event)" autocomplete="on">
+        <form id="authForm" class="auth-form" onsubmit="handleAuthSubmit(event)">
             <div class="field-box" style="text-align: left;">
                 <span class="field-label">Email Address</span>
-                <div class="input-wrapper"><input type="email" id="authEmail" placeholder="user@clinic.com" autocomplete="username" required></div>
+                <div class="input-wrapper"><input type="email" id="authEmail" placeholder="user@clinic.com" required></div>
             </div>
             <div class="field-box" style="text-align: left;">
                 <span class="field-label">Password</span>
-                <div class="input-wrapper"><input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password" required></div>
+                <div class="input-wrapper"><input type="password" id="authPassword" placeholder="••••••••" required></div>
             </div>
             <div class="forgot-pass" id="forgotPassBtn" onclick="resetPassword()">Forgot Password?</div>
             <button type="submit" class="btn-main" id="authSubmitBtn">Login</button>
@@ -205,12 +241,12 @@
     <div id="activationScreen" class="auth-screen" style="display: none;">
         <div class="activ-icon"><i class="fa-solid fa-shield-halved"></i></div>
         <div class="activ-title">Account Activation Required</div>
-        <div class="activ-sub">Please enter a single-use activation code provided by the Founder.</div>
+        <div class="activ-sub">Please enter the 3-hour dynamic Founder code to activate your new account.</div>
         <div class="field-box" style="width: 100%; text-align: left;">
-            <span class="field-label">Single-Use Activation Code</span>
-            <div class="input-wrapper"><input type="text" id="activationInput" placeholder="Enter code (e.g. ONCE-XXXX)..." style="text-align: center; letter-spacing: 1px; text-transform: uppercase;"></div>
+            <span class="field-label">3-Hour Dynamic Founder Code</span>
+            <div class="input-wrapper"><input type="text" id="activationInput" placeholder="Enter code..." style="text-align: center; letter-spacing: 2px; text-transform: uppercase;"></div>
         </div>
-        <button class="btn-main" onclick="verifySingleUseCode()">Activate Account</button>
+        <button class="btn-main" onclick="verifyDynamicCode()">Activate Account</button>
     </div>
 
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column;">
@@ -229,10 +265,9 @@
         <div class="content">
             <div id="mainScreen" class="main-menu">
                 <div class="founder-panel" id="founderControlPanel" style="display: none;">
-                    <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;">🔑 Generate Single-Use Code:</span>
-                    <button class="btn-main" onclick="generateNewSingleCode()" style="margin: 8px 0; padding: 10px; font-size: 0.85rem;"><i class="fa-solid fa-key"></i> Create Code</button>
-                    <div class="founder-code-display" id="generatedCodeBox">Click create to generate code</div>
-                    <span style="font-size: 0.72rem; color: #64748b;">This code works for 1 registration only then deletes automatically.</span>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;">🔑 3-Hour Dynamic Founder Code:</span>
+                    <div class="founder-code-display" id="dynamicFounderCode">Loading...</div>
+                    <span style="font-size: 0.72rem; color: #64748b;">Give this changing code to new users for first-time activation.</span>
                 </div>
 
                 <div class="menu-card" onclick="openAddPatient()">
@@ -248,14 +283,6 @@
                     <div class="menu-info">
                         <h3>Patients Archive & Search</h3>
                         <p>Search by Name, Phone, or Gender</p>
-                    </div>
-                </div>
-
-                <div class="menu-card" onclick="openTrashBin()">
-                    <div class="menu-icon trash-icon"><i class="fa-solid fa-trash-can"></i></div>
-                    <div class="menu-info">
-                        <h3>Trash Bin</h3>
-                        <p>Restore deleted patients or visits</p>
                     </div>
                 </div>
 
@@ -290,13 +317,13 @@
                         <div class="group-title" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:12px; color:#0f172a;"><i class="fa-solid fa-id-card"></i> Personal Information</div>
                         
                         <div class="field-box">
-                            <span class="field-label">Full Name (Required)</span>
+                            <span class="field-label">Full Name</span>
                             <div class="input-wrapper"><input type="text" id="pName" placeholder="Enter patient full name..." required></div>
                         </div>
 
                         <div style="display: flex; gap: 10px;">
                             <div class="field-box" style="flex: 1;">
-                                <span class="field-label">Age (Required)</span>
+                                <span class="field-label">Age</span>
                                 <div class="input-wrapper"><input type="number" id="pAge" placeholder="Age..." required></div>
                             </div>
 
@@ -304,6 +331,7 @@
                                 <span class="field-label">Gender</span>
                                 <div class="input-wrapper">
                                     <select id="pGender">
+                                        <option value="">Select Gender</option>
                                         <option value="Male">Male</option>
                                         <option value="Female">Female</option>
                                     </select>
@@ -315,6 +343,7 @@
                             <span class="field-label">Marital Status</span>
                             <div class="input-wrapper">
                                 <select id="pMarital">
+                                    <option value="">Select Status</option>
                                     <option value="Single">Single</option>
                                     <option value="Married">Married</option>
                                     <option value="Divorced">Divorced</option>
@@ -324,10 +353,10 @@
                         </div>
 
                         <div class="field-box">
-                            <span class="field-label">Occupation (Optional)</span>
+                            <span class="field-label">Occupation</span>
                             <div class="input-wrapper">
                                 <select id="pJob">
-                                    <option value="">-- Choose --</option>
+                                    <option value="">Select Occupation</option>
                                     <option value="Employee">Employee</option>
                                     <option value="Free Business">Free Business</option>
                                     <option value="Housewife">Housewife</option>
@@ -338,13 +367,13 @@
                         </div>
 
                         <div class="field-box">
-                            <span class="field-label">Phone Number (Optional)</span>
+                            <span class="field-label">Phone Number</span>
                             <div class="input-wrapper"><input type="tel" id="pPhone" placeholder="07XXXXXXXXX"></div>
                         </div>
 
                         <div class="field-box">
                             <span class="field-label">Initial Visit Date</span>
-                            <div class="input-wrapper"><input type="date" id="pDate" required></div>
+                            <div class="input-wrapper"><input type="date" id="pDate"></div>
                         </div>
                     </div>
 
@@ -359,7 +388,9 @@
                     <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:8px;">
                         <i class="fa-solid fa-prescription-bottle-medical" style="color:#0d9488;"></i> Clinic Prescription Template
                     </div>
-                    <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;">Upload or change your official prescription image header.</p>
+                    <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;">
+                        Upload or change your official prescription image header.
+                    </p>
 
                     <div id="currentRxPreviewContainer" style="margin-bottom: 16px; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 10px; background: #fff; min-height: 150px; display: flex; align-items: center; justify-content: center;">
                         <span style="font-size: 0.82rem; color: #94a3b8;" id="noRxText">No custom RX header uploaded yet.</span>
@@ -368,17 +399,23 @@
 
                     <div class="field-box" style="text-align: left;">
                         <span class="field-label">Select Prescription Image</span>
-                        <div class="input-wrapper" style="padding: 10px;"><input type="file" id="rxImageFileInput" accept="image/*" style="font-size: 0.85rem;"></div>
+                        <div class="input-wrapper" style="padding: 10px;">
+                            <input type="file" id="rxImageFileInput" accept="image/*" style="font-size: 0.85rem;">
+                        </div>
                     </div>
 
-                    <button class="btn-main" onclick="saveRxTemplateImage()" style="margin-top: 10px;"><i class="fa-solid fa-cloud-arrow-up"></i> Save RX Image</button>
+                    <button class="btn-main" onclick="saveRxTemplateImage()" style="margin-top: 10px;">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Save RX Image
+                    </button>
                 </div>
             </div>
 
             <div id="archiveScreen" style="display: none;">
                 <div class="filter-container">
                     <div class="field-box" style="margin-bottom: 0;">
-                        <div class="input-wrapper"><input type="text" id="searchInput" placeholder="🔍 Search by Name or Phone Number..." oninput="filterPatients()"></div>
+                        <div class="input-wrapper">
+                            <input type="text" id="searchInput" placeholder="🔍 Search by Name or Phone Number..." oninput="filterPatients()">
+                        </div>
                     </div>
                     <div class="filter-row">
                         <select id="filterGender" onchange="filterPatients()">
@@ -398,20 +435,10 @@
                 <div id="patientsList"></div>
             </div>
 
-            <div id="trashScreen" style="display: none;">
-                <div class="group-card">
-                    <div style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:12px; color:#ef4444;"><i class="fa-solid fa-trash-can"></i> Trash Bin (Deleted Items)</div>
-                    <div id="trashContainer"></div>
-                </div>
-            </div>
-
             <div id="medicalRecordScreen" style="display: none;">
                 <div class="group-card" style="background: #f0fdfa; border-color: #99f6e4;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div class="field-box" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color: #0f766e; margin-bottom:4px;">
-                            <i class="fa-solid fa-user-check"></i> <span id="recPatientName">—</span>
-                        </div>
-                        <button class="btn-main" onclick="openEditPatientModal()" style="padding: 6px 12px; font-size:0.75rem; width:auto;"><i class="fa-solid fa-pen"></i> Edit Info</button>
+                    <div class="field-box" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color: #0f766e; margin-bottom:4px;">
+                        <i class="fa-solid fa-user-check"></i> <span id="recPatientName">—</span>
                     </div>
                     <p style="font-size: 0.8rem; color: #334155;" id="recPatientMeta"></p>
                 </div>
@@ -433,11 +460,7 @@
                                 <option value="labs">Lab Tests</option>
                                 <option value="scans">Radiology & Scans</option>
                                 <option value="notes">Diagnosis & Notes</option>
-                                <option value="prevAdmission">Previous admission</option>
-                                <option value="pastSurgery">Past surgery</option>
-                                <option value="familyHistory">Family history</option>
-                                <option value="drugAllergy">Drugs allergy</option>
-                                <option value="chronicDrugs">Chronic drugs</option>
+                                <option value="mh_history">Medical History Terms</option>
                             </select>
                         </div>
                     </div>
@@ -453,7 +476,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.42 (Robust Indexing)</div>
+        <div class="footer">Clinic Master Network v16.37 (Robust Indexing)</div>
     </div>
 </div>
 
@@ -480,67 +503,72 @@
                     <input type="checkbox" id="mh-other-check" onchange="toggleOtherInput()"> Other
                 </label>
             </div>
-            <div class="input-wrapper" id="mh-other-box" style="display:none; margin-top: 8px;">
-                <input type="text" id="mh-cd-other" placeholder="Specify other chronic conditions...">
+            <div class="input-wrapper" id="mh-other-box" style="display:none; margin-top: 8px; position: relative;">
+                <input type="text" id="mh-cd-other" placeholder="Specify other chronic conditions..." oninput="handleMhLiveInput(this, 'mh_other')" onblur="hideMhSuggestions('mh_other')">
+                <div class="suggestions-box" id="suggestions-mh_other"></div>
+                <div class="live-save-bar" id="save-bar-mh_other">
+                    <span>Save: "<strong id="line-text-mh_other"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_other" onmousedown="saveMhLineToDict(event, 'mh_other')">Save</button>
+                </div>
             </div>
         </div>
 
         <div class="field-box">
             <span class="field-label">Previous admission to hospital</span>
-            <div class="input-wrapper">
-                <input type="text" id="mh-prev-admission" placeholder="Details & dates..." oninput="handleDictInputGeneric(this, 'prevAdmission')" onblur="hideDictSuggestions('prevAdmission')">
-                <div class="suggestions-box" id="suggestions-prevAdmission"></div>
-                <div class="live-save-bar" id="save-bar-prevAdmission">
-                    <span>Save: "<strong id="line-text-prevAdmission"></strong>"</span>
-                    <button type="button" class="btn-live-save" id="btn-save-prevAdmission" onmousedown="saveGenericToDict('prevAdmission')">Save</button>
+            <div class="input-wrapper" style="position: relative;">
+                <input type="text" id="mh-prev-admission" placeholder="Details & dates..." oninput="handleMhLiveInput(this, 'mh_admission')" onblur="hideMhSuggestions('mh_admission')">
+                <div class="suggestions-box" id="suggestions-mh_admission"></div>
+                <div class="live-save-bar" id="save-bar-mh_admission">
+                    <span>Save: "<strong id="line-text-mh_admission"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_admission" onmousedown="saveMhLineToDict(event, 'mh_admission')">Save</button>
                 </div>
             </div>
         </div>
 
         <div class="field-box">
             <span class="field-label">Past surgery</span>
-            <div class="input-wrapper">
-                <input type="text" id="mh-past-surgery" placeholder="Surgical history..." oninput="handleDictInputGeneric(this, 'pastSurgery')" onblur="hideDictSuggestions('pastSurgery')">
-                <div class="suggestions-box" id="suggestions-pastSurgery"></div>
-                <div class="live-save-bar" id="save-bar-pastSurgery">
-                    <span>Save: "<strong id="line-text-pastSurgery"></strong>"</span>
-                    <button type="button" class="btn-live-save" id="btn-save-pastSurgery" onmousedown="saveGenericToDict('pastSurgery')">Save</button>
+            <div class="input-wrapper" style="position: relative;">
+                <input type="text" id="mh-past-surgery" placeholder="Surgical history..." oninput="handleMhLiveInput(this, 'mh_surgery')" onblur="hideMhSuggestions('mh_surgery')">
+                <div class="suggestions-box" id="suggestions-mh_surgery"></div>
+                <div class="live-save-bar" id="save-bar-mh_surgery">
+                    <span>Save: "<strong id="line-text-mh_surgery"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_surgery" onmousedown="saveMhLineToDict(event, 'mh_surgery')">Save</button>
                 </div>
             </div>
         </div>
 
         <div class="field-box">
             <span class="field-label">Family history</span>
-            <div class="input-wrapper">
-                <input type="text" id="mh-family-history" placeholder="Hereditary diseases..." oninput="handleDictInputGeneric(this, 'familyHistory')" onblur="hideDictSuggestions('familyHistory')">
-                <div class="suggestions-box" id="suggestions-familyHistory"></div>
-                <div class="live-save-bar" id="save-bar-familyHistory">
-                    <span>Save: "<strong id="line-text-familyHistory"></strong>"</span>
-                    <button type="button" class="btn-live-save" id="btn-save-familyHistory" onmousedown="saveGenericToDict('familyHistory')">Save</button>
+            <div class="input-wrapper" style="position: relative;">
+                <input type="text" id="mh-family-history" placeholder="Hereditary diseases..." oninput="handleMhLiveInput(this, 'mh_family')" onblur="hideMhSuggestions('mh_family')">
+                <div class="suggestions-box" id="suggestions-mh_family"></div>
+                <div class="live-save-bar" id="save-bar-mh_family">
+                    <span>Save: "<strong id="line-text-mh_family"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_family" onmousedown="saveMhLineToDict(event, 'mh_family')">Save</button>
                 </div>
             </div>
         </div>
 
         <div class="field-box">
             <span class="field-label">Drugs allergy</span>
-            <div class="input-wrapper">
-                <input type="text" id="mh-drug-allergy" placeholder="Known drug allergies..." oninput="handleDictInputGeneric(this, 'drugAllergy')" onblur="hideDictSuggestions('drugAllergy')">
-                <div class="suggestions-box" id="suggestions-drugAllergy"></div>
-                <div class="live-save-bar" id="save-bar-drugAllergy">
-                    <span>Save: "<strong id="line-text-drugAllergy"></strong>"</span>
-                    <button type="button" class="btn-live-save" id="btn-save-drugAllergy" onmousedown="saveGenericToDict('drugAllergy')">Save</button>
+            <div class="input-wrapper" style="position: relative;">
+                <input type="text" id="mh-drug-allergy" placeholder="Known drug allergies..." oninput="handleMhLiveInput(this, 'mh_allergy')" onblur="hideMhSuggestions('mh_allergy')">
+                <div class="suggestions-box" id="suggestions-mh_allergy"></div>
+                <div class="live-save-bar" id="save-bar-mh_allergy">
+                    <span>Save: "<strong id="line-text-mh_allergy"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_allergy" onmousedown="saveMhLineToDict(event, 'mh_allergy')">Save</button>
                 </div>
             </div>
         </div>
 
         <div class="field-box">
             <span class="field-label">Chronic use of drugs</span>
-            <div class="input-wrapper">
-                <input type="text" id="mh-chronic-drugs" placeholder="Long-term medications..." oninput="handleDictInputGeneric(this, 'chronicDrugs')" onblur="hideDictSuggestions('chronicDrugs')">
-                <div class="suggestions-box" id="suggestions-chronicDrugs"></div>
-                <div class="live-save-bar" id="save-bar-chronicDrugs">
-                    <span>Save: "<strong id="line-text-chronicDrugs"></strong>"</span>
-                    <button type="button" class="btn-live-save" id="btn-save-chronicDrugs" onmousedown="saveGenericToDict('chronicDrugs')">Save</button>
+            <div class="input-wrapper" style="position: relative;">
+                <input type="text" id="mh-chronic-drugs" placeholder="Long-term medications..." oninput="handleMhLiveInput(this, 'mh_chronic_drugs')" onblur="hideMhSuggestions('mh_chronic_drugs')">
+                <div class="suggestions-box" id="suggestions-mh_chronic_drugs"></div>
+                <div class="live-save-bar" id="save-bar-mh_chronic_drugs">
+                    <span>Save: "<strong id="line-text-mh_chronic_drugs"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_chronic_drugs" onmousedown="saveMhLineToDict(event, 'mh_chronic_drugs')">Save</button>
                 </div>
             </div>
         </div>
@@ -550,39 +578,21 @@
             <div class="field-box" style="flex:1;"><span class="field-label">Drinking Alcohol</span><div class="input-wrapper"><select id="mh-alcohol"><option value="Non-drinker">Non-drinker</option><option value="Alcohol drinker">Alcohol drinker</option><option value="Social drinker">Social drinker</option></select></div></div>
         </div>
 
-        <div class="field-box"><span class="field-label">Notes</span><div class="input-wrapper"><textarea id="mh-notes" rows="2" placeholder="Additional clinical notes..."></textarea></div></div>
+        <div class="field-box">
+            <span class="field-label">Notes</span>
+            <div class="input-wrapper" style="position: relative;">
+                <textarea id="mh-notes" rows="2" placeholder="Additional clinical notes..." oninput="handleMhLiveInput(this, 'mh_notes')" onblur="hideMhSuggestions('mh_notes')"></textarea>
+                <div class="suggestions-box" id="suggestions-mh_notes"></div>
+                <div class="live-save-bar" id="save-bar-mh_notes">
+                    <span>Save: "<strong id="line-text-mh_notes"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_notes" onmousedown="saveMhLineToDict(event, 'mh_notes')">Save</button>
+                </div>
+            </div>
+        </div>
 
         <button class="btn-main" onclick="closeMedHistoryModal()" style="margin-top: 10px;">
             <i class="fa-solid fa-check"></i> Done & Save
         </button>
-    </div>
-</div>
-
-<div id="editPatientModal" class="modal-overlay">
-    <div class="modal-body">
-        <div class="modal-header">
-            <h3><i class="fa-solid fa-pen" style="color:#0d9488;"></i> Edit Patient Information</h3>
-            <button class="modal-close" onclick="closeEditPatientModal()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div class="field-box"><span class="field-label">Full Name</span><div class="input-wrapper"><input type="text" id="editPName"></div></div>
-        <div style="display:flex; gap:10px;">
-            <div class="field-box" style="flex:1;"><span class="field-label">Age</span><div class="input-wrapper"><input type="number" id="editPAge"></div></div>
-            <div class="field-box" style="flex:1;"><span class="field-label">Gender</span><div class="input-wrapper"><select id="editPGender"><option value="Male">Male</option><option value="Female">Female</option></select></div></div>
-        </div>
-        <div class="field-box">
-            <span class="field-label">Marital Status</span>
-            <div class="input-wrapper">
-                <select id="editPMarital">
-                    <option value="Single">Single</option>
-                    <option value="Married">Married</option>
-                    <option value="Divorced">Divorced</option>
-                    <option value="Widow">Widow</option>
-                </select>
-            </div>
-        </div>
-        <div class="field-box"><span class="field-label">Occupation</span><div class="input-wrapper"><select id="editPJob"><option value="">-- Choose --</option><option value="Employee">Employee</option><option value="Free Business">Free Business</option><option value="Housewife">Housewife</option><option value="Student">Student</option><option value="Other">Other</option></select></div></div>
-        <div class="field-box"><span class="field-label">Phone Number</span><div class="input-wrapper"><input type="tel" id="editPPhone"></div></div>
-        <button class="btn-main" onclick="saveEditedPatient()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
     </div>
 </div>
 
@@ -661,8 +671,12 @@
                 <i class="fa-solid fa-floppy-disk"></i> Save RX Layout & Fonts
             </button>
             <div style="display: flex; gap: 8px;">
-                <button class="btn-main" onclick="openPrescriptionPDF()" style="font-family: 'Plus Jakarta Sans', sans-serif; background: #0284c7; flex: 1;"><i class="fa-solid fa-file-pdf"></i> Open PDF</button>
-                <button class="btn-main" onclick="downloadPrescriptionImage()" style="font-family: 'Plus Jakarta Sans', sans-serif; background: #0d9488; flex: 1;"><i class="fa-solid fa-download"></i> Save as Image</button>
+                <button class="btn-main" onclick="openPrescriptionPDF()" style="font-family: 'Plus Jakarta Sans', sans-serif; background: #0284c7; flex: 1;">
+                    <i class="fa-solid fa-file-pdf"></i> Open PDF
+                </button>
+                <button class="btn-main" onclick="downloadPrescriptionImage()" style="font-family: 'Plus Jakarta Sans', sans-serif; background: #0d9488; flex: 1;">
+                    <i class="fa-solid fa-download"></i> Save as Image
+                </button>
             </div>
         </div>
     </div>
@@ -691,39 +705,30 @@
     let currentVisitIdForModal = null;
     let currentDoctorRxImage = localStorage.getItem('doctor_rx_template') || '';
     let isConfigMode = false;
+    let activeMhInputKey = null;
 
     let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
-    let trashBin = JSON.parse(localStorage.getItem('clinic_trash')) || [];
     let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || {
         labs: ["CBC", "RBS", "Lipid Profile", "HbA1c", "LFT", "KFT"],
         scans: ["Chest X-Ray", "Abdominal Ultrasound", "Brain MRI", "CT Scan"],
         drugs: ["Paracetamol 500mg 1x3", "Amoxicillin 500mg 1x3", "Metformin 500mg 1x2"],
         notes: ["Upper Respiratory Tract Infection", "Acute Gastroenteritis"],
-        prevAdmission: ["General Hospital - 2024", "Maysan Teaching Hospital"],
-        pastSurgery: ["Appendectomy", "Cholecystectomy"],
-        familyHistory: ["HTN in parents", "DM type 2 in family"],
-        drugAllergy: ["Penicillin allergy", "Sulfa drugs allergy"],
-        chronicDrugs: ["Aspirin 81mg daily", "Atorvastatin 20mg"]
+        mh_history: ["Appendectomy", "Cholecystectomy", "Penicillin Allergy", "Cesarean Section"]
     };
 
-    function generateSingleUseCode() {
+    function generateThreeHourCode() {
+        const now = Date.now();
+        const threeHoursMs = 3 * 60 * 60 * 1000;
+        const timeBlock = Math.floor(now / threeHoursMs);
         const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        let code = "ONCE-";
+        let code = "FND-";
+        let seed = timeBlock;
         for (let i = 0; i < 6; i++) {
-            code += chars.charAt(Math.floor(Math.random() * chars.length));
+            seed = (seed * 9301 + 49297) % 233280;
+            let rnd = seed / 233280;
+            code += chars.charAt(Math.floor(rnd * chars.length));
         }
         return code;
-    }
-
-    function generateNewSingleCode() {
-        const newCode = generateSingleUseCode();
-        db.collection('single_use_codes').doc(newCode).set({
-            createdAt: new Date().toISOString(),
-            used: false
-        }).then(() => {
-            document.getElementById('generatedCodeBox').innerText = newCode;
-            alert('تم إنشاء كود جديد بنجاح! هذا الكود صالح للاستخدام مرة واحدة فقط.');
-        }).catch(err => alert('Error: ' + err.message));
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -733,7 +738,6 @@
             if (user) {
                 currentUserId = user.uid;
                 patients = JSON.parse(localStorage.getItem(`clinic_patients_${user.uid}`)) || patients;
-                trashBin = JSON.parse(localStorage.getItem(`clinic_trash_${user.uid}`)) || trashBin;
 
                 db.collection('users_data').doc(user.uid).get().then(doc => {
                     if (doc.exists) {
@@ -744,6 +748,7 @@
                         }
                         if (data.dictionary) {
                             medicalDict = data.dictionary;
+                            if (!medicalDict.mh_history) medicalDict.mh_history = ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"];
                             localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
                         }
                     }
@@ -798,12 +803,6 @@
             .catch(err => console.log("Cloud save error:", err));
     }
 
-    function saveTrashToCloudAndLocal() {
-        if (!currentUserId) return;
-        localStorage.setItem(`clinic_trash_${currentUserId}`, JSON.stringify(trashBin));
-        localStorage.setItem('clinic_trash', JSON.stringify(trashBin));
-    }
-
     function saveSettingsToCloudAndLocal() {
         if (!currentUserId) return;
         localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
@@ -856,39 +855,26 @@
         }
     }
 
-    function verifySingleUseCode() {
+    function verifyDynamicCode() {
         const inputCode = document.getElementById('activationInput').value.trim().toUpperCase();
-        if (!inputCode) { alert('الرجاء إدخال كود التفعيل.'); return; }
+        const validCode = generateThreeHourCode();
 
-        const codeRef = db.collection('single_use_codes').doc(inputCode);
-        codeRef.get().then(doc => {
-            if (!doc.exists) {
-                alert('الكود المدخل غير صحيح أو غير موجود!');
-                return;
+        if (inputCode === validCode) {
+            const user = auth.currentUser;
+            if (user) {
+                localStorage.setItem(`activated_${user.uid}`, 'true');
+                db.collection('network_hierarchy').doc(user.uid).set({
+                    email: user.email,
+                    password: pendingUserPass || 'Saved',
+                    role: 'Client Node',
+                    registeredAt: new Date().toISOString()
+                });
             }
-            const data = doc.data();
-            if (data.used) {
-                alert('هذا الكود تم استخدامه من قبل ولا يمكن إعادة استخدامه!');
-                return;
-            }
-
-            codeRef.update({ used: true }).then(() => {
-                codeRef.delete();
-                const user = auth.currentUser;
-                if (user) {
-                    localStorage.setItem(`activated_${user.uid}`, 'true');
-                    db.collection('network_hierarchy').doc(user.uid).set({
-                        email: user.email,
-                        password: pendingUserPass || 'Saved',
-                        role: 'Client Node',
-                        registeredAt: new Date().toISOString()
-                    });
-                }
-                document.getElementById('activationScreen').style.display = 'none';
-                setupClientInterface();
-                alert('تم تفعيل الحساب بنجاح وتم استهلاك الكود ولن يعمل مرة أخرى!');
-            });
-        }).catch(err => alert('Error: ' + err.message));
+            document.getElementById('activationScreen').style.display = 'none';
+            setupClientInterface();
+        } else {
+            alert('الكود غير صحيح أو منتهي الصلاحية. يرجى مراجعة المؤسس للحصول على الكود الحالي.');
+        }
     }
 
     function setupFounderInterface() {
@@ -897,6 +883,7 @@
         document.getElementById('appContainer').style.display = 'flex';
         document.getElementById('founderControlPanel').style.display = 'block';
         document.getElementById('networkMenuCard').style.display = 'flex';
+        document.getElementById('dynamicFounderCode').innerText = generateThreeHourCode();
     }
 
     function setupClientInterface() {
@@ -910,7 +897,9 @@
     function resetPassword() {
         const email = document.getElementById('authEmail').value;
         if (!email) { alert('Enter your email first.'); return; }
-        auth.sendPasswordResetEmail(email).then(() => alert('Password reset email sent!')).catch(err => alert(err.message));
+        auth.sendPasswordResetEmail(email)
+            .then(() => alert('Password reset email sent!'))
+            .catch(err => alert(err.message));
     }
 
     function logoutUser() {
@@ -918,7 +907,6 @@
         auth.signOut().then(() => {
             currentUserId = null;
             patients = [];
-            trashBin = [];
             document.getElementById('appContainer').style.display = 'none';
             document.getElementById('authScreen').style.display = 'flex';
         });
@@ -929,7 +917,6 @@
         document.getElementById('mainScreen').style.display = 'none';
         document.getElementById('addPatientScreen').style.display = 'none';
         document.getElementById('archiveScreen').style.display = 'none';
-        document.getElementById('trashScreen').style.display = 'none';
         document.getElementById('medicalRecordScreen').style.display = 'none';
         document.getElementById('dictScreen').style.display = 'none';
         document.getElementById('networkScreen').style.display = 'none';
@@ -1097,28 +1084,31 @@
         if (textarea) textarea.focus();
     }
 
-    function handleDictInputGeneric(inputEl, category) {
-        const currentVal = inputEl.value.trim();
-        const bar = document.getElementById(`save-bar-${category}`);
-        const lineTextSpan = document.getElementById(`line-text-${category}`);
-        const btn = document.getElementById(`btn-save-${category}`);
-        const suggestBox = document.getElementById(`suggestions-${category}`);
+    // --- Medical History Dynamic Suggestions ---
+    function handleMhLiveInput(inputEl, inputKey) {
+        activeMhInputKey = inputKey;
+        const val = inputEl.value.trim();
+        const bar = document.getElementById(`save-bar-${inputKey}`);
+        const lineTextSpan = document.getElementById(`line-text-${inputKey}`);
+        const btn = document.getElementById(`btn-save-${inputKey}`);
+        const suggestBox = document.getElementById(`suggestions-${inputKey}`);
 
-        if (currentVal.length > 0) {
-            if (lineTextSpan) lineTextSpan.innerText = currentVal;
+        if (val.length > 0) {
+            if (lineTextSpan) lineTextSpan.innerText = val;
             if (bar) bar.style.display = 'flex';
             if (btn) { btn.classList.remove('saved'); btn.innerText = 'Save'; }
         } else {
             if (bar) bar.style.display = 'none';
         }
 
-        if (currentVal.length >= 2) {
-            const matches = (medicalDict[category] || []).filter(item => 
-                item.toLowerCase().includes(currentVal.toLowerCase())
+        if (val.length >= 2) {
+            const matches = (medicalDict.mh_history || []).filter(item => 
+                item.toLowerCase().includes(val.toLowerCase())
             );
+
             if (matches.length > 0) {
                 suggestBox.innerHTML = matches.map(m => `
-                    <div class="suggestion-item" onmousedown="selectGenericSuggestion('${category}', '${m.replace(/'/g, "\\'")}')">${m}</div>
+                    <div class="suggestion-item" onmousedown="selectMhSuggestion('${inputKey}', '${m.replace(/'/g, "\\'")}')">${m}</div>
                 `).join('');
                 suggestBox.style.display = 'block';
             } else {
@@ -1129,45 +1119,55 @@
         }
     }
 
-    function selectGenericSuggestion(category, value) {
-        let inputEl = null;
-        if (category === 'prevAdmission') inputEl = document.getElementById('mh-prev-admission');
-        else if (category === 'pastSurgery') inputEl = document.getElementById('mh-past-surgery');
-        else if (category === 'familyHistory') inputEl = document.getElementById('mh-family-history');
-        else if (category === 'drugAllergy') inputEl = document.getElementById('mh-drug-allergy');
-        else if (category === 'chronicDrugs') inputEl = document.getElementById('mh-chronic-drugs');
+    function selectMhSuggestion(inputKey, value) {
+        let el = null;
+        if (inputKey === 'mh_other') el = document.getElementById('mh-cd-other');
+        else if (inputKey === 'mh_admission') el = document.getElementById('mh-prev-admission');
+        else if (inputKey === 'mh_surgery') el = document.getElementById('mh-past-surgery');
+        else if (inputKey === 'mh_family') el = document.getElementById('mh-family-history');
+        else if (inputKey === 'mh_allergy') el = document.getElementById('mh-drug-allergy');
+        else if (inputKey === 'mh_chronic_drugs') el = document.getElementById('mh-chronic-drugs');
+        else if (inputKey === 'mh_notes') el = document.getElementById('mh-notes');
 
-        if (inputEl) inputEl.value = value;
-        const suggestBox = document.getElementById(`suggestions-${category}`);
+        if (el) {
+            el.value = value;
+            el.focus();
+        }
+        const suggestBox = document.getElementById(`suggestions-${inputKey}`);
         if (suggestBox) suggestBox.style.display = 'none';
     }
 
-    function hideDictSuggestions(category) {
+    function hideMhSuggestions(inputKey) {
         setTimeout(() => {
-            const suggestBox = document.getElementById(`suggestions-${category}`);
+            const suggestBox = document.getElementById(`suggestions-${inputKey}`);
             if (suggestBox) suggestBox.style.display = 'none';
         }, 200);
     }
 
-    function saveGenericToDict(category) {
-        let inputEl = null;
-        if (category === 'prevAdmission') inputEl = document.getElementById('mh-prev-admission');
-        else if (category === 'pastSurgery') inputEl = document.getElementById('mh-past-surgery');
-        else if (category === 'familyHistory') inputEl = document.getElementById('mh-family-history');
-        else if (category === 'drugAllergy') inputEl = document.getElementById('mh-drug-allergy');
-        else if (category === 'chronicDrugs') inputEl = document.getElementById('mh-chronic-drugs');
+    function saveMhLineToDict(event, inputKey) {
+        if (event) event.preventDefault();
+        const lineTextSpan = document.getElementById(`line-text-${inputKey}`);
+        const btn = document.getElementById(`btn-save-${inputKey}`);
+        let el = null;
+        if (inputKey === 'mh_other') el = document.getElementById('mh-cd-other');
+        else if (inputKey === 'mh_admission') el = document.getElementById('mh-prev-admission');
+        else if (inputKey === 'mh_surgery') el = document.getElementById('mh-past-surgery');
+        else if (inputKey === 'mh_family') el = document.getElementById('mh-family-history');
+        else if (inputKey === 'mh_allergy') el = document.getElementById('mh-drug-allergy');
+        else if (inputKey === 'mh_chronic_drugs') el = document.getElementById('mh-chronic-drugs');
+        else if (inputKey === 'mh_notes') el = document.getElementById('mh-notes');
 
-        if (!inputEl) return;
-        const val = inputEl.value.trim();
+        const val = lineTextSpan ? lineTextSpan.innerText.trim() : '';
         if (!val) return;
 
-        if (!medicalDict[category]) medicalDict[category] = [];
-        if (!medicalDict[category].includes(val)) {
-            medicalDict[category].push(val);
+        if (!medicalDict.mh_history) medicalDict.mh_history = [];
+        if (!medicalDict.mh_history.includes(val)) {
+            medicalDict.mh_history.push(val);
             saveSettingsToCloudAndLocal();
         }
-        const btn = document.getElementById(`btn-save-${category}`);
+
         if (btn) { btn.classList.add('saved'); btn.innerText = 'Saved ✓'; }
+        if (el) el.focus();
     }
 
     function handleFileUpload(input, visitId) {
@@ -1341,7 +1341,7 @@
             container.insertBefore(placeholder, container.firstChild);
         }
 
-        document.getElementById('rxDragPatientDetailsText').innerText = `Patient: ${patient.name}   |   Age: ${patient.age} yrs   |   Gender: ${patient.gender}`;
+        document.getElementById('rxDragPatientDetailsText').innerText = `Patient: ${patient.name}   |   Age: ${patient.age} yrs   |   Gender: ${patient.gender || 'N/A'}`;
         document.getElementById('rxDragDateText').innerText = `Date: ${visit.date || getTodayFormatted()}`;
         
         let vitalsArr = [];
@@ -1603,7 +1603,6 @@
         document.getElementById('addPatientScreen').style.display = 'none';
         document.getElementById('rxTemplateScreen').style.display = 'none';
         document.getElementById('archiveScreen').style.display = 'none';
-        document.getElementById('trashScreen').style.display = 'none';
         document.getElementById('medicalRecordScreen').style.display = 'none';
         document.getElementById('dictScreen').style.display = 'none';
         document.getElementById('networkScreen').style.display = 'none';
@@ -1617,7 +1616,6 @@
         document.getElementById('mainScreen').style.display = 'none';
         document.getElementById('rxTemplateScreen').style.display = 'none';
         document.getElementById('archiveScreen').style.display = 'none';
-        document.getElementById('trashScreen').style.display = 'none';
         document.getElementById('medicalRecordScreen').style.display = 'none';
         document.getElementById('dictScreen').style.display = 'none';
         document.getElementById('networkScreen').style.display = 'none';
@@ -1632,7 +1630,6 @@
         document.getElementById('mainScreen').style.display = 'none';
         document.getElementById('rxTemplateScreen').style.display = 'none';
         document.getElementById('addPatientScreen').style.display = 'none';
-        document.getElementById('trashScreen').style.display = 'none';
         document.getElementById('medicalRecordScreen').style.display = 'none';
         document.getElementById('dictScreen').style.display = 'none';
         document.getElementById('networkScreen').style.display = 'none';
@@ -1643,29 +1640,12 @@
         renderPatientsList(patients);
     }
 
-    function openTrashBin() {
-        autoSaveMedicalRecord();
-        document.getElementById('mainScreen').style.display = 'none';
-        document.getElementById('rxTemplateScreen').style.display = 'none';
-        document.getElementById('addPatientScreen').style.display = 'none';
-        document.getElementById('archiveScreen').style.display = 'none';
-        document.getElementById('medicalRecordScreen').style.display = 'none';
-        document.getElementById('dictScreen').style.display = 'none';
-        document.getElementById('networkScreen').style.display = 'none';
-        document.getElementById('trashScreen').style.display = 'block';
-        document.getElementById('backBtn').style.display = 'flex';
-        document.getElementById('headerTitle').innerText = 'Trash Bin';
-        document.getElementById('headerSub').innerText = 'Deleted patients & visits';
-        renderTrashList();
-    }
-
     function openDictionaryManager() {
         autoSaveMedicalRecord();
         document.getElementById('mainScreen').style.display = 'none';
         document.getElementById('rxTemplateScreen').style.display = 'none';
         document.getElementById('addPatientScreen').style.display = 'none';
         document.getElementById('archiveScreen').style.display = 'none';
-        document.getElementById('trashScreen').style.display = 'none';
         document.getElementById('medicalRecordScreen').style.display = 'none';
         document.getElementById('networkScreen').style.display = 'none';
         document.getElementById('dictScreen').style.display = 'block';
@@ -1706,10 +1686,10 @@
             id: Date.now(),
             name: document.getElementById('pName').value,
             age: Number(document.getElementById('pAge').value),
-            gender: document.getElementById('pGender').value,
+            gender: document.getElementById('pGender').value || 'Unspecified',
             marital: document.getElementById('pMarital').value || 'Single',
-            job: document.getElementById('pJob').value || '',
-            phone: document.getElementById('pPhone').value || '',
+            job: document.getElementById('pJob').value || 'Unspecified',
+            phone: document.getElementById('pPhone').value || 'N/A',
             visits: [
                 {
                     visitId: Date.now(),
@@ -1736,39 +1716,6 @@
         openMedicalRecord(newPatient.id);
     }
 
-    function openEditPatientModal() {
-        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-        if (!patient) return;
-        document.getElementById('editPName').value = patient.name || '';
-        document.getElementById('editPAge').value = patient.age || '';
-        document.getElementById('editPGender').value = patient.gender || 'Male';
-        document.getElementById('editPMarital').value = patient.marital || 'Single';
-        document.getElementById('editPJob').value = patient.job || '';
-        document.getElementById('editPPhone').value = patient.phone || '';
-        document.getElementById('editPatientModal').style.display = 'flex';
-    }
-
-    function closeEditPatientModal() {
-        document.getElementById('editPatientModal').style.display = 'none';
-    }
-
-    function saveEditedPatient() {
-        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-        if (!patient) return;
-
-        patient.name = document.getElementById('editPName').value;
-        patient.age = Number(document.getElementById('editPAge').value);
-        patient.gender = document.getElementById('editPGender').value;
-        patient.marital = document.getElementById('editPMarital').value;
-        patient.job = document.getElementById('editPJob').value;
-        patient.phone = document.getElementById('editPPhone').value;
-
-        savePatientToCloudAndLocal(patient);
-        closeEditPatientModal();
-        openMedicalRecord(patient.id);
-        alert('تم تعديل معلومات المريض بنجاح!');
-    }
-
     function renderPatientsList(list) {
         const container = document.getElementById('patientsList');
         if (list.length === 0) {
@@ -1778,28 +1725,242 @@
 
         container.innerHTML = list.map(p => {
             const lastVisit = p.visits && p.visits.length > 0 ? p.visits[0].date : 'N/A';
+            const genderBadgeClass = p.gender === 'Male' ? 'gender-male' : (p.gender === 'Female' ? 'gender-female' : '');
             return `
-                <div class="patient-card">
-                    <div class="patient-info" onclick="openMedicalRecord(${p.id})" style="flex:1; cursor:pointer;">
+                <div class="patient-card" onclick="openMedicalRecord(${p.id})">
+                    <div class="patient-info">
                         <h4>${p.name}</h4>
-                        <p><i class="fa-solid fa-phone"></i> ${p.phone || 'No Phone'} | <i class="fa-solid fa-calendar"></i> ${lastVisit}</p>
+                        <p><i class="fa-solid fa-phone"></i> ${p.phone} | <i class="fa-solid fa-calendar"></i> ${lastVisit}</p>
                     </div>
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <span class="badge-gender ${p.gender === 'Male' ? 'gender-male' : 'gender-female'}">${p.gender}</span>
-                        <button class="btn-danger" onclick="confirmDeletePatient(${p.id})" style="padding:6px 10px; border-radius:8px; font-size:0.75rem; border:none; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
+                    <div>
+                        ${p.gender && p.gender !== 'Unspecified' ? `<span class="badge-gender ${genderBadgeClass}">${p.gender}</span>` : ''}
                     </div>
                 </div>
             `;
         }).join('');
     }
 
-    function confirmDeletePatient(patientId) {
-        if (confirm("هل أنت متأكد من حذف هذا المريض؟ سيتم نقله إلى سلة المحذوفات.")) {
-            const index = patients.findIndex(p => Number(p.id) === Number(patientId));
-            if (index !== -1) {
-                const deletedPatient = patients.splice(index, 1)[0];
-                trashBin.unshift({ type: 'patient', data: deletedPatient, deletedAt: new Date().toISOString() });
-                if (currentUserId) {
-                    db.collection('users_data').doc(currentUserId).collection('patients').doc(String(patientId)).delete();
-                }
-                loca
+    function filterPatients() {
+        const q = document.getElementById('searchInput').value.toLowerCase().trim();
+        const genderVal = document.getElementById('filterGender').value;
+        const ageGroupVal = document.getElementById('filterAgeGroup').value;
+
+        const filtered = patients.filter(p => {
+            const matchesText = !q || p.name.toLowerCase().includes(q) || (p.phone && p.phone.includes(q));
+            const matchesGender = !genderVal || p.gender === genderVal;
+
+            let matchesAge = true;
+            const age = Number(p.age) || 0;
+            if (ageGroupVal === 'child') matchesAge = age < 18;
+            else if (ageGroupVal === 'adult') matchesAge = age >= 18 && age <= 50;
+            else if (ageGroupVal === 'senior') matchesAge = age > 50;
+
+            return matchesText && matchesGender && matchesAge;
+        });
+
+        renderPatientsList(filtered);
+    }
+
+    function openMedicalRecord(id) {
+        const patient = patients.find(p => Number(p.id) === Number(id));
+        if (!patient) return;
+
+        currentPatientId = id;
+        document.getElementById('mainScreen').style.display = 'none';
+        document.getElementById('rxTemplateScreen').style.display = 'none';
+        document.getElementById('addPatientScreen').style.display = 'none';
+        document.getElementById('archiveScreen').style.display = 'none';
+        document.getElementById('dictScreen').style.display = 'none';
+        document.getElementById('networkScreen').style.display = 'none';
+        document.getElementById('medicalRecordScreen').style.display = 'block';
+        document.getElementById('backBtn').style.display = 'flex';
+
+        document.getElementById('headerTitle').innerText = 'Patient Medical Record';
+        document.getElementById('headerSub').innerText = 'View & update medical history';
+
+        document.getElementById('recPatientName').innerText = patient.name;
+        document.getElementById('recPatientMeta').innerText = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
+
+        renderVisits(patient.visits || []);
+    }
+
+    function renderVisits(visits) {
+        const container = document.getElementById('visitsContainer');
+        if (visits.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#64748b;">No visits recorded yet.</p>';
+            return;
+        }
+
+        container.innerHTML = visits.map((v, index) => {
+            const vId = v.visitId || (Date.now() + index);
+            v.visitId = vId;
+            const mh = v.medHistory || {};
+            let summaryParts = [...(mh.chronicDiseases || [])];
+            if (mh.chronicOther) summaryParts.push(mh.chronicOther);
+            if (mh.drugAllergy) summaryParts.push(`Allergy: ${mh.drugAllergy}`);
+            if (mh.notes) summaryParts.push(mh.notes);
+
+            const mhStatusText = summaryParts.length > 0 ? summaryParts.join(' | ') : 'Tap to Configure Medical History';
+            const attachments = v.attachments || [];
+            const visitDateVal = v.date || getTodayFormatted();
+
+            return `
+            <div class="visit-card" id="visit-${vId}" data-visit-id="${vId}">
+                <div class="visit-header">
+                    <span><i class="fa-solid fa-clock-rotate-left"></i> Visit Date:</span>
+                    <input type="date" value="${visitDateVal}" class="visit-date-input" onchange="autoSaveMedicalRecord()" style="background:transparent; border:none; color:white; font-weight:700; outline:none; text-align:right;">
+                </div>
+
+                <div class="field-box">
+                    <span class="field-label"><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History</span>
+                    <button type="button" class="btn-med-history" onclick="openMedHistoryModal(${vId})">
+                        <span id="mh-label-${vId}">${mhStatusText}</span>
+                        <i class="fa-solid fa-sliders"></i>
+                    </button>
+                </div>
+
+                <div class="field-box">
+                    <span class="field-label"><i class="fa-solid fa-heart-pulse" style="color:#0d9488;"></i> Vital Signs</span>
+                    <div class="vital-box">
+                        <div class="vital-row">
+                            <div class="vital-item" style="grid-column: span 2;">
+                                <span class="vital-label">Blood Pressure (BP)</span>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <div class="vital-inputs" style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:4px 8px; flex:1;">
+                                        <input type="number" class="v-bp-sys" placeholder="SYS" value="${v.bpSystolic || ''}" oninput="autoSaveMedicalRecord()">
+                                    </div>
+                                    <span style="font-weight:700; color:#94a3b8;">/</span>
+                                    <div class="vital-inputs" style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:4px 8px; flex:1;">
+                                        <input type="number" class="v-bp-dia" placeholder="DIA" value="${v.bpDiastolic || ''}" oninput="autoSaveMedicalRecord()">
+                                    </div>
+                                    <span style="font-size:0.75rem; font-weight:700; color:#0d9488;">mmHg</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="vital-row">
+                            <div class="vital-item">
+                                <span class="vital-label">SpO2</span>
+                                <div class="vital-inputs">
+                                    <input type="number" class="v-spo2" placeholder="98" value="${v.spo2 || ''}" oninput="autoSaveMedicalRecord()">
+                                    <span>%</span>
+                                </div>
+                            </div>
+                            <div class="vital-item">
+                                <span class="vital-label">Heart Rate (HR)</span>
+                                <div class="vital-inputs">
+                                    <input type="number" class="v-hr" placeholder="75" value="${v.hr || ''}" oninput="autoSaveMedicalRecord()">
+                                    <span>bpm</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-box">
+                    <span class="field-label"><i class="fa-solid fa-vial" style="color:#0d9488;"></i> Lab Tests</span>
+                    <div class="input-wrapper">
+                        <textarea class="v-labs" rows="2" placeholder="Type lab tests..." oninput="handleLiveInput(this, 'labs', ${vId})" onblur="hideSuggestions('labs', ${vId})">${v.labs || ''}</textarea>
+                        <div class="suggestions-box" id="suggestions-labs-${vId}"></div>
+                        <div class="live-save-bar" id="save-bar-labs-${vId}">
+                            <span>Save: "<strong id="line-text-labs-${vId}"></strong>"</span>
+                            <button type="button" class="btn-live-save" id="btn-save-labs-${vId}" onmousedown="saveLineToDict(event, 'labs', ${vId})">Save</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-box">
+                    <span class="field-label"><i class="fa-solid fa-x-ray" style="color:#0d9488;"></i> Scans & Imaging</span>
+                    <div class="input-wrapper">
+                        <textarea class="v-scans" rows="2" placeholder="Type scans..." oninput="handleLiveInput(this, 'scans', ${vId})" onblur="hideSuggestions('scans', ${vId})">${v.scans || ''}</textarea>
+                        <div class="suggestions-box" id="suggestions-scans-${vId}"></div>
+                        <div class="live-save-bar" id="save-bar-scans-${vId}">
+                            <span>Save: "<strong id="line-text-scans-${vId}"></strong>"</span>
+                            <button type="button" class="btn-live-save" id="btn-save-scans-${vId}" onmousedown="saveLineToDict(event, 'scans', ${vId})">Save</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-box">
+                    <span class="field-label"><i class="fa-solid fa-pills" style="color:#0d9488;"></i> Medications & Treatment</span>
+                    <div class="input-wrapper">
+                        <textarea class="v-drugs" rows="3" placeholder="Type medications..." onfocus="handleDrugsInput(this, ${vId})" onkeydown="handleDrugsKeyDown(event, this, ${vId})" oninput="handleDrugsInput(this, ${vId})" onblur="hideSuggestions('drugs', ${vId})">${v.drugs || '— '}</textarea>
+                        <div class="suggestions-box" id="suggestions-drugs-${vId}"></div>
+                        <div class="live-save-bar" id="save-bar-drugs-${vId}">
+                            <span>Save: "<strong id="line-text-drugs-${vId}"></strong>"</span>
+                            <button type="button" class="btn-live-save" id="btn-save-drugs-${vId}" onmousedown="saveLineToDict(event, 'drugs', ${vId})">Save</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-box">
+                    <span class="field-label"><i class="fa-solid fa-clipboard-user" style="color:#0d9488;"></i> Diagnosis & Notes</span>
+                    <div class="input-wrapper">
+                        <textarea class="v-notes" rows="2" placeholder="Notes..." oninput="handleLiveInput(this, 'notes', ${vId})" onblur="hideSuggestions('notes', ${vId})">${v.notes || ''}</textarea>
+                        <div class="suggestions-box" id="suggestions-notes-${vId}"></div>
+                        <div class="live-save-bar" id="save-bar-notes-${vId}">
+                            <span>Save: "<strong id="line-text-notes-${vId}"></strong>"</span>
+                            <button type="button" class="btn-live-save" id="btn-save-notes-${vId}" onmousedown="saveLineToDict(event, 'notes', ${vId})">Save</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-box">
+                    <span class="field-label"><i class="fa-solid fa-paperclip" style="color:#0d9488;"></i> Attachments</span>
+                    <div class="attachments-container">
+                        ${attachments.map((imgSrc, imgIdx) => `
+                            <div class="attachment-thumb" onclick="previewAttachmentImage('${imgSrc}')">
+                                <img src="${imgSrc}" alt="Attachment">
+                                <button type="button" class="attachment-delete" onclick="event.stopPropagation(); confirmDeleteAttachment(${vId}, ${imgIdx})"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="display: flex; gap: 6px; margin-top: 6px;">
+                        <label class="btn-upload-attach" style="flex: 1;">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Upload
+                            <input type="file" accept="image/*" style="display: none;" onchange="handleFileUpload(this, ${vId})">
+                        </label>
+                        <button type="button" class="btn-scan-attach" onclick="handleScannerScan(${vId})" style="flex: 1;">
+                            <i class="fa-solid fa-print"></i> Scan Document
+                        </button>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-rx-action" onclick="openRxModal(${vId})">
+                    <i class="fa-solid fa-file-prescription"></i> Prescription (RX)
+                </button>
+            </div>
+        `}).join('');
+    }
+
+    function addNewVisit() {
+        autoSaveMedicalRecord();
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+
+        const today = getTodayFormatted();
+        const newVisit = {
+            visitId: Date.now(),
+            date: today,
+            medHistory: {},
+            bpSystolic: '',
+            bpDiastolic: '',
+            spo2: '',
+            hr: '',
+            rr: '',
+            labs: '',
+            scans: '',
+            drugs: '— ',
+            notes: '',
+            attachments: []
+        };
+
+        if (!patient.visits) patient.visits = [];
+        patient.visits.unshift(newVisit);
+
+        savePatientToCloudAndLocal(patient);
+        renderVisits(patient.visits);
+    }
+</script>
+
+</body>
+</html>
