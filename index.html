@@ -460,6 +460,7 @@
                                 <option value="labs">Lab Tests</option>
                                 <option value="scans">Radiology & Scans</option>
                                 <option value="notes">Diagnosis & Notes</option>
+                                <option value="mh_history">Medical History Terms</option>
                             </select>
                         </div>
                     </div>
@@ -502,23 +503,92 @@
                     <input type="checkbox" id="mh-other-check" onchange="toggleOtherInput()"> Other
                 </label>
             </div>
-            <div class="input-wrapper" id="mh-other-box" style="display:none; margin-top: 8px;">
-                <input type="text" id="mh-cd-other" placeholder="Specify other chronic conditions...">
+            <div class="input-wrapper" id="mh-other-box" style="display:none; margin-top: 8px; position: relative;">
+                <input type="text" id="mh-cd-other" placeholder="Specify other chronic conditions..." oninput="handleMhLiveInput(this, 'mh_other')" onblur="hideMhSuggestions('mh_other')">
+                <div class="suggestions-box" id="suggestions-mh_other"></div>
+                <div class="live-save-bar" id="save-bar-mh_other">
+                    <span>Save: "<strong id="line-text-mh_other"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_other" onmousedown="saveMhLineToDict(event, 'mh_other')">Save</button>
+                </div>
             </div>
         </div>
 
-        <div class="field-box"><span class="field-label">Previous admission to hospital</span><div class="input-wrapper"><input type="text" id="mh-prev-admission" placeholder="Details & dates..."></div></div>
-        <div class="field-box"><span class="field-label">Past surgery</span><div class="input-wrapper"><input type="text" id="mh-past-surgery" placeholder="Surgical history..."></div></div>
-        <div class="field-box"><span class="field-label">Family history</span><div class="input-wrapper"><input type="text" id="mh-family-history" placeholder="Hereditary diseases..."></div></div>
-        <div class="field-box"><span class="field-label">Drugs allergy</span><div class="input-wrapper"><input type="text" id="mh-drug-allergy" placeholder="Known drug allergies..."></div></div>
-        <div class="field-box"><span class="field-label">Chronic use of drugs</span><div class="input-wrapper"><input type="text" id="mh-chronic-drugs" placeholder="Long-term medications..."></div></div>
+        <div class="field-box">
+            <span class="field-label">Previous admission to hospital</span>
+            <div class="input-wrapper" style="position: relative;">
+                <input type="text" id="mh-prev-admission" placeholder="Details & dates..." oninput="handleMhLiveInput(this, 'mh_admission')" onblur="hideMhSuggestions('mh_admission')">
+                <div class="suggestions-box" id="suggestions-mh_admission"></div>
+                <div class="live-save-bar" id="save-bar-mh_admission">
+                    <span>Save: "<strong id="line-text-mh_admission"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_admission" onmousedown="saveMhLineToDict(event, 'mh_admission')">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label">Past surgery</span>
+            <div class="input-wrapper" style="position: relative;">
+                <input type="text" id="mh-past-surgery" placeholder="Surgical history..." oninput="handleMhLiveInput(this, 'mh_surgery')" onblur="hideMhSuggestions('mh_surgery')">
+                <div class="suggestions-box" id="suggestions-mh_surgery"></div>
+                <div class="live-save-bar" id="save-bar-mh_surgery">
+                    <span>Save: "<strong id="line-text-mh_surgery"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_surgery" onmousedown="saveMhLineToDict(event, 'mh_surgery')">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label">Family history</span>
+            <div class="input-wrapper" style="position: relative;">
+                <input type="text" id="mh-family-history" placeholder="Hereditary diseases..." oninput="handleMhLiveInput(this, 'mh_family')" onblur="hideMhSuggestions('mh_family')">
+                <div class="suggestions-box" id="suggestions-mh_family"></div>
+                <div class="live-save-bar" id="save-bar-mh_family">
+                    <span>Save: "<strong id="line-text-mh_family"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_family" onmousedown="saveMhLineToDict(event, 'mh_family')">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label">Drugs allergy</span>
+            <div class="input-wrapper" style="position: relative;">
+                <input type="text" id="mh-drug-allergy" placeholder="Known drug allergies..." oninput="handleMhLiveInput(this, 'mh_allergy')" onblur="hideMhSuggestions('mh_allergy')">
+                <div class="suggestions-box" id="suggestions-mh_allergy"></div>
+                <div class="live-save-bar" id="save-bar-mh_allergy">
+                    <span>Save: "<strong id="line-text-mh_allergy"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_allergy" onmousedown="saveMhLineToDict(event, 'mh_allergy')">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label">Chronic use of drugs</span>
+            <div class="input-wrapper" style="position: relative;">
+                <input type="text" id="mh-chronic-drugs" placeholder="Long-term medications..." oninput="handleMhLiveInput(this, 'mh_chronic_drugs')" onblur="hideMhSuggestions('mh_chronic_drugs')">
+                <div class="suggestions-box" id="suggestions-mh_chronic_drugs"></div>
+                <div class="live-save-bar" id="save-bar-mh_chronic_drugs">
+                    <span>Save: "<strong id="line-text-mh_chronic_drugs"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_chronic_drugs" onmousedown="saveMhLineToDict(event, 'mh_chronic_drugs')">Save</button>
+                </div>
+            </div>
+        </div>
 
         <div style="display:flex; gap:10px;">
             <div class="field-box" style="flex:1;"><span class="field-label">Smoking status</span><div class="input-wrapper"><select id="mh-smoking"><option value="Non-smoker">Non-smoker</option><option value="Smoker">Smoker</option><option value="Passive smoker">Passive smoker</option></select></div></div>
             <div class="field-box" style="flex:1;"><span class="field-label">Drinking Alcohol</span><div class="input-wrapper"><select id="mh-alcohol"><option value="Non-drinker">Non-drinker</option><option value="Alcohol drinker">Alcohol drinker</option><option value="Social drinker">Social drinker</option></select></div></div>
         </div>
 
-        <div class="field-box"><span class="field-label">Notes</span><div class="input-wrapper"><textarea id="mh-notes" rows="2" placeholder="Additional clinical notes..."></textarea></div></div>
+        <div class="field-box">
+            <span class="field-label">Notes</span>
+            <div class="input-wrapper" style="position: relative;">
+                <textarea id="mh-notes" rows="2" placeholder="Additional clinical notes..." oninput="handleMhLiveInput(this, 'mh_notes')" onblur="hideMhSuggestions('mh_notes')"></textarea>
+                <div class="suggestions-box" id="suggestions-mh_notes"></div>
+                <div class="live-save-bar" id="save-bar-mh_notes">
+                    <span>Save: "<strong id="line-text-mh_notes"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_notes" onmousedown="saveMhLineToDict(event, 'mh_notes')">Save</button>
+                </div>
+            </div>
+        </div>
 
         <button class="btn-main" onclick="closeMedHistoryModal()" style="margin-top: 10px;">
             <i class="fa-solid fa-check"></i> Done & Save
@@ -635,13 +705,15 @@
     let currentVisitIdForModal = null;
     let currentDoctorRxImage = localStorage.getItem('doctor_rx_template') || '';
     let isConfigMode = false;
+    let activeMhInputKey = null;
 
     let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
     let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || {
         labs: ["CBC", "RBS", "Lipid Profile", "HbA1c", "LFT", "KFT"],
         scans: ["Chest X-Ray", "Abdominal Ultrasound", "Brain MRI", "CT Scan"],
         drugs: ["Paracetamol 500mg 1x3", "Amoxicillin 500mg 1x3", "Metformin 500mg 1x2"],
-        notes: ["Upper Respiratory Tract Infection", "Acute Gastroenteritis"]
+        notes: ["Upper Respiratory Tract Infection", "Acute Gastroenteritis"],
+        mh_history: ["Appendectomy", "Cholecystectomy", "Penicillin Allergy", "Cesarean Section"]
     };
 
     function generateThreeHourCode() {
@@ -676,6 +748,7 @@
                         }
                         if (data.dictionary) {
                             medicalDict = data.dictionary;
+                            if (!medicalDict.mh_history) medicalDict.mh_history = ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"];
                             localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
                         }
                     }
@@ -1009,6 +1082,92 @@
 
         if (btn) { btn.classList.add('saved'); btn.innerText = 'Saved ✓'; }
         if (textarea) textarea.focus();
+    }
+
+    // --- Medical History Dynamic Suggestions ---
+    function handleMhLiveInput(inputEl, inputKey) {
+        activeMhInputKey = inputKey;
+        const val = inputEl.value.trim();
+        const bar = document.getElementById(`save-bar-${inputKey}`);
+        const lineTextSpan = document.getElementById(`line-text-${inputKey}`);
+        const btn = document.getElementById(`btn-save-${inputKey}`);
+        const suggestBox = document.getElementById(`suggestions-${inputKey}`);
+
+        if (val.length > 0) {
+            if (lineTextSpan) lineTextSpan.innerText = val;
+            if (bar) bar.style.display = 'flex';
+            if (btn) { btn.classList.remove('saved'); btn.innerText = 'Save'; }
+        } else {
+            if (bar) bar.style.display = 'none';
+        }
+
+        if (val.length >= 2) {
+            const matches = (medicalDict.mh_history || []).filter(item => 
+                item.toLowerCase().includes(val.toLowerCase())
+            );
+
+            if (matches.length > 0) {
+                suggestBox.innerHTML = matches.map(m => `
+                    <div class="suggestion-item" onmousedown="selectMhSuggestion('${inputKey}', '${m.replace(/'/g, "\\'")}')">${m}</div>
+                `).join('');
+                suggestBox.style.display = 'block';
+            } else {
+                suggestBox.style.display = 'none';
+            }
+        } else {
+            if (suggestBox) suggestBox.style.display = 'none';
+        }
+    }
+
+    function selectMhSuggestion(inputKey, value) {
+        let el = null;
+        if (inputKey === 'mh_other') el = document.getElementById('mh-cd-other');
+        else if (inputKey === 'mh_admission') el = document.getElementById('mh-prev-admission');
+        else if (inputKey === 'mh_surgery') el = document.getElementById('mh-past-surgery');
+        else if (inputKey === 'mh_family') el = document.getElementById('mh-family-history');
+        else if (inputKey === 'mh_allergy') el = document.getElementById('mh-drug-allergy');
+        else if (inputKey === 'mh_chronic_drugs') el = document.getElementById('mh-chronic-drugs');
+        else if (inputKey === 'mh_notes') el = document.getElementById('mh-notes');
+
+        if (el) {
+            el.value = value;
+            el.focus();
+        }
+        const suggestBox = document.getElementById(`suggestions-${inputKey}`);
+        if (suggestBox) suggestBox.style.display = 'none';
+    }
+
+    function hideMhSuggestions(inputKey) {
+        setTimeout(() => {
+            const suggestBox = document.getElementById(`suggestions-${inputKey}`);
+            if (suggestBox) suggestBox.style.display = 'none';
+        }, 200);
+    }
+
+    function saveMhLineToDict(event, inputKey) {
+        if (event) event.preventDefault();
+        const lineTextSpan = document.getElementById(`line-text-${inputKey}`);
+        const btn = document.getElementById(`btn-save-${inputKey}`);
+        let el = null;
+        if (inputKey === 'mh_other') el = document.getElementById('mh-cd-other');
+        else if (inputKey === 'mh_admission') el = document.getElementById('mh-prev-admission');
+        else if (inputKey === 'mh_surgery') el = document.getElementById('mh-past-surgery');
+        else if (inputKey === 'mh_family') el = document.getElementById('mh-family-history');
+        else if (inputKey === 'mh_allergy') el = document.getElementById('mh-drug-allergy');
+        else if (inputKey === 'mh_chronic_drugs') el = document.getElementById('mh-chronic-drugs');
+        else if (inputKey === 'mh_notes') el = document.getElementById('mh-notes');
+
+        const val = lineTextSpan ? lineTextSpan.innerText.trim() : '';
+        if (!val) return;
+
+        if (!medicalDict.mh_history) medicalDict.mh_history = [];
+        if (!medicalDict.mh_history.includes(val)) {
+            medicalDict.mh_history.push(val);
+            saveSettingsToCloudAndLocal();
+        }
+
+        if (btn) { btn.classList.add('saved'); btn.innerText = 'Saved ✓'; }
+        if (el) el.focus();
     }
 
     function handleFileUpload(input, visitId) {
@@ -1693,115 +1852,4 @@
                                     <span>bpm</span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-vial" style="color:#0d9488;"></i> Lab Tests</span>
-                    <div class="input-wrapper">
-                        <textarea class="v-labs" rows="2" placeholder="Type lab tests..." oninput="handleLiveInput(this, 'labs', ${vId})" onblur="hideSuggestions('labs', ${vId})">${v.labs || ''}</textarea>
-                        <div class="suggestions-box" id="suggestions-labs-${vId}"></div>
-                        <div class="live-save-bar" id="save-bar-labs-${vId}">
-                            <span>Save: "<strong id="line-text-labs-${vId}"></strong>"</span>
-                            <button type="button" class="btn-live-save" id="btn-save-labs-${vId}" onmousedown="saveLineToDict(event, 'labs', ${vId})">Save</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-x-ray" style="color:#0d9488;"></i> Scans & Imaging</span>
-                    <div class="input-wrapper">
-                        <textarea class="v-scans" rows="2" placeholder="Type scans..." oninput="handleLiveInput(this, 'scans', ${vId})" onblur="hideSuggestions('scans', ${vId})">${v.scans || ''}</textarea>
-                        <div class="suggestions-box" id="suggestions-scans-${vId}"></div>
-                        <div class="live-save-bar" id="save-bar-scans-${vId}">
-                            <span>Save: "<strong id="line-text-scans-${vId}"></strong>"</span>
-                            <button type="button" class="btn-live-save" id="btn-save-scans-${vId}" onmousedown="saveLineToDict(event, 'scans', ${vId})">Save</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-pills" style="color:#0d9488;"></i> Medications & Treatment</span>
-                    <div class="input-wrapper">
-                        <textarea class="v-drugs" rows="3" placeholder="Type medications..." onfocus="handleDrugsInput(this, ${vId})" onkeydown="handleDrugsKeyDown(event, this, ${vId})" oninput="handleDrugsInput(this, ${vId})" onblur="hideSuggestions('drugs', ${vId})">${v.drugs || '— '}</textarea>
-                        <div class="suggestions-box" id="suggestions-drugs-${vId}"></div>
-                        <div class="live-save-bar" id="save-bar-drugs-${vId}">
-                            <span>Save: "<strong id="line-text-drugs-${vId}"></strong>"</span>
-                            <button type="button" class="btn-live-save" id="btn-save-drugs-${vId}" onmousedown="saveLineToDict(event, 'drugs', ${vId})">Save</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-clipboard-user" style="color:#0d9488;"></i> Diagnosis & Notes</span>
-                    <div class="input-wrapper">
-                        <textarea class="v-notes" rows="2" placeholder="Notes..." oninput="handleLiveInput(this, 'notes', ${vId})" onblur="hideSuggestions('notes', ${vId})">${v.notes || ''}</textarea>
-                        <div class="suggestions-box" id="suggestions-notes-${vId}"></div>
-                        <div class="live-save-bar" id="save-bar-notes-${vId}">
-                            <span>Save: "<strong id="line-text-notes-${vId}"></strong>"</span>
-                            <button type="button" class="btn-live-save" id="btn-save-notes-${vId}" onmousedown="saveLineToDict(event, 'notes', ${vId})">Save</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-paperclip" style="color:#0d9488;"></i> Attachments</span>
-                    <div class="attachments-container">
-                        ${attachments.map((imgSrc, imgIdx) => `
-                            <div class="attachment-thumb" onclick="previewAttachmentImage('${imgSrc}')">
-                                <img src="${imgSrc}" alt="Attachment">
-                                <button type="button" class="attachment-delete" onclick="event.stopPropagation(); confirmDeleteAttachment(${vId}, ${imgIdx})"><i class="fa-solid fa-xmark"></i></button>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div style="display: flex; gap: 6px; margin-top: 6px;">
-                        <label class="btn-upload-attach" style="flex: 1;">
-                            <i class="fa-solid fa-cloud-arrow-up"></i> Upload
-                            <input type="file" accept="image/*" style="display: none;" onchange="handleFileUpload(this, ${vId})">
-                        </label>
-                        <button type="button" class="btn-scan-attach" onclick="handleScannerScan(${vId})" style="flex: 1;">
-                            <i class="fa-solid fa-print"></i> Scan Document
-                        </button>
-                    </div>
-                </div>
-
-                <button type="button" class="btn-rx-action" onclick="openRxModal(${vId})">
-                    <i class="fa-solid fa-file-prescription"></i> Prescription (RX)
-                </button>
-            </div>
-        `}).join('');
-    }
-
-    function addNewVisit() {
-        autoSaveMedicalRecord();
-        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-        if (!patient) return;
-
-        const today = getTodayFormatted();
-        const newVisit = {
-            visitId: Date.now(),
-            date: today,
-            medHistory: {},
-            bpSystolic: '',
-            bpDiastolic: '',
-            spo2: '',
-            hr: '',
-            rr: '',
-            labs: '',
-            scans: '',
-            drugs: '— ',
-            notes: '',
-            attachments: []
-        };
-
-        if (!patient.visits) patient.visits = [];
-        patient.visits.unshift(newVisit);
-
-        savePatientToCloudAndLocal(patient);
-        renderVisits(patient.visits);
-    }
-</script>
-
-</body>
-</html>
+                     
