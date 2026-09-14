@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Step 5 (Final Base)</title>
+    <title>Clinic Master System - Step 6</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -81,6 +81,14 @@
                     </div>
                 </div>
 
+                <div class="menu-card" onclick="openRxTemplateManager()">
+                    <div class="menu-icon" style="background: #fae8ff; color: #c084fc;"><i class="fa-solid fa-file-prescription"></i></div>
+                    <div>
+                        <h3>إدارة قالب الروشتة</h3>
+                        <p style="font-size: 0.75rem; color: #64748b;">رفع وتحديث ترويسة روشتة العيادة</p>
+                    </div>
+                </div>
+
                 <div class="menu-card" onclick="openDictionaryManager()">
                     <div class="menu-icon" style="background: #fef3c7; color: #d97706;"><i class="fa-solid fa-book-medical"></i></div>
                     <div>
@@ -148,6 +156,25 @@
                 <div id="visitsContainer"></div>
             </div>
 
+            <div id="rxTemplateScreen" style="display: none;">
+                <div class="group-card" style="text-align: center;">
+                    <h3 style="font-size: 1.1rem; color: #0f172a; margin-bottom: 8px;"><i class="fa-solid fa-prescription-bottle-medical"></i> صورة ترويسة الروشتة</h3>
+                    <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 14px;">قم برفع صورة ترويسة عيادتك الرسمية لتظهر في الوصفات الطبية.</p>
+
+                    <div id="rxPreviewBox" style="margin-bottom: 14px; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 10px; background: #fff; min-height: 120px; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 0.8rem; color: #94a3b8;" id="noRxText">لم يتم رفع صورة ترويسة بعد.</span>
+                        <img id="rxImgTag" src="" alt="RX Header" style="max-width: 100%; border-radius: 8px; display: none;">
+                    </div>
+
+                    <div class="field-box" style="text-align: left;">
+                        <span class="field-label">اختر صورة الترويسة</span>
+                        <div class="input-wrapper" style="padding: 6px;"><input type="file" id="rxFileInput" accept="image/*" style="font-size: 0.8rem;"></div>
+                    </div>
+
+                    <button class="btn-main" onclick="saveRxTemplate()" style="margin-top: 10px;"><i class="fa-solid fa-cloud-arrow-up"></i> حفظ صورة الروشتة</button>
+                </div>
+            </div>
+
             <div id="dictScreen" style="display: none;">
                 <div class="group-card">
                     <div class="field-box">
@@ -186,6 +213,7 @@
     const FOUNDER_EMAIL = "musqaqa009@gmail.com";
     let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
     let currentPatientId = null;
+    let currentRxImage = localStorage.getItem('clinic_rx_img') || '';
     let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || {
         drugs: ["Paracetamol 500mg 1x3", "Amoxicillin 500mg 1x3"],
         labs: ["CBC", "RBS", "Lipid Profile"],
@@ -240,6 +268,40 @@
         renderPatientsList(patients);
     }
 
+    function openRxTemplateManager() {
+        hideAllScreens();
+        document.getElementById('rxTemplateScreen').style.display = 'block';
+        document.getElementById('backBtn').style.display = 'block';
+        document.getElementById('headerTitle').innerText = 'إدارة قالب الروشتة';
+
+        const imgTag = document.getElementById('rxImgTag');
+        const noText = document.getElementById('noRxText');
+        if (currentRxImage) {
+            imgTag.src = currentRxImage;
+            imgTag.style.display = 'block';
+            noText.style.display = 'none';
+        } else {
+            imgTag.style.display = 'none';
+            noText.style.display = 'block';
+        }
+    }
+
+    function saveRxTemplate() {
+        const fileInput = document.getElementById('rxFileInput');
+        if (fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                currentRxImage = e.target.result;
+                localStorage.setItem('clinic_rx_img', currentRxImage);
+                alert('تم حفظ صورة ترويسة الروشتة بنجاح!');
+                openRxTemplateManager();
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            alert('الرجاء اختيار صورة أولاً.');
+        }
+    }
+
     function openDictionaryManager() {
         hideAllScreens();
         document.getElementById('dictScreen').style.display = 'block';
@@ -261,6 +323,7 @@
         document.getElementById('addPatientScreen').style.display = 'none';
         document.getElementById('archiveScreen').style.display = 'none';
         document.getElementById('medicalRecordScreen').style.display = 'none';
+        document.getElementById('rxTemplateScreen').style.display = 'none';
         document.getElementById('dictScreen').style.display = 'none';
     }
 
