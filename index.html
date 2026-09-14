@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Step 2</title>
+    <title>Clinic Master System - Step 3</title>
     
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -28,6 +28,7 @@
         .menu-card { background: #fff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
         .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 14px; text-align: left; }
         .back-btn { position: absolute; top: 20px; left: 15px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; }
+        .patient-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
     </style>
 </head>
 <body>
@@ -56,8 +57,8 @@
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column;">
         <div class="header">
             <button id="backBtn" class="back-btn" onclick="showMainMenu()" style="display: none;"><i class="fa-solid fa-arrow-left"></i> الرئيسية</button>
-            <h2>لوحة تحكم العيادة</h2>
-            <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">مرحباً بالمهندس قيس</p>
+            <h2 id="headerTitle">لوحة تحكم العيادة</h2>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;" id="headerSub">مرحباً بالمهندس قيس</p>
         </div>
 
         <div class="content">
@@ -70,6 +71,15 @@
                         <p style="font-size: 0.75rem; color: #64748b;">إضافة بيانات مريض جديد للعيادة</p>
                     </div>
                 </div>
+
+                <div class="menu-card" onclick="openArchive()">
+                    <i class="fa-solid fa-address-book" style="font-size: 24px; color: #0284c7;"></i>
+                    <div>
+                        <h3>أرشيف المرضى</h3>
+                        <p style="font-size: 0.75rem; color: #64748b;">عرض والبحث في قائمة المرضى</p>
+                    </div>
+                </div>
+
                 <button class="btn-main" style="background: #ef4444; margin-top: 20px;" onclick="executeLogout()">تسجيل الخروج</button>
             </div>
 
@@ -109,6 +119,14 @@
                     <button type="submit" class="btn-main"><i class="fa-solid fa-floppy-disk"></i> حفظ المريض</button>
                 </form>
             </div>
+
+            <!-- شاشة أرشيف المرضى -->
+            <div id="archiveScreen" style="display: none;">
+                <div class="field-box" style="margin-bottom: 14px;">
+                    <div class="input-wrapper"><input type="text" id="searchInput" placeholder="🔍 بحث بالاسم أو رقم الهاتف..." oninput="filterPatients()"></div>
+                </div>
+                <div id="patientsListContainer"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -130,6 +148,10 @@
 
     const auth = firebase.auth();
     const FOUNDER_EMAIL = "musqaqa009@gmail.com";
+    let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [
+        { id: 1, name: "أحمد علي", age: 35, gender: "ذكر", phone: "07701234567" },
+        { id: 2, name: "فاطمة حسن", age: 28, gender: "أنثى", phone: "07809876543" }
+    ];
 
     auth.onAuthStateChanged(user => {
         if (user && user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
@@ -166,24 +188,70 @@
 
     function openAddPatient() {
         document.getElementById('mainMenuScreen').style.display = 'none';
+        document.getElementById('archiveScreen').style.display = 'none';
         document.getElementById('addPatientScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'block';
+        document.getElementById('headerTitle').innerText = 'تسجيل مريض جديد';
+    }
+
+    function openArchive() {
+        document.getElementById('mainMenuScreen').style.display = 'none';
+        document.getElementById('addPatientScreen').style.display = 'none';
+        document.getElementById('archiveScreen').style.display = 'block';
+        document.getElementById('backBtn').style.display = 'block';
+        document.getElementById('headerTitle').innerText = 'أرشيف المرضى';
+        renderPatientsList(patients);
     }
 
     function showMainMenu() {
         document.getElementById('addPatientScreen').style.display = 'none';
+        document.getElementById('archiveScreen').style.display = 'none';
         document.getElementById('mainMenuScreen').style.display = 'flex';
         document.getElementById('backBtn').style.display = 'none';
+        document.getElementById('headerTitle').innerText = 'لوحة تحكم العيادة';
     }
 
     function savePatient(e) {
         e.preventDefault();
-        const name = document.getElementById('pName').value;
-        const age = document.getElementById('pAge').value;
-        const phone = document.getElementById('pPhone').value;
+        const newP = {
+            id: Date.now(),
+            name: document.getElementById('pName').value,
+            age: Number(document.getElementById('pAge').value),
+            gender: document.getElementById('pGender').value,
+            phone: document.getElementById('pPhone').value || 'بدون هاتف'
+        };
 
-        alert('تم حفظ بيانات المريض بنجاح:\n' + name + ' (' + age + ' سنة)');
+        patients.unshift(newP);
+        localStorage.setItem('clinic_patients', JSON.stringify(patients));
+        alert('تم حفظ المريض بنجاح!');
+        document.getElementById('pName').value = '';
+        document.getElementById('pAge').value = '';
+        document.getElementById('pPhone').value = '';
         showMainMenu();
+    }
+
+    function renderPatientsList(list) {
+        const container = document.getElementById('patientsListContainer');
+        if (list.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#64748b; margin-top:20px;">لا يوجد مرضى محفوظين.</p>';
+            return;
+        }
+
+        container.innerHTML = list.map(p => `
+            <div class="patient-card">
+                <div>
+                    <h4 style="font-size: 1rem; color: #0f172a; margin-bottom: 2px;">${p.name}</h4>
+                    <p style="font-size: 0.78rem; color: #64748b;"><i class="fa-solid fa-phone"></i> ${p.phone} | العمر: ${p.age} سنة</p>
+                </div>
+                <span style="background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold;">${p.gender}</span>
+            </div>
+        `).join('');
+    }
+
+    function filterPatients() {
+        const q = document.getElementById('searchInput').value.toLowerCase().trim();
+        const filtered = patients.filter(p => p.name.toLowerCase().includes(q) || p.phone.includes(q));
+        renderPatientsList(filtered);
     }
 </script>
 
