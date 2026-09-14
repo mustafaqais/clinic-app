@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Ultimate Edition with Trash</title>
+    <title>Clinic Master System - Professional English Edition</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -11,7 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Amiri:wght@400;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Plus+Jakarta+Sans:wght@400;600;700&family=Amiri:wght@400;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
 
     <style>
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
@@ -27,6 +27,7 @@
         .btn-main { width: 100%; background: #0d9488; color: white; border: none; border-radius: 14px; padding: 14px; font-size: 0.98rem; font-weight: 700; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-danger { background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
         .header { background: #0f172a; color: white; padding: 20px; text-align: center; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; position: relative; }
+        .header h2 { font-family: 'Playfair Display', serif; }
         .content { padding: 20px; flex: 1; overflow-y: auto; }
         .menu-card { background: #fff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
         .menu-icon { width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; color: #0d9488; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
@@ -39,9 +40,14 @@
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 999; display: none; justify-content: center; align-items: center; padding: 15px; }
         .modal-body { background: #fff; width: 100%; max-width: 450px; max-height: 90vh; border-radius: 20px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; text-align: left; position: relative; }
-        .rx-canvas-container { position: relative; width: 100%; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; overflow: hidden; min-height: 420px; }
+        .rx-canvas-container { position: relative; width: 100%; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 12px; overflow: hidden; min-height: 420px; direction: ltr; text-align: left; }
         .rx-bg-img { width: 100%; display: block; pointer-events: none; }
         .rx-text-overlay { padding: 15px; direction: ltr; text-align: left; }
+        
+        .rx-patient-info-text { font-family: 'Amiri', serif; font-size: 0.95rem; font-weight: 700; color: #b91c1c; margin-bottom: 8px; }
+        .rx-date-text { font-family: 'Cinzel', serif; font-size: 0.85rem; font-weight: 700; color: #1e293b; margin-bottom: 12px; letter-spacing: 0.5px; }
+        .rx-title-text { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 900; color: #b91c1c; margin-bottom: 4px; letter-spacing: 1px; }
+        .rx-drugs-text { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; white-space: pre-wrap; color: #000; line-height: 1.6; }
     </style>
 </head>
 <body>
@@ -49,27 +55,27 @@
 <div class="mobile-container">
     <div id="authScreen" class="auth-screen">
         <div class="activ-icon"><i class="fa-solid fa-user-doctor"></i></div>
-        <div class="activ-title">تسجيل دخول المؤسس</div>
-        <p style="color: #64748b; font-size: 0.85rem;" id="systemStatus">النظام جاهز</p>
+        <div class="activ-title">Founder Secure Login</div>
+        <p style="color: #64748b; font-size: 0.85rem;" id="systemStatus">System Ready</p>
 
         <div class="auth-form">
             <div class="field-box">
-                <span class="field-label">البريد الإلكتروني</span>
+                <span class="field-label">Email Address</span>
                 <div class="input-wrapper"><input type="email" id="authEmail" value="musqaqa009@gmail.com"></div>
             </div>
             <div class="field-box">
-                <span class="field-label">كلمة المرور</span>
-                <div class="input-wrapper"><input type="password" id="authPassword" placeholder="أدخل كلمة المرور"></div>
+                <span class="field-label">Password</span>
+                <div class="input-wrapper"><input type="password" id="authPassword" placeholder="Enter password"></div>
             </div>
-            <button type="button" class="btn-main" onclick="executeLogin()">تسجيل الدخول</button>
+            <button type="button" class="btn-main" onclick="executeLogin()">Sign In</button>
         </div>
     </div>
 
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column;">
         <div class="header">
-            <button id="backBtn" class="back-btn" onclick="showMainMenu()" style="display: none;"><i class="fa-solid fa-arrow-left"></i> الرئيسية</button>
-            <h2 id="headerTitle">لوحة تحكم العيادة</h2>
-            <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;" id="headerSub">مرحباً بالمهندس قيس</p>
+            <button id="backBtn" class="back-btn" onclick="showMainMenu()" style="display: none;"><i class="fa-solid fa-arrow-left"></i> Main Menu</button>
+            <h2 id="headerTitle">Clinic Master Dashboard</h2>
+            <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;" id="headerSub">Welcome, Dr. Qais</p>
         </div>
 
         <div class="content">
@@ -77,93 +83,93 @@
                 <div class="menu-card" onclick="openAddPatient()">
                     <div class="menu-icon"><i class="fa-solid fa-user-plus"></i></div>
                     <div>
-                        <h3>تسجيل مريض جديد</h3>
-                        <p style="font-size: 0.75rem; color: #64748b;">إضافة بيانات مريض جديد للعيادة</p>
+                        <h3>Register New Patient</h3>
+                        <p style="font-size: 0.75rem; color: #64748b;">Add new patient records securely</p>
                     </div>
                 </div>
 
                 <div class="menu-card" onclick="openArchive()">
                     <div class="menu-icon" style="background: #e0f2fe; color: #0284c7;"><i class="fa-solid fa-address-book"></i></div>
                     <div>
-                        <h3>أرشيف المرضى</h3>
-                        <p style="font-size: 0.75rem; color: #64748b;">عرض والبحث في قائمة المرضى</p>
+                        <h3>Patients Archive</h3>
+                        <p style="font-size: 0.75rem; color: #64748b;">Search and manage patient records</p>
                     </div>
                 </div>
 
                 <div class="menu-card" onclick="openTrashBin()">
                     <div class="menu-icon" style="background: #fee2e2; color: #ef4444;"><i class="fa-solid fa-trash-can"></i></div>
                     <div>
-                        <h3>سلة المحذوفات</h3>
-                        <p style="font-size: 0.75rem; color: #64748b;">استرجاع المرضى أو الزيارات المحذوفة</p>
+                        <h3>Trash Bin</h3>
+                        <p style="font-size: 0.75rem; color: #64748b;">Restore deleted patients or visits</p>
                     </div>
                 </div>
 
                 <div class="menu-card" onclick="openRxTemplateManager()">
                     <div class="menu-icon" style="background: #fae8ff; color: #c084fc;"><i class="fa-solid fa-file-prescription"></i></div>
                     <div>
-                        <h3>إدارة قالب الروشتة</h3>
-                        <p style="font-size: 0.75rem; color: #64748b;">رفع وتحديث ترويسة روشتة العيادة</p>
+                        <h3>RX Template Manager</h3>
+                        <p style="font-size: 0.75rem; color: #64748b;">Upload & update clinic prescription header</p>
                     </div>
                 </div>
 
                 <div class="menu-card" onclick="openDictionaryManager()">
                     <div class="menu-icon" style="background: #fef3c7; color: #d97706;"><i class="fa-solid fa-book-medical"></i></div>
                     <div>
-                        <h3>القاموس الطبي</h3>
-                        <p style="font-size: 0.75rem; color: #64748b;">إدارة الأدوية والعبارات المحفوظة</p>
+                        <h3>Medical Dictionary</h3>
+                        <p style="font-size: 0.75rem; color: #64748b;">Manage saved drugs, labs & phrases</p>
                     </div>
                 </div>
 
-                <button class="btn-main" style="background: #ef4444; margin-top: 20px;" onclick="executeLogout()">تسجيل الخروج</button>
+                <button class="btn-main" style="background: #ef4444; margin-top: 20px;" onclick="executeLogout()">Sign Out</button>
             </div>
 
             <div id="addPatientScreen" style="display: none;">
                 <form onsubmit="savePatient(event)">
                     <div class="group-card">
-                        <h3 style="margin-bottom: 12px; font-size: 1.05rem; color: #0f172a;"><i class="fa-solid fa-id-card"></i> معلومات المريض</h3>
+                        <h3 style="margin-bottom: 12px; font-size: 1.05rem; color: #0f172a;"><i class="fa-solid fa-id-card"></i> Patient Information</h3>
                         
                         <div class="field-box" style="margin-bottom: 10px;">
-                            <span class="field-label">اسم المريض الكامل</span>
-                            <div class="input-wrapper"><input type="text" id="pName" placeholder="أدخل اسم المريض..." required></div>
+                            <span class="field-label">Full Name</span>
+                            <div class="input-wrapper"><input type="text" id="pName" placeholder="Enter patient full name..." required></div>
                         </div>
 
                         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                             <div class="field-box" style="flex: 1; margin-bottom:0;">
-                                <span class="field-label">العمر</span>
-                                <div class="input-wrapper"><input type="number" id="pAge" placeholder="العمر" required></div>
+                                <span class="field-label">Age</span>
+                                <div class="input-wrapper"><input type="number" id="pAge" placeholder="Age" required></div>
                             </div>
                             <div class="field-box" style="flex: 1; margin-bottom:0;">
-                                <span class="field-label">الجنس</span>
+                                <span class="field-label">Gender</span>
                                 <div class="input-wrapper">
                                     <select id="pGender">
-                                        <option value="ذكر">ذكر</option>
-                                        <option value="أنثى">أنثى</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
 
                         <div class="field-box" style="margin-bottom: 10px;">
-                            <span class="field-label">رقم الهاتف</span>
+                            <span class="field-label">Phone Number</span>
                             <div class="input-wrapper"><input type="tel" id="pPhone" placeholder="07XXXXXXXXX"></div>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-main"><i class="fa-solid fa-floppy-disk"></i> حفظ المريض وفتح سجله</button>
+                    <button type="submit" class="btn-main"><i class="fa-solid fa-floppy-disk"></i> Save & Open Medical Record</button>
                 </form>
             </div>
 
             <div id="archiveScreen" style="display: none;">
                 <div class="field-box" style="margin-bottom: 14px;">
-                    <div class="input-wrapper"><input type="text" id="searchInput" placeholder="🔍 بحث بالاسم أو رقم الهاتف..." oninput="filterPatients()"></div>
+                    <div class="input-wrapper"><input type="text" id="searchInput" placeholder="🔍 Search by name or phone..." oninput="filterPatients()"></div>
                 </div>
                 <div id="patientsListContainer"></div>
             </div>
 
             <div id="trashScreen" style="display: none;">
                 <div class="group-card" style="background: #fef2f2; border-color: #fecaca;">
-                    <h3 style="color: #991b1b; margin-bottom: 4px;"><i class="fa-solid fa-trash-can"></i> سلة المحذوفات</h3>
-                    <p style="font-size: 0.78rem; color: #7f1d1d;">العناصر المحذوفة مع إمكانية الاسترجاع الفوري.</p>
+                    <h3 style="color: #991b1b; margin-bottom: 4px;"><i class="fa-solid fa-trash-can"></i> Trash Bin</h3>
+                    <p style="font-size: 0.78rem; color: #7f1d1d;">Deleted items with instant restore capability.</p>
                 </div>
                 <div id="trashContainer"></div>
             </div>
@@ -175,7 +181,7 @@
                 </div>
 
                 <button class="btn-main" style="background: #0284c7; margin-bottom: 14px;" onclick="addNewVisit()">
-                    <i class="fa-solid fa-calendar-plus"></i> إضافة زيارة جديدة
+                    <i class="fa-solid fa-calendar-plus"></i> Add New Visit
                 </button>
 
                 <div id="visitsContainer"></div>
@@ -183,32 +189,32 @@
 
             <div id="rxTemplateScreen" style="display: none;">
                 <div class="group-card" style="text-align: center;">
-                    <h3 style="font-size: 1.1rem; color: #0f172a; margin-bottom: 8px;"><i class="fa-solid fa-prescription-bottle-medical"></i> صورة ترويسة الروشتة</h3>
-                    <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 14px;">قم برفع صورة ترويسة عيادتك الرسمية لتظهر في الوصفات الطبية.</p>
+                    <h3 style="font-size: 1.1rem; color: #0f172a; margin-bottom: 8px;"><i class="fa-solid fa-prescription-bottle-medical"></i> RX Prescription Header</h3>
+                    <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 14px;">Upload your official clinic prescription header image.</p>
 
                     <div id="rxPreviewBox" style="margin-bottom: 14px; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 10px; background: #fff; min-height: 120px; display: flex; align-items: center; justify-content: center;">
-                        <span style="font-size: 0.8rem; color: #94a3b8;" id="noRxText">لم يتم رفع صورة ترويسة بعد.</span>
+                        <span style="font-size: 0.8rem; color: #94a3b8;" id="noRxText">No custom header uploaded yet.</span>
                         <img id="rxImgTag" src="" alt="RX Header" style="max-width: 100%; border-radius: 8px; display: none;">
                     </div>
 
                     <div class="field-box" style="text-align: left;">
-                        <span class="field-label">اختر صورة الترويسة</span>
+                        <span class="field-label">Select Header Image</span>
                         <div class="input-wrapper" style="padding: 6px;"><input type="file" id="rxFileInput" accept="image/*" style="font-size: 0.8rem;"></div>
                     </div>
 
-                    <button class="btn-main" onclick="saveRxTemplate()" style="margin-top: 10px;"><i class="fa-solid fa-cloud-arrow-up"></i> حفظ صورة الروشتة</button>
+                    <button class="btn-main" onclick="saveRxTemplate()" style="margin-top: 10px;"><i class="fa-solid fa-cloud-arrow-up"></i> Save RX Image</button>
                 </div>
             </div>
 
             <div id="dictScreen" style="display: none;">
                 <div class="group-card">
                     <div class="field-box">
-                        <span class="field-label">التصنيف</span>
+                        <span class="field-label">Category</span>
                         <div class="input-wrapper">
                             <select id="dictCategorySelect" onchange="renderDictTerms()">
-                                <option value="drugs">الأدوية والجرعات</option>
-                                <option value="labs">الفحوصات المختبرية</option>
-                                <option value="notes">التشخيص والملاحظات</option>
+                                <option value="drugs">Medications & Doses</option>
+                                <option value="labs">Lab Tests</option>
+                                <option value="notes">Diagnosis & Notes</option>
                             </select>
                         </div>
                     </div>
@@ -222,23 +228,23 @@
 <div id="rxModal" class="modal-overlay">
     <div class="modal-body">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">
-            <h3 style="font-size: 1.1rem; color: #0f172a;"><i class="fa-solid fa-file-prescription"></i> الوصفة الطبية (RX)</h3>
+            <h3 style="font-size: 1.1rem; color: #0f172a;"><i class="fa-solid fa-file-prescription"></i> Prescription (RX)</h3>
             <button onclick="closeRxModal()" style="background:#f1f5f9; border:none; border-radius:50%; width:30px; height:30px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div id="rxCanvasContainer" class="rx-canvas-container">
             <div id="rxModalBgContainer"></div>
             <div class="rx-text-overlay">
-                <div id="rxModalPatientInfo" style="font-family: 'Amiri', serif; font-size: 0.95rem; font-weight: bold; color: #b91c1c; margin-bottom: 8px;"></div>
-                <div id="rxModalDate" style="font-family: 'Cinzel', serif; font-size: 0.85rem; font-weight: bold; color: #1e293b; margin-bottom: 12px;"></div>
-                <div style="font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 900; color: #b91c1c; margin-bottom: 4px;">RX</div>
-                <div id="rxModalDrugs" style="font-size: 1rem; font-weight: bold; white-space: pre-wrap; color: #000; line-height: 1.6;"></div>
+                <div id="rxModalPatientInfo" class="rx-patient-info-text"></div>
+                <div id="rxModalDate" class="rx-date-text"></div>
+                <div class="rx-title-text">RX</div>
+                <div id="rxModalDrugs" class="rx-drugs-text"></div>
             </div>
         </div>
 
         <div style="display: flex; gap: 8px; margin-top: 8px;">
-            <button class="btn-main" onclick="openPrescriptionPDF()" style="background: #0284c7; flex: 1;"><i class="fa-solid fa-file-pdf"></i> فتح PDF</button>
-            <button class="btn-main" onclick="downloadPrescriptionImage()" style="background: #0d9488; flex: 1;"><i class="fa-solid fa-download"></i> حفظ كصورة</button>
+            <button class="btn-main" onclick="openPrescriptionPDF()" style="background: #0284c7; flex: 1;"><i class="fa-solid fa-file-pdf"></i> Open PDF</button>
+            <button class="btn-main" onclick="downloadPrescriptionImage()" style="background: #0d9488; flex: 1;"><i class="fa-solid fa-download"></i> Save as Image</button>
         </div>
     </div>
 </div>
@@ -282,7 +288,7 @@
         const pass = document.getElementById('authPassword').value;
 
         if (!pass) {
-            alert('الرجاء إدخال كلمة المرور!');
+            alert('Please enter your password!');
             return;
         }
 
@@ -292,7 +298,7 @@
                 document.getElementById('appContainer').style.display = 'flex';
             })
             .catch((error) => {
-                alert('فشل تسجيل الدخول:\n' + error.message);
+                alert('Sign in failed:\n' + error.message);
             });
     }
 
@@ -307,14 +313,14 @@
         hideAllScreens();
         document.getElementById('addPatientScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'block';
-        document.getElementById('headerTitle').innerText = 'تسجيل مريض جديد';
+        document.getElementById('headerTitle').innerText = 'Register New Patient';
     }
 
     function openArchive() {
         hideAllScreens();
         document.getElementById('archiveScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'block';
-        document.getElementById('headerTitle').innerText = 'أرشيف المرضى';
+        document.getElementById('headerTitle').innerText = 'Patients Archive';
         renderPatientsList(patients);
     }
 
@@ -322,7 +328,7 @@
         hideAllScreens();
         document.getElementById('trashScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'block';
-        document.getElementById('headerTitle').innerText = 'سلة المحذوفات';
+        document.getElementById('headerTitle').innerText = 'Trash Bin';
         renderTrashList();
     }
 
@@ -330,7 +336,7 @@
         hideAllScreens();
         document.getElementById('rxTemplateScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'block';
-        document.getElementById('headerTitle').innerText = 'إدارة قالب الروشتة';
+        document.getElementById('headerTitle').innerText = 'RX Template Manager';
 
         const imgTag = document.getElementById('rxImgTag');
         const noText = document.getElementById('noRxText');
@@ -351,12 +357,12 @@
             reader.onload = function(e) {
                 currentRxImage = e.target.result;
                 localStorage.setItem('clinic_rx_img', currentRxImage);
-                alert('تم حفظ صورة ترويسة الروشتة بنجاح!');
+                alert('RX header image saved successfully!');
                 openRxTemplateManager();
             };
             reader.readAsDataURL(fileInput.files[0]);
         } else {
-            alert('الرجاء اختيار صورة أولاً.');
+            alert('Please select an image first.');
         }
     }
 
@@ -364,7 +370,7 @@
         hideAllScreens();
         document.getElementById('dictScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'block';
-        document.getElementById('headerTitle').innerText = 'القاموس الطبي';
+        document.getElementById('headerTitle').innerText = 'Medical Dictionary';
         renderDictTerms();
     }
 
@@ -373,7 +379,7 @@
         hideAllScreens();
         document.getElementById('mainMenuScreen').style.display = 'flex';
         document.getElementById('backBtn').style.display = 'none';
-        document.getElementById('headerTitle').innerText = 'لوحة تحكم العيادة';
+        document.getElementById('headerTitle').innerText = 'Clinic Master Dashboard';
     }
 
     function hideAllScreens() {
@@ -393,7 +399,7 @@
             name: document.getElementById('pName').value,
             age: Number(document.getElementById('pAge').value),
             gender: document.getElementById('pGender').value,
-            phone: document.getElementById('pPhone').value || 'بدون هاتف',
+            phone: document.getElementById('pPhone').value || 'No Phone',
             visits: [
                 { visitId: Date.now(), date: new Date().toISOString().substring(0, 10), bp: '', notes: '', drugs: '— ' }
             ]
@@ -408,7 +414,7 @@
     }
 
     function confirmDeletePatient(patientId) {
-        if (confirm("هل أنت متأكد من حذف هذا المريض؟ سيتم نقله إلى سلة المحذوفات.")) {
+        if (confirm("Are you sure you want to delete this patient? It will be moved to trash.")) {
             const index = patients.findIndex(p => p.id === patientId);
             if (index !== -1) {
                 const deleted = patients.splice(index, 1)[0];
@@ -416,13 +422,13 @@
                 localStorage.setItem('clinic_patients', JSON.stringify(patients));
                 localStorage.setItem('clinic_trash', JSON.stringify(trashBin));
                 renderPatientsList(patients);
-                alert('تم نقل المريض إلى سلة المحذوفات.');
+                alert('Patient moved to trash.');
             }
         }
     }
 
     function confirmDeleteVisit(visitId) {
-        if (confirm("هل أنت متأكد من حذف هذه الزيارة؟ سيتم نقلها إلى سلة المحذوفات.")) {
+        if (confirm("Are you sure you want to delete this visit? It will be moved to trash.")) {
             const patient = patients.find(p => p.id === currentPatientId);
             if (!patient) return;
             const vIndex = patient.visits.findIndex(v => v.visitId === visitId);
@@ -432,7 +438,7 @@
                 localStorage.setItem('clinic_patients', JSON.stringify(patients));
                 localStorage.setItem('clinic_trash', JSON.stringify(trashBin));
                 renderVisits(patient.visits);
-                alert('تم نقل الزيارة إلى سلة المحذوفات.');
+                alert('Visit moved to trash.');
             }
         }
     }
@@ -440,7 +446,7 @@
     function renderTrashList() {
         const container = document.getElementById('trashContainer');
         if (trashBin.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b; margin-top:20px;">سلة المحذوفات فارغة.</p>';
+            container.innerHTML = '<p style="text-align:center; color:#64748b; margin-top:20px;">Trash bin is empty.</p>';
             return;
         }
 
@@ -449,20 +455,20 @@
                 return `
                     <div class="patient-card" style="background:#fef2f2; border-color:#fecaca;">
                         <div>
-                            <h4 style="font-size: 1rem; color: #991b1b; margin-bottom: 2px;">[مريض] ${item.data.name}</h4>
-                            <p style="font-size: 0.75rem; color: #7f1d1d;">العمر: ${item.data.age} | الهاتف: ${item.data.phone}</p>
+                            <h4 style="font-size: 1rem; color: #991b1b; margin-bottom: 2px;">[Patient] ${item.data.name}</h4>
+                            <p style="font-size: 0.75rem; color: #7f1d1d;">Age: ${item.data.age} | Phone: ${item.data.phone}</p>
                         </div>
-                        <button class="btn-main" onclick="restoreFromTrash(${index})" style="background:#16a34a; padding:6px 10px; font-size:0.75rem; width:auto;"><i class="fa-solid fa-rotate-left"></i> استرجاع</button>
+                        <button class="btn-main" onclick="restoreFromTrash(${index})" style="background:#16a34a; padding:6px 10px; font-size:0.75rem; width:auto;"><i class="fa-solid fa-rotate-left"></i> Restore</button>
                     </div>
                 `;
             } else {
                 return `
                     <div class="patient-card" style="background:#fef2f2; border-color:#fecaca;">
                         <div>
-                            <h4 style="font-size: 1rem; color: #991b1b; margin-bottom: 2px;">[زيارة] بتاريخ: ${item.data.date}</h4>
-                            <p style="font-size: 0.75rem; color: #7f1d1d;">ملاحظات: ${item.data.notes || 'بدون ملاحظات'}</p>
+                            <h4 style="font-size: 1rem; color: #991b1b; margin-bottom: 2px;">[Visit] Date: ${item.data.date}</h4>
+                            <p style="font-size: 0.75rem; color: #7f1d1d;">Notes: ${item.data.notes || 'No notes'}</p>
                         </div>
-                        <button class="btn-main" onclick="restoreFromTrash(${index})" style="background:#16a34a; padding:6px 10px; font-size:0.75rem; width:auto;"><i class="fa-solid fa-rotate-left"></i> استرجاع</button>
+                        <button class="btn-main" onclick="restoreFromTrash(${index})" style="background:#16a34a; padding:6px 10px; font-size:0.75rem; width:auto;"><i class="fa-solid fa-rotate-left"></i> Restore</button>
                     </div>
                 `;
             }
@@ -481,12 +487,12 @@
                 patient.visits.unshift(item.data);
                 localStorage.setItem('clinic_patients', JSON.stringify(patients));
             } else {
-                alert('عذراً، المريض الأساسي لهذه الزيارة غير موجود أو تم حذفه نهائياً.');
+                alert('Original patient for this visit no longer exists.');
             }
         }
         localStorage.setItem('clinic_trash', JSON.stringify(trashBin));
         renderTrashList();
-        alert('تم استرجاع العنصر بنجاح!');
+        alert('Item restored successfully!');
     }
 
     function openMedicalRecord(id) {
@@ -498,9 +504,9 @@
         document.getElementById('medicalRecordScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'block';
 
-        document.getElementById('headerTitle').innerText = 'سجل المريض الطبي';
+        document.getElementById('headerTitle').innerText = 'Patient Medical Record';
         document.getElementById('recPatientName').innerText = patient.name;
-        document.getElementById('recPatientMeta').innerText = `العمر: ${patient.age} سنة | الجنس: ${patient.gender} | الهاتف: ${patient.phone}`;
+        document.getElementById('recPatientMeta').innerText = `Age: ${patient.age} yrs | Gender: ${patient.gender} | Phone: ${patient.phone}`;
 
         renderVisits(patient.visits || []);
     }
@@ -508,29 +514,29 @@
     function renderVisits(visits) {
         const container = document.getElementById('visitsContainer');
         if (visits.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b;">لا توجد زيارات مسجلة.</p>';
+            container.innerHTML = '<p style="text-align:center; color:#64748b;">No visits recorded yet.</p>';
             return;
         }
 
         container.innerHTML = visits.map(v => `
             <div class="visit-card" data-visit-id="${v.visitId}">
                 <div style="background: #0f172a; color: #fff; padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; margin-bottom: 10px; display:flex; justify-content:space-between; align-items:center;">
-                    <span>📅 تاريخ الزيارة: ${v.date}</span>
-                    <button type="button" class="btn-danger" onclick="confirmDeleteVisit(${v.visitId})"><i class="fa-solid fa-trash"></i> حذف الزيارة</button>
+                    <span>📅 Visit Date: ${v.date}</span>
+                    <button type="button" class="btn-danger" onclick="confirmDeleteVisit(${v.visitId})"><i class="fa-solid fa-trash"></i> Delete</button>
                 </div>
                 <div class="field-box" style="margin-bottom: 8px;">
-                    <span class="field-label">ضغط الدم (BP)</span>
+                    <span class="field-label">Blood Pressure (BP)</span>
                     <div class="input-wrapper"><input type="text" class="v-bp" value="${v.bp || ''}" placeholder="120/80" oninput="autoSaveRecord()"></div>
                 </div>
                 <div class="field-box" style="margin-bottom: 8px;">
-                    <span class="field-label">العلاجات والأدوية (RX)</span>
-                    <div class="input-wrapper"><textarea class="v-drugs" rows="2" placeholder="الأدوية..." oninput="autoSaveRecord()">${v.drugs || ''}</textarea></div>
+                    <span class="field-label">Medications & Treatment (RX)</span>
+                    <div class="input-wrapper"><textarea class="v-drugs" rows="2" placeholder="Medications..." oninput="autoSaveRecord()">${v.drugs || ''}</textarea></div>
                 </div>
                 <div class="field-box" style="margin-bottom: 10px;">
-                    <span class="field-label">ملاحظات وتشخيص</span>
-                    <div class="input-wrapper"><textarea class="v-notes" rows="2" placeholder="ملاحظات..." oninput="autoSaveRecord()">${v.notes || ''}</textarea></div>
+                    <span class="field-label">Diagnosis & Notes</span>
+                    <div class="input-wrapper"><textarea class="v-notes" rows="2" placeholder="Notes..." oninput="autoSaveRecord()">${v.notes || ''}</textarea></div>
                 </div>
-                <button class="btn-main" onclick="openRxModal(${v.visitId})" style="background: #0f172a; font-size: 0.85rem; padding: 10px;"><i class="fa-solid fa-file-prescription"></i> عرض وطباعة الروشتة (RX)</button>
+                <button class="btn-main" onclick="openRxModal(${v.visitId})" style="background: #0f172a; font-size: 0.85rem; padding: 10px;"><i class="fa-solid fa-file-prescription"></i> Print / View Prescription (RX)</button>
             </div>
         `).join('');
     }
@@ -581,7 +587,7 @@
         if (!visit) return;
 
         const bgContainer = document.getElementById('rxModalBgContainer');
-        bgContainer.innerHTML = currentRxImage ? `<img src="${currentRxImage}" class="rx-bg-img" alt="RX Header">` : '<div style="padding:20px; text-align:center; color:#94a3b8; font-size:0.8rem;">(لم تقم برفع ترويسة روشتة مخصصة)</div>';
+        bgContainer.innerHTML = currentRxImage ? `<img src="${currentRxImage}" class="rx-bg-img" alt="RX Header">` : '<div style="padding:20px; text-align:center; color:#94a3b8; font-size:0.8rem;">(No custom RX header uploaded)</div>';
 
         document.getElementById('rxModalPatientInfo').innerText = `Patient: ${patient.name} | Age: ${patient.age} yrs | Gender: ${patient.gender}`;
         document.getElementById('rxModalDate').innerText = `Date: ${visit.date}`;
@@ -605,7 +611,7 @@
             pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
             const pdfBlob = pdf.output('blob');
             window.open(URL.createObjectURL(pdfBlob), '_blank');
-        }).catch(err => alert('خطأ في توليد الـ PDF: ' + err.message));
+        }).catch(err => alert('Error generating PDF: ' + err.message));
     }
 
     function downloadPrescriptionImage() {
@@ -615,8 +621,8 @@
             link.download = `Prescription-${Date.now()}.png`;
             link.href = canvas.toDataURL('image/png');
             link.click();
-            alert('تم حفظ الروشتة كصورة بنجاح!');
-        }).catch(err => alert('خطأ في حفظ الصورة: ' + err.message));
+            alert('Prescription image saved successfully!');
+        }).catch(err => alert('Error saving image: ' + err.message));
     }
 
     function renderDictTerms() {
@@ -625,14 +631,14 @@
         const items = medicalDict[cat] || [];
 
         if (items.length === 0) {
-            container.innerHTML = '<p style="font-size:0.85rem; color:#64748b; text-align:center;">لا توجد عناصر محفوظة في هذا التصنيف.</p>';
+            container.innerHTML = '<p style="font-size:0.85rem; color:#64748b; text-align:center;">No items found in this category.</p>';
             return;
         }
 
         container.innerHTML = items.map((item, idx) => `
             <div class="dict-tag">
                 <span>${item}</span>
-                <button onclick="removeDictTerm('${cat}', ${idx})"><i class="fa-solid fa-trash"></i> حذف</button>
+                <button onclick="removeDictTerm('${cat}', ${idx})"><i class="fa-solid fa-trash"></i> Delete</button>
             </div>
         `).join('');
     }
@@ -646,7 +652,7 @@
     function renderPatientsList(list) {
         const container = document.getElementById('patientsListContainer');
         if (list.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b; margin-top:20px;">لا يوجد مرضى محفوظين.</p>';
+            container.innerHTML = '<p style="text-align:center; color:#64748b; margin-top:20px;">No patients found.</p>';
             return;
         }
 
@@ -654,7 +660,7 @@
             <div class="patient-card">
                 <div onclick="openMedicalRecord(${p.id})" style="flex:1; cursor:pointer;">
                     <h4 style="font-size: 1rem; color: #0f172a; margin-bottom: 2px;">${p.name}</h4>
-                    <p style="font-size: 0.78rem; color: #64748b;"><i class="fa-solid fa-phone"></i> ${p.phone} | العمر: ${p.age} سنة</p>
+                    <p style="font-size: 0.78rem; color: #64748b;"><i class="fa-solid fa-phone"></i> ${p.phone} | Age: ${p.age} yrs</p>
                 </div>
                 <div style="display:flex; align-items:center; gap:8px;">
                     <span style="background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold;">${p.gender}</span>
