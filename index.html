@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.38</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.39</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -47,6 +47,7 @@
         .menu-icon.dict-icon { background: #fef3c7; color: #d97706; }
         .menu-icon.network-icon { background: #f3e8ff; color: #9333ea; }
         .menu-icon.rx-icon { background: #fae8ff; color: #c084fc; }
+        .menu-icon.trash-icon { background: #fee2e2; color: #ef4444; }
         .menu-info h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
         .menu-info p { font-size: 0.78rem; color: #64748b; }
 
@@ -122,6 +123,7 @@
         .btn-main { width: 100%; background: #0d9488; color: white; border: none; border-radius: 14px; padding: 14px; font-size: 0.98rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); }
         .btn-secondary { background: #0284c7; margin-bottom: 14px; }
         .btn-danger { background: #ef4444; color: white; border: none; border-radius: 10px; padding: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 10px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
+        .btn-restore { background: #16a34a; color: white; border: none; border-radius: 10px; padding: 8px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; }
 
         .patient-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .patient-info h4 { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
@@ -129,6 +131,8 @@
         .badge-gender { padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; }
         .gender-male { background: #e0f2fe; color: #0369a1; }
         .gender-female { background: #fce7f3; color: #be185d; }
+
+        .trash-card { background: #fff5f5; border: 1.5px solid #feb2b2; border-radius: 16px; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
 
         .dict-tag { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #334155; }
         .dict-tag button { background: #fee2e2; color: #ef4444; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 0.75rem; }
@@ -287,6 +291,14 @@
                     </div>
                 </div>
 
+                <div class="menu-card" onclick="openTrashBin()">
+                    <div class="menu-icon trash-icon"><i class="fa-solid fa-trash-arrow-up"></i></div>
+                    <div class="menu-info">
+                        <h3>Trash Bin</h3>
+                        <p>Recover deleted patients or visits</p>
+                    </div>
+                </div>
+
                 <div class="menu-card" onclick="openRxTemplateManager()">
                     <div class="menu-icon rx-icon"><i class="fa-solid fa-file-prescription"></i></div>
                     <div class="menu-info">
@@ -436,6 +448,14 @@
                 <div id="patientsList"></div>
             </div>
 
+            <div id="trashScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:10px; color:#ef4444;"><i class="fa-solid fa-trash-can"></i> Trash Bin (Deleted Records)</div>
+                    <p style="font-size:0.78rem; color:#64748b; margin-bottom:14px;">You can restore deleted patients or specific visits back to their original locations instantly.</p>
+                    <div id="trashItemsContainer"></div>
+                </div>
+            </div>
+
             <div id="medicalRecordScreen" style="display: none;">
                 <div class="group-card" style="background: #f0fdfa; border-color: #99f6e4; position: relative;">
                     <div style="position: absolute; top: 14px; right: 14px; display: flex; gap: 6px; z-index: 5;">
@@ -485,7 +505,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.38 (Robust Indexing)</div>
+        <div class="footer">Clinic Master Network v16.39 (Trash Bin Enabled)</div>
     </div>
 </div>
 
@@ -786,6 +806,7 @@
     let activeMhInputKey = null;
 
     let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
+    let trashBin = JSON.parse(localStorage.getItem('clinic_trash')) || [];
     let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || {
         labs: ["CBC", "RBS", "Lipid Profile", "HbA1c", "LFT", "KFT"],
         scans: ["Chest X-Ray", "Abdominal Ultrasound", "Brain MRI", "CT Scan"],
@@ -816,6 +837,7 @@
             if (user) {
                 currentUserId = user.uid;
                 patients = JSON.parse(localStorage.getItem(`clinic_patients_${user.uid}`)) || patients;
+                trashBin = JSON.parse(localStorage.getItem(`clinic_trash_${user.uid}`)) || trashBin;
 
                 db.collection('users_data').doc(user.uid).get().then(doc => {
                     if (doc.exists) {
@@ -828,6 +850,10 @@
                             medicalDict = data.dictionary;
                             if (!medicalDict.mh_history) medicalDict.mh_history = ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"];
                             localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
+                        }
+                        if (data.trashBin) {
+                            trashBin = data.trashBin;
+                            localStorage.setItem(`clinic_trash_${user.uid}`, JSON.stringify(trashBin));
                         }
                     }
                 }).catch(err => console.log(err));
@@ -879,6 +905,17 @@
 
         db.collection('users_data').doc(currentUserId).collection('patients').doc(String(patientObj.id)).set(patientObj)
             .catch(err => console.log("Cloud save error:", err));
+    }
+
+    function saveTrashToCloudAndLocal() {
+        if (!currentUserId) return;
+        localStorage.setItem(`clinic_trash_${currentUserId}`, JSON.stringify(trashBin));
+        localStorage.setItem('clinic_trash', JSON.stringify(trashBin));
+
+        db.collection('users_data').doc(currentUserId).set({
+            trashBin: trashBin,
+            updatedAt: new Date().toISOString()
+        }, { merge: true }).catch(err => console.log("Trash sync error:", err));
     }
 
     function saveSettingsToCloudAndLocal() {
@@ -985,6 +1022,7 @@
         auth.signOut().then(() => {
             currentUserId = null;
             patients = [];
+            trashBin = [];
             document.getElementById('appContainer').style.display = 'none';
             document.getElementById('authScreen').style.display = 'flex';
         });
@@ -992,12 +1030,7 @@
 
     function openRxTemplateManager() {
         autoSaveMedicalRecord();
-        document.getElementById('mainScreen').style.display = 'none';
-        document.getElementById('addPatientScreen').style.display = 'none';
-        document.getElementById('archiveScreen').style.display = 'none';
-        document.getElementById('medicalRecordScreen').style.display = 'none';
-        document.getElementById('dictScreen').style.display = 'none';
-        document.getElementById('networkScreen').style.display = 'none';
+        hideAllScreens();
         document.getElementById('rxTemplateScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'flex';
         document.getElementById('headerTitle').innerText = 'RX Template';
@@ -1033,7 +1066,7 @@
     }
 
     function openNetworkHierarchy() {
-        document.getElementById('mainScreen').style.display = 'none';
+        hideAllScreens();
         document.getElementById('networkScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'flex';
         document.getElementById('headerTitle').innerText = 'Network Database';
@@ -1063,6 +1096,17 @@
             });
             container.innerHTML = html;
         });
+    }
+
+    function hideAllScreens() {
+        document.getElementById('mainScreen').style.display = 'none';
+        document.getElementById('addPatientScreen').style.display = 'none';
+        document.getElementById('rxTemplateScreen').style.display = 'none';
+        document.getElementById('archiveScreen').style.display = 'none';
+        document.getElementById('trashScreen').style.display = 'none';
+        document.getElementById('medicalRecordScreen').style.display = 'none';
+        document.getElementById('dictScreen').style.display = 'none';
+        document.getElementById('networkScreen').style.display = 'none';
     }
 
     function handleDrugsInput(textarea, visitId) {
@@ -1318,7 +1362,6 @@
         document.getElementById('imagePreviewModal').style.display = 'none';
     }
 
-    // --- Edit Patient Info Functions ---
     function openEditPatientModal() {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
@@ -1365,24 +1408,32 @@
         alert('تم تعديل معلومات المريض بنجاح!');
     }
 
-    // --- Delete Patient Record & Visit Functions ---
+    // --- Trash Bin & Deletion Management ---
     function confirmDeletePatientRecord() {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
 
-        if (confirm(`هل أنت متأكد من حذف السجل الطبي الكامل للمريض "${patient.name}"؟ لا يمكن التراجع عن هذا الإجراء!`)) {
+        if (confirm(`هل أنت متأكد من نقل السجل الطبي للمريض "${patient.name}" إلى سلة المحذوفات؟`)) {
             const idx = patients.findIndex(p => Number(p.id) === Number(currentPatientId));
             if (idx !== -1) {
                 const pIdStr = String(patients[idx].id);
-                patients.splice(idx, 1);
+                const removedPatient = patients.splice(idx, 1)[0];
                 
+                // Add to Trash
+                trashBin.unshift({
+                    type: 'patient',
+                    deletedAt: new Date().toLocaleString(),
+                    data: removedPatient
+                });
+                saveTrashToCloudAndLocal();
+
                 if (currentUserId) {
                     localStorage.setItem(`clinic_patients_${currentUserId}`, JSON.stringify(patients));
                     db.collection('users_data').doc(currentUserId).collection('patients').doc(pIdStr).delete().catch(err => console.log(err));
                 }
                 localStorage.setItem('clinic_patients', JSON.stringify(patients));
             }
-            alert('تم حذف سجل المريض بنجاح.');
+            alert('تم نقل المريض إلى سلة المحذوفات بنجاح.');
             openPatientsArchive();
         }
     }
@@ -1392,15 +1443,118 @@
         if (!patient) return;
 
         if (patient.visits && patient.visits.length <= 1) {
-            alert('عذراً، لا يمكن حذف المراجعة الوحيدة للمريض. يمكنك تعديل محتواها أو حذف المريض بالكامل.');
+            alert('عذراً، لا يمكن حذف المراجعة الوحيدة للمريض. يمكنك حذف المريض بالكامل إن أردت.');
             return;
         }
 
-        if (confirm("هل أنت متأكد من حذف هذه المراجعة؟ لا يمكن استرجاع بياناتها بعد الحذف.")) {
-            patient.visits = patient.visits.filter(v => Number(v.visitId) !== Number(visitId));
-            savePatientToCloudAndLocal(patient);
-            renderVisits(patient.visits);
-            alert('تم حذف المراجعة بنجاح.');
+        if (confirm("هل أنت متأكد من نقل هذه المراجعة إلى سلة المحذوفات؟")) {
+            const vIndex = patient.visits.findIndex(v => Number(v.visitId) === Number(visitId));
+            if (vIndex !== -1) {
+                const removedVisit = patient.visits.splice(vIndex, 1)[0];
+                
+                trashBin.unshift({
+                    type: 'visit',
+                    patientId: patient.id,
+                    patientName: patient.name,
+                    deletedAt: new Date().toLocaleString(),
+                    data: removedVisit
+                });
+                saveTrashToCloudAndLocal();
+
+                savePatientToCloudAndLocal(patient);
+                renderVisits(patient.visits);
+                alert('تم نقل المراجعة إلى سلة المحذوفات.');
+            }
+        }
+    }
+
+    function openTrashBin() {
+        autoSaveMedicalRecord();
+        hideAllScreens();
+        document.getElementById('trashScreen').style.display = 'block';
+        document.getElementById('backBtn').style.display = 'flex';
+        document.getElementById('headerTitle').innerText = 'Trash Bin';
+        document.getElementById('headerSub').innerText = 'Restore deleted items';
+        renderTrashItems();
+    }
+
+    function renderTrashItems() {
+        const container = document.getElementById('trashItemsContainer');
+        if (trashBin.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#64748b; margin-top:20px;">سلة المحذوفات فارغة تماماً.</p>';
+            return;
+        }
+
+        container.innerHTML = trashBin.map((item, index) => {
+            if (item.type === 'patient') {
+                return `
+                    <div class="trash-card">
+                        <div>
+                            <h4 style="font-family:'Playfair Display',serif; color:#0f172a; font-size:1rem;">👤 مريض: ${item.data.name}</h4>
+                            <p style="font-size:0.75rem; color:#64748b;">العمر: ${item.data.age} | الهاتف: ${item.data.phone || 'N/A'}</p>
+                            <p style="font-size:0.7rem; color:#ef4444; margin-top:2px;">حُذف في: ${item.deletedAt}</p>
+                        </div>
+                        <button class="btn-restore" onclick="restoreTrashItem(${index})">
+                            <i class="fa-solid fa-rotate-left"></i> استرجاع
+                        </button>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="trash-card">
+                        <div>
+                            <h4 style="font-family:'Playfair Display',serif; color:#0f172a; font-size:1.02rem;">📋 مراجعة للمريض: ${item.patientName}</h4>
+                            <p style="font-size:0.75rem; color:#64748b;">تاريخ المراجعة: ${item.data.date || 'N/A'}</p>
+                            <p style="font-size:0.7rem; color:#ef4444; margin-top:2px;">حُذفت في: ${item.deletedAt}</p>
+                        </div>
+                        <button class="btn-restore" onclick="restoreTrashItem(${index})">
+                            <i class="fa-solid fa-rotate-left"></i> استرجاع
+                        </button>
+                    </div>
+                `;
+            }
+        }).join('');
+    }
+
+    function restoreTrashItem(index) {
+        const item = trashBin[index];
+        if (!item) return;
+
+        if (item.type === 'patient') {
+            patients.unshift(item.data);
+            savePatientToCloudAndLocal(item.data);
+            trashBin.splice(index, 1);
+            saveTrashToCloudAndLocal();
+            alert(`تم استرجاع المريض "${item.data.name}" إلى الأرشيف بنجاح!`);
+            renderTrashItems();
+        } else {
+            const patient = patients.find(p => Number(p.id) === Number(item.patientId));
+            if (patient) {
+                if (!patient.visits) patient.visits = [];
+                patient.visits.unshift(item.data);
+                savePatientToCloudAndLocal(patient);
+                trashBin.splice(index, 1);
+                saveTrashToCloudAndLocal();
+                alert(`تم استرجاع المراجعة إلى ملف المريض "${item.patientName}" بنجاح!`);
+                renderTrashItems();
+            } else {
+                alert('عذراً، لم يتم العثور على ملف المريض الأصلي (ربما تم حذفه بالكامل). سيتم إنشاء ملف جديد له.');
+                const newPatient = {
+                    id: item.patientId || Date.now(),
+                    name: item.patientName,
+                    age: 30,
+                    gender: 'Unspecified',
+                    marital: 'Single',
+                    job: 'Unspecified',
+                    phone: 'N/A',
+                    visits: [item.data]
+                };
+                patients.unshift(newPatient);
+                savePatientToCloudAndLocal(newPatient);
+                trashBin.splice(index, 1);
+                saveTrashToCloudAndLocal();
+                renderTrashItems();
+            }
         }
     }
 
@@ -1763,12 +1917,7 @@
 
     function showMainMenu() {
         autoSaveMedicalRecord();
-        document.getElementById('addPatientScreen').style.display = 'none';
-        document.getElementById('rxTemplateScreen').style.display = 'none';
-        document.getElementById('archiveScreen').style.display = 'none';
-        document.getElementById('medicalRecordScreen').style.display = 'none';
-        document.getElementById('dictScreen').style.display = 'none';
-        document.getElementById('networkScreen').style.display = 'none';
+        hideAllScreens();
         document.getElementById('mainScreen').style.display = 'flex';
         document.getElementById('backBtn').style.display = 'none';
         document.getElementById('headerTitle').innerText = 'Clinic Master System';
@@ -1776,12 +1925,7 @@
     }
 
     function openAddPatient() {
-        document.getElementById('mainScreen').style.display = 'none';
-        document.getElementById('rxTemplateScreen').style.display = 'none';
-        document.getElementById('archiveScreen').style.display = 'none';
-        document.getElementById('medicalRecordScreen').style.display = 'none';
-        document.getElementById('dictScreen').style.display = 'none';
-        document.getElementById('networkScreen').style.display = 'none';
+        hideAllScreens();
         document.getElementById('addPatientScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'flex';
         document.getElementById('headerTitle').innerText = 'Register New Patient';
@@ -1790,12 +1934,7 @@
 
     function openPatientsArchive() {
         autoSaveMedicalRecord();
-        document.getElementById('mainScreen').style.display = 'none';
-        document.getElementById('rxTemplateScreen').style.display = 'none';
-        document.getElementById('addPatientScreen').style.display = 'none';
-        document.getElementById('medicalRecordScreen').style.display = 'none';
-        document.getElementById('dictScreen').style.display = 'none';
-        document.getElementById('networkScreen').style.display = 'none';
+        hideAllScreens();
         document.getElementById('archiveScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'flex';
         document.getElementById('headerTitle').innerText = 'Smart Patients Archive';
@@ -1805,12 +1944,7 @@
 
     function openDictionaryManager() {
         autoSaveMedicalRecord();
-        document.getElementById('mainScreen').style.display = 'none';
-        document.getElementById('rxTemplateScreen').style.display = 'none';
-        document.getElementById('addPatientScreen').style.display = 'none';
-        document.getElementById('archiveScreen').style.display = 'none';
-        document.getElementById('medicalRecordScreen').style.display = 'none';
-        document.getElementById('networkScreen').style.display = 'none';
+        hideAllScreens();
         document.getElementById('dictScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'flex';
         document.getElementById('headerTitle').innerText = 'Dictionary Manager';
@@ -1929,12 +2063,7 @@
         if (!patient) return;
 
         currentPatientId = id;
-        document.getElementById('mainScreen').style.display = 'none';
-        document.getElementById('rxTemplateScreen').style.display = 'none';
-        document.getElementById('addPatientScreen').style.display = 'none';
-        document.getElementById('archiveScreen').style.display = 'none';
-        document.getElementById('dictScreen').style.display = 'none';
-        document.getElementById('networkScreen').style.display = 'none';
+        hideAllScreens();
         document.getElementById('medicalRecordScreen').style.display = 'block';
         document.getElementById('backBtn').style.display = 'flex';
 
