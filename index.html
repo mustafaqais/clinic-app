@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.43</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.44</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -510,7 +510,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.43</div>
+        <div class="footer">Clinic Master Network v16.44</div>
     </div>
 </div>
 
@@ -1361,14 +1361,12 @@
         }
     }
 
-    // دالة Scan Document المحدثة لتفعيل وضع مسح المستندات الحقيقي (تلقائي الحواف)
+    // دالة Scan Document المطورة بقص تلقائي دقيق لإزالة الخلفيات تماماً (True Document Scanner)
     function handleScannerScan(visitId) {
         const scannerInput = document.createElement('input');
         scannerInput.type = 'file';
         scannerInput.accept = 'image/*';
-        // تفعيل خصائص الكاميرا الخلفية ووضع المستندات الذكي للأنظمة الداعمة
         scannerInput.setAttribute('capture', 'environment');
-        scannerInput.setAttribute('x-webkit-airplay', 'allow');
         
         scannerInput.onchange = e => {
             if (e.target.files && e.target.files[0]) {
@@ -1378,22 +1376,57 @@
                     const img = new Image();
                     img.src = event.target.result;
                     img.onload = function() {
-                        // معالجة رقمية لقص الأطراف وتصحيح التباين لتظهر وكأنها مسحوبة بـ Scanner
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
                         
-                        // تقليص المساحات البيضاء الزائدة وقص الحواف بنسبة تلقائية دقيقة
-                        const cropMarginX = Math.floor(img.width * 0.05);
-                        const cropMarginY = Math.floor(img.height * 0.05);
-                        const targetWidth = img.width - (cropMarginX * 2);
-                        const targetHeight = img.height - (cropMarginY * 2);
+                        const w = img.width;
+                        const h = img.height;
+                        canvas.width = w;
+                        canvas.height = h;
+                        ctx.drawImage(img, 0, 0);
 
-                        canvas.width = targetWidth;
-                        canvas.height = targetHeight;
-
-                        ctx.drawImage(img, cropMarginX, cropMarginY, targetWidth, targetHeight, 0, 0, targetWidth, targetHeight);
+                        // خوارزمية مسح وتحليل الحواف التلقائية (Smart Document Cropping)
+                        const imgData = ctx.getImageData(0, 0, w, h);
+                        const data = imgData.data;
                         
-                        const scannedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+                        let minX = w, minY = h, maxX = 0, maxY = 0;
+                        const threshold = 210; // كشف المساحات البيضاء والخلفيات الخارجية وتحديد حدود الورقة بدقة
+
+                        for (let y = 0; y < h; y += 4) {
+                            for (let x = 0; x < w; x += 4) {
+                                const idx = (y * w + x) * 4;
+                                const avg = (data[idx] + data[idx+1] + data[idx+2]) / 3;
+                                if (avg < threshold) { // عثر على جزء من محتوى المستند أو الورقة
+                                    if (x < minX) minX = x;
+                                    if (x > maxX) maxX = x;
+                                    if (y < minY) minY = y;
+                                    if (y > maxY) maxY = y;
+                                }
+                            }
+                        }
+
+                        // إضافة هامش صغير وامن جداً (Padding) لضمان عدم قطع أطراف الكتابة
+                        const padding = 15;
+                        minX = Math.max(0, minX - padding);
+                        minY = Math.max(0, minY - padding);
+                        maxX = Math.min(w, maxX + padding);
+                        maxY = Math.min(h, maxY + padding);
+
+                        const cropW = maxX - minX;
+                        const cropH = maxY - minY;
+
+                        const finalCanvas = document.createElement('canvas');
+                        finalCanvas.width = cropW > 100 ? cropW : w;
+                        finalCanvas.height = cropH > 100 ? cropH : h;
+                        const finalCtx = finalCanvas.getContext('2d');
+
+                        if (cropW > 100 && cropH > 100) {
+                            finalCtx.drawImage(img, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
+                        } else {
+                            finalCtx.drawImage(img, 0, 0);
+                        }
+
+                        const scannedDataUrl = finalCanvas.toDataURL('image/jpeg', 0.95);
 
                         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
                         if (!patient) return;
