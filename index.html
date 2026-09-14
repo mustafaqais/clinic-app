@@ -437,7 +437,7 @@
 
             <div id="medicalRecordScreen" style="display: none;">
                 <div class="group-card" style="background: #f0fdfa; border-color: #99f6e4; position: relative;">
-                    <button type="button" onclick="openEditPatientModal()" style="position: absolute; top: 14px; right: 14px; background: #0d9488; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    <button type="button" onclick="openEditPatientModal()" style="position: absolute; top: 14px; right: 14px; background: #0d9488; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; z-index: 5;">
                         <i class="fa-solid fa-pen-to-square"></i> Edit Info
                     </button>
                     <div class="field-box" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color: #0f766e; margin-bottom:4px; padding-right: 70px;">
@@ -1354,7 +1354,6 @@
         savePatientToCloudAndLocal(patient);
         closeEditPatientModal();
 
-        // تحديث البيانات المعروضة في الشاشة
         document.getElementById('recPatientName').innerText = patient.name;
         document.getElementById('recPatientMeta').innerText = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
         
