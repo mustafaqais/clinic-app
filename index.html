@@ -1361,7 +1361,7 @@
         }
     }
 
-    // دالة Scan Document المطورة بقص تلقائي دقيق لإزالة الخلفيات تماماً (True Document Scanner)
+    // دالة Scan Document المحدثة لفتح الكاميرا الخلفية مباشرة وقص الأطراف التلقائي
     function handleScannerScan(visitId) {
         const scannerInput = document.createElement('input');
         scannerInput.type = 'file';
@@ -1385,18 +1385,17 @@
                         canvas.height = h;
                         ctx.drawImage(img, 0, 0);
 
-                        // خوارزمية مسح وتحليل الحواف التلقائية (Smart Document Cropping)
                         const imgData = ctx.getImageData(0, 0, w, h);
                         const data = imgData.data;
                         
                         let minX = w, minY = h, maxX = 0, maxY = 0;
-                        const threshold = 210; // كشف المساحات البيضاء والخلفيات الخارجية وتحديد حدود الورقة بدقة
+                        const threshold = 210;
 
                         for (let y = 0; y < h; y += 4) {
                             for (let x = 0; x < w; x += 4) {
                                 const idx = (y * w + x) * 4;
                                 const avg = (data[idx] + data[idx+1] + data[idx+2]) / 3;
-                                if (avg < threshold) { // عثر على جزء من محتوى المستند أو الورقة
+                                if (avg < threshold) {
                                     if (x < minX) minX = x;
                                     if (x > maxX) maxX = x;
                                     if (y < minY) minY = y;
@@ -1405,7 +1404,6 @@
                             }
                         }
 
-                        // إضافة هامش صغير وامن جداً (Padding) لضمان عدم قطع أطراف الكتابة
                         const padding = 15;
                         minX = Math.max(0, minX - padding);
                         minY = Math.max(0, minY - padding);
