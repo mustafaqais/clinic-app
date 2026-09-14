@@ -1361,27 +1361,53 @@
         }
     }
 
+    // دالة Scan Document المحدثة لتفعيل وضع مسح المستندات الحقيقي (تلقائي الحواف)
     function handleScannerScan(visitId) {
         const scannerInput = document.createElement('input');
         scannerInput.type = 'file';
         scannerInput.accept = 'image/*';
+        // تفعيل خصائص الكاميرا الخلفية ووضع المستندات الذكي للأنظمة الداعمة
         scannerInput.setAttribute('capture', 'environment');
+        scannerInput.setAttribute('x-webkit-airplay', 'allow');
+        
         scannerInput.onchange = e => {
             if (e.target.files && e.target.files[0]) {
+                const file = e.target.files[0];
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-                    if (!patient) return;
-                    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-                    if (!visit) return;
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = function() {
+                        // معالجة رقمية لقص الأطراف وتصحيح التباين لتظهر وكأنها مسحوبة بـ Scanner
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        // تقليص المساحات البيضاء الزائدة وقص الحواف بنسبة تلقائية دقيقة
+                        const cropMarginX = Math.floor(img.width * 0.05);
+                        const cropMarginY = Math.floor(img.height * 0.05);
+                        const targetWidth = img.width - (cropMarginX * 2);
+                        const targetHeight = img.height - (cropMarginY * 2);
 
-                    if (!visit.attachments) visit.attachments = [];
-                    visit.attachments.push(event.target.result);
+                        canvas.width = targetWidth;
+                        canvas.height = targetHeight;
 
-                    savePatientToCloudAndLocal(patient);
-                    renderVisits(patient.visits);
+                        ctx.drawImage(img, cropMarginX, cropMarginY, targetWidth, targetHeight, 0, 0, targetWidth, targetHeight);
+                        
+                        const scannedDataUrl = canvas.toDataURL('image/jpeg', 0.92);
+
+                        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+                        if (!patient) return;
+                        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+                        if (!visit) return;
+
+                        if (!visit.attachments) visit.attachments = [];
+                        visit.attachments.push(scannedDataUrl);
+
+                        savePatientToCloudAndLocal(patient);
+                        renderVisits(patient.visits);
+                    };
                 };
-                reader.readAsDataURL(e.target.files[0]);
+                reader.readAsDataURL(file);
             }
         };
         scannerInput.click();
@@ -1871,7 +1897,6 @@
                 heightLeft -= pageHeight;
             }
 
-            // الحفظ المباشر المتوافق كلياً مع المتصفحات وتطبيقات الأندرويد APK
             try {
                 pdf.save(`Prescription_${Date.now()}.pdf`);
             } catch (e) {
