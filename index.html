@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.37</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.38</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -121,6 +121,7 @@
 
         .btn-main { width: 100%; background: #0d9488; color: white; border: none; border-radius: 14px; padding: 14px; font-size: 0.98rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); }
         .btn-secondary { background: #0284c7; margin-bottom: 14px; }
+        .btn-danger { background: #ef4444; color: white; border: none; border-radius: 10px; padding: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 10px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
 
         .patient-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .patient-info h4 { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
@@ -437,10 +438,15 @@
 
             <div id="medicalRecordScreen" style="display: none;">
                 <div class="group-card" style="background: #f0fdfa; border-color: #99f6e4; position: relative;">
-                    <button type="button" onclick="openEditPatientModal()" style="position: absolute; top: 14px; right: 14px; background: #0d9488; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; z-index: 5;">
-                        <i class="fa-solid fa-pen-to-square"></i> Edit Info
-                    </button>
-                    <div class="field-box" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color: #0f766e; margin-bottom:4px; padding-right: 70px;">
+                    <div style="position: absolute; top: 14px; right: 14px; display: flex; gap: 6px; z-index: 5;">
+                        <button type="button" onclick="openEditPatientModal()" style="background: #0d9488; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                        </button>
+                        <button type="button" onclick="confirmDeletePatientRecord()" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </div>
+                    <div class="field-box" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color: #0f766e; margin-bottom:4px; padding-right: 125px;">
                         <i class="fa-solid fa-user-check"></i> <span id="recPatientName">—</span>
                     </div>
                     <p style="font-size: 0.8rem; color: #334155; line-height: 1.5;" id="recPatientMeta"></p>
@@ -479,7 +485,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.37 (Robust Indexing)</div>
+        <div class="footer">Clinic Master Network v16.38 (Robust Indexing)</div>
     </div>
 </div>
 
@@ -1156,7 +1162,6 @@
         if (textarea) textarea.focus();
     }
 
-    // --- Medical History Dynamic Suggestions ---
     function handleMhLiveInput(inputEl, inputKey) {
         activeMhInputKey = inputKey;
         const val = inputEl.value.trim();
@@ -1358,6 +1363,45 @@
         document.getElementById('recPatientMeta').innerText = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
         
         alert('تم تعديل معلومات المريض بنجاح!');
+    }
+
+    // --- Delete Patient Record & Visit Functions ---
+    function confirmDeletePatientRecord() {
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+
+        if (confirm(`هل أنت متأكد من حذف السجل الطبي الكامل للمريض "${patient.name}"؟ لا يمكن التراجع عن هذا الإجراء!`)) {
+            const idx = patients.findIndex(p => Number(p.id) === Number(currentPatientId));
+            if (idx !== -1) {
+                const pIdStr = String(patients[idx].id);
+                patients.splice(idx, 1);
+                
+                if (currentUserId) {
+                    localStorage.setItem(`clinic_patients_${currentUserId}`, JSON.stringify(patients));
+                    db.collection('users_data').doc(currentUserId).collection('patients').doc(pIdStr).delete().catch(err => console.log(err));
+                }
+                localStorage.setItem('clinic_patients', JSON.stringify(patients));
+            }
+            alert('تم حذف سجل المريض بنجاح.');
+            openPatientsArchive();
+        }
+    }
+
+    function confirmDeleteVisit(visitId) {
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+
+        if (patient.visits && patient.visits.length <= 1) {
+            alert('عذراً، لا يمكن حذف المراجعة الوحيدة للمريض. يمكنك تعديل محتواها أو حذف المريض بالكامل.');
+            return;
+        }
+
+        if (confirm("هل أنت متأكد من حذف هذه المراجعة؟ لا يمكن استرجاع بياناتها بعد الحذف.")) {
+            patient.visits = patient.visits.filter(v => Number(v.visitId) !== Number(visitId));
+            savePatientToCloudAndLocal(patient);
+            renderVisits(patient.visits);
+            alert('تم حذف المراجعة بنجاح.');
+        }
     }
 
     function openMedHistoryModal(visitId) {
@@ -2046,6 +2090,10 @@
 
                 <button type="button" class="btn-rx-action" onclick="openRxModal(${vId})">
                     <i class="fa-solid fa-file-prescription"></i> Prescription (RX)
+                </button>
+
+                <button type="button" class="btn-danger" onclick="confirmDeleteVisit(${vId})">
+                    <i class="fa-solid fa-trash-can"></i> Delete This Visit
                 </button>
             </div>
         `}).join('');
