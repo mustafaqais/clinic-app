@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Complete Ultimate Edition</title>
+    <title>Clinic Master System - Ultimate Edition with Trash</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -25,13 +25,14 @@
         .input-wrapper { background-color: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 4px 10px; }
         .input-wrapper input, .input-wrapper select, .input-wrapper textarea { width: 100%; border: none; outline: none; padding: 8px 0; font-size: 0.92rem; font-weight: 600; color: #0f172a; background: transparent; }
         .btn-main { width: 100%; background: #0d9488; color: white; border: none; border-radius: 14px; padding: 14px; font-size: 0.98rem; font-weight: 700; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-danger { background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 12px; font-size: 0.75rem; font-weight: 700; cursor: pointer; }
         .header { background: #0f172a; color: white; padding: 20px; text-align: center; border-bottom-left-radius: 25px; border-bottom-right-radius: 25px; position: relative; }
         .content { padding: 20px; flex: 1; overflow-y: auto; }
         .menu-card { background: #fff; border: 2px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; cursor: pointer; }
         .menu-icon { width: 42px; height: 42px; border-radius: 12px; background: #ccfbf1; color: #0d9488; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
         .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 14px; text-align: left; }
         .back-btn { position: absolute; top: 20px; left: 15px; background: rgba(255,255,255,0.15); color: #fff; border: none; padding: 6px 10px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; }
-        .patient-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .patient-card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 12px 16px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
         .visit-card { background: #fff; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 14px; margin-bottom: 14px; text-align: left; }
         .dict-tag { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #334155; }
         .dict-tag button { background: #fee2e2; color: #ef4444; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 0.75rem; }
@@ -86,6 +87,14 @@
                     <div>
                         <h3>أرشيف المرضى</h3>
                         <p style="font-size: 0.75rem; color: #64748b;">عرض والبحث في قائمة المرضى</p>
+                    </div>
+                </div>
+
+                <div class="menu-card" onclick="openTrashBin()">
+                    <div class="menu-icon" style="background: #fee2e2; color: #ef4444;"><i class="fa-solid fa-trash-can"></i></div>
+                    <div>
+                        <h3>سلة المحذوفات</h3>
+                        <p style="font-size: 0.75rem; color: #64748b;">استرجاع المرضى أو الزيارات المحذوفة</p>
                     </div>
                 </div>
 
@@ -149,6 +158,14 @@
                     <div class="input-wrapper"><input type="text" id="searchInput" placeholder="🔍 بحث بالاسم أو رقم الهاتف..." oninput="filterPatients()"></div>
                 </div>
                 <div id="patientsListContainer"></div>
+            </div>
+
+            <div id="trashScreen" style="display: none;">
+                <div class="group-card" style="background: #fef2f2; border-color: #fecaca;">
+                    <h3 style="color: #991b1b; margin-bottom: 4px;"><i class="fa-solid fa-trash-can"></i> سلة المحذوفات</h3>
+                    <p style="font-size: 0.78rem; color: #7f1d1d;">العناصر المحذوفة مع إمكانية الاسترجاع الفوري.</p>
+                </div>
+                <div id="trashContainer"></div>
             </div>
 
             <div id="medicalRecordScreen" style="display: none;">
@@ -244,6 +261,7 @@
     const auth = firebase.auth();
     const FOUNDER_EMAIL = "musqaqa009@gmail.com";
     let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
+    let trashBin = JSON.parse(localStorage.getItem('clinic_trash')) || [];
     let currentPatientId = null;
     let currentRxImage = localStorage.getItem('clinic_rx_img') || '';
     let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || {
@@ -300,6 +318,14 @@
         renderPatientsList(patients);
     }
 
+    function openTrashBin() {
+        hideAllScreens();
+        document.getElementById('trashScreen').style.display = 'block';
+        document.getElementById('backBtn').style.display = 'block';
+        document.getElementById('headerTitle').innerText = 'سلة المحذوفات';
+        renderTrashList();
+    }
+
     function openRxTemplateManager() {
         hideAllScreens();
         document.getElementById('rxTemplateScreen').style.display = 'block';
@@ -354,6 +380,7 @@
         document.getElementById('mainMenuScreen').style.display = 'none';
         document.getElementById('addPatientScreen').style.display = 'none';
         document.getElementById('archiveScreen').style.display = 'none';
+        document.getElementById('trashScreen').style.display = 'none';
         document.getElementById('medicalRecordScreen').style.display = 'none';
         document.getElementById('rxTemplateScreen').style.display = 'none';
         document.getElementById('dictScreen').style.display = 'none';
@@ -380,6 +407,88 @@
         openMedicalRecord(newP.id);
     }
 
+    function confirmDeletePatient(patientId) {
+        if (confirm("هل أنت متأكد من حذف هذا المريض؟ سيتم نقله إلى سلة المحذوفات.")) {
+            const index = patients.findIndex(p => p.id === patientId);
+            if (index !== -1) {
+                const deleted = patients.splice(index, 1)[0];
+                trashBin.unshift({ type: 'patient', data: deleted });
+                localStorage.setItem('clinic_patients', JSON.stringify(patients));
+                localStorage.setItem('clinic_trash', JSON.stringify(trashBin));
+                renderPatientsList(patients);
+                alert('تم نقل المريض إلى سلة المحذوفات.');
+            }
+        }
+    }
+
+    function confirmDeleteVisit(visitId) {
+        if (confirm("هل أنت متأكد من حذف هذه الزيارة؟ سيتم نقلها إلى سلة المحذوفات.")) {
+            const patient = patients.find(p => p.id === currentPatientId);
+            if (!patient) return;
+            const vIndex = patient.visits.findIndex(v => v.visitId === visitId);
+            if (vIndex !== -1) {
+                const deletedVisit = patient.visits.splice(vIndex, 1)[0];
+                trashBin.unshift({ type: 'visit', patientId: patient.id, data: deletedVisit });
+                localStorage.setItem('clinic_patients', JSON.stringify(patients));
+                localStorage.setItem('clinic_trash', JSON.stringify(trashBin));
+                renderVisits(patient.visits);
+                alert('تم نقل الزيارة إلى سلة المحذوفات.');
+            }
+        }
+    }
+
+    function renderTrashList() {
+        const container = document.getElementById('trashContainer');
+        if (trashBin.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#64748b; margin-top:20px;">سلة المحذوفات فارغة.</p>';
+            return;
+        }
+
+        container.innerHTML = trashBin.map((item, index) => {
+            if (item.type === 'patient') {
+                return `
+                    <div class="patient-card" style="background:#fef2f2; border-color:#fecaca;">
+                        <div>
+                            <h4 style="font-size: 1rem; color: #991b1b; margin-bottom: 2px;">[مريض] ${item.data.name}</h4>
+                            <p style="font-size: 0.75rem; color: #7f1d1d;">العمر: ${item.data.age} | الهاتف: ${item.data.phone}</p>
+                        </div>
+                        <button class="btn-main" onclick="restoreFromTrash(${index})" style="background:#16a34a; padding:6px 10px; font-size:0.75rem; width:auto;"><i class="fa-solid fa-rotate-left"></i> استرجاع</button>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="patient-card" style="background:#fef2f2; border-color:#fecaca;">
+                        <div>
+                            <h4 style="font-size: 1rem; color: #991b1b; margin-bottom: 2px;">[زيارة] بتاريخ: ${item.data.date}</h4>
+                            <p style="font-size: 0.75rem; color: #7f1d1d;">ملاحظات: ${item.data.notes || 'بدون ملاحظات'}</p>
+                        </div>
+                        <button class="btn-main" onclick="restoreFromTrash(${index})" style="background:#16a34a; padding:6px 10px; font-size:0.75rem; width:auto;"><i class="fa-solid fa-rotate-left"></i> استرجاع</button>
+                    </div>
+                `;
+            }
+        }).join('');
+    }
+
+    function restoreFromTrash(index) {
+        const item = trashBin.splice(index, 1)[0];
+        if (item.type === 'patient') {
+            patients.unshift(item.data);
+            localStorage.setItem('clinic_patients', JSON.stringify(patients));
+        } else if (item.type === 'visit') {
+            const patient = patients.find(p => p.id === item.patientId);
+            if (patient) {
+                if (!patient.visits) patient.visits = [];
+                patient.visits.unshift(item.data);
+                localStorage.setItem('clinic_patients', JSON.stringify(patients));
+            } else {
+                alert('عذراً، المريض الأساسي لهذه الزيارة غير موجود أو تم حذفه نهائياً.');
+            }
+        }
+        localStorage.setItem('clinic_trash', JSON.stringify(trashBin));
+        renderTrashList();
+        alert('تم استرجاع العنصر بنجاح!');
+    }
+
     function openMedicalRecord(id) {
         currentPatientId = id;
         const patient = patients.find(p => p.id === id);
@@ -398,10 +507,16 @@
 
     function renderVisits(visits) {
         const container = document.getElementById('visitsContainer');
+        if (visits.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#64748b;">لا توجد زيارات مسجلة.</p>';
+            return;
+        }
+
         container.innerHTML = visits.map(v => `
             <div class="visit-card" data-visit-id="${v.visitId}">
-                <div style="background: #0f172a; color: #fff; padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; margin-bottom: 10px; display:flex; justify-content:space-between;">
+                <div style="background: #0f172a; color: #fff; padding: 6px 10px; border-radius: 8px; font-size: 0.8rem; margin-bottom: 10px; display:flex; justify-content:space-between; align-items:center;">
                     <span>📅 تاريخ الزيارة: ${v.date}</span>
+                    <button type="button" class="btn-danger" onclick="confirmDeleteVisit(${v.visitId})"><i class="fa-solid fa-trash"></i> حذف الزيارة</button>
                 </div>
                 <div class="field-box" style="margin-bottom: 8px;">
                     <span class="field-label">ضغط الدم (BP)</span>
@@ -536,12 +651,15 @@
         }
 
         container.innerHTML = list.map(p => `
-            <div class="patient-card" onclick="openMedicalRecord(${p.id})">
-                <div>
+            <div class="patient-card">
+                <div onclick="openMedicalRecord(${p.id})" style="flex:1; cursor:pointer;">
                     <h4 style="font-size: 1rem; color: #0f172a; margin-bottom: 2px;">${p.name}</h4>
                     <p style="font-size: 0.78rem; color: #64748b;"><i class="fa-solid fa-phone"></i> ${p.phone} | العمر: ${p.age} سنة</p>
                 </div>
-                <span style="background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold;">${p.gender}</span>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="background: #e0f2fe; color: #0369a1; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold;">${p.gender}</span>
+                    <button class="btn-danger" onclick="confirmDeletePatient(${p.id})"><i class="fa-solid fa-trash"></i></button>
+                </div>
             </div>
         `).join('');
     }
