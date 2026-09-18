@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.52</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.53</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -266,8 +266,8 @@
 
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column;">
         <div class="header">
-            <button id="backBtn" class="back-btn" onclick="showMainMenu()" style="display: none;">
-                <i class="fa-solid fa-arrow-left"></i> Main Menu
+            <button id="backBtn" class="back-btn" onclick="goBackScreen()" style="display: none;">
+                <i class="fa-solid fa-arrow-left"></i> Back
             </button>
             <button class="logout-btn" onclick="logoutUser()">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
@@ -278,14 +278,14 @@
         </div>
 
         <div class="content">
-            <div id="mainScreen" class="main-menu">
+            <div id="mainScreen" class="main-menu" style="display: none;">
                 <div class="founder-panel" id="founderControlPanel" style="display: none;">
                     <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;">🔑 Single-Use Activation Code:</span>
                     <div class="founder-code-display" id="dynamicFounderCode">Loading...</div>
                     <span style="font-size: 0.72rem; color: #64748b;">Give this code to a new user. It burns permanently after 1 use.</span>
                 </div>
 
-                <div class="menu-card" onclick="openAddPatient()">
+                <div class="menu-card" onclick="navigateTo('addPatientScreen', 'Register New Patient', 'Fill in patient details accurately')">
                     <div class="menu-icon"><i class="fa-solid fa-user-plus"></i></div>
                     <div class="menu-info">
                         <h3>Register New Patient</h3>
@@ -574,7 +574,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.52</div>
+        <div class="footer">Clinic Master Network v16.53</div>
     </div>
 </div>
 
@@ -882,7 +882,7 @@
     </div>
 </div>
 
-<!-- حاوية التقرير الطبي الشامل المخفية (بدون روشتة، بتنسيق راقي وعصري) -->
+<!-- حاوية التقرير الطبي الشامل المخفية -->
 <div id="pdfReportExportContainer" style="position: absolute; left: -9999px; top: 0; width: 750px; background: #ffffff; padding: 40px; font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; direction: ltr; text-align: left;">
     <div style="text-align: center; border-bottom: 2.5px solid #0d9488; padding-bottom: 15px; margin-bottom: 20px;">
         <div style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: #0f172a; margin-bottom: 4px;">CLINIC MASTER MEDICAL RECORD</div>
@@ -890,7 +890,6 @@
         <div style="font-size: 0.72rem; color: #64748b; margin-top: 4px;" id="pdfRepDateLabel">Generated on: —</div>
     </div>
 
-    <!-- معلومات المريض الشخصية -->
     <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px; margin-bottom: 20px;">
         <div style="font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: #0f766e; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;"><i class="fa-solid fa-id-card"></i> Patient Profile</div>
         <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
@@ -915,13 +914,11 @@
         </table>
     </div>
 
-    <!-- سجل الزيارات والروشتات -->
     <div>
         <div style="font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 10px;"><i class="fa-solid fa-notes-medical"></i> Clinical Visits & Prescriptions Timeline</div>
         <div id="pdfRepVisitsContainer" style="display: flex; flex-direction: column; gap: 14px;"></div>
     </div>
 
-    <!-- التوقيع والتذييل -->
     <div style="margin-top: 30px; display: flex; justify-content: space-between; align-items: flex-end; border-top: 1.5px solid #cbd5e1; padding-top: 12px; font-size: 0.75rem;">
         <div>
             <span style="color: #64748b; font-weight: 700;">Clinic Master System — Certified Document</span>
@@ -974,6 +971,84 @@
             code += chars.charAt(Math.floor(Math.random() * chars.length));
         }
         return code;
+    }
+
+    // نظام التنقل الشامل خطوة بخطوة (متوافق مع المتصفح، أزرار الهواتف، والحاسوب)
+    let screenHistory = ['mainScreen'];
+
+    function navigateTo(screenId, title = 'Clinic Master System', sub = 'Cloud Secure Dashboard') {
+        autoSaveMedicalRecord();
+        hideAllScreensInner();
+        
+        const target = document.getElementById(screenId);
+        if (target) target.style.display = 'block';
+
+        document.getElementById('headerTitle').innerText = title;
+        document.getElementById('headerSub').innerText = sub;
+
+        if (screenId === 'mainScreen') {
+            document.getElementById('backBtn').style.display = 'none';
+            screenHistory = ['mainScreen'];
+        } else {
+            document.getElementById('backBtn').style.display = 'flex';
+            if (screenHistory[screenHistory.length - 1] !== screenId) {
+                screenHistory.push(screenId);
+                window.history.pushState({screen: screenId}, '', '#' + screenId);
+            }
+        }
+    }
+
+    function goBackScreen() {
+        autoSaveMedicalRecord();
+        if (screenHistory.length > 1) {
+            screenHistory.pop();
+            const prevScreen = screenHistory[screenHistory.length - 1];
+            
+            hideAllScreensInner();
+            document.getElementById(prevScreen).style.display = 'block';
+
+            if (prevScreen === 'mainScreen') {
+                document.getElementById('backBtn').style.display = 'none';
+                document.getElementById('headerTitle').innerText = 'Clinic Master System';
+                document.getElementById('headerSub').innerText = 'Cloud Secure Dashboard';
+            } else if (prevScreen === 'archiveScreen') {
+                document.getElementById('headerTitle').innerText = 'Smart Patients Archive';
+                document.getElementById('headerSub').innerText = 'Advanced search, filters & records';
+            } else if (prevScreen === 'medicalRecordScreen') {
+                document.getElementById('headerTitle').innerText = 'Patient Medical Record';
+                document.getElementById('headerSub').innerText = 'View & update medical history';
+            }
+        } else {
+            showMainMenu();
+        }
+    }
+
+    // الاستماع لزر الرجوع الخاص بالمتصفح أو الهاتف
+    window.addEventListener('popstate', function(event) {
+        if (screenHistory.length > 1) {
+            screenHistory.pop();
+            const prevScreen = screenHistory[screenHistory.length - 1];
+            hideAllScreensInner();
+            document.getElementById(prevScreen).style.display = 'block';
+
+            if (prevScreen === 'mainScreen') {
+                document.getElementById('backBtn').style.display = 'none';
+                document.getElementById('headerTitle').innerText = 'Clinic Master System';
+                document.getElementById('headerSub').innerText = 'Cloud Secure Dashboard';
+            }
+        }
+    });
+
+    function hideAllScreensInner() {
+        document.getElementById('mainScreen').style.display = 'none';
+        document.getElementById('addPatientScreen').style.display = 'none';
+        document.getElementById('rxTemplateScreen').style.display = 'none';
+        document.getElementById('archiveScreen').style.display = 'none';
+        document.getElementById('trashScreen').style.display = 'none';
+        document.getElementById('medicalRecordScreen').style.display = 'none';
+        document.getElementById('dictScreen').style.display = 'none';
+        document.getElementById('networkScreen').style.display = 'none';
+        document.getElementById('analyticsScreen').style.display = 'none';
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -1194,6 +1269,7 @@
         document.getElementById('appContainer').style.display = 'flex';
         document.getElementById('founderControlPanel').style.display = 'block';
         document.getElementById('networkMenuCard').style.display = 'flex';
+        navigateTo('mainScreen');
 
         const activeCode = await getOrInitActiveCode();
         document.getElementById('dynamicFounderCode').innerText = activeCode;
@@ -1205,6 +1281,7 @@
         document.getElementById('appContainer').style.display = 'flex';
         document.getElementById('founderControlPanel').style.display = 'none';
         document.getElementById('networkMenuCard').style.display = 'none';
+        navigateTo('mainScreen');
     }
 
     function resetPassword() {
@@ -1227,13 +1304,7 @@
     }
 
     function openRxTemplateManager() {
-        autoSaveMedicalRecord();
-        hideAllScreens();
-        document.getElementById('rxTemplateScreen').style.display = 'block';
-        document.getElementById('backBtn').style.display = 'flex';
-        document.getElementById('headerTitle').innerText = 'RX Template';
-        document.getElementById('headerSub').innerText = 'Prescription header customization';
-
+        navigateTo('rxTemplateScreen', 'RX Template', 'Prescription header customization');
         const previewImg = document.getElementById('rxPreviewImg');
         const noText = document.getElementById('noRxText');
 
@@ -1264,12 +1335,7 @@
     }
 
     function openNetworkHierarchy() {
-        hideAllScreens();
-        document.getElementById('networkScreen').style.display = 'block';
-        document.getElementById('backBtn').style.display = 'flex';
-        document.getElementById('headerTitle').innerText = 'Network Database';
-        document.getElementById('headerSub').innerText = 'Users & Credentials Control';
-
+        navigateTo('networkScreen', 'Network Database', 'Users & Credentials Control');
         const container = document.getElementById('networkTreeContainer');
         container.innerHTML = '<p style="text-align:center; color:#64748b;">Loading network credentials...</p>';
 
@@ -1296,25 +1362,8 @@
         });
     }
 
-    function hideAllScreens() {
-        document.getElementById('mainScreen').style.display = 'none';
-        document.getElementById('addPatientScreen').style.display = 'none';
-        document.getElementById('rxTemplateScreen').style.display = 'none';
-        document.getElementById('archiveScreen').style.display = 'none';
-        document.getElementById('trashScreen').style.display = 'none';
-        document.getElementById('medicalRecordScreen').style.display = 'none';
-        document.getElementById('dictScreen').style.display = 'none';
-        document.getElementById('networkScreen').style.display = 'none';
-        document.getElementById('analyticsScreen').style.display = 'none';
-    }
-
     function openAnalyticsDashboard() {
-        autoSaveMedicalRecord();
-        hideAllScreens();
-        document.getElementById('analyticsScreen').style.display = 'block';
-        document.getElementById('backBtn').style.display = 'flex';
-        document.getElementById('headerTitle').innerText = 'Clinic Analytics';
-        document.getElementById('headerSub').innerText = 'Smart performance & metrics';
+        navigateTo('analyticsScreen', 'Clinic Analytics', 'Smart performance & metrics');
 
         const totalPatients = patients.length;
         let todayVisitsCount = 0;
@@ -1737,7 +1786,6 @@
         if (el) el.focus();
     }
 
-    // دالة رفع المرفقات سحابياً ومجانياً عبر خدمة ImgBB العامة المدمجة
     function handleFileUpload(input, visitId) {
         if (input.files && input.files[0]) {
             const file = input.files[0];
@@ -1746,7 +1794,6 @@
 
             alert('جاري رفع الصورة سحابياً، لطفاً انتظر قليلاً...');
 
-            // استخدام مفتاح عام مجاني لرفع الصور وتوليد روابط سحابية مباشرة
             fetch("https://api.imgbb.com/1/upload?key=6d207e02bde9756f77732d84a7e9378c", {
                 method: "POST",
                 body: formData
@@ -2011,12 +2058,7 @@
     }
 
     function openTrashBin() {
-        autoSaveMedicalRecord();
-        hideAllScreens();
-        document.getElementById('trashScreen').style.display = 'block';
-        document.getElementById('backBtn').style.display = 'flex';
-        document.getElementById('headerTitle').innerText = 'Trash Bin';
-        document.getElementById('headerSub').innerText = 'Restore deleted items';
+        navigateTo('trashScreen', 'Trash Bin', 'Restore deleted items');
         renderTrashItems();
     }
 
@@ -2470,39 +2512,16 @@
     }
 
     function showMainMenu() {
-        autoSaveMedicalRecord();
-        hideAllScreens();
-        document.getElementById('mainScreen').style.display = 'flex';
-        document.getElementById('backBtn').style.display = 'none';
-        document.getElementById('headerTitle').innerText = 'Clinic Master System';
-        document.getElementById('headerSub').innerText = 'Cloud Secure Dashboard';
-    }
-
-    function openAddPatient() {
-        hideAllScreens();
-        document.getElementById('addPatientScreen').style.display = 'block';
-        document.getElementById('backBtn').style.display = 'flex';
-        document.getElementById('headerTitle').innerText = 'Register New Patient';
-        document.getElementById('headerSub').innerText = 'Fill in patient details accurately';
+        navigateTo('mainScreen');
     }
 
     function openPatientsArchive() {
-        autoSaveMedicalRecord();
-        hideAllScreens();
-        document.getElementById('archiveScreen').style.display = 'block';
-        document.getElementById('backBtn').style.display = 'flex';
-        document.getElementById('headerTitle').innerText = 'Smart Patients Archive';
-        document.getElementById('headerSub').innerText = 'Advanced search, filters & records';
+        navigateTo('archiveScreen', 'Smart Patients Archive', 'Advanced search, filters & records');
         renderPatientsList(patients);
     }
 
     function openDictionaryManager() {
-        autoSaveMedicalRecord();
-        hideAllScreens();
-        document.getElementById('dictScreen').style.display = 'block';
-        document.getElementById('backBtn').style.display = 'flex';
-        document.getElementById('headerTitle').innerText = 'Dictionary Manager';
-        document.getElementById('headerSub').innerText = 'Manage saved phrases & doses';
+        navigateTo('dictScreen', 'Dictionary Manager', 'Manage saved phrases & doses');
         renderDictTerms();
     }
 
@@ -2620,12 +2639,7 @@
         if (!patient) return;
 
         currentPatientId = id;
-        hideAllScreens();
-        document.getElementById('medicalRecordScreen').style.display = 'block';
-        document.getElementById('backBtn').style.display = 'flex';
-
-        document.getElementById('headerTitle').innerText = 'Patient Medical Record';
-        document.getElementById('headerSub').innerText = 'View & update medical history';
+        navigateTo('medicalRecordScreen', 'Patient Medical Record', 'View & update medical history');
 
         document.getElementById('recPatientName').innerText = patient.name;
         document.getElementById('recPatientMeta').innerText = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
