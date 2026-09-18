@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.62</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.63</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -60,6 +60,7 @@
         .menu-icon.rx-icon { background: #fae8ff; color: #c084fc; }
         .menu-icon.trash-icon { background: #fee2e2; color: #ef4444; }
         .menu-icon.analytics-icon { background: #f0fdf4; color: #16a34a; }
+        .menu-icon.settings-icon { background: #f1f5f9; color: #475569; }
         .menu-info h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
         .menu-info p { font-size: 0.78rem; color: #64748b; }
 
@@ -348,11 +349,63 @@
                     </div>
                 </div>
 
+                <div class="menu-card" onclick="openAccountSettings()">
+                    <div class="menu-icon settings-icon"><i class="fa-solid fa-user-gear"></i></div>
+                    <div class="menu-info">
+                        <h3>Account Settings</h3>
+                        <p>Change email, password or reset via email</p>
+                    </div>
+                </div>
+
                 <div class="menu-card" id="networkMenuCard" onclick="openNetworkHierarchy()" style="display: none;">
                     <div class="menu-icon network-icon"><i class="fa-solid fa-network-wired"></i></div>
                     <div class="menu-info">
                         <h3>Hierarchical Network</h3>
                         <p>View connected users & credentials</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settingsScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:14px;">
+                        <i class="fa-solid fa-user-shield" style="color:#0d9488;"></i> إعدادات الأمان والحساب
+                    </div>
+
+                    <div class="field-box">
+                        <span class="field-label">البريد الإلكتروني الحالي</span>
+                        <div class="input-wrapper"><input type="email" id="currentAccountEmail" readonly style="color:#64748b; background:#f1f5f9;"></div>
+                    </div>
+
+                    <div class="field-box">
+                        <span class="field-label">تغيير البريد الإلكتروني الجديد</span>
+                        <div class="input-wrapper"><input type="email" id="newAccountEmail" placeholder="أدخل البريد الجديد..."></div>
+                    </div>
+                    <div class="field-box">
+                        <span class="field-label">كلمة المرور الحالية (لتأكيد تغيير الإيميل)</span>
+                        <div class="input-wrapper"><input type="password" id="confirmEmailPass" placeholder="••••••••"></div>
+                    </div>
+                    <button class="btn-main" onclick="updateAccountEmail()" style="margin-bottom: 16px; background:#0284c7;">
+                        <i class="fa-solid fa-envelope"></i> تحديث البريد الإلكتروني
+                    </button>
+
+                    <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
+
+                    <div class="field-box">
+                        <span class="field-label">كلمة المرور الجديدة</span>
+                        <div class="input-wrapper"><input type="password" id="newAccountPassword" placeholder="••••••••"></div>
+                    </div>
+                    <button class="btn-main" onclick="updateAccountPassword()" style="margin-bottom: 16px;">
+                        <i class="fa-solid fa-key"></i> تغيير كلمة المرور
+                    </button>
+
+                    <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
+
+                    <div style="text-align: center;">
+                        <p style="font-size:0.8rem; color:#64748b; margin-bottom:10px;">هل نسيت كلمة المرور وتريد استرجاعها عبر رسالة البريد الإلكتروني؟</p>
+                        <button class="btn-main" onclick="sendPasswordResetEmailFromSettings()" style="background: #d97706;">
+                            <i class="fa-solid fa-paper-plane"></i> إرسال رابط إعادة التعيين للإيميل
+                        </button>
                     </div>
                 </div>
             </div>
@@ -589,7 +642,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.62</div>
+        <div class="footer">Clinic Master Network v16.63</div>
     </div>
 </div>
 
@@ -1107,6 +1160,7 @@
         document.getElementById('dictScreen').style.display = 'none';
         document.getElementById('networkScreen').style.display = 'none';
         document.getElementById('analyticsScreen').style.display = 'none';
+        document.getElementById('settingsScreen').style.display = 'none';
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -1375,7 +1429,7 @@
         const email = document.getElementById('authEmail').value;
         if (!email) { alert('Enter your email first.'); return; }
         auth.sendPasswordResetEmail(email)
-            .then(() => alert('Password reset email sent!'))
+            .then(() => alert('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني بنجاح!'))
             .catch(err => alert(err.message));
     }
 
@@ -1387,6 +1441,75 @@
             trashBin = [];
             document.getElementById('appContainer').style.display = 'none';
             document.getElementById('authScreen').style.display = 'flex';
+        });
+    }
+
+    function openAccountSettings() {
+        navigateTo('settingsScreen', 'إعدادات الحساب', 'تغيير الإيميل وكلمة المرور');
+        const user = auth.currentUser;
+        if (user) {
+            document.getElementById('currentAccountEmail').value = user.email || '';
+        }
+        document.getElementById('newAccountEmail').value = '';
+        document.getElementById('confirmEmailPass').value = '';
+        document.getElementById('newAccountPassword').value = '';
+    }
+
+    function updateAccountEmail() {
+        const newEmail = document.getElementById('newAccountEmail').value.trim();
+        const password = document.getElementById('confirmEmailPass').value;
+        const user = auth.currentUser;
+
+        if (!newEmail || !password) {
+            alert('الرجاء إدخال البريد الإلكتروني الجديد وكلمة المرور الحالية للتأكيد.');
+            return;
+        }
+
+        const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+        user.reauthenticateWithCredential(credential).then(() => {
+            user.updateEmail(newEmail).then(() => {
+                alert('تم تحديث البريد الإلكتروني بنجاح!');
+                document.getElementById('currentAccountEmail').value = newEmail;
+                document.getElementById('newAccountEmail').value = '';
+                document.getElementById('confirmEmailPass').value = '';
+            }).catch(error => {
+                alert('خطأ في تحديث الإيميل: ' + error.message);
+            });
+        }).catch(error => {
+            alert('كلمة المرور الحالية غير صحيحة أو حدث خطأ في المصادقة: ' + error.message);
+        });
+    }
+
+    function updateAccountPassword() {
+        const newPass = document.getElementById('newAccountPassword').value;
+        const user = auth.currentUser;
+
+        if (!newPass || newPass.length < 6) {
+            alert('الرجاء إدخال كلمة مرور جديدة تتكون من 6 أحرف أو أرقام على الأقل.');
+            return;
+        }
+
+        if (confirm('هل أنت متأكد من تغيير كلمة المرور؟')) {
+            user.updatePassword(newPass).then(() => {
+                alert('تم تغيير كلمة المرور بنجاح!');
+                document.getElementById('newAccountPassword').value = '';
+            }).catch(error => {
+                alert('حدث خطأ (قد يتطلب النظام إعادة تسجيل الدخول لتحديث كلمة المرور لأسباب أمنية): ' + error.message);
+            });
+        }
+    }
+
+    function sendPasswordResetEmailFromSettings() {
+        const user = auth.currentUser;
+        if (!user || !user.email) {
+            alert('لا يوجد بريد إلكتروني مسجل حالياً.');
+            return;
+        }
+
+        auth.sendPasswordResetEmail(user.email).then(() => {
+            alert(`تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك (${user.email}) بنجاح! تحقق من البريد الوارد أو غير المرغوب فيه.`);
+        }).catch(error => {
+            alert('حدث خطأ أثناء إرسال البريد: ' + error.message);
         });
     }
 
@@ -1890,7 +2013,6 @@
         if (el) el.focus();
     }
 
-    // دالة رفع وضغط الصور السريعة والمضمونة 100%
     function handleFileUpload(input, visitId) {
         if (input.files && input.files.length > 0) {
             const files = Array.from(input.files);
