@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.59</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.60</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -589,7 +589,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.59</div>
+        <div class="footer">Clinic Master Network v16.60</div>
     </div>
 </div>
 
@@ -1893,9 +1893,9 @@
     function handleFileUpload(input, visitId) {
         if (input.files && input.files.length > 0) {
             const files = Array.from(input.files);
-            alert(`جاري رفع ${files.length} صورة سحابياً، لطفاً انتظر قليلاً...`);
+            alert(`جاري معالجة ورفع ${files.length} صورة، لطفاً انتظر قليلاً...`);
 
-            let uploadedCount = 0;
+            let processedCount = 0;
             const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
             if (!patient) return;
             const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
@@ -1904,35 +1904,23 @@
             if (!visit.attachments) visit.attachments = [];
 
             files.forEach(file => {
-                const formData = new FormData();
-                formData.append("image", file);
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const base64Image = e.target.result;
+                    visit.attachments.push(base64Image);
+                    processedCount++;
 
-                fetch("https://api.imgbb.com/1/upload?key=6d207e02bde9756f77732d84a7e9378c", {
-                    method: "POST",
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(result => {
-                    uploadedCount++;
-                    if (result && result.success) {
-                        visit.attachments.push(result.data.url);
-                    }
-                    
-                    if (uploadedCount === files.length) {
+                    if (processedCount === files.length) {
                         savePatientToCloudAndLocal(patient);
                         renderVisits(patient.visits);
-                        alert('تم رفع وحفظ جميع الصور المحددة بنجاح!');
+                        alert(`تمت إضافة وتثبيت عدد (${files.length}) صورة بنجاح كامل ضمن المرفقات وحفظها في النظام!`);
                     }
-                })
-                .catch(error => {
-                    uploadedCount++;
-                    console.log("Upload error:", error);
-                    if (uploadedCount === files.length) {
-                        savePatientToCloudAndLocal(patient);
-                        renderVisits(patient.visits);
-                        alert('تم الانتهاء من عملية الرفع (تحقق من المرفقات).');
-                    }
-                });
+                };
+                reader.onerror = function() {
+                    processedCount++;
+                    console.log("Error reading file.");
+                };
+                reader.readAsDataURL(file);
             });
         }
     }
@@ -2000,38 +1988,22 @@
                         }
 
                         finalCanvas.toBlob(blob => {
-                            const scannedFile = new File([blob], "scanned_doc.jpg", { type: "image/jpeg" });
-                            const formData = new FormData();
-                            formData.append("image", scannedFile);
+                            const scannedReader = new FileReader();
+                            scannedReader.onload = function(resEvent) {
+                                const downloadURL = resEvent.target.result;
+                                const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+                                if (!patient) return;
+                                const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+                                if (!visit) return;
 
-                            alert('جاري معالجة ورفع المستند الممسوح سحابياً...');
+                                if (!visit.attachments) visit.attachments = [];
+                                visit.attachments.push(downloadURL);
 
-                            fetch("https://api.imgbb.com/1/upload?key=6d207e02bde9756f77732d84a7e9378c", {
-                                method: "POST",
-                                body: formData
-                            })
-                            .then(response => response.json())
-                            .then(result => {
-                                if (result && result.success) {
-                                    const downloadURL = result.data.url;
-                                    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-                                    if (!patient) return;
-                                    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-                                    if (!visit) return;
-
-                                    if (!visit.attachments) visit.attachments = [];
-                                    visit.attachments.push(downloadURL);
-
-                                    savePatientToCloudAndLocal(patient);
-                                    renderVisits(patient.visits);
-                                    alert('تم مسح وحفظ المستند سحابياً بنجاح!');
-                                } else {
-                                    alert('فشل رفع المستند الممسوح.');
-                                }
-                            })
-                            .catch(error => {
-                                alert('حدث خطأ أثناء الرفع: ' + error.message);
-                            });
+                                savePatientToCloudAndLocal(patient);
+                                renderVisits(patient.visits);
+                                alert('تم مسح وحفظ المستند الممسوح بنجاح!');
+                            };
+                            scannedReader.readAsDataURL(blob);
                         }, 'image/jpeg', 0.95);
                     };
                 };
