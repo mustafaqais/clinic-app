@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.48</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.49</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -536,8 +536,8 @@
                     </div>
                     <p style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin-bottom: 10px;" id="recPatientMeta"></p>
                     
-                    <button type="button" class="btn-main" onclick="exportPatientMedicalReportPDF()" style="background: #0284c7; padding: 10px; font-size: 0.85rem;">
-                        <i class="fa-solid fa-file-pdf"></i> Export Medical Report PDF (التقرير الشامل)
+                    <button type="button" class="btn-main" onclick="exportPatientMedicalReportPDF()" style="background: #0284c7; padding: 12px; font-size: 0.9rem;">
+                        <i class="fa-solid fa-file-pdf"></i> تصدير التقرير الطبي الشامل PDF (نظامي للـ APK)
                     </button>
                 </div>
 
@@ -574,7 +574,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.48</div>
+        <div class="footer">Clinic Master Network v16.49</div>
     </div>
 </div>
 
@@ -882,52 +882,57 @@
     </div>
 </div>
 
-<!-- حاوية مخفية لتوليد تقرير المريض الطبي الشامل عبر jsPDF -->
-<div id="pdfReportExportContainer" style="position: absolute; left: -9999px; top: 0; width: 700px; background: #ffffff; padding: 40px; font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; direction: ltr; text-align: left;">
-    <div id="pdfHeaderImgContainer" style="text-align: center; margin-bottom: 20px;">
-        <img id="pdfHeaderImage" src="" style="max-width: 100%; max-height: 120px; object-fit: contain; display: none;" alt="Clinic Header">
-        <div id="pdfHeaderFallback" style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: #0f172a; border-bottom: 3px solid #0d9488; padding-bottom: 8px;">CLINIC MASTER MEDICAL REPORT</div>
+<!-- حاوية التقرير الطبي الشامل المصممة خصيصاً لتكون نظامية وتمتد لعدة صفحات في الـ APK -->
+<div id="pdfReportExportContainer" style="position: absolute; left: -9999px; top: 0; width: 750px; background: #ffffff; padding: 45px; font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; direction: ltr; text-align: left;">
+    <div style="text-align: center; margin-bottom: 25px; border-bottom: 3px solid #0d9488; padding-bottom: 15px;">
+        <img id="pdfHeaderImage" src="" style="max-width: 100%; max-height: 130px; object-fit: contain; display: none; margin: 0 auto 10px auto;" alt="Clinic Header">
+        <div id="pdfHeaderFallback" style="font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 900; color: #0f172a; margin-bottom: 5px;">CLINIC MASTER MEDICAL REPORT</div>
+        <div style="font-size: 0.85rem; color: #0d9488; font-weight: 700; letter-spacing: 1px;">COMPREHENSIVE PATIENT CLINICAL HISTORY & RX RECORD</div>
+        <p style="font-size: 0.75rem; color: #64748b; margin-top: 4px;" id="pdfReportDateLabel">Generated on: —</p>
     </div>
 
-    <div style="text-align: center; margin-bottom: 25px;">
-        <h2 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #0d9488; margin-bottom: 4px;">Comprehensive Patient Report</h2>
-        <p style="font-size: 0.8rem; color: #64748b;" id="pdfReportDateLabel">Generated on: —</p>
-    </div>
-
-    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
-        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #0f172a; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">Patient Information</h3>
-        <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+    <!-- معلومات المريض الأساسية -->
+    <div style="background: #f8fafc; border: 2px solid #cbd5e1; border-radius: 14px; padding: 16px; margin-bottom: 25px;">
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; margin-bottom: 12px; border-bottom: 1.5px solid #cbd5e1; padding-bottom: 6px;"><i class="fa-solid fa-id-card"></i> Patient Profile</h3>
+        <table style="width: 100%; font-size: 0.88rem; border-collapse: collapse;">
             <tr>
-                <td style="padding: 4px 0; font-weight: 700; color: #475569; width: 25%;">Full Name:</td>
-                <td style="padding: 4px 0; font-weight: 600; color: #0f172a;" id="pdfRepName">—</td>
-                <td style="padding: 4px 0; font-weight: 700; color: #475569; width: 20%;">Age:</td>
-                <td style="padding: 4px 0; font-weight: 600; color: #0f172a;" id="pdfRepAge">—</td>
+                <td style="padding: 6px 0; font-weight: 700; color: #475569; width: 22%;">Full Name:</td>
+                <td style="padding: 6px 0; font-weight: 700; color: #0f172a;" id="pdfRepName">—</td>
+                <td style="padding: 6px 0; font-weight: 700; color: #475569; width: 18%;">Age:</td>
+                <td style="padding: 6px 0; font-weight: 700; color: #0f172a;" id="pdfRepAge">—</td>
             </tr>
             <tr>
-                <td style="padding: 4px 0; font-weight: 700; color: #475569;">Gender:</td>
-                <td style="padding: 4px 0; font-weight: 600; color: #0f172a;" id="pdfRepGender">—</td>
-                <td style="padding: 4px 0; font-weight: 700; color: #475569;">Marital Status:</td>
-                <td style="padding: 4px 0; font-weight: 600; color: #0f172a;" id="pdfRepMarital">—</td>
+                <td style="padding: 6px 0; font-weight: 700; color: #475569;">Gender:</td>
+                <td style="padding: 6px 0; font-weight: 700; color: #0f172a;" id="pdfRepGender">—</td>
+                <td style="padding: 6px 0; font-weight: 700; color: #475569;">Marital Status:</td>
+                <td style="padding: 6px 0; font-weight: 700; color: #0f172a;" id="pdfRepMarital">—</td>
             </tr>
             <tr>
-                <td style="padding: 4px 0; font-weight: 700; color: #475569;">Occupation:</td>
-                <td style="padding: 4px 0; font-weight: 600; color: #0f172a;" id="pdfRepJob">—</td>
-                <td style="padding: 4px 0; font-weight: 700; color: #475569;">Phone Number:</td>
-                <td style="padding: 4px 0; font-weight: 600; color: #0f172a;" id="pdfRepPhone">—</td>
+                <td style="padding: 6px 0; font-weight: 700; color: #475569;">Occupation:</td>
+                <td style="padding: 6px 0; font-weight: 700; color: #0f172a;" id="pdfRepJob">—</td>
+                <td style="padding: 6px 0; font-weight: 700; color: #475569;">Phone Number:</td>
+                <td style="padding: 6px 0; font-weight: 700; color: #0f172a;" id="pdfRepPhone">—</td>
             </tr>
         </table>
     </div>
 
+    <!-- سجل الزيارات والروشتات -->
     <div>
-        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #0f172a; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">Visits & Clinical History</h3>
-        <div id="pdfRepVisitsContainer" style="display: flex; flex-direction: column; gap: 14px;">
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; margin-bottom: 14px; border-bottom: 2px solid #0d9488; padding-bottom: 6px;"><i class="fa-solid fa-notes-medical"></i> Clinical Visits & Prescriptions Timeline</h3>
+        <div id="pdfRepVisitsContainer" style="display: flex; flex-direction: column; gap: 16px;">
             <!-- يتم تعبئته برمجياً -->
         </div>
     </div>
 
-    <div style="margin-top: 40px; text-align: right; border-top: 2px solid #e2e8f0; padding-top: 15px;">
-        <p style="font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: #0f172a;">Attending Doctor Signature</p>
-        <p style="font-size: 0.8rem; color: #64748b; margin-top: 25px;">Clinic Master System - Verified Medical Record</p>
+    <div style="margin-top: 50px; display: flex; justify-content: space-between; align-items: flex-end; border-top: 2px solid #cbd5e1; padding-top: 20px;">
+        <div>
+            <p style="font-size: 0.75rem; color: #64748b;">Clinic Master System — Certified Digital Medical Record</p>
+            <p style="font-size: 0.7rem; color: #94a3b8; margin-top: 2px;">This document is electronically generated and verified.</p>
+        </div>
+        <div style="text-align: right;">
+            <p style="font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 900; color: #0f172a;">Attending Doctor Signature</p>
+            <div style="height: 35px;"></div>
+        </div>
     </div>
 </div>
 
@@ -1373,12 +1378,11 @@
         }
     }
 
-    // توليد وتصدير تقرير المريض الطبي الشامل PDF
+    // دالة تصدير التقرير الطبي الشامل ونظامه المتوافق مع الـ APK والروابط
     function exportPatientMedicalReportPDF() {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
 
-        // تعبئة البيانات في الحاوية المخفية
         document.getElementById('pdfRepName').innerText = patient.name;
         document.getElementById('pdfRepAge').innerText = patient.age;
         document.getElementById('pdfRepGender').innerText = patient.gender || 'N/A';
@@ -1391,7 +1395,7 @@
         const headerFallback = document.getElementById('pdfHeaderFallback');
         if (currentDoctorRxImage) {
             headerImg.src = currentDoctorRxImage;
-            headerImg.style.display = 'inline-block';
+            headerImg.style.display = 'block';
             headerFallback.style.display = 'none';
         } else {
             headerImg.style.display = 'none';
@@ -1406,42 +1410,47 @@
         } else {
             visitsContainer.innerHTML = visits.map((v, idx) => {
                 const mh = v.medHistory || {};
-                let summaryParts = [...(mh.chronicDiseases || [])];
-                if (mh.chronicOther) summaryParts.push(mh.chronicOther);
-                if (mh.drugAllergy) summaryParts.push(`Allergy: ${mh.drugAllergy}`);
-                if (mh.notes) summaryParts.push(mh.notes);
-                const mhText = summaryParts.length > 0 ? summaryParts.join(' | ') : 'None specified';
-
+                let chronicList = [...(mh.chronicDiseases || [])];
+                if (mh.chronicOther) chronicList.push(mh.chronicOther);
+                
                 const bpText = (v.bpSystolic && v.bpDiastolic) ? `${v.bpSystolic}/${v.bpDiastolic} mmHg` : 'N/A';
-                const bmiText = v.bmiScore ? `BMI: ${v.bmiScore} (${v.bmiWeight}kg/${v.bmiHeight}cm)` : 'N/A';
+                const bmiText = v.bmiScore ? `BMI: ${v.bmiScore} (${v.bmiWeight}kg / ${v.bmiHeight}cm)` : 'N/A';
 
                 return `
-                    <div style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 12px; margin-bottom: 10px;">
-                        <div style="font-size: 0.9rem; font-weight: 700; color: #0d9488; margin-bottom: 6px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 4px;">
-                            Visit #${visits.length - idx} — Date: ${v.date || 'N/A'}
+                    <div style="background: #ffffff; border: 2px solid #94a3b8; border-radius: 14px; padding: 18px; margin-bottom: 18px; page-break-inside: avoid;">
+                        <div style="background: #0f172a; color: #ffffff; padding: 8px 12px; border-radius: 8px; font-size: 0.95rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                            <span>Visit #${visits.length - idx}</span>
+                            <span>Date: ${v.date || 'N/A'}</span>
                         </div>
-                        <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
-                            <tr>
-                                <td style="padding: 2px 0; font-weight: 700; color: #475569; width: 22%;">Vitals:</td>
-                                <td style="padding: 2px 0; color: #0f172a;">BP: ${bpText} | SpO2: ${v.spo2 || 'N/A'}% | HR: ${v.hr || 'N/A'}bpm | ${bmiText}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 2px 0; font-weight: 700; color: #475569;">Med History:</td>
-                                <td style="padding: 2px 0; color: #0f172a;">${mhText}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 2px 0; font-weight: 700; color: #475569;">Labs / Scans:</td>
-                                <td style="padding: 2px 0; color: #0f172a;">Labs: ${v.labs || 'None'} | Scans: ${v.scans || 'None'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 2px 0; font-weight: 700; color: #475569;">Medications:</td>
-                                <td style="padding: 2px 0; font-weight: 700; color: #b91c1c; white-space: pre-wrap;">${v.drugs || 'None'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 2px 0; font-weight: 700; color: #475569;">Diagnosis/Notes:</td>
-                                <td style="padding: 2px 0; color: #0f172a;">${v.notes || 'None'}</td>
-                            </tr>
-                        </table>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; font-size: 0.82rem;">
+                            <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px; border-radius: 8px;">
+                                <strong style="color: #0284c7; display: block; margin-bottom: 2px;">Vital Signs & BMI:</strong>
+                                BP: ${bpText}<br>
+                                SpO2: ${v.spo2 || 'N/A'}% | HR: ${v.hr || 'N/A'} bpm | RR: ${v.rr || 'N/A'} cpm<br>
+                                ${bmiText}
+                            </div>
+                            <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 8px; border-radius: 8px;">
+                                <strong style="color: #0d9488; display: block; margin-bottom: 2px;">Medical History:</strong>
+                                Chronic: ${chronicList.length > 0 ? chronicList.join(', ') : 'None'}<br>
+                                Allergy: ${mh.drugAllergy || 'None'}<br>
+                                Smoking: ${mh.smoking || 'N/A'}
+                            </div>
+                        </div>
+
+                        <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.82rem;">
+                            <div style="margin-bottom: 6px;"><strong>Lab Tests:</strong> ${v.labs || 'None specified'}</div>
+                            <div><strong>Radiology & Scans:</strong> ${v.scans || 'None specified'}</div>
+                        </div>
+
+                        <div style="background: #fff5f5; border: 1.5px dashed #f87171; padding: 12px; border-radius: 8px; margin-bottom: 10px;">
+                            <strong style="color: #b91c1c; font-size: 0.9rem; font-family: 'Playfair Display', serif; display: block; margin-bottom: 4px;">RX — Prescribed Medications:</strong>
+                            <div style="color: #000; font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; white-space: pre-wrap; line-height: 1.5;">${v.drugs || '—'}</div>
+                        </div>
+
+                        <div style="font-size: 0.8rem; color: #334155; background: #f1f5f9; padding: 8px; border-radius: 8px;">
+                            <strong>Diagnosis & Clinical Notes:</strong> ${v.notes || 'None'}
+                        </div>
                     </div>
                 `;
             }).join('');
@@ -1474,15 +1483,23 @@
                 heightLeft -= pageHeight;
             }
 
+            // التوافق التام مع الـ APK والروابط عبر فتح نافذة Blob أو تحميل مباشر آمن
             try {
-                pdf.save(`Medical_Report_${patient.name.replace(/\s+/g, '_')}_${Date.now()}.pdf`);
-            } catch (e) {
                 const pdfBlob = pdf.output('blob');
                 const blobUrl = URL.createObjectURL(pdfBlob);
-                const link = document.createElement('a');
-                link.href = blobUrl;
-                link.download = `Medical_Report_${patient.name.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
-                link.click();
+                
+                const openedWindow = window.open(blobUrl, '_blank');
+                if (!openedWindow) {
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.target = '_blank';
+                    link.download = `Medical_Report_${patient.name.replace(/\s+/g, '_')}.pdf`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+            } catch (e) {
+                pdf.save(`Medical_Report_${patient.name.replace(/\s+/g, '_')}.pdf`);
             }
         }).catch(err => {
             alert('حدث خطأ أثناء تصدير التقرير الطبي: ' + err.message);
@@ -2340,14 +2357,18 @@
             }
 
             try {
-                pdf.save(`Prescription_${Date.now()}.pdf`);
-            } catch (e) {
                 const pdfBlob = pdf.output('blob');
                 const blobUrl = URL.createObjectURL(pdfBlob);
-                const link = document.createElement('a');
-                link.href = blobUrl;
-                link.download = `Prescription_${Date.now()}.pdf`;
-                link.click();
+                const openedWindow = window.open(blobUrl, '_blank');
+                if (!openedWindow) {
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.target = '_blank';
+                    link.download = `Prescription_${Date.now()}.pdf`;
+                    link.click();
+                }
+            } catch (e) {
+                pdf.save(`Prescription_${Date.now()}.pdf`);
             }
         }).catch(err => {
             alert('حدث خطأ أثناء توليد ملف الـ PDF: ' + err.message);
