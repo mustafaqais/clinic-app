@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.58</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.59</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -589,7 +589,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.58</div>
+        <div class="footer">Clinic Master Network v16.59</div>
     </div>
 </div>
 
@@ -1891,38 +1891,48 @@
     }
 
     function handleFileUpload(input, visitId) {
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            const formData = new FormData();
-            formData.append("image", file);
+        if (input.files && input.files.length > 0) {
+            const files = Array.from(input.files);
+            alert(`جاري رفع ${files.length} صورة سحابياً، لطفاً انتظر قليلاً...`);
 
-            alert('جاري رفع الصورة سحابياً، لطفاً انتظر قليلاً...');
+            let uploadedCount = 0;
+            const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+            if (!patient) return;
+            const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+            if (!visit) return;
 
-            fetch("https://api.imgbb.com/1/upload?key=6d207e02bde9756f77732d84a7e9378c", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result && result.success) {
-                    const downloadURL = result.data.url;
-                    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-                    if (!patient) return;
-                    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-                    if (!visit) return;
+            if (!visit.attachments) visit.attachments = [];
 
-                    if (!visit.attachments) visit.attachments = [];
-                    visit.attachments.push(downloadURL);
+            files.forEach(file => {
+                const formData = new FormData();
+                formData.append("image", file);
 
-                    savePatientToCloudAndLocal(patient);
-                    renderVisits(patient.visits);
-                    alert('تم رفع وحفظ المرفق سحابياً بنجاح!');
-                } else {
-                    alert('فشل الرفع السحابي، حاول مرة أخرى.');
-                }
-            })
-            .catch(error => {
-                alert('حدث خطأ أثناء الاتصال بالسحاب: ' + error.message);
+                fetch("https://api.imgbb.com/1/upload?key=6d207e02bde9756f77732d84a7e9378c", {
+                    method: "POST",
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(result => {
+                    uploadedCount++;
+                    if (result && result.success) {
+                        visit.attachments.push(result.data.url);
+                    }
+                    
+                    if (uploadedCount === files.length) {
+                        savePatientToCloudAndLocal(patient);
+                        renderVisits(patient.visits);
+                        alert('تم رفع وحفظ جميع الصور المحددة بنجاح!');
+                    }
+                })
+                .catch(error => {
+                    uploadedCount++;
+                    console.log("Upload error:", error);
+                    if (uploadedCount === files.length) {
+                        savePatientToCloudAndLocal(patient);
+                        renderVisits(patient.visits);
+                        alert('تم الانتهاء من عملية الرفع (تحقق من المرفقات).');
+                    }
+                });
             });
         }
     }
@@ -2892,8 +2902,8 @@
                     </div>
                     <div style="display: flex; gap: 6px; margin-top: 6px;">
                         <label class="btn-upload-attach" style="flex: 1;">
-                            <i class="fa-solid fa-cloud-arrow-up"></i> Upload
-                            <input type="file" accept="image/*" style="display: none;" onchange="handleFileUpload(this, ${vId})">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Upload Multiple
+                            <input type="file" accept="image/*" multiple style="display: none;" onchange="handleFileUpload(this, ${vId})">
                         </label>
                         <button type="button" class="btn-scan-attach" onclick="handleScannerScan(${vId})" style="flex: 1;">
                             <i class="fa-solid fa-print"></i> Scan Document
