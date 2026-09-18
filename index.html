@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.56</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.57</title>
     
     <!-- أيقونة الموقع للحاسوب والأنظمة المختلفة -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -587,7 +587,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.56</div>
+        <div class="footer">Clinic Master Network v16.57</div>
     </div>
 </div>
 
@@ -856,7 +856,7 @@
         <div id="rxCanvasContainer" class="rx-canvas-container">
             <div id="dragBoxPatientDetails" class="draggable-box" style="top: 20px; left: 15px;">
                 <div class="box-font-controls">
-                    <span>Patient Info Font:</span>
+                    <span>Name Font:</span>
                     <div style="display:flex; gap:3px;">
                         <button type="button" onclick="changeBoxFontSize('patientDetails', -1)">-</button>
                         <button type="button" onclick="changeBoxFontSize('patientDetails', 1)">+</button>
@@ -906,14 +906,9 @@
             <button id="rxSaveLayoutBtn" class="btn-main" onclick="saveRxLayoutPositions()" style="display: none; background: #0284c7;">
                 <i class="fa-solid fa-floppy-disk"></i> Save RX Layout & Fonts
             </button>
-            <div style="display: flex; gap: 8px;">
-                <button class="btn-main" onclick="openPrescriptionPDF()" style="font-family: 'Plus Jakarta Sans', sans-serif; background: #0284c7; flex: 1;">
-                    <i class="fa-solid fa-file-pdf"></i> Open PDF
-                </button>
-                <button class="btn-main" onclick="downloadPrescriptionImage()" style="font-family: 'Plus Jakarta Sans', sans-serif; background: #0d9488; flex: 1;">
-                    <i class="fa-solid fa-download"></i> Save as Image
-                </button>
-            </div>
+            <button class="btn-main" onclick="openPrescriptionPDF()" style="font-family: 'Plus Jakarta Sans', sans-serif; background: #0284c7; width: 100%;">
+                <i class="fa-solid fa-file-pdf"></i> حفظ PDF (Save as PDF)
+            </button>
         </div>
     </div>
 </div>
@@ -1669,7 +1664,6 @@
             const start = textarea.selectionStart;
             const end = textarea.selectionEnd;
             const val = textarea.value;
-            // إدراج سطرين فارغين (أي ضغطتي إنتر) لترك مسافة واضحة بين علاج وعلاج
             textarea.value = val.substring(0, start) + '\n\n' + val.substring(end);
             textarea.selectionStart = textarea.selectionEnd = start + 2;
             autoResizeTextarea(textarea);
@@ -1873,7 +1867,7 @@
                 }
             })
             .catch(error => {
-                alert('حدث خطأ في الاتصال بالسحاب: ' + error.message);
+                alert('حدث خطأ أثناء الاتصال بالسحاب: ' + error.message);
             });
         }
     }
@@ -2312,7 +2306,8 @@
             container.insertBefore(placeholder, container.firstChild);
         }
 
-        document.getElementById('rxDragPatientDetailsText').innerText = `Patient: ${patient.name}   |   Age: ${patient.age} yrs`;
+        // تعديل كلمة بيشنت إلى نيم (Name)
+        document.getElementById('rxDragPatientDetailsText').innerText = `Name: ${patient.name}   |   Age: ${patient.age} yrs`;
         document.getElementById('rxDragDateText').innerText = `Date: ${visit.date || getTodayFormatted()}`;
         
         let bpVal = (visit.bpSystolic && visit.bpDiastolic) ? `${visit.bpSystolic}/${visit.bpDiastolic} mmHg` : '____ / ____ mmHg';
@@ -2470,26 +2465,7 @@
 
             pdf.save(`Prescription_${Date.now()}.pdf`);
         }).catch(err => {
-            alert('حدث خطأ أثناء توليد ملف الـ PDF: ' + err.message);
-        });
-    }
-
-    function downloadPrescriptionImage() {
-        const container = document.getElementById('rxCanvasContainer');
-        const wasConfig = isConfigMode;
-        if (wasConfig) {
-            isConfigMode = false;
-            updateConfigModeUI();
-        }
-
-        html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = `Prescription-${Date.now()}.png`;
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-            alert('تم حفظ الروشتة كصورة في جهازك بنجاح!');
-        }).catch(err => {
-            alert('حدث خطأ أثناء حفظ الصورة: ' + err.message);
+            alert('حدث خطأ أثناء حفظ الروشتة PDF: ' + err.message);
         });
     }
 
