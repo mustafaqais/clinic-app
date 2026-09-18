@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.51</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.52</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -574,7 +574,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.51</div>
+        <div class="footer">Clinic Master Network v16.52</div>
     </div>
 </div>
 
@@ -1374,7 +1374,6 @@
         }
     }
 
-    // دالة التخزين المباشر لملف PDF بدون مشاكل في الـ APK
     function exportPatientMedicalReportPDF() {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
@@ -1467,7 +1466,6 @@
                 heightLeft -= pageHeight;
             }
 
-            // حفظ الملف مباشرة بكل سلاسة ودون الحاجة لضغطات متعددة
             pdf.save(`Medical_Report_${patient.name.replace(/\s+/g, '_')}.pdf`);
         }).catch(err => {
             alert('حدث خطأ أثناء تحميل التقرير الطبي: ' + err.message);
@@ -1739,22 +1737,42 @@
         if (el) el.focus();
     }
 
+    // دالة رفع المرفقات سحابياً ومجانياً عبر خدمة ImgBB العامة المدمجة
     function handleFileUpload(input, visitId) {
         if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-                if (!patient) return;
-                const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-                if (!visit) return;
+            const file = input.files[0];
+            const formData = new FormData();
+            formData.append("image", file);
 
-                if (!visit.attachments) visit.attachments = [];
-                visit.attachments.push(e.target.result);
+            alert('جاري رفع الصورة سحابياً، لطفاً انتظر قليلاً...');
 
-                savePatientToCloudAndLocal(patient);
-                renderVisits(patient.visits);
-            };
-            reader.readAsDataURL(input.files[0]);
+            // استخدام مفتاح عام مجاني لرفع الصور وتوليد روابط سحابية مباشرة
+            fetch("https://api.imgbb.com/1/upload?key=6d207e02bde9756f77732d84a7e9378c", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result && result.success) {
+                    const downloadURL = result.data.url;
+                    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+                    if (!patient) return;
+                    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+                    if (!visit) return;
+
+                    if (!visit.attachments) visit.attachments = [];
+                    visit.attachments.push(downloadURL);
+
+                    savePatientToCloudAndLocal(patient);
+                    renderVisits(patient.visits);
+                    alert('تم رفع وحفظ المرفق سحابياً بنجاح!');
+                } else {
+                    alert('فشل الرفع السحابي، حاول مرة أخرى.');
+                }
+            })
+            .catch(error => {
+                alert('حدث خطأ في الاتصال بالسحاب: ' + error.message);
+            });
         }
     }
 
@@ -1820,18 +1838,40 @@
                             finalCtx.drawImage(img, 0, 0);
                         }
 
-                        const scannedDataUrl = finalCanvas.toDataURL('image/jpeg', 0.95);
+                        finalCanvas.toBlob(blob => {
+                            const scannedFile = new File([blob], "scanned_doc.jpg", { type: "image/jpeg" });
+                            const formData = new FormData();
+                            formData.append("image", scannedFile);
 
-                        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-                        if (!patient) return;
-                        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-                        if (!visit) return;
+                            alert('جاري معالجة ورفع المستند الممسوح سحابياً...');
 
-                        if (!visit.attachments) visit.attachments = [];
-                        visit.attachments.push(scannedDataUrl);
+                            fetch("https://api.imgbb.com/1/upload?key=6d207e02bde9756f77732d84a7e9378c", {
+                                method: "POST",
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(result => {
+                                if (result && result.success) {
+                                    const downloadURL = result.data.url;
+                                    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+                                    if (!patient) return;
+                                    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+                                    if (!visit) return;
 
-                        savePatientToCloudAndLocal(patient);
-                        renderVisits(patient.visits);
+                                    if (!visit.attachments) visit.attachments = [];
+                                    visit.attachments.push(downloadURL);
+
+                                    savePatientToCloudAndLocal(patient);
+                                    renderVisits(patient.visits);
+                                    alert('تم مسح وحفظ المستند سحابياً بنجاح!');
+                                } else {
+                                    alert('فشل رفع المستند الممسوح.');
+                                }
+                            })
+                            .catch(error => {
+                                alert('حدث خطأ أثناء الرفع: ' + error.message);
+                            });
+                        }, 'image/jpeg', 0.95);
                     };
                 };
                 reader.readAsDataURL(file);
