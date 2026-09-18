@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.45</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.46</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -516,7 +516,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.45</div>
+        <div class="footer">Clinic Master Network v16.46</div>
     </div>
 </div>
 
@@ -1199,16 +1199,55 @@
         document.getElementById('networkScreen').style.display = 'none';
     }
 
-    // دوال حاسبة الـ BMI الاختيارية
-    function openBmiCalculator() {
-        document.getElementById('bmiWeight').value = '';
-        document.getElementById('bmiHeight').value = '';
-        document.getElementById('bmiScoreDisplay').innerText = '—';
-        document.getElementById('bmiBadgeContainer').innerHTML = '<span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>';
+    // دوال حاسبة الـ BMI مع الحفظ التلقائي في الزيارة الحالية
+    function openBmiCalculator(visitId) {
+        currentVisitIdForModal = visitId;
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+        if (!visit) return;
+
+        document.getElementById('bmiWeight').value = visit.bmiWeight || '';
+        document.getElementById('bmiHeight').value = visit.bmiHeight || '';
+        
+        if (visit.bmiWeight && visit.bmiHeight) {
+            calculateBmiLive();
+        } else {
+            document.getElementById('bmiScoreDisplay').innerText = '—';
+            document.getElementById('bmiBadgeContainer').innerHTML = '<span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>';
+        }
+
         document.getElementById('bmiCalculatorModal').style.display = 'flex';
     }
 
     function closeBmiModal() {
+        if (currentVisitIdForModal && currentPatientId) {
+            const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+            if (patient) {
+                const visit = patient.visits.find(v => Number(v.visitId) === Number(currentVisitIdForModal));
+                if (visit) {
+                    const w = document.getElementById('bmiWeight').value;
+                    const h = document.getElementById('bmiHeight').value;
+                    visit.bmiWeight = w;
+                    visit.bmiHeight = h;
+
+                    if (w && h && Number(h) > 0) {
+                        const hM = Number(h) / 100;
+                        visit.bmiScore = (Number(w) / (hM * hM)).toFixed(1);
+                    } else {
+                        visit.bmiScore = '';
+                    }
+
+                    savePatientToCloudAndLocal(patient);
+
+                    // تحديث النص الظاهري في زر الـ BMI داخل بطاقة الزيارة
+                    const bmiLabel = document.getElementById(`bmi-label-${currentVisitIdForModal}`);
+                    if (bmiLabel) {
+                        bmiLabel.innerText = visit.bmiScore ? `BMI: ${visit.bmiScore} (${visit.bmiWeight}kg / ${visit.bmiHeight}cm)` : 'Open BMI (Body Mass Index) Calculator';
+                    }
+                }
+            }
+        }
         document.getElementById('bmiCalculatorModal').style.display = 'none';
     }
 
@@ -2212,7 +2251,10 @@
                     scans: '',
                     drugs: '— ',
                     notes: '',
-                    attachments: []
+                    attachments: [],
+                    bmiWeight: '',
+                    bmiHeight: '',
+                    bmiScore: ''
                 }
             ]
         };
@@ -2306,6 +2348,8 @@
             const mhStatusText = summaryParts.length > 0 ? summaryParts.join(' | ') : 'Tap to Configure Medical History';
             const attachments = v.attachments || [];
             const visitDateVal = v.date || getTodayFormatted();
+            
+            const bmiText = v.bmiScore ? `BMI: ${v.bmiScore} (${v.bmiWeight}kg / ${v.bmiHeight}cm)` : 'Open BMI (Body Mass Index) Calculator';
 
             return `
             <div class="visit-card" id="visit-${vId}" data-visit-id="${vId}">
@@ -2324,8 +2368,8 @@
 
                 <div class="field-box">
                     <span class="field-label"><i class="fa-solid fa-weight-scale" style="color:#0284c7;"></i> Optional Tools</span>
-                    <button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator()">
-                        <span><i class="fa-solid fa-calculator"></i> Open BMI (Body Mass Index) Calculator</span>
+                    <button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(${vId})">
+                        <span id="bmi-label-${vId}"><i class="fa-solid fa-calculator"></i> ${bmiText}</span>
                         <i class="fa-solid fa-arrow-up-right-from-square"></i>
                     </button>
                 </div>
@@ -2475,7 +2519,10 @@
             scans: '',
             drugs: '— ',
             notes: '',
-            attachments: []
+            attachments: [],
+            bmiWeight: '',
+            bmiHeight: '',
+            bmiScore: ''
         };
 
         if (!Array.isArray(patient.visits)) patient.visits = [];
