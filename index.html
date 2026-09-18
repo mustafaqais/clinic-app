@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.57</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.58</title>
     
-    <!-- أيقونة الموقع للحاسوب والأنظمة المختلفة -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
-    <!-- أيقونة الشاشة الرئيسية لأجهزة الآيفون والآيباد -->
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon-precomposed" href="https://i.ibb.co/68n8910/1000111840.png">
 
@@ -38,6 +36,9 @@
 
         .founder-panel { background: #f0fdfa; border: 2px dashed #0d9488; border-radius: 16px; padding: 14px; margin-bottom: 14px; text-align: center; }
         .founder-code-display { font-size: 1.3rem; font-weight: 900; color: #0f766e; letter-spacing: 2px; margin: 6px 0; background: #fff; padding: 6px; border-radius: 8px; border: 1px solid #ccfbf1; }
+
+        .network-status-bar { background: #fef3c7; color: #b45309; font-size: 0.72rem; font-weight: 700; text-align: center; padding: 4px; display: none; }
+        .network-status-bar.offline { display: block; background: #fee2e2; color: #b91c1c; }
 
         .header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 35px 20px 30px 20px; text-align: center; border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
         .header-icon { font-size: 42px; color: #0d9488; margin-bottom: 10px; }
@@ -239,6 +240,7 @@
 <body>
 
 <div class="mobile-container">
+    <div id="networkStatusBar" class="network-status-bar">⚠️ وضع عدم الاتصال (Offline Mode) - يتم الحفظ محلياً وسيتم المزامنة تلقائياً عند عودة الإنترنت</div>
 
     <div id="authScreen" class="auth-screen">
         <div class="activ-icon"><i class="fa-solid fa-user-lock"></i></div>
@@ -587,11 +589,10 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.57</div>
+        <div class="footer">Clinic Master Network v16.58</div>
     </div>
 </div>
 
-<!-- Modal نافذة الدعم الفني والتواصل -->
 <div id="supportModal" class="modal-overlay">
     <div class="modal-body" style="max-width: 400px; text-align: center;">
         <div class="modal-header">
@@ -614,7 +615,6 @@
     </div>
 </div>
 
-<!-- Modal حاسبة مؤشر كتلة الجسم (BMI) -->
 <div id="bmiCalculatorModal" class="modal-overlay">
     <div class="modal-body">
         <div class="modal-header">
@@ -647,7 +647,6 @@
     </div>
 </div>
 
-<!-- Modal تعديل معلومات المريض -->
 <div id="editPatientModal" class="modal-overlay">
     <div class="modal-body">
         <div class="modal-header">
@@ -913,7 +912,6 @@
     </div>
 </div>
 
-<!-- حاوية التقرير الطبي الشامل المخفية -->
 <div id="pdfReportExportContainer" style="position: absolute; left: -9999px; top: 0; width: 750px; background: #ffffff; padding: 40px; font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; direction: ltr; text-align: left;">
     <div style="text-align: center; border-bottom: 2.5px solid #0d9488; padding-bottom: 15px; margin-bottom: 20px;">
         <div style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: #0f172a; margin-bottom: 4px;">CLINIC MASTER MEDICAL RECORD</div>
@@ -994,6 +992,37 @@
         notes: ["Upper Respiratory Tract Infection", "Acute Gastroenteritis"],
         mh_history: ["Appendectomy", "Cholecystectomy", "Penicillin Allergy", "Cesarean Section"]
     };
+
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    function updateOnlineStatus() {
+        const bar = document.getElementById('networkStatusBar');
+        if (!navigator.onLine) {
+            bar.classList.add('offline');
+            bar.innerText = "⚠️ وضع عدم الاتصال (Offline) - يتم الحفظ محلياً وسيتم المزامنة عند عودة الإنترنت";
+        } else {
+            bar.classList.remove('offline');
+            bar.style.display = 'none';
+            syncLocalDataToCloud();
+        }
+    }
+
+    function syncLocalDataToCloud() {
+        if (!currentUserId || !navigator.onLine) return;
+        
+        patients.forEach(patient => {
+            db.collection('users_data').doc(currentUserId).collection('patients').doc(String(patient.id)).set(patient)
+                .catch(err => console.log("Sync error:", err));
+        });
+        
+        db.collection('users_data').doc(currentUserId).set({
+            rxImage: currentDoctorRxImage,
+            dictionary: medicalDict,
+            trashBin: trashBin,
+            updatedAt: new Date().toISOString()
+        }, { merge: true }).catch(err => console.log("Settings sync error:", err));
+    }
 
     function generateUniqueCode() {
         const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -1082,6 +1111,11 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('pDate').value = getTodayFormatted();
+        if (!navigator.onLine) {
+            const bar = document.getElementById('networkStatusBar');
+            bar.classList.add('offline');
+            bar.style.display = 'block';
+        }
 
         auth.onAuthStateChanged(user => {
             if (user) {
@@ -1089,53 +1123,59 @@
                 patients = JSON.parse(localStorage.getItem(`clinic_patients_${user.uid}`)) || patients;
                 trashBin = JSON.parse(localStorage.getItem(`clinic_trash_${user.uid}`)) || trashBin;
 
-                db.collection('users_data').doc(user.uid).get().then(doc => {
-                    if (doc.exists) {
-                        const data = doc.data();
-                        if (data.rxImage) {
-                            currentDoctorRxImage = data.rxImage;
-                            localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
+                if (navigator.onLine) {
+                    db.collection('users_data').doc(user.uid).get().then(doc => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            if (data.rxImage) {
+                                currentDoctorRxImage = data.rxImage;
+                                localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
+                            }
+                            if (data.dictionary) {
+                                medicalDict = data.dictionary;
+                                if (!medicalDict.mh_history) medicalDict.mh_history = ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"];
+                                localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
+                            }
+                            if (data.trashBin) {
+                                trashBin = data.trashBin;
+                                localStorage.setItem(`clinic_trash_${user.uid}`, JSON.stringify(trashBin));
+                            }
                         }
-                        if (data.dictionary) {
-                            medicalDict = data.dictionary;
-                            if (!medicalDict.mh_history) medicalDict.mh_history = ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"];
-                            localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
-                        }
-                        if (data.trashBin) {
-                            trashBin = data.trashBin;
-                            localStorage.setItem(`clinic_trash_${user.uid}`, JSON.stringify(trashBin));
-                        }
-                    }
-                }).catch(err => console.log(err));
+                    }).catch(err => console.log(err));
 
-                db.collection('users_data').doc(user.uid).collection('patients').get().then(snapshot => {
-                    if (!snapshot.empty) {
-                        let cloudPatients = [];
-                        snapshot.forEach(doc => {
-                            cloudPatients.push(doc.data());
-                        });
-                        patients = cloudPatients;
-                        localStorage.setItem(`clinic_patients_${user.uid}`, JSON.stringify(patients));
-                    }
-                }).catch(err => console.log(err));
+                    db.collection('users_data').doc(user.uid).collection('patients').get().then(snapshot => {
+                        if (!snapshot.empty) {
+                            let cloudPatients = [];
+                            snapshot.forEach(doc => {
+                                cloudPatients.push(doc.data());
+                            });
+                            patients = cloudPatients;
+                            localStorage.setItem(`clinic_patients_${user.uid}`, JSON.stringify(patients));
+                        }
+                    }).catch(err => console.log(err));
+                }
 
                 if (user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
                     setupFounderInterface();
                 } else {
                     const isActivated = localStorage.getItem(`activated_${user.uid}`) === 'true';
                     if (!isActivated) {
-                        db.collection('network_hierarchy').doc(user.uid).get().then(docRef => {
-                            if (docRef.exists && docRef.data().isActivated === true) {
-                                localStorage.setItem(`activated_${user.uid}`, 'true');
-                                setupClientInterface();
-                            } else {
+                        if (navigator.onLine) {
+                            db.collection('network_hierarchy').doc(user.uid).get().then(docRef => {
+                                if (docRef.exists && docRef.data().isActivated === true) {
+                                    localStorage.setItem(`activated_${user.uid}`, 'true');
+                                    setupClientInterface();
+                                } else {
+                                    document.getElementById('authScreen').style.display = 'none';
+                                    document.getElementById('activationScreen').style.display = 'flex';
+                                }
+                            }).catch(() => {
                                 document.getElementById('authScreen').style.display = 'none';
                                 document.getElementById('activationScreen').style.display = 'flex';
-                            }
-                        }).catch(() => {
-                            document.getElementById('authScreen').style.display = 'none';
-                            document.getElementById('activationScreen').style.display = 'flex';
-                        });
+                            });
+                        } else {
+                            setupClientInterface();
+                        }
                     } else {
                         setupClientInterface();
                     }
@@ -1171,8 +1211,10 @@
         localStorage.setItem(`clinic_patients_${currentUserId}`, JSON.stringify(patients));
         localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
-        db.collection('users_data').doc(currentUserId).collection('patients').doc(String(patientObj.id)).set(patientObj)
-            .catch(err => console.log("Cloud save error:", err));
+        if (navigator.onLine) {
+            db.collection('users_data').doc(currentUserId).collection('patients').doc(String(patientObj.id)).set(patientObj)
+                .catch(err => console.log("Cloud save error:", err));
+        }
     }
 
     function saveTrashToCloudAndLocal() {
@@ -1180,10 +1222,12 @@
         localStorage.setItem(`clinic_trash_${currentUserId}`, JSON.stringify(trashBin));
         localStorage.setItem('clinic_trash', JSON.stringify(trashBin));
 
-        db.collection('users_data').doc(currentUserId).set({
-            trashBin: trashBin,
-            updatedAt: new Date().toISOString()
-        }, { merge: true }).catch(err => console.log("Trash sync error:", err));
+        if (navigator.onLine) {
+            db.collection('users_data').doc(currentUserId).set({
+                trashBin: trashBin,
+                updatedAt: new Date().toISOString()
+            }, { merge: true }).catch(err => console.log("Trash sync error:", err));
+        }
     }
 
     function saveSettingsToCloudAndLocal() {
@@ -1191,11 +1235,13 @@
         localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
         localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
 
-        db.collection('users_data').doc(currentUserId).set({
-            rxImage: currentDoctorRxImage,
-            dictionary: medicalDict,
-            updatedAt: new Date().toISOString()
-        }, { merge: true }).catch(err => console.log("Settings save error:", err));
+        if (navigator.onLine) {
+            db.collection('users_data').doc(currentUserId).set({
+                rxImage: currentDoctorRxImage,
+                dictionary: medicalDict,
+                updatedAt: new Date().toISOString()
+            }, { merge: true }).catch(err => console.log("Settings save error:", err));
+        }
     }
 
     function getTodayFormatted() {
@@ -1308,8 +1354,12 @@
         document.getElementById('networkMenuCard').style.display = 'flex';
         navigateTo('mainScreen');
 
-        const activeCode = await getOrInitActiveCode();
-        document.getElementById('dynamicFounderCode').innerText = activeCode;
+        if (navigator.onLine) {
+            const activeCode = await getOrInitActiveCode();
+            document.getElementById('dynamicFounderCode').innerText = activeCode;
+        } else {
+            document.getElementById('dynamicFounderCode').innerText = "OFFLINE-MODE";
+        }
     }
 
     function setupClientInterface() {
@@ -1375,6 +1425,11 @@
         navigateTo('networkScreen', 'Network Database', 'Users & Credentials Control');
         const container = document.getElementById('networkTreeContainer');
         container.innerHTML = '<p style="text-align:center; color:#64748b;">Loading network credentials...</p>';
+
+        if (!navigator.onLine) {
+            container.innerHTML = '<p style="text-align:center; color:#b91c1c;">عذراً، يتطلب عرض شبكة المستخدمين اتصالاً بالإنترنت.</p>';
+            return;
+        }
 
         db.collection('network_hierarchy').get().then(snapshot => {
             if (snapshot.empty) {
@@ -2067,7 +2122,9 @@
 
                 if (currentUserId) {
                     localStorage.setItem(`clinic_patients_${currentUserId}`, JSON.stringify(patients));
-                    db.collection('users_data').doc(currentUserId).collection('patients').doc(pIdStr).delete().catch(err => console.log(err));
+                    if (navigator.onLine) {
+                        db.collection('users_data').doc(currentUserId).collection('patients').doc(pIdStr).delete().catch(err => console.log(err));
+                    }
                 }
                 localStorage.setItem('clinic_patients', JSON.stringify(patients));
             }
@@ -2306,7 +2363,6 @@
             container.insertBefore(placeholder, container.firstChild);
         }
 
-        // تعديل كلمة بيشنت إلى نيم (Name)
         document.getElementById('rxDragPatientDetailsText').innerText = `Name: ${patient.name}   |   Age: ${patient.age} yrs`;
         document.getElementById('rxDragDateText').innerText = `Date: ${visit.date || getTodayFormatted()}`;
         
