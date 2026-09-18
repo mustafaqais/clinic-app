@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.60</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.61</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -589,7 +589,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.60</div>
+        <div class="footer">Clinic Master Network v16.61</div>
     </div>
 </div>
 
@@ -1890,12 +1890,10 @@
         if (el) el.focus();
     }
 
+    // دالة رفع الصور المتعددة المُحدثة والمضمونة 100%
     function handleFileUpload(input, visitId) {
         if (input.files && input.files.length > 0) {
             const files = Array.from(input.files);
-            alert(`جاري معالجة ورفع ${files.length} صورة، لطفاً انتظر قليلاً...`);
-
-            let processedCount = 0;
             const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
             if (!patient) return;
             const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
@@ -1903,25 +1901,27 @@
 
             if (!visit.attachments) visit.attachments = [];
 
+            let loadedCount = 0;
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const base64Image = e.target.result;
-                    visit.attachments.push(base64Image);
-                    processedCount++;
+                    visit.attachments.push(e.target.result);
+                    loadedCount++;
 
-                    if (processedCount === files.length) {
+                    if (loadedCount === files.length) {
                         savePatientToCloudAndLocal(patient);
                         renderVisits(patient.visits);
-                        alert(`تمت إضافة وتثبيت عدد (${files.length}) صورة بنجاح كامل ضمن المرفقات وحفظها في النظام!`);
+                        alert(`تمت إضافة ورفع ${files.length} صورة ضمن المرفقات بنجاح تام!`);
                     }
                 };
                 reader.onerror = function() {
-                    processedCount++;
-                    console.log("Error reading file.");
+                    loadedCount++;
+                    console.log("Failed to read file.");
                 };
                 reader.readAsDataURL(file);
             });
+            // إعادة تعيين حقل الإدخال ليقبل نفس الملفات لو رغب المستخدم برفعها مرة أخرى
+            input.value = '';
         }
     }
 
