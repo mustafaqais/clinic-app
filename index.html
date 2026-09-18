@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.53</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.54</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -36,8 +36,11 @@
         .header-icon { font-size: 42px; color: #0d9488; margin-bottom: 10px; }
         .header h1 { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; color: #f8fafc; letter-spacing: 0.5px; }
         .header p { font-size: 0.82rem; color: #94a3b8; }
-        .back-btn, .logout-btn { position: absolute; top: 15px; background: rgba(255, 255, 255, 0.12); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 12px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
-        .back-btn { left: 15px; } .logout-btn { right: 15px; color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
+        
+        .back-btn, .logout-btn, .support-btn { position: absolute; top: 15px; background: rgba(255, 255, 255, 0.12); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 10px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .back-btn { left: 15px; } 
+        .logout-btn { right: 15px; color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
+        .support-btn { right: 88px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
 
         .content { padding: 20px 18px; flex: 1; overflow-y: auto; }
         .main-menu { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
@@ -269,8 +272,11 @@
             <button id="backBtn" class="back-btn" onclick="goBackScreen()" style="display: none;">
                 <i class="fa-solid fa-arrow-left"></i> Back
             </button>
-            <button class="logout-btn" onclick="logoutUser()">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            <button class="support-btn" onclick="openSupportModal()" title="الدعم الفني والاتصال">
+                <i class="fa-solid fa-headset"></i> الدعم
+            </button>
+            <button class="logout-btn" onclick="logoutUser()" title="تسجيل الخروج">
+                <i class="fa-solid fa-right-from-bracket"></i> خروج
             </button>
             <div class="header-icon"><i class="fa-solid fa-user-doctor"></i></div>
             <h1 id="headerTitle">Clinic Master System</h1>
@@ -574,7 +580,30 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.53</div>
+        <div class="footer">Clinic Master Network v16.54</div>
+    </div>
+</div>
+
+<!-- Modal نافذة الدعم الفني والتواصل -->
+<div id="supportModal" class="modal-overlay">
+    <div class="modal-body" style="max-width: 400px; text-align: center;">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-headset" style="color:#0d9488;"></i> الدعم الفني والتواصل</h3>
+            <button class="modal-close" onclick="closeSupportModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">
+            تواصل معنا مباشرة عبر الواتساب أو التليجرام بالرقم: <br><strong style="color: #0f172a; direction: ltr; display: inline-block;">+964 773 911 4548</strong>
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 5px;">
+            <a href="https://wa.me/9647739114548?text=مرحباً، أستفسر عن نظام Clinic Master" target="_blank" style="background: #25d366; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.25);">
+                <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i> مراسلة عبر الواتساب (WhatsApp)
+            </a>
+
+            <a href="https://t.me/+9647739114548" target="_blank" style="background: #0088cc; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; box-shadow: 0 4px 10px rgba(0, 136, 204, 0.25);">
+                <i class="fa-brands fa-telegram" style="font-size: 1.3rem;"></i> مراسلة عبر التليجرام (Telegram)
+            </a>
+        </div>
     </div>
 </div>
 
@@ -1120,6 +1149,14 @@
         initDraggableElements();
         loadSavedRxLayout();
     });
+
+    function openSupportModal() {
+        document.getElementById('supportModal').style.display = 'flex';
+    }
+
+    function closeSupportModal() {
+        document.getElementById('supportModal').style.display = 'none';
+    }
 
     function savePatientToCloudAndLocal(patientObj) {
         if (!currentUserId) return;
