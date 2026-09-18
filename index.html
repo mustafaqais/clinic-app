@@ -973,7 +973,6 @@
         return code;
     }
 
-    // نظام التنقل الشامل خطوة بخطوة (متوافق مع المتصفح، أزرار الهواتف، والحاسوب)
     let screenHistory = ['mainScreen'];
 
     function navigateTo(screenId, title = 'Clinic Master System', sub = 'Cloud Secure Dashboard') {
@@ -1023,7 +1022,6 @@
         }
     }
 
-    // الاستماع لزر الرجوع الخاص بالمتصفح أو الهاتف
     window.addEventListener('popstate', function(event) {
         if (screenHistory.length > 1) {
             screenHistory.pop();
