@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.61</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.62</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -589,7 +589,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.61</div>
+        <div class="footer">Clinic Master Network v16.62</div>
     </div>
 </div>
 
@@ -1890,7 +1890,7 @@
         if (el) el.focus();
     }
 
-    // دالة رفع الصور المتعددة المُحدثة والمضمونة 100%
+    // دالة رفع وضغط الصور السريعة والمضمونة 100%
     function handleFileUpload(input, visitId) {
         if (input.files && input.files.length > 0) {
             const files = Array.from(input.files);
@@ -1901,26 +1901,45 @@
 
             if (!visit.attachments) visit.attachments = [];
 
-            let loadedCount = 0;
+            let processedCount = 0;
             files.forEach(file => {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    visit.attachments.push(e.target.result);
-                    loadedCount++;
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        
+                        let width = img.width;
+                        let height = img.height;
+                        const maxDim = 1000;
 
-                    if (loadedCount === files.length) {
-                        savePatientToCloudAndLocal(patient);
-                        renderVisits(patient.visits);
-                        alert(`تمت إضافة ورفع ${files.length} صورة ضمن المرفقات بنجاح تام!`);
-                    }
-                };
-                reader.onerror = function() {
-                    loadedCount++;
-                    console.log("Failed to read file.");
+                        if (width > height && width > maxDim) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        } else if (height > maxDim) {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+
+                        visit.attachments.push(compressedBase64);
+                        processedCount++;
+
+                        if (processedCount === files.length) {
+                            savePatientToCloudAndLocal(patient);
+                            renderVisits(patient.visits);
+                        }
+                    };
                 };
                 reader.readAsDataURL(file);
             });
-            // إعادة تعيين حقل الإدخال ليقبل نفس الملفات لو رغب المستخدم برفعها مرة أخرى
             input.value = '';
         }
     }
@@ -1942,69 +1961,34 @@
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
                         
-                        const w = img.width;
-                        const h = img.height;
-                        canvas.width = w;
-                        canvas.height = h;
-                        ctx.drawImage(img, 0, 0);
+                        let width = img.width;
+                        let height = img.height;
+                        const maxDim = 1000;
 
-                        const imgData = ctx.getImageData(0, 0, w, h);
-                        const data = imgData.data;
-                        
-                        let minX = w, minY = h, maxX = 0, maxY = 0;
-                        const threshold = 210;
-
-                        for (let y = 0; y < h; y += 4) {
-                            for (let x = 0; x < w; x += 4) {
-                                const idx = (y * w + x) * 4;
-                                const avg = (data[idx] + data[idx+1] + data[idx+2]) / 3;
-                                if (avg < threshold) {
-                                    if (x < minX) minX = x;
-                                    if (x > maxX) maxX = x;
-                                    if (y < minY) minY = y;
-                                    if (y > maxY) maxY = y;
-                                }
-                            }
+                        if (width > height && width > maxDim) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        } else if (height > maxDim) {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
                         }
 
-                        const padding = 15;
-                        minX = Math.max(0, minX - padding);
-                        minY = Math.max(0, minY - padding);
-                        maxX = Math.min(w, maxX + padding);
-                        maxY = Math.min(h, maxY + padding);
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
 
-                        const cropW = maxX - minX;
-                        const cropH = maxY - minY;
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
 
-                        const finalCanvas = document.createElement('canvas');
-                        finalCanvas.width = cropW > 100 ? cropW : w;
-                        finalCanvas.height = cropH > 100 ? cropH : h;
-                        const finalCtx = finalCanvas.getContext('2d');
+                        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+                        if (!patient) return;
+                        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+                        if (!visit) return;
 
-                        if (cropW > 100 && cropH > 100) {
-                            finalCtx.drawImage(img, minX, minY, cropW, cropH, 0, 0, cropW, cropH);
-                        } else {
-                            finalCtx.drawImage(img, 0, 0);
-                        }
+                        if (!visit.attachments) visit.attachments = [];
+                        visit.attachments.push(compressedBase64);
 
-                        finalCanvas.toBlob(blob => {
-                            const scannedReader = new FileReader();
-                            scannedReader.onload = function(resEvent) {
-                                const downloadURL = resEvent.target.result;
-                                const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-                                if (!patient) return;
-                                const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-                                if (!visit) return;
-
-                                if (!visit.attachments) visit.attachments = [];
-                                visit.attachments.push(downloadURL);
-
-                                savePatientToCloudAndLocal(patient);
-                                renderVisits(patient.visits);
-                                alert('تم مسح وحفظ المستند الممسوح بنجاح!');
-                            };
-                            scannedReader.readAsDataURL(blob);
-                        }, 'image/jpeg', 0.95);
+                        savePatientToCloudAndLocal(patient);
+                        renderVisits(patient.visits);
                     };
                 };
                 reader.readAsDataURL(file);
