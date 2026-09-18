@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.44</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.45</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -101,6 +101,8 @@
 
         .btn-med-history { width: 100%; background: #f0fdfa; color: #0d9488; border: 1.5px dashed #0d9488; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
         
+        .btn-bmi-trigger { width: 100%; background: #f0f9ff; color: #0284c7; border: 1.5px dashed #0284c7; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+
         .btn-rx-action { width: 100%; background: #0f172a; color: #38bdf8; border: 2px solid #38bdf8; border-radius: 12px; padding: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; letter-spacing: 1px; }
 
         .attachments-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
@@ -124,6 +126,10 @@
         .btn-secondary { background: #0284c7; margin-bottom: 14px; }
         .btn-danger { background: #ef4444; color: white; border: none; border-radius: 10px; padding: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 10px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
         .btn-restore { background: #16a34a; color: white; border: none; border-radius: 10px; padding: 8px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+        .bmi-result-card { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px; text-align: center; margin-top: 10px; }
+        .bmi-value { font-size: 1.8rem; font-weight: 900; color: #0f172a; margin: 4px 0; }
+        .bmi-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 800; margin-top: 4px; }
 
         .patient-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .patient-info h4 { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
@@ -510,7 +516,40 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.44</div>
+        <div class="footer">Clinic Master Network v16.45</div>
+    </div>
+</div>
+
+<!-- Modal حاسبة مؤشر كتلة الجسم (BMI) -->
+<div id="bmiCalculatorModal" class="modal-overlay">
+    <div class="modal-body">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> BMI Calculator (مؤشر الكتلة)</h3>
+            <button class="modal-close" onclick="closeBmiModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <div class="field-box" style="flex: 1;">
+                <span class="field-label">Weight (kg)</span>
+                <div class="input-wrapper"><input type="number" id="bmiWeight" placeholder="مثلاً: 70" oninput="calculateBmiLive()"></div>
+            </div>
+            <div class="field-box" style="flex: 1;">
+                <span class="field-label">Height (cm)</span>
+                <div class="input-wrapper"><input type="number" id="bmiHeight" placeholder="مثلاً: 175" oninput="calculateBmiLive()"></div>
+            </div>
+        </div>
+
+        <div class="bmi-result-card">
+            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b;">مؤشر كتلة الجسم (BMI Score):</span>
+            <div class="bmi-value" id="bmiScoreDisplay">—</div>
+            <div id="bmiBadgeContainer">
+                <span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>
+            </div>
+        </div>
+
+        <button class="btn-main" onclick="closeBmiModal()" style="background: #0284c7; margin-top: 6px;">
+            <i class="fa-solid fa-check"></i> موافق وحفظ
+        </button>
     </div>
 </div>
 
@@ -1160,6 +1199,52 @@
         document.getElementById('networkScreen').style.display = 'none';
     }
 
+    // دوال حاسبة الـ BMI الاختيارية
+    function openBmiCalculator() {
+        document.getElementById('bmiWeight').value = '';
+        document.getElementById('bmiHeight').value = '';
+        document.getElementById('bmiScoreDisplay').innerText = '—';
+        document.getElementById('bmiBadgeContainer').innerHTML = '<span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>';
+        document.getElementById('bmiCalculatorModal').style.display = 'flex';
+    }
+
+    function closeBmiModal() {
+        document.getElementById('bmiCalculatorModal').style.display = 'none';
+    }
+
+    function calculateBmiLive() {
+        const w = parseFloat(document.getElementById('bmiWeight').value);
+        const h = parseFloat(document.getElementById('bmiHeight').value);
+        const scoreDisplay = document.getElementById('bmiScoreDisplay');
+        const badgeContainer = document.getElementById('bmiBadgeContainer');
+
+        if (!w || !h || w <= 0 || h <= 0) {
+            scoreDisplay.innerText = '—';
+            badgeContainer.innerHTML = '<span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>';
+            return;
+        }
+
+        const heightInMeters = h / 100;
+        const bmi = (w / (heightInMeters * heightInMeters)).toFixed(1);
+        scoreDisplay.innerText = bmi;
+
+        let badgeBg = '#f1f5f9';
+        let badgeColor = '#334155';
+        let badgeText = '';
+
+        if (bmi < 18.5) {
+            badgeBg = '#e0f2fe'; badgeColor = '#0369a1'; badgeText = 'نحافة (Underweight)';
+        } else if (bmi >= 18.5 && bmi <= 24.9) {
+            badgeBg = '#dcfce7'; badgeColor = '#15803d'; badgeText = 'وزن مثالي وطبيعي (Normal)';
+        } else if (bmi >= 25 && bmi <= 29.9) {
+            badgeBg = '#fef3c7'; badgeColor = '#b45309'; badgeText = 'زيادة وزن (Overweight)';
+        } else {
+            badgeBg = '#fee2e2'; badgeColor = '#b91c1c'; badgeText = 'سمنة مفرطة (Obese)';
+        }
+
+        badgeContainer.innerHTML = `<span class="bmi-badge" style="background:${badgeBg}; color:${badgeColor};">${badgeText}</span>`;
+    }
+
     function handleDrugsInput(textarea, visitId) {
         let val = textarea.value;
         if (val === '' || val.trim() === '') {
@@ -1361,7 +1446,6 @@
         }
     }
 
-    // دالة Scan Document المحدثة لفتح الكاميرا الخلفية مباشرة وقص الأطراف التلقائي
     function handleScannerScan(visitId) {
         const scannerInput = document.createElement('input');
         scannerInput.type = 'file';
@@ -2239,6 +2323,14 @@
                 </div>
 
                 <div class="field-box">
+                    <span class="field-label"><i class="fa-solid fa-weight-scale" style="color:#0284c7;"></i> Optional Tools</span>
+                    <button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator()">
+                        <span><i class="fa-solid fa-calculator"></i> Open BMI (Body Mass Index) Calculator</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </button>
+                </div>
+
+                <div class="field-box">
                     <span class="field-label"><i class="fa-solid fa-heart-pulse" style="color:#0d9488;"></i> Vital Signs</span>
                     <div class="vital-box">
                         <div class="vital-row">
@@ -2338,7 +2430,7 @@
                         ${attachments.map((imgSrc, imgIdx) => `
                             <div class="attachment-thumb" onclick="previewAttachmentImage('${imgSrc}')">
                                 <img src="${imgSrc}" alt="Attachment">
-                                <button type="button" class="attachment-delete" onclick="event.stopPropagation(); confirmDeleteAttachment(${vId}, ${imgIdx})"><i class="fa-solid fa-xmark"></i></button>
+                                <button type="button" class="attachment-delete" onclick="event.stopPropagation(); confirmDeleteAttachment(${vId},${imgIdx})"><i class="fa-solid fa-xmark"></i></button>
                             </div>
                         `).join('')}
                     </div>
