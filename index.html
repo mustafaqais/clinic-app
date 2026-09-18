@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.54</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.55</title>
     
     <!-- أيقونة الموقع للحاسوب والأنظمة المختلفة -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -69,7 +69,7 @@
         .field-box { margin-bottom: 14px; position: relative; text-align: left; }
         .field-label { font-size: 0.82rem; color: #475569; margin-bottom: 6px; font-weight: 700; display: block; }
         .input-wrapper { background-color: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; display: flex; flex-direction: column; padding: 4px 10px; position: relative; }
-        .input-wrapper input, .input-wrapper select, .input-wrapper textarea { width: 100%; border: none; outline: none; padding: 8px 0; font-size: 0.92rem; font-weight: 600; color: #0f172a; background: transparent; resize: vertical; }
+        .input-wrapper input, .input-wrapper select, .input-wrapper textarea { width: 100%; border: none; outline: none; padding: 8px 0; font-size: 0.92rem; font-weight: 600; color: #0f172a; background: transparent; resize: none; overflow: hidden; }
 
         .suggestions-box {
             position: absolute;
@@ -231,7 +231,7 @@
         .rx-vitals-text { color: #0284c7; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.85rem; line-height: 1.6; direction: ltr; text-align: left; } 
         .rx-treatment-wrapper { direction: ltr; text-align: left; width: 100%; }
         .rx-rx-title { color: #b91c1c; font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-align: left; margin-bottom: 2px; direction: ltr; } 
-        .rx-treatment-text { color: #000000; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.05rem; white-space: pre-wrap; text-align: left; direction: ltr; } 
+        .rx-treatment-text { color: #000000; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.05rem; white-space: pre-wrap; text-align: left; direction: ltr; line-height: 1.6; } 
 
         .footer { text-align: center; padding: 16px; color: #334155; font-size: 0.85rem; font-weight: 700; margin-top: auto; border-top: 1px solid #e2e8f0; background: #f8fafc; }
     </style>
@@ -587,7 +587,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.54</div>
+        <div class="footer">Clinic Master Network v16.55</div>
     </div>
 </div>
 
@@ -1426,7 +1426,7 @@
                     if (v.drugs) {
                         const lines = v.drugs.split('\n');
                         lines.forEach(line => {
-                            let cleanDrug = line.replace('—', '').trim();
+                            let cleanDrug = line.replace(/^\d+[-–]\s*/, '').trim();
                             if (cleanDrug && cleanDrug !== '') {
                                 drugFrequency[cleanDrug] = (drugFrequency[cleanDrug] || 0) + 1;
                             }
@@ -1491,6 +1491,13 @@
                 const bpText = (v.bpSystolic && v.bpDiastolic) ? `${v.bpSystolic}/${v.bpDiastolic} mmHg` : 'N/A';
                 const bmiText = v.bmiScore ? `BMI: ${v.bmiScore} (${v.bmiWeight}kg / ${v.bmiHeight}cm)` : 'N/A';
 
+                let rawDrugs = v.drugs || '';
+                let formattedDrugs = rawDrugs;
+                if (rawDrugs.trim()) {
+                    const lines = rawDrugs.split('\n').map(l => l.trim()).filter(l => l !== '');
+                    formattedDrugs = lines.map((l, i) => `${i + 1}- ${l.replace(/^\d+[-–]\s*/, '')}`).join('\n');
+                }
+
                 return `
                     <div style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 12px; padding: 14px; margin-bottom: 12px; page-break-inside: avoid;">
                         <div style="background: #0f172a; color: #ffffff; padding: 6px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -1517,9 +1524,9 @@
                             <div><strong>Radiology & Scans:</strong> ${v.scans || 'None'}</div>
                         </div>
 
-                        <div style="background: #fff5f5; border: 1px dashed #f87171; padding: 10px; border-radius: 8px;">
+                        <div style="background: #fff5f5; border: 1.5px dashed #f87171; padding: 10px; border-radius: 8px; direction: ltr; text-align: left;">
                             <strong style="color: #b91c1c; font-size: 0.85rem; font-family: 'Playfair Display', serif; display: block; margin-bottom: 2px;">RX — Prescribed Medications:</strong>
-                            <div style="color: #000; font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; white-space: pre-wrap; line-height: 1.4;">${v.drugs || '—'}</div>
+                            <div style="color: #000; font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 700; white-space: pre-wrap; line-height: 1.4; direction: ltr; text-align: left;">${formattedDrugs || '—'}</div>
                         </div>
 
                         <div style="font-size: 0.78rem; color: #334155; background: #f1f5f9; padding: 6px 10px; border-radius: 6px; margin-top: 8px;">
@@ -1646,11 +1653,13 @@
         badgeContainer.innerHTML = `<span class="bmi-badge" style="background:${badgeBg}; color:${badgeColor};">${badgeText}</span>`;
     }
 
+    function autoResizeTextarea(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = (textarea.scrollHeight) + 'px';
+    }
+
     function handleDrugsInput(textarea, visitId) {
-        let val = textarea.value;
-        if (val === '' || val.trim() === '') {
-            textarea.value = '— ';
-        }
+        autoResizeTextarea(textarea);
         handleLiveInput(textarea, 'drugs', visitId);
     }
 
@@ -1660,15 +1669,17 @@
             const start = textarea.selectionStart;
             const end = textarea.selectionEnd;
             const val = textarea.value;
-            textarea.value = val.substring(0, start) + '\n— ' + val.substring(end);
-            textarea.selectionStart = textarea.selectionEnd = start + 3;
+            textarea.value = val.substring(0, start) + '\n' + val.substring(end);
+            textarea.selectionStart = textarea.selectionEnd = start + 1;
+            autoResizeTextarea(textarea);
             handleLiveInput(textarea, 'drugs', visitId);
         }
     }
 
     function handleLiveInput(textarea, category, visitId) {
+        autoResizeTextarea(textarea);
         const lines = textarea.value.split('\n');
-        const currentLine = lines[lines.length - 1].replace('—', '').trim();
+        const currentLine = lines[lines.length - 1].replace(/^\d+[-–]\s*/, '').trim();
 
         const bar = document.getElementById(`save-bar-${category}-${visitId}`);
         const lineTextSpan = document.getElementById(`line-text-${category}-${visitId}`);
@@ -1708,12 +1719,13 @@
         if (!textarea) return;
 
         const lines = textarea.value.split('\n');
-        lines[lines.length - 1] = (category === 'drugs' ? '— ' : '') + value;
+        lines[lines.length - 1] = value;
         textarea.value = lines.join('\n') + '\n';
 
         const suggestBox = document.getElementById(`suggestions-${category}-${visitId}`);
         if (suggestBox) suggestBox.style.display = 'none';
 
+        autoResizeTextarea(textarea);
         textarea.focus();
         autoSaveMedicalRecord();
     }
@@ -1730,7 +1742,7 @@
         const lineTextSpan = document.getElementById(`line-text-${category}-${visitId}`);
         const btn = document.getElementById(`btn-save-${category}-${visitId}`);
         const textarea = document.querySelector(`[data-visit-id="${visitId}"] .v-${category}`);
-        let val = lineTextSpan ? lineTextSpan.innerText.replace('—', '').trim() : '';
+        let val = lineTextSpan ? lineTextSpan.innerText.replace(/^\d+[-–]\s*/, '').trim() : '';
 
         if (!val) return;
         if (!medicalDict[category]) medicalDict[category] = [];
@@ -2308,7 +2320,14 @@
         let rrVal = visit.rr ? `${visit.rr} cpm` : '____ cpm';
         
         document.getElementById('rxDragVitalsText').innerText = `BP: ${bpVal}   |   SpO2: ${spo2Val}   |   HR: ${hrVal}   |   RR: ${rrVal}`;
-        document.getElementById('rxDragTreatmentText').innerText = visit.drugs || '— ';
+        
+        let rawDrugs = visit.drugs || '';
+        let formattedDrugs = '';
+        if (rawDrugs.trim()) {
+            const lines = rawDrugs.split('\n').map(l => l.trim()).filter(l => l !== '');
+            formattedDrugs = lines.map((l, i) => `${i + 1}- ${l.replace(/^\d+[-–]\s*/, '')}`).join('\n');
+        }
+        document.getElementById('rxDragTreatmentText').innerText = formattedDrugs || '— ';
 
         loadSavedRxLayout();
 
@@ -2614,7 +2633,7 @@
                     rr: '',
                     labs: '',
                     scans: '',
-                    drugs: '— ',
+                    drugs: '',
                     notes: '',
                     attachments: [],
                     bmiWeight: '',
@@ -2783,7 +2802,7 @@
                 <div class="field-box">
                     <span class="field-label"><i class="fa-solid fa-vial" style="color:#0d9488;"></i> Lab Tests</span>
                     <div class="input-wrapper">
-                        <textarea class="v-labs" rows="2" placeholder="Type lab tests..." oninput="handleLiveInput(this, 'labs', ${vId})" onblur="hideSuggestions('labs', ${vId})">${v.labs || ''}</textarea>
+                        <textarea class="v-labs" rows="1" placeholder="Type lab tests..." oninput="handleLiveInput(this, 'labs', ${vId})" onblur="hideSuggestions('labs', ${vId})">${v.labs || ''}</textarea>
                         <div class="suggestions-box" id="suggestions-labs-${vId}"></div>
                         <div class="live-save-bar" id="save-bar-labs-${vId}">
                             <span>Save: "<strong id="line-text-labs-${vId}"></strong>"</span>
@@ -2795,7 +2814,7 @@
                 <div class="field-box">
                     <span class="field-label"><i class="fa-solid fa-x-ray" style="color:#0d9488;"></i> Scans & Imaging</span>
                     <div class="input-wrapper">
-                        <textarea class="v-scans" rows="2" placeholder="Type scans..." oninput="handleLiveInput(this, 'scans', ${vId})" onblur="hideSuggestions('scans', ${vId})">${v.scans || ''}</textarea>
+                        <textarea class="v-scans" rows="1" placeholder="Type scans..." oninput="handleLiveInput(this, 'scans', ${vId})" onblur="hideSuggestions('scans', ${vId})">${v.scans || ''}</textarea>
                         <div class="suggestions-box" id="suggestions-scans-${vId}"></div>
                         <div class="live-save-bar" id="save-bar-scans-${vId}">
                             <span>Save: "<strong id="line-text-scans-${vId}"></strong>"</span>
@@ -2807,7 +2826,7 @@
                 <div class="field-box">
                     <span class="field-label"><i class="fa-solid fa-pills" style="color:#0d9488;"></i> Medications & Treatment</span>
                     <div class="input-wrapper">
-                        <textarea class="v-drugs" rows="3" placeholder="Type medications..." onfocus="handleDrugsInput(this, ${vId})" onkeydown="handleDrugsKeyDown(event, this, ${vId})" oninput="handleDrugsInput(this, ${vId})" onblur="hideSuggestions('drugs', ${vId})">${v.drugs || '— '}</textarea>
+                        <textarea class="v-drugs" rows="2" placeholder="Type medications..." oninput="handleDrugsInput(this, ${vId})" onkeydown="handleDrugsKeyDown(event, this, ${vId})" onblur="hideSuggestions('drugs', ${vId})">${v.drugs || ''}</textarea>
                         <div class="suggestions-box" id="suggestions-drugs-${vId}"></div>
                         <div class="live-save-bar" id="save-bar-drugs-${vId}">
                             <span>Save: "<strong id="line-text-drugs-${vId}"></strong>"</span>
@@ -2819,7 +2838,7 @@
                 <div class="field-box">
                     <span class="field-label"><i class="fa-solid fa-clipboard-user" style="color:#0d9488;"></i> Diagnosis & Notes</span>
                     <div class="input-wrapper">
-                        <textarea class="v-notes" rows="2" placeholder="Notes..." oninput="handleLiveInput(this, 'notes', ${vId})" onblur="hideSuggestions('notes', ${vId})">${v.notes || ''}</textarea>
+                        <textarea class="v-notes" rows="1" placeholder="Notes..." oninput="handleLiveInput(this, 'notes', ${vId})" onblur="hideSuggestions('notes', ${vId})">${v.notes || ''}</textarea>
                         <div class="suggestions-box" id="suggestions-notes-${vId}"></div>
                         <div class="live-save-bar" id="save-bar-notes-${vId}">
                             <span>Save: "<strong id="line-text-notes-${vId}"></strong>"</span>
@@ -2858,6 +2877,10 @@
                 </button>
             </div>
         `}).join('');
+
+        setTimeout(() => {
+            document.querySelectorAll('#visitsContainer textarea').forEach(ta => autoResizeTextarea(ta));
+        }, 50);
     }
 
     function addNewVisit() {
@@ -2877,7 +2900,7 @@
             rr: '',
             labs: '',
             scans: '',
-            drugs: '— ',
+            drugs: '',
             notes: '',
             attachments: [],
             bmiWeight: '',
