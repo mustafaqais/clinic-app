@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.55</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.56</title>
     
     <!-- أيقونة الموقع للحاسوب والأنظمة المختلفة -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -587,7 +587,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.55</div>
+        <div class="footer">Clinic Master Network v16.56</div>
     </div>
 </div>
 
@@ -1669,8 +1669,9 @@
             const start = textarea.selectionStart;
             const end = textarea.selectionEnd;
             const val = textarea.value;
-            textarea.value = val.substring(0, start) + '\n' + val.substring(end);
-            textarea.selectionStart = textarea.selectionEnd = start + 1;
+            // إدراج سطرين فارغين (أي ضغطتي إنتر) لترك مسافة واضحة بين علاج وعلاج
+            textarea.value = val.substring(0, start) + '\n\n' + val.substring(end);
+            textarea.selectionStart = textarea.selectionEnd = start + 2;
             autoResizeTextarea(textarea);
             handleLiveInput(textarea, 'drugs', visitId);
         }
@@ -1720,7 +1721,7 @@
 
         const lines = textarea.value.split('\n');
         lines[lines.length - 1] = value;
-        textarea.value = lines.join('\n') + '\n';
+        textarea.value = lines.join('\n') + '\n\n';
 
         const suggestBox = document.getElementById(`suggestions-${category}-${visitId}`);
         if (suggestBox) suggestBox.style.display = 'none';
