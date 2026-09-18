@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.47</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.48</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -342,7 +342,6 @@
                 </div>
             </div>
 
-            <!-- شاشة التحليلات والإحصائيات -->
             <div id="analyticsScreen" style="display: none;">
                 <div class="analytics-grid">
                     <div class="analytics-box">
@@ -381,9 +380,7 @@
                     <div style="font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
                         <i class="fa-solid fa-pills" style="color:#0d9488;"></i> Top Prescribed Medications
                     </div>
-                    <div id="topDrugsList" style="display:flex; flex-direction:column; gap:6px;">
-                        <!-- يتم تعبئته برمجياً -->
-                    </div>
+                    <div id="topDrugsList" style="display:flex; flex-direction:column; gap:6px;"></div>
                 </div>
             </div>
 
@@ -537,7 +534,11 @@
                     <div class="field-box" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color: #0f766e; margin-bottom:4px; padding-right: 125px;">
                         <i class="fa-solid fa-user-check"></i> <span id="recPatientName">—</span>
                     </div>
-                    <p style="font-size: 0.8rem; color: #334155; line-height: 1.5;" id="recPatientMeta"></p>
+                    <p style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin-bottom: 10px;" id="recPatientMeta"></p>
+                    
+                    <button type="button" class="btn-main" onclick="exportPatientMedicalReportPDF()" style="background: #0284c7; padding: 10px; font-size: 0.85rem;">
+                        <i class="fa-solid fa-file-pdf"></i> Export Medical Report PDF (التقرير الشامل)
+                    </button>
                 </div>
 
                 <button class="btn-main btn-secondary" onclick="addNewVisit()">
@@ -573,7 +574,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.47</div>
+        <div class="footer">Clinic Master Network v16.48</div>
     </div>
 </div>
 
@@ -878,6 +879,55 @@
                 </button>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- حاوية مخفية لتوليد تقرير المريض الطبي الشامل عبر jsPDF -->
+<div id="pdfReportExportContainer" style="position: absolute; left: -9999px; top: 0; width: 700px; background: #ffffff; padding: 40px; font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; direction: ltr; text-align: left;">
+    <div id="pdfHeaderImgContainer" style="text-align: center; margin-bottom: 20px;">
+        <img id="pdfHeaderImage" src="" style="max-width: 100%; max-height: 120px; object-fit: contain; display: none;" alt="Clinic Header">
+        <div id="pdfHeaderFallback" style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: #0f172a; border-bottom: 3px solid #0d9488; padding-bottom: 8px;">CLINIC MASTER MEDICAL REPORT</div>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 25px;">
+        <h2 style="font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #0d9488; margin-bottom: 4px;">Comprehensive Patient Report</h2>
+        <p style="font-size: 0.8rem; color: #64748b;" id="pdfReportDateLabel">Generated on: —</p>
+    </div>
+
+    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #0f172a; margin-bottom: 10px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">Patient Information</h3>
+        <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 4px 0; font-weight: 700; color: #475569; width: 25%;">Full Name:</td>
+                <td style="padding: 4px 0; font-weight: 600; color: #0f172a;" id="pdfRepName">—</td>
+                <td style="padding: 4px 0; font-weight: 700; color: #475569; width: 20%;">Age:</td>
+                <td style="padding: 4px 0; font-weight: 600; color: #0f172a;" id="pdfRepAge">—</td>
+            </tr>
+            <tr>
+                <td style="padding: 4px 0; font-weight: 700; color: #475569;">Gender:</td>
+                <td style="padding: 4px 0; font-weight: 600; color: #0f172a;" id="pdfRepGender">—</td>
+                <td style="padding: 4px 0; font-weight: 700; color: #475569;">Marital Status:</td>
+                <td style="padding: 4px 0; font-weight: 600; color: #0f172a;" id="pdfRepMarital">—</td>
+            </tr>
+            <tr>
+                <td style="padding: 4px 0; font-weight: 700; color: #475569;">Occupation:</td>
+                <td style="padding: 4px 0; font-weight: 600; color: #0f172a;" id="pdfRepJob">—</td>
+                <td style="padding: 4px 0; font-weight: 700; color: #475569;">Phone Number:</td>
+                <td style="padding: 4px 0; font-weight: 600; color: #0f172a;" id="pdfRepPhone">—</td>
+            </tr>
+        </table>
+    </div>
+
+    <div>
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #0f172a; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px;">Visits & Clinical History</h3>
+        <div id="pdfRepVisitsContainer" style="display: flex; flex-direction: column; gap: 14px;">
+            <!-- يتم تعبئته برمجياً -->
+        </div>
+    </div>
+
+    <div style="margin-top: 40px; text-align: right; border-top: 2px solid #e2e8f0; padding-top: 15px;">
+        <p style="font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: #0f172a;">Attending Doctor Signature</p>
+        <p style="font-size: 0.8rem; color: #64748b; margin-top: 25px;">Clinic Master System - Verified Medical Record</p>
     </div>
 </div>
 
@@ -1257,7 +1307,6 @@
         document.getElementById('analyticsScreen').style.display = 'none';
     }
 
-    // فتح شاشة التحليلات وحساب الإحصائيات الذكية
     function openAnalyticsDashboard() {
         autoSaveMedicalRecord();
         hideAllScreens();
@@ -1309,7 +1358,6 @@
         document.getElementById('ratioMaleText').innerText = `Male: ${malePct}%`;
         document.getElementById('ratioFemaleText').innerText = `Female: ${femalePct}%`;
 
-        // ترتيب الأدوية الأكثر تكراراً
         const sortedDrugs = Object.entries(drugFrequency).sort((a, b) => b[1] - a[1]).slice(0, 5);
         const topDrugsContainer = document.getElementById('topDrugsList');
 
@@ -1323,6 +1371,122 @@
                 </div>
             `).join('');
         }
+    }
+
+    // توليد وتصدير تقرير المريض الطبي الشامل PDF
+    function exportPatientMedicalReportPDF() {
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+
+        // تعبئة البيانات في الحاوية المخفية
+        document.getElementById('pdfRepName').innerText = patient.name;
+        document.getElementById('pdfRepAge').innerText = patient.age;
+        document.getElementById('pdfRepGender').innerText = patient.gender || 'N/A';
+        document.getElementById('pdfRepMarital').innerText = patient.marital || 'N/A';
+        document.getElementById('pdfRepJob').innerText = patient.job || 'N/A';
+        document.getElementById('pdfRepPhone').innerText = patient.phone || 'N/A';
+        document.getElementById('pdfReportDateLabel').innerText = `Generated on: ${new Date().toLocaleString()}`;
+
+        const headerImg = document.getElementById('pdfHeaderImage');
+        const headerFallback = document.getElementById('pdfHeaderFallback');
+        if (currentDoctorRxImage) {
+            headerImg.src = currentDoctorRxImage;
+            headerImg.style.display = 'inline-block';
+            headerFallback.style.display = 'none';
+        } else {
+            headerImg.style.display = 'none';
+            headerFallback.style.display = 'block';
+        }
+
+        const visitsContainer = document.getElementById('pdfRepVisitsContainer');
+        const visits = patient.visits || [];
+
+        if (visits.length === 0) {
+            visitsContainer.innerHTML = '<p style="font-size:0.85rem; color:#64748b;">No visits recorded.</p>';
+        } else {
+            visitsContainer.innerHTML = visits.map((v, idx) => {
+                const mh = v.medHistory || {};
+                let summaryParts = [...(mh.chronicDiseases || [])];
+                if (mh.chronicOther) summaryParts.push(mh.chronicOther);
+                if (mh.drugAllergy) summaryParts.push(`Allergy: ${mh.drugAllergy}`);
+                if (mh.notes) summaryParts.push(mh.notes);
+                const mhText = summaryParts.length > 0 ? summaryParts.join(' | ') : 'None specified';
+
+                const bpText = (v.bpSystolic && v.bpDiastolic) ? `${v.bpSystolic}/${v.bpDiastolic} mmHg` : 'N/A';
+                const bmiText = v.bmiScore ? `BMI: ${v.bmiScore} (${v.bmiWeight}kg/${v.bmiHeight}cm)` : 'N/A';
+
+                return `
+                    <div style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 12px; margin-bottom: 10px;">
+                        <div style="font-size: 0.9rem; font-weight: 700; color: #0d9488; margin-bottom: 6px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 4px;">
+                            Visit #${visits.length - idx} — Date: ${v.date || 'N/A'}
+                        </div>
+                        <table style="width: 100%; font-size: 0.8rem; border-collapse: collapse;">
+                            <tr>
+                                <td style="padding: 2px 0; font-weight: 700; color: #475569; width: 22%;">Vitals:</td>
+                                <td style="padding: 2px 0; color: #0f172a;">BP: ${bpText} | SpO2: ${v.spo2 || 'N/A'}% | HR: ${v.hr || 'N/A'}bpm | ${bmiText}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 2px 0; font-weight: 700; color: #475569;">Med History:</td>
+                                <td style="padding: 2px 0; color: #0f172a;">${mhText}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 2px 0; font-weight: 700; color: #475569;">Labs / Scans:</td>
+                                <td style="padding: 2px 0; color: #0f172a;">Labs: ${v.labs || 'None'} | Scans: ${v.scans || 'None'}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 2px 0; font-weight: 700; color: #475569;">Medications:</td>
+                                <td style="padding: 2px 0; font-weight: 700; color: #b91c1c; white-space: pre-wrap;">${v.drugs || 'None'}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 2px 0; font-weight: 700; color: #475569;">Diagnosis/Notes:</td>
+                                <td style="padding: 2px 0; color: #0f172a;">${v.notes || 'None'}</td>
+                            </tr>
+                        </table>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        const reportElement = document.getElementById('pdfReportExportContainer');
+
+        html2canvas(reportElement, { scale: 2, useCORS: true }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            const imgWidth = 210;
+            const pageHeight = 295;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            try {
+                pdf.save(`Medical_Report_${patient.name.replace(/\s+/g, '_')}_${Date.now()}.pdf`);
+            } catch (e) {
+                const pdfBlob = pdf.output('blob');
+                const blobUrl = URL.createObjectURL(pdfBlob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = `Medical_Report_${patient.name.replace(/\s+/g, '_')}_${Date.now()}.pdf`;
+                link.click();
+            }
+        }).catch(err => {
+            alert('حدث خطأ أثناء تصدير التقرير الطبي: ' + err.message);
+        });
     }
 
     function openBmiCalculator(visitId) {
