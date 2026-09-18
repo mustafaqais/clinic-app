@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.46</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.47</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -48,6 +48,7 @@
         .menu-icon.network-icon { background: #f3e8ff; color: #9333ea; }
         .menu-icon.rx-icon { background: #fae8ff; color: #c084fc; }
         .menu-icon.trash-icon { background: #fee2e2; color: #ef4444; }
+        .menu-icon.analytics-icon { background: #f0fdf4; color: #16a34a; }
         .menu-info h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
         .menu-info p { font-size: 0.78rem; color: #64748b; }
 
@@ -100,10 +101,13 @@
         .btn-live-save.saved { background: #16a34a; }
 
         .btn-med-history { width: 100%; background: #f0fdfa; color: #0d9488; border: 1.5px dashed #0d9488; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
-        
         .btn-bmi-trigger { width: 100%; background: #f0f9ff; color: #0284c7; border: 1.5px dashed #0284c7; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
-
         .btn-rx-action { width: 100%; background: #0f172a; color: #38bdf8; border: 2px solid #38bdf8; border-radius: 12px; padding: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; letter-spacing: 1px; }
+
+        .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        .analytics-box { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .analytics-num { font-size: 1.8rem; font-weight: 900; color: #0f172a; margin-top: 4px; }
+        .analytics-label { font-size: 0.78rem; font-weight: 700; color: #64748b; display: flex; align-items: center; gap: 6px; }
 
         .attachments-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
         .attachment-thumb { position: relative; width: 70px; height: 70px; border-radius: 10px; overflow: hidden; border: 1.5px solid #cbd5e1; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
@@ -297,6 +301,14 @@
                     </div>
                 </div>
 
+                <div class="menu-card" onclick="openAnalyticsDashboard()">
+                    <div class="menu-icon analytics-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                    <div class="menu-info">
+                        <h3>Clinic Analytics & Stats</h3>
+                        <p>Smart reports, patient metrics & data</p>
+                    </div>
+                </div>
+
                 <div class="menu-card" onclick="openTrashBin()">
                     <div class="menu-icon trash-icon"><i class="fa-solid fa-trash-arrow-up"></i></div>
                     <div class="menu-info">
@@ -326,6 +338,51 @@
                     <div class="menu-info">
                         <h3>Hierarchical Network</h3>
                         <p>View connected users & credentials</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- شاشة التحليلات والإحصائيات -->
+            <div id="analyticsScreen" style="display: none;">
+                <div class="analytics-grid">
+                    <div class="analytics-box">
+                        <span class="analytics-label"><i class="fa-solid fa-users" style="color:#0d9488;"></i> Total Patients</span>
+                        <div class="analytics-num" id="statTotalPatients">0</div>
+                    </div>
+                    <div class="analytics-box">
+                        <span class="analytics-label"><i class="fa-solid fa-calendar-check" style="color:#0284c7;"></i> Today's Visits</span>
+                        <div class="analytics-num" id="statTodayVisits">0</div>
+                    </div>
+                    <div class="analytics-box">
+                        <span class="analytics-label"><i class="fa-solid fa-mars" style="color:#0369a1;"></i> Male Patients</span>
+                        <div class="analytics-num" id="statMaleCount">0</div>
+                    </div>
+                    <div class="analytics-box">
+                        <span class="analytics-label"><i class="fa-solid fa-venus" style="color:#be185d;"></i> Female Patients</span>
+                        <div class="analytics-num" id="statFemaleCount">0</div>
+                    </div>
+                </div>
+
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
+                        <i class="fa-solid fa-chart-bar" style="color:#0d9488;"></i> Gender Distribution Ratio
+                    </div>
+                    <div style="background:#e2e8f0; height:12px; border-radius:6px; overflow:hidden; display:flex; margin-bottom:8px;">
+                        <div id="ratioMaleBar" style="background:#0284c7; width:50%; height:100%; transition:width 0.5s;"></div>
+                        <div id="ratioFemaleBar" style="background:#ec4899; width:50%; height:100%; transition:width 0.5s;"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#64748b; font-weight:700;">
+                        <span id="ratioMaleText">Male: 0%</span>
+                        <span id="ratioFemaleText">Female: 0%</span>
+                    </div>
+                </div>
+
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
+                        <i class="fa-solid fa-pills" style="color:#0d9488;"></i> Top Prescribed Medications
+                    </div>
+                    <div id="topDrugsList" style="display:flex; flex-direction:column; gap:6px;">
+                        <!-- يتم تعبئته برمجياً -->
                     </div>
                 </div>
             </div>
@@ -516,7 +573,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.46</div>
+        <div class="footer">Clinic Master Network v16.47</div>
     </div>
 </div>
 
@@ -1197,9 +1254,77 @@
         document.getElementById('medicalRecordScreen').style.display = 'none';
         document.getElementById('dictScreen').style.display = 'none';
         document.getElementById('networkScreen').style.display = 'none';
+        document.getElementById('analyticsScreen').style.display = 'none';
     }
 
-    // دوال حاسبة الـ BMI مع الحفظ التلقائي في الزيارة الحالية
+    // فتح شاشة التحليلات وحساب الإحصائيات الذكية
+    function openAnalyticsDashboard() {
+        autoSaveMedicalRecord();
+        hideAllScreens();
+        document.getElementById('analyticsScreen').style.display = 'block';
+        document.getElementById('backBtn').style.display = 'flex';
+        document.getElementById('headerTitle').innerText = 'Clinic Analytics';
+        document.getElementById('headerSub').innerText = 'Smart performance & metrics';
+
+        const totalPatients = patients.length;
+        let todayVisitsCount = 0;
+        let maleCount = 0;
+        let femaleCount = 0;
+        const todayStr = getTodayFormatted();
+        const drugFrequency = {};
+
+        patients.forEach(p => {
+            if (p.gender === 'Male') maleCount++;
+            else if (p.gender === 'Female') femaleCount++;
+
+            if (p.visits) {
+                p.visits.forEach(v => {
+                    if (v.date === todayStr) {
+                        todayVisitsCount++;
+                    }
+                    if (v.drugs) {
+                        const lines = v.drugs.split('\n');
+                        lines.forEach(line => {
+                            let cleanDrug = line.replace('—', '').trim();
+                            if (cleanDrug && cleanDrug !== '') {
+                                drugFrequency[cleanDrug] = (drugFrequency[cleanDrug] || 0) + 1;
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+        document.getElementById('statTotalPatients').innerText = totalPatients;
+        document.getElementById('statTodayVisits').innerText = todayVisitsCount;
+        document.getElementById('statMaleCount').innerText = maleCount;
+        document.getElementById('statFemaleCount').innerText = femaleCount;
+
+        const totalGender = maleCount + femaleCount;
+        const malePct = totalGender > 0 ? Math.round((maleCount / totalGender) * 100) : 50;
+        const femalePct = totalGender > 0 ? 100 - malePct : 50;
+
+        document.getElementById('ratioMaleBar').style.width = `${malePct}%`;
+        document.getElementById('ratioFemaleBar').style.width = `${femalePct}%`;
+        document.getElementById('ratioMaleText').innerText = `Male: ${malePct}%`;
+        document.getElementById('ratioFemaleText').innerText = `Female: ${femalePct}%`;
+
+        // ترتيب الأدوية الأكثر تكراراً
+        const sortedDrugs = Object.entries(drugFrequency).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        const topDrugsContainer = document.getElementById('topDrugsList');
+
+        if (sortedDrugs.length === 0) {
+            topDrugsContainer.innerHTML = '<p style="font-size:0.8rem; color:#64748b; text-align:center;">No prescription data recorded yet.</p>';
+        } else {
+            topDrugsContainer.innerHTML = sortedDrugs.map(([drug, count], idx) => `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:10px; font-size:0.85rem; font-weight:600; color:#0f172a;">
+                    <span>${idx + 1}. ${drug}</span>
+                    <span style="background:#ccfbf1; color:#0f766e; padding:2px 8px; border-radius:6px; font-size:0.75rem; font-weight:700;">${count} times</span>
+                </div>
+            `).join('');
+        }
+    }
+
     function openBmiCalculator(visitId) {
         currentVisitIdForModal = visitId;
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
@@ -1240,7 +1365,6 @@
 
                     savePatientToCloudAndLocal(patient);
 
-                    // تحديث النص الظاهري في زر الـ BMI داخل بطاقة الزيارة
                     const bmiLabel = document.getElementById(`bmi-label-${currentVisitIdForModal}`);
                     if (bmiLabel) {
                         bmiLabel.innerText = visit.bmiScore ? `BMI: ${visit.bmiScore} (${visit.bmiWeight}kg / ${visit.bmiHeight}cm)` : 'Open BMI (Body Mass Index) Calculator';
