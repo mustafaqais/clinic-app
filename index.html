@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.99</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.00</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -813,7 +813,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v16.99</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.00</div>
     </div>
 </div>
 
@@ -836,6 +836,25 @@
                 <i class="fa-brands fa-telegram" style="font-size: 1.3rem;"></i> Telegram Chat
             </a>
         </div>
+    </div>
+</div>
+
+<div id="founderDeleteModal" class="modal-overlay">
+    <div class="modal-body" style="max-width: 400px; text-align: center;">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> Confirm Account Deletion</h3>
+            <button class="modal-close" onclick="closeFounderDeleteModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">
+            To delete this account (<strong id="delTargetEmailDisplay" style="color:#0f172a;"></strong>), please enter your Founder password:
+        </p>
+        <div class="field-box" style="text-align: left;">
+            <span class="field-label">Founder Password *</span>
+            <div class="input-wrapper"><input type="password" id="founderConfirmPassInput" placeholder="Enter founder password..."></div>
+        </div>
+        <button class="btn-main" onclick="executeFounderDeleteAccount()" style="background: #ef4444; margin-top: 5px;">
+            <i class="fa-solid fa-trash"></i> Confirm & Delete Account
+        </button>
     </div>
 </div>
 
@@ -1214,6 +1233,8 @@
     let activeMhInputKey = null;
     let isUserSecretary = false;
     let patientsListenerUnsubscribe = null;
+    let targetNodeUidToDelete = null;
+    let targetNodeEmailToDelete = null;
 
     let currentLang = localStorage.getItem('clinic_lang') || 'ar';
 
@@ -1271,7 +1292,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v16.99",
+            footer: "نظام عيادة ماستر المتقدم v17.00",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1431,7 +1452,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v16.99",
+            footer: "Clinic Master Network v17.00",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -2425,7 +2446,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.99",
+            version: "17.00",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -2627,20 +2648,78 @@
             let html = '';
             snapshot.forEach(doc => {
                 const data = doc.data();
+                const nodeUid = doc.id;
+                const userEmail = data.email || data.secretaryEmail || 'User';
+                const isFounder = userEmail.toLowerCase() === FOUNDER_EMAIL.toLowerCase();
+
                 html += `
                     <div class="node-card">
                         <div class="node-info">
-                            <h5><i class="fa-solid fa-envelope" style="color:#0d9488;"></i> ${data.email || data.secretaryEmail || 'User'}</h5>
+                            <h5><i class="fa-solid fa-envelope" style="color:#0d9488;"></i> ${userEmail}</h5>
                             <p><b>Password:</b> <span style="color:#9333ea; background:#f3e8ff; padding:2px 6px; border-radius:4px;">${data.password || 'N/A'}</span></p>
                             ${data.secretaryEmail ? `<p style="font-size:0.75rem; color:#0284c7;"><b>Linked Secretary:</b> ${data.secretaryEmail}</p>` : ''}
                             <p style="font-size:0.7rem; color:#94a3b8;">Expires: ${data.expiryDate ? data.expiryDate.substring(0, 10) : 'N/A'}</p>
                         </div>
-                        <div><span class="node-badge">${data.role || 'Client'}</span></div>
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+                            <span class="node-badge">${data.role || 'Client'}</span>
+                            ${!isFounder ? `<button onclick="promptFounderDeleteNode('${nodeUid}', '${userEmail.replace(/'/g, "\\'")}')" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-trash"></i> Delete</button>` : ''}
+                        </div>
                     </div>
                 `;
             });
             container.innerHTML = html;
         });
+    }
+
+    function promptFounderDeleteNode(nodeUid, nodeEmail) {
+        targetNodeUidToDelete = nodeUid;
+        targetNodeEmailToDelete = nodeEmail;
+        document.getElementById('delTargetEmailDisplay').innerText = nodeEmail;
+        document.getElementById('founderConfirmPassInput').value = '';
+        document.getElementById('founderDeleteModal').style.display = 'flex';
+    }
+
+    function closeFounderDeleteModal() {
+        document.getElementById('founderDeleteModal').style.display = 'none';
+        targetNodeUidToDelete = null;
+        targetNodeEmailToDelete = null;
+    }
+
+    async function executeFounderDeleteAccount() {
+        const inputPass = document.getElementById('founderConfirmPassInput').value;
+        if (!inputPass) {
+            alert('Please enter your founder password.');
+            return;
+        }
+
+        if (!currentUserId) return;
+
+        try {
+            const founderDoc = await db.collection('network_hierarchy').doc(currentUserId).get();
+            if (!founderDoc.exists) {
+                alert('Founder record not found in network hierarchy.');
+                return;
+            }
+
+            const founderData = founderDoc.data();
+            const storedFounderPass = founderData.password;
+
+            if (inputPass !== storedFounderPass) {
+                alert('Incorrect founder password! Deletion aborted.');
+                return;
+            }
+
+            if (!targetNodeUidToDelete) return;
+
+            await db.collection('network_hierarchy').doc(targetNodeUidToDelete).delete();
+            
+            closeFounderDeleteModal();
+            alert(`Account (${targetNodeEmailToDelete}) deleted successfully from network database!`);
+            openNetworkHierarchy();
+
+        } catch (e) {
+            alert('Error deleting account: ' + e.message);
+        }
     }
 
     function openAnalyticsDashboard() {
