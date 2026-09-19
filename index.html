@@ -52,9 +52,8 @@
 
         .content { padding: 20px 16px; flex: 1; overflow-y: auto; }
         
-        /* تصاميم الأقسام والمجموعات المدمجة (شبكية أنيقة) */
         .section-group { margin-bottom: 18px; }
-        .section-title { font-size: 0.82rem; font-weight: 800; color: #0d9488; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; padding-right: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .section-title { font-size: 0.82rem; font-weight: 800; color: #0d9488; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; padding-left: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
         .menu-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
@@ -250,7 +249,7 @@
 <body>
 
 <div class="mobile-container">
-    <div id="networkStatusBar" class="network-status-bar">⚠️ وضع عدم الاتصال (Offline Mode) - يتم الحفظ محلياً وسيتم المزامنة تلقائياً عند عودة الإنترنت</div>
+    <div id="networkStatusBar" class="network-status-bar">⚠️ Offline Mode - Changes saved locally, will sync when online</div>
 
     <div id="authScreen" class="auth-screen">
         <div class="activ-icon"><i class="fa-solid fa-user-lock"></i></div>
@@ -291,11 +290,11 @@
             <button id="backBtn" class="back-btn" onclick="goBackScreen()" style="display: none;">
                 <i class="fa-solid fa-arrow-left"></i> Back
             </button>
-            <button class="support-btn" onclick="openSupportModal()" title="الدعم الفني والاتصال">
-                <i class="fa-solid fa-headset"></i> الدعم
+            <button class="support-btn" onclick="openSupportModal()" title="Technical Support">
+                <i class="fa-solid fa-headset"></i> Support
             </button>
-            <button class="logout-btn" onclick="logoutUser()" title="تسجيل الخروج">
-                <i class="fa-solid fa-right-from-bracket"></i> خروج
+            <button class="logout-btn" onclick="logoutUser()" title="Logout">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
             </button>
             <div class="header-icon"><i class="fa-solid fa-user-doctor"></i></div>
             <h1 id="headerTitle">Clinic Master System</h1>
@@ -305,104 +304,104 @@
         <div class="content">
             <div id="mainScreen" style="display: none;">
                 
-                <!-- لوحة المؤسس المخفية/الظاهرة حصرياً لإيميلك -->
+                <!-- Founder Control Panel (Visible only to founder email) -->
                 <div class="founder-panel" id="founderControlPanel" style="display: none;">
                     <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;">🔑 Single-Use Activation Code:</span>
                     <div class="founder-code-display" id="dynamicFounderCode">Loading...</div>
                     <span style="font-size: 0.72rem; color: #64748b;">Give this code to a new user. It burns permanently after 1 use.</span>
                 </div>
 
-                <!-- المجموعة الأولى: العمليات اليومية للعيادة -->
+                <!-- Group 1: Daily Clinic Operations -->
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-stethoscope"></i> العمليات اليومية</div>
+                    <div class="section-title"><i class="fa-solid fa-stethoscope"></i> Daily Operations</div>
                     <div class="menu-grid">
                         <div class="menu-card" onclick="navigateTo('addPatientScreen', 'Register New Patient', 'Fill in patient details accurately')">
                             <div class="menu-icon"><i class="fa-solid fa-user-plus"></i></div>
                             <div class="menu-info">
-                                <h3>مريض جديد</h3>
-                                <p>تسجيل وحفظ البيانات</p>
+                                <h3>New Patient</h3>
+                                <p>Register & save records</p>
                             </div>
                         </div>
 
                         <div class="menu-card" onclick="openPatientsArchive()">
                             <div class="menu-icon archive-icon"><i class="fa-solid fa-address-book"></i></div>
                             <div class="menu-info">
-                                <h3>أرشيف المرضى</h3>
-                                <p>بحث وسجل المراجعات</p>
+                                <h3>Patients Archive</h3>
+                                <p>Search & visit history</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- المجموعة الثانية: الأدوات الطبية والروشتات -->
+                <!-- Group 2: RX & Medical Tools -->
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-file-prescription"></i> الروشتة والأدوات الطبية</div>
+                    <div class="section-title"><i class="fa-solid fa-file-prescription"></i> RX & Medical Tools</div>
                     <div class="menu-grid">
                         <div class="menu-card" onclick="openRxTemplateManager()">
                             <div class="menu-icon rx-icon"><i class="fa-solid fa-prescription-bottle-medical"></i></div>
                             <div class="menu-info">
-                                <h3>تصميم الروشتة</h3>
-                                <p>صورة ترويسة العيادة</p>
+                                <h3>RX Template</h3>
+                                <p>Prescription header image</p>
                             </div>
                         </div>
 
                         <div class="menu-card" onclick="openDictionaryManager()">
                             <div class="menu-icon dict-icon"><i class="fa-solid fa-book-medical"></i></div>
                             <div class="menu-info">
-                                <h3>القاموس الطبي</h3>
-                                <p>إدارة الأدوية والجرعات</p>
+                                <h3>Medical Dictionary</h3>
+                                <p>Manage drugs & doses</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- المجموعة الثالثة: التقارير والإحصائيات -->
+                <!-- Group 3: Reports & Performance -->
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-chart-pie"></i> التقارير والأداء</div>
+                    <div class="section-title"><i class="fa-solid fa-chart-pie"></i> Reports & Stats</div>
                     <div class="menu-grid">
-                        <div class="menu-card" onclick="openAnalyticsDashboard()" style="grid-column: span 2; flex-direction: row; text-align: right; padding: 12px 16px;">
+                        <div class="menu-card" onclick="openAnalyticsDashboard()" style="grid-column: span 2; flex-direction: row; text-align: left; padding: 12px 16px;">
                             <div class="menu-icon analytics-icon"><i class="fa-solid fa-chart-column"></i></div>
                             <div class="menu-info" style="flex: 1;">
-                                <h3>تحليعات وإحصائيات العيادة</h3>
-                                <p>تقارير الأداء ونسب المرضى والأدوية الأكثر صرفاً</p>
+                                <h3>Clinic Analytics & Stats</h3>
+                                <p>Performance metrics, patient ratios & top prescribed medications</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- المجموعة الرابعة: إدارة النظام والصيانة -->
+                <!-- Group 4: System & Maintenance -->
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-shield-halved"></i> إدارة النظام والصيانة</div>
+                    <div class="section-title"><i class="fa-solid fa-shield-halved"></i> System & Maintenance</div>
                     <div class="menu-grid">
                         <div class="menu-card" onclick="openBackupManager()">
                             <div class="menu-icon backup-icon"><i class="fa-solid fa-database"></i></div>
                             <div class="menu-info">
-                                <h3>النسخ الاحتياطي</h3>
-                                <p>تصدير أو رفع ملف البيانات</p>
+                                <h3>Backup & Restore</h3>
+                                <p>Export or upload data file</p>
                             </div>
                         </div>
 
                         <div class="menu-card" onclick="openTrashBin()">
                             <div class="menu-icon trash-icon"><i class="fa-solid fa-trash-arrow-up"></i></div>
                             <div class="menu-info">
-                                <h3>سلة المحذوفات</h3>
-                                <p>استرجاع الملفات المحذوفة</p>
+                                <h3>Trash Bin</h3>
+                                <p>Recover deleted items</p>
                             </div>
                         </div>
 
                         <div class="menu-card" onclick="openAccountSettings()">
                             <div class="menu-icon settings-icon"><i class="fa-solid fa-user-gear"></i></div>
                             <div class="menu-info">
-                                <h3>إعدادات الحساب</h3>
-                                <p>تغيير الإيميل وكلمة المرور</p>
+                                <h3>Account Settings</h3>
+                                <p>Email & password options</p>
                             </div>
                         </div>
 
                         <div class="menu-card" id="networkMenuCard" onclick="openNetworkHierarchy()" style="display: none;">
                             <div class="menu-icon network-icon"><i class="fa-solid fa-network-wired"></i></div>
                             <div class="menu-info">
-                                <h3>شبكة المستخدمين</h3>
-                                <p>إدارة الحسابات وكلماتها</p>
+                                <h3>Network Database</h3>
+                                <p>Users & credentials</p>
                             </div>
                         </div>
                     </div>
@@ -413,20 +412,20 @@
             <div id="backupScreen" style="display: none;">
                 <div class="group-card">
                     <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
-                        <i class="fa-solid fa-database" style="color:#4f46e5;"></i> نظام النسخ الاحتياطي المباشر
+                        <i class="fa-solid fa-database" style="color:#4f46e5;"></i> Direct Backup Manager
                     </div>
                     <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
-                        قم بتنزيل النسخة الاحتياطية أو ارفع ملف النسخة الاحتياطية (`.json` أو `.txt`) مباشرة لاسترجاع البيانات بكاملها فورا ودون أي نسخ أو لصق!
+                        Export your full database backup or upload a backup file (`.json` or `.txt`) directly to restore all data instantly!
                     </p>
 
                     <button class="btn-main" onclick="exportJsonBackup()" style="background: #4f46e5; margin-bottom: 16px;">
-                        <i class="fa-solid fa-download"></i> تصدير النسخة الاحتياطية (Export Backup)
+                        <i class="fa-solid fa-download"></i> Export Backup File
                     </button>
 
                     <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
 
                     <div class="field-box" style="text-align: left;">
-                        <span class="field-label" style="color:#16a34a; font-weight:800;"><i class="fa-solid fa-file-arrow-up"></i> رفع ملف النسخة الاحتياطية مباشرة (موصى به جداً)</span>
+                        <span class="field-label" style="color:#16a34a; font-weight:800;"><i class="fa-solid fa-file-arrow-up"></i> Upload Backup File Directly (Recommended)</span>
                         <div class="input-wrapper" style="padding: 10px; border: 2px dashed #16a34a; background: #f0fdf4; text-align: center;">
                             <input type="file" id="backupFileInput" accept=".json,.txt" style="font-size: 0.85rem; cursor: pointer;" onchange="restoreFromUploadedFile(this)">
                         </div>
@@ -437,42 +436,42 @@
             <div id="settingsScreen" style="display: none;">
                 <div class="group-card">
                     <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:14px;">
-                        <i class="fa-solid fa-user-shield" style="color:#0d9488;"></i> إعدادات الأمان والحساب
+                        <i class="fa-solid fa-user-shield" style="color:#0d9488;"></i> Security & Account Settings
                     </div>
 
                     <div class="field-box">
-                        <span class="field-label">البريد الإلكتروني الحالي</span>
+                        <span class="field-label">Current Email Address</span>
                         <div class="input-wrapper"><input type="email" id="currentAccountEmail" readonly style="color:#64748b; background:#f1f5f9;"></div>
                     </div>
 
                     <div class="field-box">
-                        <span class="field-label">تغيير البريد الإلكتروني الجديد</span>
-                        <div class="input-wrapper"><input type="email" id="newAccountEmail" placeholder="أدخل البريد الجديد..."></div>
+                        <span class="field-label">New Email Address</span>
+                        <div class="input-wrapper"><input type="email" id="newAccountEmail" placeholder="Enter new email..."></div>
                     </div>
                     <div class="field-box">
-                        <span class="field-label">كلمة المرور الحالية (لتأكيد تغيير الإيميل)</span>
+                        <span class="field-label">Current Password (To Confirm Email Change)</span>
                         <div class="input-wrapper"><input type="password" id="confirmEmailPass" placeholder="••••••••"></div>
                     </div>
                     <button class="btn-main" onclick="updateAccountEmail()" style="margin-bottom: 16px; background:#0284c7;">
-                        <i class="fa-solid fa-envelope"></i> تحديث البريد الإلكتروني
+                        <i class="fa-solid fa-envelope"></i> Update Email Address
                     </button>
 
                     <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
 
                     <div class="field-box">
-                        <span class="field-label">كلمة المرور الجديدة</span>
+                        <span class="field-label">New Password</span>
                         <div class="input-wrapper"><input type="password" id="newAccountPassword" placeholder="••••••••"></div>
                     </div>
                     <button class="btn-main" onclick="updateAccountPassword()" style="margin-bottom: 16px;">
-                        <i class="fa-solid fa-key"></i> تغيير كلمة المرور
+                        <i class="fa-solid fa-key"></i> Change Password
                     </button>
 
                     <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
 
                     <div style="text-align: center;">
-                        <p style="font-size:0.8rem; color:#64748b; margin-bottom:10px;">هل نسيت كلمة المرور وتريد استرجاعها عبر رسالة البريد الإلكتروني؟</p>
+                        <p style="font-size:0.8rem; color:#64748b; margin-bottom:10px;">Forgot password and want to reset via email?</p>
                         <button class="btn-main" onclick="sendPasswordResetEmailFromSettings()" style="background: #d97706;">
-                            <i class="fa-solid fa-paper-plane"></i> إرسال رابط إعادة التعيين للإيميل
+                            <i class="fa-solid fa-paper-plane"></i> Send Password Reset Link
                         </button>
                     </div>
                 </div>
@@ -673,7 +672,7 @@
                     <p style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin-bottom: 10px;" id="recPatientMeta"></p>
                     
                     <button type="button" class="btn-main" onclick="exportPatientMedicalReportPDF()" style="background: #0284c7; padding: 12px; font-size: 0.9rem;">
-                        <i class="fa-solid fa-file-pdf"></i> تحميل التقرير الطبي الشامل PDF مباشرة
+                        <i class="fa-solid fa-file-pdf"></i> Download Comprehensive PDF Report
                     </button>
                 </div>
 
@@ -717,20 +716,20 @@
 <div id="supportModal" class="modal-overlay">
     <div class="modal-body" style="max-width: 400px; text-align: center;">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-headset" style="color:#0d9488;"></i> الدعم الفني والتواصل</h3>
+            <h3><i class="fa-solid fa-headset" style="color:#0d9488;"></i> Technical Support</h3>
             <button class="modal-close" onclick="closeSupportModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">
-            تواصل معنا مباشرة عبر الواتساب أو التليجرام بالرقم: <br><strong style="color: #0f172a; direction: ltr; display: inline-block;">+964 773 911 4548</strong>
+            Contact us directly via WhatsApp or Telegram at: <br><strong style="color: #0f172a; direction: ltr; display: inline-block;">+964 773 911 4548</strong>
         </p>
 
         <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 5px;">
-            <a href="https://wa.me/9647739114548?text=مرحباً، أستفسر عن نظام Clinic Master" target="_blank" style="background: #25d366; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.25);">
-                <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i> مراسلة عبر الواتساب (WhatsApp)
+            <a href="https://wa.me/9647739114548?text=Hello,%20I%20have%20an%20inquiry%20regarding%20Clinic%20Master" target="_blank" style="background: #25d366; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.25);">
+                <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i> WhatsApp Chat
             </a>
 
             <a href="https://t.me/+9647739114548" target="_blank" style="background: #0088cc; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; box-shadow: 0 4px 10px rgba(0, 136, 204, 0.25);">
-                <i class="fa-brands fa-telegram" style="font-size: 1.3rem;"></i> مراسلة عبر التليجرام (Telegram)
+                <i class="fa-brands fa-telegram" style="font-size: 1.3rem;"></i> Telegram Chat
             </a>
         </div>
     </div>
@@ -739,31 +738,31 @@
 <div id="bmiCalculatorModal" class="modal-overlay">
     <div class="modal-body">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> BMI Calculator (مؤشر الكتلة)</h3>
+            <h3><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> BMI Calculator</h3>
             <button class="modal-close" onclick="closeBmiModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div style="display: flex; gap: 10px;">
             <div class="field-box" style="flex: 1;">
                 <span class="field-label">Weight (kg)</span>
-                <div class="input-wrapper"><input type="number" id="bmiWeight" placeholder="مثلاً: 70" oninput="calculateBmiLive()"></div>
+                <div class="input-wrapper"><input type="number" id="bmiWeight" placeholder="e.g. 70" oninput="calculateBmiLive()"></div>
             </div>
             <div class="field-box" style="flex: 1;">
                 <span class="field-label">Height (cm)</span>
-                <div class="input-wrapper"><input type="number" id="bmiHeight" placeholder="مثلاً: 175" oninput="calculateBmiLive()"></div>
+                <div class="input-wrapper"><input type="number" id="bmiHeight" placeholder="e.g. 175" oninput="calculateBmiLive()"></div>
             </div>
         </div>
 
         <div class="bmi-result-card">
-            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b;">مؤشر كتلة الجسم (BMI Score):</span>
+            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b;">Body Mass Index (BMI Score):</span>
             <div class="bmi-value" id="bmiScoreDisplay">—</div>
             <div id="bmiBadgeContainer">
-                <span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>
+                <span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">Enter weight & height to calculate</span>
             </div>
         </div>
 
         <button class="btn-main" onclick="closeBmiModal()" style="background: #0284c7; margin-top: 6px;">
-            <i class="fa-solid fa-check"></i> موافق وحفظ
+            <i class="fa-solid fa-check"></i> Agree & Save
         </button>
     </div>
 </div>
@@ -1027,7 +1026,7 @@
                 <i class="fa-solid fa-floppy-disk"></i> Save RX Layout & Fonts
             </button>
             <button class="btn-main" onclick="openPrescriptionPDF()" style="font-family: 'Plus Jakarta Sans', sans-serif; background: #0284c7; width: 100%;">
-                <i class="fa-solid fa-file-pdf"></i> حفظ PDF (Save as PDF)
+                <i class="fa-solid fa-file-pdf"></i> Save as PDF
             </button>
         </div>
     </div>
@@ -1121,7 +1120,7 @@
         const bar = document.getElementById('networkStatusBar');
         if (!navigator.onLine) {
             bar.classList.add('offline');
-            bar.innerText = "⚠️ وضع عدم الاتصال (Offline) - يتم الحفظ محلياً وسيتم المزامنة عند عودة الإنترنت";
+            bar.innerText = "⚠️ Offline Mode - Changes saved locally, will sync when online";
         } else {
             bar.classList.remove('offline');
             bar.style.display = 'none';
@@ -1430,13 +1429,13 @@
         try {
             const doc = await codeDocRef.get();
             if (!doc.exists) {
-                alert('خطأ في النظام: لم يتم العثور على كود التنشيط.');
+                alert('System error: Activation code not found.');
                 return;
             }
 
             const data = doc.data();
             if (data.isUsed === true || data.code !== inputCode) {
-                alert('هذا الكود غير صالح أو تم استخدامه مسبقاً من قبل شخص آخر ولا يمكن استخدامه مرتين مطلقاً!');
+                alert('This activation code is invalid or has already been used by someone else!');
                 return;
             }
 
@@ -1460,12 +1459,12 @@
                 }, { merge: true });
             }
 
-            alert('تم تفعيل الحساب بنجاح وإحراق الكود نهائياً!');
+            alert('Account activated successfully and code burned permanently!');
             document.getElementById('activationScreen').style.display = 'none';
             setupClientInterface();
 
         } catch (err) {
-            alert('حدث خطأ أثناء التحقق من الكود: ' + err.message);
+            alert('Error during code verification: ' + err.message);
         }
     }
 
@@ -1498,7 +1497,7 @@
         const email = document.getElementById('authEmail').value;
         if (!email) { alert('Enter your email first.'); return; }
         auth.sendPasswordResetEmail(email)
-            .then(() => alert('تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني بنجاح!'))
+            .then(() => alert('Password reset link sent to your email successfully!'))
             .catch(err => alert(err.message));
     }
 
@@ -1514,7 +1513,7 @@
     }
 
     function openBackupManager() {
-        navigateTo('backupScreen', 'النسخ الاحتياطي', 'تصدير واسترجاع بيانات العيادة');
+        navigateTo('backupScreen', 'Backup Manager', 'Export and restore clinic data');
         document.getElementById('backupFileInput').value = '';
     }
 
@@ -1535,7 +1534,7 @@
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         downloadAnchor.remove();
-        alert('تم تصدير وتنزيل النسخة الاحتياطية بنجاح!');
+        alert('Backup exported and downloaded successfully!');
     }
 
     function restoreFromUploadedFile(input) {
@@ -1549,11 +1548,11 @@
                     const parsed = JSON.parse(rawText);
                     
                     if (!parsed.patients || !Array.isArray(parsed.patients)) {
-                        alert('الملف المرفوع غير صالح أو تالف (لا يحتوي على بيانات المرضى).');
+                        alert('Invalid or corrupted backup file (missing patients data).');
                         return;
                     }
 
-                    if (confirm(`هل أنت متأكد من استرجاع البيانات؟ سيتم دمج واستبدال البيانات الحالية بـ (${parsed.patients.length}) مريضاً.`)) {
+                    if (confirm(`Are you sure you want to restore? Current data will be merged/replaced with (${parsed.patients.length}) patients.`)) {
                         patients = parsed.patients;
                         trashBin = parsed.trashBin || [];
                         medicalDict = parsed.medicalDict || medicalDict;
@@ -1568,11 +1567,11 @@
                         saveSettingsToCloudAndLocal();
                         syncLocalDataToCloud();
 
-                        alert('تم استرجاع النسخة الاحتياطية من الملف بنجاح وتحديث النظام!');
+                        alert('Backup restored from file successfully and system updated!');
                         showMainMenu();
                     }
                 } catch (err) {
-                    alert('خطأ في قراءة ملف النسخة الاحتياطية: تأكد من أنه ملف JSON أو TXT صحيح. التفاصيل: ' + err.message);
+                    alert('Error reading backup file: Make sure it is a valid JSON or TXT file. Details: ' + err.message);
                 }
             };
             
@@ -1581,7 +1580,7 @@
     }
 
     function openAccountSettings() {
-        navigateTo('settingsScreen', 'إعدادات الحساب', 'تغيير الإيميل وكلمة المرور');
+        navigateTo('settingsScreen', 'Account Settings', 'Change email and password');
         const user = auth.currentUser;
         if (user) {
             document.getElementById('currentAccountEmail').value = user.email || '';
@@ -1597,22 +1596,22 @@
         const user = auth.currentUser;
 
         if (!newEmail || !password) {
-            alert('الرجاء إدخال البريد الإلكتروني الجديد وكلمة المرور الحالية للتأكيد.');
+            alert('Please enter your new email and current password to confirm.');
             return;
         }
 
         const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
         user.reauthenticateWithCredential(credential).then(() => {
             user.updateEmail(newEmail).then(() => {
-                alert('تم تحديث البريد الإلكتروني بنجاح!');
+                alert('Email updated successfully!');
                 document.getElementById('currentAccountEmail').value = newEmail;
                 document.getElementById('newAccountEmail').value = '';
                 document.getElementById('confirmEmailPass').value = '';
             }).catch(error => {
-                alert('خطأ في تحديث الإيميل: ' + error.message);
+                alert('Error updating email: ' + error.message);
             });
         }).catch(error => {
-            alert('كلمة المرور الحالية غير صحيحة أو حدث خطأ في المصادقة: ' + error.message);
+            alert('Incorrect current password or authentication error: ' + error.message);
         });
     }
 
@@ -1621,16 +1620,16 @@
         const user = auth.currentUser;
 
         if (!newPass || newPass.length < 6) {
-            alert('الرجاء إدخال كلمة مرور جديدة تتكون من 6 أحرف أو أرقام على الأقل.');
+            alert('Please enter a new password of at least 6 characters.');
             return;
         }
 
-        if (confirm('هل أنت متأكد من تغيير كلمة المرور؟')) {
+        if (confirm('Are you sure you want to change your password?')) {
             user.updatePassword(newPass).then(() => {
-                alert('تم تغيير كلمة المرور بنجاح!');
+                alert('Password changed successfully!');
                 document.getElementById('newAccountPassword').value = '';
             }).catch(error => {
-                alert('حدث خطأ (قد يتطلب النظام إعادة تسجيل الدخول لتحديث كلمة المرور لأسباب أمنية): ' + error.message);
+                alert('Error (You may need to re-login to update password for security reasons): ' + error.message);
             });
         }
     }
@@ -1638,14 +1637,14 @@
     function sendPasswordResetEmailFromSettings() {
         const user = auth.currentUser;
         if (!user || !user.email) {
-            alert('لا يوجد بريد إلكتروني مسجل حالياً.');
+            alert('No registered email found.');
             return;
         }
 
         auth.sendPasswordResetEmail(user.email).then(() => {
-            alert(`تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك (${user.email}) بنجاح! تحقق من البريد الوارد أو غير المرغوب فيه.`);
+            alert(`Password reset link sent to your email (${user.email}) successfully! Check your inbox or spam folder.`);
         }).catch(error => {
-            alert('حدث خطأ أثناء إرسال البريد: ' + error.message);
+            alert('Error sending email: ' + error.message);
         });
     }
 
@@ -1671,12 +1670,12 @@
             reader.onload = function(e) {
                 currentDoctorRxImage = e.target.result;
                 saveSettingsToCloudAndLocal();
-                alert('تم حفظ صورة الروشتة بنجاح!');
+                alert('Prescription header image saved successfully!');
                 openRxTemplateManager();
             };
             reader.readAsDataURL(fileInput.files[0]);
         } else {
-            alert('الرجاء اختيار صورة أولاً.');
+            alert('Please select an image first.');
         }
     }
 
@@ -1686,7 +1685,7 @@
         container.innerHTML = '<p style="text-align:center; color:#64748b;">Loading network credentials...</p>';
 
         if (!navigator.onLine) {
-            container.innerHTML = '<p style="text-align:center; color:#b91c1c;">عذراً، يتطلب عرض شبكة المستخدمين اتصالاً بالإنترنت.</p>';
+            container.innerHTML = '<p style="text-align:center; color:#b91c1c;">Internet connection required to view user network.</p>';
             return;
         }
 
@@ -1875,7 +1874,7 @@
 
             pdf.save(`Medical_Report_${patient.name.replace(/\s+/g, '_')}.pdf`);
         }).catch(err => {
-            alert('حدث خطأ أثناء تحميل التقرير الطبي: ' + err.message);
+            alert('Error generating medical report PDF: ' + err.message);
         });
     }
 
@@ -1893,7 +1892,7 @@
             calculateBmiLive();
         } else {
             document.getElementById('bmiScoreDisplay').innerText = '—';
-            document.getElementById('bmiBadgeContainer').innerHTML = '<span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>';
+            document.getElementById('bmiBadgeContainer').innerHTML = '<span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">Enter weight & height to calculate</span>';
         }
 
         document.getElementById('bmiCalculatorModal').style.display = 'flex';
@@ -1921,7 +1920,7 @@
 
                     const bmiLabel = document.getElementById(`bmi-label-${currentVisitIdForModal}`);
                     if (bmiLabel) {
-                        bmiLabel.innerText = visit.bmiScore ? `BMI: ${visit.bmiScore} (${visit.bmiWeight}kg / ${visit.bmiHeight}cm)` : 'Open BMI (Body Mass Index) Calculator';
+                        bmiLabel.innerText = visit.bmiScore ? `BMI: ${visit.bmiScore} (${visit.bmiWeight}kg / ${visit.bmiHeight}cm)` : 'Open BMI Calculator';
                     }
                 }
             }
@@ -1937,7 +1936,7 @@
 
         if (!w || !h || w <= 0 || h <= 0) {
             scoreDisplay.innerText = '—';
-            badgeContainer.innerHTML = '<span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>';
+            badgeContainer.innerHTML = '<span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">Enter weight & height to calculate</span>';
             return;
         }
 
@@ -1950,13 +1949,13 @@
         let badgeText = '';
 
         if (bmi < 18.5) {
-            badgeBg = '#e0f2fe'; badgeColor = '#0369a1'; badgeText = 'نحافة (Underweight)';
+            badgeBg = '#e0f2fe'; badgeColor = '#0369a1'; badgeText = 'Underweight';
         } else if (bmi >= 18.5 && bmi <= 24.9) {
-            badgeBg = '#dcfce7'; badgeColor = '#15803d'; badgeText = 'وزن مثالي وطبيعي (Normal)';
+            badgeBg = '#dcfce7'; badgeColor = '#15803d'; badgeText = 'Normal Weight';
         } else if (bmi >= 25 && bmi <= 29.9) {
-            badgeBg = '#fef3c7'; badgeColor = '#b45309'; badgeText = 'زيادة وزن (Overweight)';
+            badgeBg = '#fef3c7'; badgeColor = '#b45309'; badgeText = 'Overweight';
         } else {
-            badgeBg = '#fee2e2'; badgeColor = '#b91c1c'; badgeText = 'سمنة مفرطة (Obese)';
+            badgeBg = '#fee2e2'; badgeColor = '#b91c1c'; badgeText = 'Obese';
         }
 
         badgeContainer.innerHTML = `<span class="bmi-badge" style="background:${badgeBg}; color:${badgeColor};">${badgeText}</span>`;
@@ -2256,7 +2255,7 @@
     }
 
     function confirmDeleteAttachment(visitId, index) {
-        if (confirm("هل أنت متأكد من حذف هذا المرفق؟")) {
+        if (confirm("Are you sure you want to delete this attachment?")) {
             deleteAttachment(visitId, index);
         }
     }
@@ -2304,7 +2303,7 @@
         const age = Number(document.getElementById('editPAge').value);
 
         if (!name || !age) {
-            alert('الاسم والعمر حقلان إجباريان!');
+            alert('Name and Age are required fields!');
             return;
         }
 
@@ -2324,14 +2323,14 @@
         document.getElementById('recPatientName').innerText = patient.name;
         document.getElementById('recPatientMeta').innerText = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
         
-        alert('تم تعديل معلومات المريض بنجاح!');
+        alert('Patient information updated successfully!');
     }
 
     function confirmDeletePatientRecord() {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
 
-        if (confirm(`هل أنت متأكد من نقل السجل الطبي للمريض "${patient.name}" إلى سلة المحذوفات؟`)) {
+        if (confirm(`Are you sure you want to move patient "${patient.name}" to the trash bin?`)) {
             const idx = patients.findIndex(p => Number(p.id) === Number(currentPatientId));
             if (idx !== -1) {
                 const pIdStr = String(patients[idx].id);
@@ -2352,7 +2351,7 @@
                 }
                 localStorage.setItem('clinic_patients', JSON.stringify(patients));
             }
-            alert('تم نقل المريض إلى سلة المحذوفات بنجاح.');
+            alert('Patient moved to trash bin successfully.');
             openPatientsArchive();
         }
     }
@@ -2362,11 +2361,11 @@
         if (!patient) return;
 
         if (patient.visits && patient.visits.length <= 1) {
-            alert('عذراً، لا يمكن حذف المراجعة الوحيدة للمريض. يمكنك حذف المريض بالكامل إن أردت.');
+            alert('Cannot delete the only visit for this patient. You can delete the entire patient record instead.');
             return;
         }
 
-        if (confirm("هل أنت متأكد من نقل هذه المراجعة إلى سلة المحذوفات؟")) {
+        if (confirm("Are you sure you want to move this visit to the trash bin?")) {
             const vIndex = patient.visits.findIndex(v => Number(v.visitId) === Number(visitId));
             if (vIndex !== -1) {
                 const removedVisit = patient.visits.splice(vIndex, 1)[0];
@@ -2382,7 +2381,7 @@
 
                 savePatientToCloudAndLocal(patient);
                 renderVisits(patient.visits);
-                alert('تم نقل المراجعة إلى سلة المحذوفات.');
+                alert('Visit moved to trash bin.');
             }
         }
     }
@@ -2397,7 +2396,7 @@
         const emptyBtn = document.getElementById('emptyTrashBtn');
 
         if (trashBin.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b; margin-top:20px;">سلة المحذوفات فارغة تماماً.</p>';
+            container.innerHTML = '<p style="text-align:center; color:#64748b; margin-top:20px;">Trash bin is completely empty.</p>';
             if (emptyBtn) emptyBtn.style.display = 'none';
             return;
         }
@@ -2409,12 +2408,12 @@
                 return `
                     <div class="trash-card">
                         <div>
-                            <h4 style="font-family:'Playfair Display',serif; color:#0f172a; font-size:1rem;">👤 مريض: ${item.data.name}</h4>
-                            <p style="font-size:0.75rem; color:#64748b;">العمر: ${item.data.age} | الهاتف: ${item.data.phone || 'N/A'}</p>
-                            <p style="font-size:0.7rem; color:#ef4444; margin-top:2px;">حُذف في: ${item.deletedAt}</p>
+                            <h4 style="font-family:'Playfair Display',serif; color:#0f172a; font-size:1rem;">👤 Patient: ${item.data.name}</h4>
+                            <p style="font-size:0.75rem; color:#64748b;">Age: ${item.data.age} | Phone: ${item.data.phone || 'N/A'}</p>
+                            <p style="font-size:0.7rem; color:#ef4444; margin-top:2px;">Deleted at: ${item.deletedAt}</p>
                         </div>
                         <button class="btn-restore" onclick="restoreTrashItem(${index})">
-                            <i class="fa-solid fa-rotate-left"></i> استرجاع
+                            <i class="fa-solid fa-rotate-left"></i> Restore
                         </button>
                     </div>
                 `;
@@ -2422,12 +2421,12 @@
                 return `
                     <div class="trash-card">
                         <div>
-                            <h4 style="font-family:'Playfair Display',serif; color:#0f172a; font-size:1.02rem;">📋 مراجعة للمريض: ${item.patientName}</h4>
-                            <p style="font-size:0.75rem; color:#64748b;">تاريخ المراجعة: ${item.data.date || 'N/A'}</p>
-                            <p style="font-size:0.7rem; color:#ef4444; margin-top:2px;">حُذفت في: ${item.deletedAt}</p>
+                            <h4 style="font-family:'Playfair Display',serif; color:#0f172a; font-size:1.02rem;">📋 Visit for: ${item.patientName}</h4>
+                            <p style="font-size:0.75rem; color:#64748b;">Visit Date: ${item.data.date || 'N/A'}</p>
+                            <p style="font-size:0.7rem; color:#ef4444; margin-top:2px;">Deleted at: ${item.deletedAt}</p>
                         </div>
                         <button class="btn-restore" onclick="restoreTrashItem(${index})">
-                            <i class="fa-solid fa-rotate-left"></i> استرجاع
+                            <i class="fa-solid fa-rotate-left"></i> Restore
                         </button>
                     </div>
                 `;
@@ -2444,7 +2443,7 @@
             savePatientToCloudAndLocal(item.data);
             trashBin.splice(index, 1);
             saveTrashToCloudAndLocal();
-            alert(`تم استرجاع المريض "${item.data.name}" إلى الأرشيف بنجاح!`);
+            alert(`Patient "${item.data.name}" restored to archive successfully!`);
             renderTrashItems();
         } else {
             const patient = patients.find(p => Number(p.id) === Number(item.patientId));
@@ -2454,10 +2453,10 @@
                 savePatientToCloudAndLocal(patient);
                 trashBin.splice(index, 1);
                 saveTrashToCloudAndLocal();
-                alert(`تم استرجاع المراجعة إلى ملف المريض "${item.patientName}" بنجاح!`);
+                alert(`Visit restored to patient "${item.patientName}" successfully!`);
                 renderTrashItems();
             } else {
-                alert('عذراً، لم يتم العثور على ملف المريض الأصلي (ربما تم حذفه بالكامل). سيتم إنشاء ملف جديد له.');
+                alert('Original patient record not found. Creating a new profile for this visit.');
                 const newPatient = {
                     id: item.patientId || Date.now(),
                     name: item.patientName,
@@ -2479,11 +2478,11 @@
 
     function confirmEmptyTrash() {
         if (trashBin.length === 0) return;
-        if (confirm("هل أنت متأكد تماماً من تفريغ سلة المحذوفات نهائياً؟ لا يمكن التراجع عن هذه الخطوة وسيتم حذف العناصر للأبد.")) {
+        if (confirm("Are you sure you want to empty the trash bin? This action cannot be undone.")) {
             trashBin = [];
             saveTrashToCloudAndLocal();
             renderTrashItems();
-            alert('تم تفريغ سلة المحذوفات نهائياً بنجاح.');
+            alert('Trash bin emptied permanently.');
         }
     }
 
@@ -2583,7 +2582,7 @@
             placeholder.style.textAlign = 'center';
             placeholder.style.color = '#94a3b8';
             placeholder.style.fontSize = '0.85rem';
-            placeholder.innerText = '(لم تقم برفع صورة روشتة مخصصة من القائمة الرئيسية)';
+            placeholder.innerText = '(No custom prescription header uploaded from main menu)';
             container.insertBefore(placeholder, container.firstChild);
         }
 
@@ -2630,18 +2629,18 @@
 
         if (isConfigMode) {
             boxes.forEach(b => b.classList.add('config-mode'));
-            hint.innerText = 'وضع الضبط مفعل: اسحب العناصر وعدّل أحجام الخطوط ثم اضغط حفظ.';
+            hint.innerText = 'Configuration mode active: Drag elements and adjust fonts, then click save.';
             hint.style.color = '#0d9488';
             hint.style.fontWeight = '700';
             saveBtn.style.display = 'block';
-            toggleBtn.innerText = 'إلغاء الضبط';
+            toggleBtn.innerText = 'Cancel Config';
         } else {
             boxes.forEach(b => b.classList.remove('config-mode'));
-            hint.innerText = 'الروشتة جاهزة. (اضغط ضبط الأماكن للتعديل)';
+            hint.innerText = 'RX ready. (Click Configure Layout to edit)';
             hint.style.color = '#64748b';
             hint.style.fontWeight = '400';
             saveBtn.style.display = 'none';
-            toggleBtn.innerHTML = '<i class="fa-solid fa-sliders"></i> ضبط الأماكن والخطوط';
+            toggleBtn.innerHTML = '<i class="fa-solid fa-sliders"></i> Configure Layout';
         }
     }
 
@@ -2681,7 +2680,7 @@
         };
 
         localStorage.setItem('clinic_rx_layout', JSON.stringify(layoutData));
-        alert('تم حفظ أماكن وأحجام خطوط الروشتة بنجاح!');
+        alert('RX layout and font sizes saved successfully!');
         isConfigMode = false;
         updateConfigModeUI();
     }
@@ -2745,7 +2744,7 @@
 
             pdf.save(`Prescription_${Date.now()}.pdf`);
         }).catch(err => {
-            alert('حدث خطأ أثناء حفظ الروشتة PDF: ' + err.message);
+            alert('Error saving prescription PDF: ' + err.message);
         });
     }
 
@@ -2985,7 +2984,7 @@
             const attachments = v.attachments || [];
             const visitDateVal = v.date || getTodayFormatted();
             
-            const bmiText = v.bmiScore ? `BMI: ${v.bmiScore} (${v.bmiWeight}kg / ${v.bmiHeight}cm)` : 'Open BMI (Body Mass Index) Calculator';
+            const bmiText = v.bmiScore ? `BMI: ${v.bmiScore} (${v.bmiWeight}kg / ${v.bmiHeight}cm)` : 'Open BMI Calculator';
 
             return `
             <div class="visit-card" id="visit-${vId}" data-visit-id="${vId}">
