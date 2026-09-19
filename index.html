@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.75</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.80</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -320,7 +320,7 @@
                     <button onclick="openSupportModal()" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:6px 10px; font-size:0.75rem; font-weight:700; cursor:pointer; white-space:nowrap;">Renew</button>
                 </div>
 
-                <!-- Founder Control Panel (Visible only to founder email to generate keys) -->
+                <!-- Founder Control Panel -->
                 <div class="founder-panel" id="founderControlPanel" style="display: none;">
                     <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;">🔑 Code Generator (Founder):</span>
                     <div style="display: flex; gap: 6px; margin: 6px 0;">
@@ -421,8 +421,8 @@
                         <div class="menu-card" id="cardPermissions" onclick="openPermissionsManager()" style="display: none;">
                             <div class="menu-icon permissions-icon"><i class="fa-solid fa-user-shield"></i></div>
                             <div class="menu-info">
-                                <h3>Secretary Permissions</h3>
-                                <p>Control secretary features</p>
+                                <h3>Secretary Management</h3>
+                                <p>Create account & permissions</p>
                             </div>
                         </div>
 
@@ -441,13 +441,34 @@
             <div id="permissionsScreen" style="display: none;">
                 <div class="group-card">
                     <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
-                        <i class="fa-solid fa-user-shield" style="color:#d946ef;"></i> Secretary Access Permissions
+                        <i class="fa-solid fa-user-shield" style="color:#d946ef;"></i> Secretary Account & Permissions
                     </div>
-                    <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
-                        Check the features and permissions you wish to grant to the secretary. Unchecked features will be completely hidden from their account.
+                    <p style="font-size: 0.80rem; color: #64748b; margin-bottom: 14px; line-height: 1.5;">
+                        Create or update the secretary login credentials, and select the specific features you wish to grant them.
                     </p>
 
-                    <div class="checkbox-grid" style="grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px;">
+                    <div class="field-box">
+                        <span class="field-label">Secretary Email Address</span>
+                        <div class="input-wrapper"><input type="email" id="secEmailInput" placeholder="secretary@clinic.com"></div>
+                    </div>
+                    <div class="field-box">
+                        <span class="field-label">Secretary Password</span>
+                        <div class="input-wrapper"><input type="password" id="secPassInput" placeholder="••••••••"></div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+                        <button class="btn-main" onclick="saveSecretaryAccount()" style="flex: 1; background: #0d9488; padding: 10px; font-size: 0.85rem;">
+                            <i class="fa-solid fa-user-plus"></i> Save Secretary Account
+                        </button>
+                        <button class="btn-danger" onclick="deleteSecretaryAccount()" style="flex: 1; margin-top: 0; padding: 10px; font-size: 0.85rem;">
+                            <i class="fa-solid fa-trash"></i> Delete Account
+                        </button>
+                    </div>
+
+                    <hr style="border:0; border-top:1px solid #cbd5e1; margin:14px 0;">
+
+                    <span style="font-size: 0.85rem; font-weight: 800; color: #0f172a; display: block; margin-bottom: 8px;">Feature Permissions:</span>
+                    <div class="checkbox-grid" style="grid-template-columns: 1fr; gap: 8px; margin-bottom: 16px;">
                         <label class="checkbox-item"><input type="checkbox" id="perm_newPatient" checked> 🟢 Register New Patient</label>
                         <label class="checkbox-item"><input type="checkbox" id="perm_archive" checked> 🟢 Patients Archive & Search</label>
                         <label class="checkbox-item"><input type="checkbox" id="perm_rxTemplate"> 🟡 RX Template Header</label>
@@ -459,7 +480,7 @@
                     </div>
 
                     <button class="btn-main" onclick="saveSecretaryPermissions()" style="background: #d946ef;">
-                        <i class="fa-solid fa-floppy-disk"></i> Save Secretary Permissions
+                        <i class="fa-solid fa-floppy-disk"></i> Save Permissions
                     </button>
                 </div>
             </div>
@@ -764,7 +785,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.75</div>
+        <div class="footer">Clinic Master Network v16.80</div>
     </div>
 </div>
 
@@ -1168,6 +1189,7 @@
         mh_history: ["Appendectomy", "Cholecystectomy", "Penicillin Allergy", "Cesarean Section"]
     };
 
+    let secretaryAccount = JSON.parse(localStorage.getItem('clinic_sec_account')) || { email: "", password: "" };
     let secretaryPermissions = JSON.parse(localStorage.getItem('clinic_sec_perms')) || {
         newPatient: true,
         archive: true,
@@ -1206,6 +1228,7 @@
             rxImage: currentDoctorRxImage,
             dictionary: medicalDict,
             trashBin: trashBin,
+            secretaryAccount: secretaryAccount,
             secretaryPermissions: secretaryPermissions,
             updatedAt: new Date().toISOString()
         }, { merge: true }).catch(err => console.log("Settings sync error:", err));
@@ -1221,7 +1244,7 @@
     }
 
     async function generateNewKey(type) {
-        let prefix = "TRL"; // 14 Days Trial
+        let prefix = "TRL";
         let days = 14;
         if (type === 'EXT') { prefix = "EXT"; days = 7; }
         else if (type === 'ANNUAL') { prefix = "ANN"; days = 365; }
@@ -1354,6 +1377,10 @@
                                 trashBin = data.trashBin;
                                 localStorage.setItem(`clinic_trash_${user.uid}`, JSON.stringify(trashBin));
                             }
+                            if (data.secretaryAccount) {
+                                secretaryAccount = data.secretaryAccount;
+                                localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
+                            }
                             if (data.secretaryPermissions) {
                                 secretaryPermissions = data.secretaryPermissions;
                                 localStorage.setItem('clinic_sec_perms', JSON.stringify(secretaryPermissions));
@@ -1406,6 +1433,16 @@
             } catch (e) {
                 console.log(e);
             }
+        }
+
+        const user = auth.currentUser;
+        const isSec = user && secretaryAccount.email && user.email.toLowerCase() === secretaryAccount.email.toLowerCase();
+
+        if (isSec) {
+            document.getElementById('cardPermissions').style.display = 'none';
+            applySecretaryUIVisibility();
+            navigateTo('mainScreen');
+            return;
         }
 
         if (expiryDateStr && new Date().getTime() < new Date(expiryDateStr).getTime()) {
@@ -1515,12 +1552,14 @@
         if (!currentUserId) return;
         localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
         localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
+        localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
         localStorage.setItem('clinic_sec_perms', JSON.stringify(secretaryPermissions));
 
         if (navigator.onLine) {
             db.collection('users_data').doc(currentUserId).set({
                 rxImage: currentDoctorRxImage,
                 dictionary: medicalDict,
+                secretaryAccount: secretaryAccount,
                 secretaryPermissions: secretaryPermissions,
                 updatedAt: new Date().toISOString()
             }, { merge: true }).catch(err => console.log("Settings save error:", err));
@@ -1565,16 +1604,19 @@
                 .catch(err => alert(err.message));
         } else {
             auth.signInWithEmailAndPassword(email, pass)
+                .then(res => {
+                    // Check if logged in as secretary
+                    if (secretaryAccount.email && email.toLowerCase() === secretaryAccount.email.toLowerCase()) {
+                        document.getElementById('authScreen').style.display = 'none';
+                        document.getElementById('appContainer').style.display = 'flex';
+                        document.getElementById('cardPermissions').style.display = 'none';
+                        document.getElementById('subStatusBanner').style.display = 'none';
+                        applySecretaryUIVisibility();
+                        navigateTo('mainScreen');
+                    }
+                })
                 .catch(err => alert(err.message));
         }
-    }
-
-    function isDoctorOrFounder() {
-        const user = auth.currentUser;
-        if (!user) return false;
-        if (user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) return true;
-        // Assume main account or check if it contains doctor keyword, or if it's not explicitly a secretary. For simplicity, founder/main account is full doctor. Let's provide UI for permission management if founder or based on email/role.
-        return true; // Doctor always configures. If you want to distinguish doctor vs secretary login emails, we can check email or flag.
     }
 
     async function setupFounderInterface() {
@@ -1596,7 +1638,7 @@
         document.getElementById('networkMenuCard').style.display = 'none';
 
         const user = auth.currentUser;
-        const isSec = user && user.email.toLowerCase().includes('sec'); // or check if logged in as secretary
+        const isSec = user && secretaryAccount.email && user.email.toLowerCase() === secretaryAccount.email.toLowerCase();
 
         if (isSec) {
             document.getElementById('cardPermissions').style.display = 'none';
@@ -1656,7 +1698,10 @@
     }
 
     function openPermissionsManager() {
-        navigateTo('permissionsScreen', 'Secretary Permissions', 'Control feature access');
+        navigateTo('permissionsScreen', 'Secretary Management', 'Create account & permissions');
+        document.getElementById('secEmailInput').value = secretaryAccount.email || '';
+        document.getElementById('secPassInput').value = secretaryAccount.password || '';
+
         document.getElementById('perm_newPatient').checked = secretaryPermissions.newPatient;
         document.getElementById('perm_archive').checked = secretaryPermissions.archive;
         document.getElementById('perm_rxTemplate').checked = secretaryPermissions.rxTemplate;
@@ -1665,6 +1710,47 @@
         document.getElementById('perm_backup').checked = secretaryPermissions.backup;
         document.getElementById('perm_trash').checked = secretaryPermissions.trash;
         document.getElementById('perm_settings').checked = secretaryPermissions.settings;
+    }
+
+    async function saveSecretaryAccount() {
+        const email = document.getElementById('secEmailInput').value.trim();
+        const password = document.getElementById('secPassInput').value;
+
+        if (!email || !password) {
+            alert('Please enter both email and password for the secretary.');
+            return;
+        }
+
+        if (!navigator.onLine) {
+            alert('Internet connection required to create secretary authentication account.');
+            return;
+        }
+
+        try {
+            // Create Firebase Auth user for secretary
+            await auth.createUserWithEmailAndPassword(email, password);
+            secretaryAccount = { email, password };
+            saveSettingsToCloudAndLocal();
+            alert('Secretary account created and registered successfully in Firebase Auth!');
+        } catch (e) {
+            if (e.code === 'auth/email-already-in-use') {
+                secretaryAccount = { email, password };
+                saveSettingsToCloudAndLocal();
+                alert('Secretary account email updated successfully!');
+            } else {
+                alert('Error creating secretary account: ' + e.message);
+            }
+        }
+    }
+
+    function deleteSecretaryAccount() {
+        if (confirm('Are you sure you want to delete and revoke access for the secretary account?')) {
+            secretaryAccount = { email: "", password: "" };
+            document.getElementById('secEmailInput').value = '';
+            document.getElementById('secPassInput').value = '';
+            saveSettingsToCloudAndLocal();
+            alert('Secretary account revoked successfully.');
+        }
     }
 
     function saveSecretaryPermissions() {
@@ -1710,11 +1796,12 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.75",
+            version: "16.80",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
             rxImage: currentDoctorRxImage,
+            secretaryAccount: secretaryAccount,
             secretaryPermissions: secretaryPermissions
         };
 
@@ -1748,6 +1835,7 @@
                         trashBin = parsed.trashBin || [];
                         medicalDict = parsed.medicalDict || medicalDict;
                         if (parsed.rxImage) currentDoctorRxImage = parsed.rxImage;
+                        if (parsed.secretaryAccount) secretaryAccount = parsed.secretaryAccount;
                         if (parsed.secretaryPermissions) secretaryPermissions = parsed.secretaryPermissions;
 
                         if (currentUserId) {
