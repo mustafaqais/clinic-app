@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.90</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Clinic Master System - Cloud Ultimate Edition v16.91</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -22,8 +22,8 @@
 
     <style>
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
-        body { background-color: #eef2f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .mobile-container { background: #ffffff; width: 100%; max-width: 430px; min-height: 100vh; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.12); position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        html, body { background-color: #eef2f6; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow-x: hidden; }
+        .mobile-container { background: #ffffff; width: 100%; max-width: 430px; height: 100vh; min-height: 100vh; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.12); position: relative; overflow: hidden; display: flex; flex-direction: column; }
         
         .auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px 20px; flex: 1; text-align: center; }
         .activ-icon { font-size: 50px; color: #0d9488; margin-bottom: 15px; }
@@ -46,7 +46,7 @@
         .network-status-bar { background: #fef3c7; color: #b45309; font-size: 0.72rem; font-weight: 700; text-align: center; padding: 4px; display: none; }
         .network-status-bar.offline { display: block; background: #fee2e2; color: #b91c1c; }
 
-        .header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 35px 20px 30px 20px; text-align: center; border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+        .header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 35px 20px 30px 20px; text-align: center; border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.15); flex-shrink: 0; }
         .header-icon { font-size: 42px; color: #0d9488; margin-bottom: 10px; }
         .header h1 { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; color: #f8fafc; letter-spacing: 0.5px; }
         .header p { font-size: 0.82rem; color: #94a3b8; }
@@ -57,7 +57,7 @@
         .support-btn { right: 82px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
         .lang-btn { right: 152px; color: #facc15; border-color: rgba(250, 204, 21, 0.3); }
 
-        .content { padding: 20px 16px; flex: 1; overflow-y: auto; }
+        .content { padding: 20px 16px; flex: 1; overflow-y: auto; width: 100%; }
         
         .section-group { margin-bottom: 18px; }
         .section-title { font-size: 0.82rem; font-weight: 800; color: #0d9488; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; padding-left: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -251,7 +251,7 @@
         .rx-rx-title { color: #b91c1c; font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-align: left; margin-bottom: 2px; direction: ltr; } 
         .rx-treatment-text { color: #000000; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.05rem; white-space: pre-wrap; text-align: left; direction: ltr; line-height: 1.6; } 
 
-        .footer { text-align: center; padding: 16px; color: #334155; font-size: 0.85rem; font-weight: 700; margin-top: auto; border-top: 1px solid #e2e8f0; background: #f8fafc; }
+        .footer { text-align: center; padding: 16px; color: #334155; font-size: 0.85rem; font-weight: 700; margin-top: auto; border-top: 1px solid #e2e8f0; background: #f8fafc; flex-shrink: 0; }
     </style>
 </head>
 <body>
@@ -296,7 +296,7 @@
         <button class="btn-main" onclick="verifyActivationCode()" id="btnActivate">Activate System</button>
     </div>
 
-    <div id="appContainer" style="display: none; flex: 1; flex-direction: column;">
+    <div id="appContainer" style="display: none; flex: 1; flex-direction: column; overflow: hidden;">
         <div class="header">
             <button id="backBtn" class="back-btn" onclick="goBackScreen()" style="display: none;">
                 <i class="fa-solid fa-arrow-left"></i> <span id="txtBack">Back</span>
@@ -792,7 +792,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v16.90</div>
+        <div class="footer" id="footerText">Clinic Master Network v16.91</div>
     </div>
 </div>
 
@@ -1248,7 +1248,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v16.90"
+            footer: "نظام عيادة ماستر المتقدم v16.91"
         },
         en: {
             loginTitle: "User Login",
@@ -1303,7 +1303,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v16.90"
+            footer: "Clinic Master Network v16.91"
         }
     };
 
@@ -1316,11 +1316,9 @@
     function applyLanguage() {
         const t = translations[currentLang];
         
-        // Direction
         const isAr = currentLang === 'ar';
         document.body.style.direction = isAr ? 'rtl' : 'ltr';
 
-        // Auth Screen
         document.getElementById('authTitle').innerText = isRegisterMode ? t.registerTitle : t.loginTitle;
         document.getElementById('authSubText').innerText = isRegisterMode ? t.registerSub : t.loginSub;
         document.getElementById('lblEmail').innerText = t.emailLabel;
@@ -1329,13 +1327,11 @@
         document.getElementById('authSubmitBtn').innerText = isRegisterMode ? t.btnRegister : t.btnLogin;
         document.getElementById('authSwitchText').innerHTML = isRegisterMode ? t.switchLogin : t.switchRegister;
 
-        // Activation Screen
         document.getElementById('activTitle').innerText = t.activTitle;
         document.getElementById('activSub').innerText = t.activSub;
         document.getElementById('lblActivCode').innerText = t.lblActivCode;
         document.getElementById('btnActivate').innerText = t.btnActivate;
 
-        // Header & Nav
         document.getElementById('headerTitle').innerText = t.headerTitle;
         document.getElementById('headerSub').innerText = t.headerSub;
         document.getElementById('txtBack').innerText = t.txtBack;
@@ -1343,7 +1339,6 @@
         document.getElementById('txtLogout').innerText = t.txtLogout;
         document.getElementById('txtLangBadge').innerText = t.txtLangBadge;
 
-        // Menu Groups & Cards
         document.getElementById('secGroup1').innerHTML = `<i class="fa-solid fa-stethoscope"></i> ${t.group1}`;
         document.getElementById('menuNewPatientTitle').innerText = t.newPatient;
         document.getElementById('menuNewPatientSub').innerText = t.newPatientSub;
@@ -1988,7 +1983,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.90",
+            version: "16.91",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
