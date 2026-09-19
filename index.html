@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.95</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.96</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -813,7 +813,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v16.95</div>
+        <div class="footer" id="footerText">Clinic Master Network v16.96</div>
     </div>
 </div>
 
@@ -1213,6 +1213,7 @@
     let isConfigMode = false;
     let activeMhInputKey = null;
     let isUserSecretary = false;
+    let patientsListenerUnsubscribe = null;
 
     let currentLang = localStorage.getItem('clinic_lang') || 'ar';
 
@@ -1270,7 +1271,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v16.95",
+            footer: "نظام عيادة ماستر المتقدم v16.96",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1430,7 +1431,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v16.95",
+            footer: "Clinic Master Network v16.96",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -1821,6 +1822,7 @@
             sessionStorage.setItem('header_sub', sub);
             if (screenId !== 'medicalRecordScreen') {
                 sessionStorage.removeItem('current_patient_id');
+                currentPatientId = null;
             }
         }
 
@@ -1831,7 +1833,6 @@
             document.getElementById('backBtn').style.display = 'flex';
             if (screenHistory[screenHistory.length - 1] !== screenId) {
                 screenHistory.push(screenId);
-                window.history.pushState({screen: screenId}, '', '#' + screenId);
             }
         }
     }
@@ -1852,33 +1853,18 @@
                 document.getElementById('headerSub').innerText = translations[currentLang].headerSub;
                 sessionStorage.setItem('header_title', translations[currentLang].headerTitle);
                 sessionStorage.setItem('header_sub', translations[currentLang].headerSub);
+                sessionStorage.removeItem('current_patient_id');
+                currentPatientId = null;
             } else if (prevScreen === 'archiveScreen') {
                 document.getElementById('headerTitle').innerText = translations[currentLang].archive;
                 document.getElementById('headerSub').innerText = 'Advanced search, filters & records';
-            } else if (prevScreen === 'medicalRecordScreen') {
-                document.getElementById('headerTitle').innerText = 'Patient Medical Record';
-                document.getElementById('headerSub').innerText = 'View & update medical history';
+                sessionStorage.removeItem('current_patient_id');
+                currentPatientId = null;
             }
         } else {
             showMainMenu();
         }
     }
-
-    window.addEventListener('popstate', function(event) {
-        if (screenHistory.length > 1) {
-            screenHistory.pop();
-            const prevScreen = screenHistory[screenHistory.length - 1];
-            hideAllScreensInner();
-            document.getElementById(prevScreen).style.display = 'block';
-            sessionStorage.setItem('current_screen', prevScreen);
-
-            if (prevScreen === 'mainScreen') {
-                document.getElementById('backBtn').style.display = 'none';
-                document.getElementById('headerTitle').innerText = translations[currentLang].headerTitle;
-                document.getElementById('headerSub').innerText = translations[currentLang].headerSub;
-            }
-        }
-    });
 
     function hideAllScreensInner() {
         document.getElementById('mainScreen').style.display = 'none';
@@ -1926,6 +1912,10 @@
                 patients = JSON.parse(localStorage.getItem(`clinic_patients_${dataOwnerUid}`)) || patients;
                 trashBin = JSON.parse(localStorage.getItem(`clinic_trash_${dataOwnerUid}`)) || trashBin;
 
+                if (patientsListenerUnsubscribe) {
+                    patientsListenerUnsubscribe();
+                }
+
                 if (navigator.onLine) {
                     db.collection('users_data').doc(dataOwnerUid).get().then(doc => {
                         if (doc.exists) {
@@ -1950,16 +1940,27 @@
                         }
                     }).catch(err => console.log(err));
 
-                    db.collection('users_data').doc(dataOwnerUid).collection('patients').get().then(snapshot => {
-                        if (!snapshot.empty) {
+                    patientsListenerUnsubscribe = db.collection('users_data').doc(dataOwnerUid).collection('patients')
+                        .onSnapshot(snapshot => {
                             let cloudPatients = [];
                             snapshot.forEach(doc => {
                                 cloudPatients.push(doc.data());
                             });
                             patients = cloudPatients;
                             localStorage.setItem(`clinic_patients_${dataOwnerUid}`, JSON.stringify(patients));
-                        }
-                    }).catch(err => console.log(err));
+                            localStorage.setItem('clinic_patients', JSON.stringify(patients));
+
+                            if (document.getElementById('archiveScreen').style.display === 'block') {
+                                renderPatientsList(patients);
+                            } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
+                                const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
+                                if (pat) {
+                                    renderVisits(pat.visits || []);
+                                } else {
+                                    showMainMenu();
+                                }
+                            }
+                        }, err => console.log("Real-time listener error:", err));
                 }
 
                 if (user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
@@ -1968,6 +1969,7 @@
                     checkUserSubscriptionStatus(user.uid, isUserSecretary);
                 }
             } else {
+                if (patientsListenerUnsubscribe) patientsListenerUnsubscribe();
                 currentUserId = null;
                 isUserSecretary = false;
                 sessionStorage.removeItem('target_doctor_uid');
@@ -2380,6 +2382,7 @@
     function logoutUser() {
         autoSaveMedicalRecord();
         sessionStorage.clear();
+        if (patientsListenerUnsubscribe) patientsListenerUnsubscribe();
         auth.signOut().then(() => {
             currentUserId = null;
             isUserSecretary = false;
@@ -2398,7 +2401,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.95",
+            version: "16.96",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -2783,7 +2786,7 @@
     }
 
     function openBmiCalculator(visitId) {
-        if (isUserSecretary) return; // Secretary restricted
+        if (isUserSecretary) return;
         currentVisitIdForModal = visitId;
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
@@ -3414,7 +3417,7 @@
     }
 
     function openMedHistoryModal(visitId) {
-        if (isUserSecretary) return; // Secretary restricted
+        if (isUserSecretary) return;
         currentVisitIdForModal = visitId;
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
