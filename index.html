@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.01</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.02</title>
     
     <!-- PWA & App Icons Integration -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -876,7 +876,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.01</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.02</div>
     </div>
 </div>
 
@@ -1355,7 +1355,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.01",
+            footer: "نظام عيادة ماستر المتقدم v17.02",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل (يُفضل إدخال اسم الجد الرابع لمنع التكرار) *",
@@ -1510,7 +1510,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.01",
+            footer: "Clinic Master Network v17.02",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name (Include 4th Grandfather to prevent duplication) *",
@@ -1638,7 +1638,7 @@
             renderDictTerms();
         } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
             const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-            if (patient) renderVisits(patient.visits || []);
+            if (patient) renderVisits(patient.visits || [], false);
         }
     }
 
@@ -2036,7 +2036,9 @@
                             } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
                                 const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
                                 if (pat) {
-                                    renderVisits(pat.visits || []);
+                                    // منع إعادة رندر كامل السجل إذا كان المستخدم يكتب حالياً داخل الحقل لتفادي اختفاء الكيبورد
+                                    if (document.activeElement && document.activeElement.tagName === 'TEXTAREA') return;
+                                    renderVisits(pat.visits || [], false);
                                 } else {
                                     showMainMenu();
                                 }
@@ -2499,7 +2501,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.01",
+            version: "17.02",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3273,7 +3275,7 @@
 
                         if (processedCount === files.length) {
                             savePatientToCloudAndLocal(patient);
-                            renderVisits(patient.visits);
+                            renderVisits(patient.visits, false);
                         }
                     };
                 };
@@ -3327,7 +3329,7 @@
                         visit.attachments.push(compressedBase64);
 
                         savePatientToCloudAndLocal(patient);
-                        renderVisits(patient.visits);
+                        renderVisits(patient.visits, false);
                     };
                 };
                 reader.readAsDataURL(file);
@@ -3350,7 +3352,7 @@
 
         visit.attachments.splice(index, 1);
         savePatientToCloudAndLocal(patient);
-        renderVisits(patient.visits);
+        renderVisits(patient.visits, false);
     }
 
     function previewAttachmentImage(imgSrc) {
@@ -3390,7 +3392,6 @@
             return;
         }
 
-        // تحقق من التكرار عند التعديل (باستثناء المريض الحالي نفسه)
         const nameNormalized = name.toLowerCase().replace(/\s+/g, ' ');
         const exists = patients.some(p => Number(p.id) !== Number(currentPatientId) && p.name.toLowerCase().replace(/\s+/g, ' ') === nameNormalized);
         if (exists) {
@@ -3480,7 +3481,7 @@
                 saveTrashToCloudAndLocal();
 
                 savePatientToCloudAndLocal(patient);
-                renderVisits(patient.visits);
+                renderVisits(patient.visits, false);
                 alert('Visit moved to trash bin.');
             }
         }
@@ -3986,7 +3987,6 @@
         const rawName = document.getElementById('pName').value.trim();
         const nameNormalized = rawName.toLowerCase().replace(/\s+/g, ' ');
 
-        // [منع تكرار الأسماء بالكامل] التحقق مما إذا كان الاسم مسجلاً مسبقاً
         const nameExists = patients.some(p => p.name.toLowerCase().replace(/\s+/g, ' ') === nameNormalized);
         if (nameExists) {
             alert('⚠️ تنبيه بالرفض: يوجد مريض مسجل بهذا الاسم تماماً في النظام!\n\nلا يمكن حفظ الملف لتجنب تشابه الأسماء.\nالرجاء إدخال اسم الجد الرابع أو إضافة لقب تفصيلي للمريض (مثلاً: أحمد علي حسن محمد) ثم إعادة المحاولة.');
@@ -4100,10 +4100,15 @@
             document.getElementById('patientRecordHeaderActions').style.display = 'flex';
         }
 
-        renderVisits(patient.visits || []);
+        renderVisits(patient.visits || [], true);
     }
 
-    function renderVisits(visits) {
+    function renderVisits(visits, forceFullRender = true) {
+        // إذا لم يكن مطلوباً إعادة الرندر بالقوة، والمستخدم يكتب حالياً، نتخطى التحديث لمنع فقدان التركيز واختفاء الكيبورد
+        if (!forceFullRender && document.activeElement && document.activeElement.tagName === 'TEXTAREA') {
+            return;
+        }
+
         const container = document.getElementById('visitsContainer');
         if (visits.length === 0) {
             container.innerHTML = '<p style="text-align:center; color:#64748b;">No visits recorded yet.</p>';
@@ -4309,7 +4314,7 @@
         patient.visits.unshift(newVisit);
 
         savePatientToCloudAndLocal(patient);
-        renderVisits(patient.visits);
+        renderVisits(patient.visits, true);
     }
 </script>
 
