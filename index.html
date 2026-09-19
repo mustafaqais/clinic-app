@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.00</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.01</title>
     
     <!-- PWA & App Icons Integration -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -12,7 +12,6 @@
     <meta name="theme-color" content="#0f172a">
     
     <script>
-        // Inject PWA Manifest dynamically to ensure desktop & mobile pick up the custom icon instantly
         const manifestData = {
             "name": "عيادتي - Clinic Master",
             "short_name": "عيادتي",
@@ -196,7 +195,6 @@
         .modal-header h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; font-weight: 700; }
         .modal-close { background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; color: #475569; cursor: pointer; }
 
-        /* نافذة معاينة الصور */
         #imagePreviewModal {
             position: fixed;
             top: 0;
@@ -695,7 +693,7 @@
                         
                         <div class="field-box">
                             <span class="field-label" id="lblPatName">Full Name *</span>
-                            <div class="input-wrapper"><input type="text" id="pName" placeholder="Enter patient full name..." required></div>
+                            <div class="input-wrapper"><input type="text" id="pName" placeholder="Enter patient full name (e.g. including 4th grandfather)..." required></div>
                         </div>
 
                         <div style="display: flex; gap: 10px;">
@@ -878,7 +876,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.00</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.01</div>
     </div>
 </div>
 
@@ -1357,10 +1355,10 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.00",
+            footer: "نظام عيادة ماستر المتقدم v17.01",
 
             patInfoTitle: "المعلومات الشخصية",
-            lblPatName: "الاسم الكامل *",
+            lblPatName: "الاسم الكامل (يُفضل إدخال اسم الجد الرابع لمنع التكرار) *",
             lblPatAge: "العمر *",
             lblPatGender: "الجنس",
             optSelGender: "اختر الجنس",
@@ -1456,11 +1454,6 @@
             editOptWidow: "أرمل / أرملة",
             editLblJob: "المهنة",
             editOptJob: "اختر المهنة",
-            editJobEmp: "موظف",
-            editJobFree: "عمل حر",
-            editJobHouse: "ربة منزل",
-            editJobStud: "طالب",
-            editJobOther: "أخرى",
             editLblPhone: "رقم الهاتف",
             btnSaveEdit: "حفظ التغييرات"
         },
@@ -1517,10 +1510,10 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.00",
+            footer: "Clinic Master Network v17.01",
 
             patInfoTitle: "Personal Information",
-            lblPatName: "Full Name *",
+            lblPatName: "Full Name (Include 4th Grandfather to prevent duplication) *",
             lblPatAge: "Age *",
             lblPatGender: "Gender",
             optSelGender: "Select Gender",
@@ -1616,11 +1609,6 @@
             editOptWidow: "Widow",
             editLblJob: "Occupation",
             editOptJob: "Select Occupation",
-            editJobEmp: "Employee",
-            editJobFree: "Free Business",
-            editJobHouse: "Housewife",
-            editJobStud: "Student",
-            editJobOther: "Other",
             editLblPhone: "Phone Number",
             btnSaveEdit: "Save Changes"
         }
@@ -2511,7 +2499,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.00",
+            version: "17.01",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3402,6 +3390,14 @@
             return;
         }
 
+        // تحقق من التكرار عند التعديل (باستثناء المريض الحالي نفسه)
+        const nameNormalized = name.toLowerCase().replace(/\s+/g, ' ');
+        const exists = patients.some(p => Number(p.id) !== Number(currentPatientId) && p.name.toLowerCase().replace(/\s+/g, ' ') === nameNormalized);
+        if (exists) {
+            alert('⚠️ خطأ: يوجد مريض مسجل بهذا الاسم تماماً!\nلا يمكن الحفظ إلا إذا قمت بإضافة اسم الجد الرابع (أو تمييز الاسم) لتفادي تشابه الأسماء.');
+            return;
+        }
+
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
 
@@ -3987,10 +3983,20 @@
 
     function saveNewPatient(e) {
         e.preventDefault();
+        const rawName = document.getElementById('pName').value.trim();
+        const nameNormalized = rawName.toLowerCase().replace(/\s+/g, ' ');
+
+        // [منع تكرار الأسماء بالكامل] التحقق مما إذا كان الاسم مسجلاً مسبقاً
+        const nameExists = patients.some(p => p.name.toLowerCase().replace(/\s+/g, ' ') === nameNormalized);
+        if (nameExists) {
+            alert('⚠️ تنبيه بالرفض: يوجد مريض مسجل بهذا الاسم تماماً في النظام!\n\nلا يمكن حفظ الملف لتجنب تشابه الأسماء.\nالرجاء إدخال اسم الجد الرابع أو إضافة لقب تفصيلي للمريض (مثلاً: أحمد علي حسن محمد) ثم إعادة المحاولة.');
+            return;
+        }
+
         const today = document.getElementById('pDate').value || getTodayFormatted();
         const newPatient = {
             id: Date.now(),
-            name: document.getElementById('pName').value,
+            name: rawName,
             age: Number(document.getElementById('pAge').value),
             gender: document.getElementById('pGender').value || 'Unspecified',
             marital: document.getElementById('pMarital').value || 'Single',
