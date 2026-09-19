@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.02</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.03</title>
     
     <!-- PWA & App Icons Integration -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -562,6 +562,7 @@
                     <div class="checkbox-grid" style="grid-template-columns: 1fr; gap: 8px; margin-bottom: 16px;">
                         <label class="checkbox-item"><input type="checkbox" id="perm_newPatient" checked> <span id="pNewPat">🟢 Register New Patient & Personal Info</span></label>
                         <label class="checkbox-item"><input type="checkbox" id="perm_archive" checked> <span id="pArch">🟢 Patients Archive, Search & Attachments</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_vitals" checked> <span id="pVitals">🟢 Vital Signs & BMI Calculator</span></label>
                         <label class="checkbox-item"><input type="checkbox" id="perm_rxTemplate" disabled> <span id="pRx">🔴 RX Template Header (Doctor Only)</span></label>
                         <label class="checkbox-item"><input type="checkbox" id="perm_dict" disabled> <span id="pDict">🔴 Medical Dictionary (Doctor Only)</span></label>
                         <label class="checkbox-item"><input type="checkbox" id="perm_analytics" disabled> <span id="pAnalytics">🔴 Clinic Analytics (Doctor Only)</span></label>
@@ -876,7 +877,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.02</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.03</div>
     </div>
 </div>
 
@@ -1358,7 +1359,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.02",
+            footer: "نظام عيادة ماستر المتقدم v17.03",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل (يُفضل إدخال اسم الجد الرابع لمنع التكرار) *",
@@ -1513,7 +1514,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.02",
+            footer: "Clinic Master Network v17.03",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name (Include 4th Grandfather to prevent duplication) *",
@@ -2469,7 +2470,7 @@
     }
 
     function saveSecretaryPermissions() {
-        alert('Secretary permissions are permanently configured: Secretary can register patients and upload/manage attachments. All medical, prescription, and system features are restricted to the Doctor.');
+        alert('Secretary permissions are permanently configured: Secretary can register patients, enter Vital Signs & BMI, and upload/manage attachments. All medical prescriptions and system features are restricted to the Doctor.');
         showMainMenu();
     }
 
@@ -2503,7 +2504,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.02",
+            version: "17.03",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -2952,7 +2953,6 @@
     }
 
     function openBmiCalculator(visitId) {
-        if (isUserSecretary) return;
         currentVisitIdForModal = visitId;
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
@@ -2973,10 +2973,6 @@
     }
 
     function closeBmiModal() {
-        if (isUserSecretary) {
-            document.getElementById('bmiCalculatorModal').style.display = 'none';
-            return;
-        }
         if (currentVisitIdForModal && currentPatientId) {
             const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
             if (patient) {
@@ -3822,7 +3818,6 @@
         }
     }
 
-    // دالة لطباعة الروشتة مباشرة أو حفظها بصيغة PDF بدون تخزين بالجهاز
     function printPrescriptionDirectly() {
         const wasConfig = isConfigMode;
         if (wasConfig) {
@@ -3999,12 +3994,15 @@
                 if (dateInput && dateInput.value && !isUserSecretary) {
                     visitObj.date = dateInput.value;
                 }
+
+                // السماح بحفظ العلامات الحيوية سواء للطبيب أو السكرتير
+                visitObj.bpSystolic = el.querySelector('.v-bp-sys').value;
+                visitObj.bpDiastolic = el.querySelector('.v-bp-dia').value;
+                visitObj.spo2 = el.querySelector('.v-spo2').value;
+                visitObj.hr = el.querySelector('.v-hr').value;
+                visitObj.rr = el.querySelector('.v-rr') ? el.querySelector('.v-rr').value : '';
+
                 if (!isUserSecretary) {
-                    visitObj.bpSystolic = el.querySelector('.v-bp-sys').value;
-                    visitObj.bpDiastolic = el.querySelector('.v-bp-dia').value;
-                    visitObj.spo2 = el.querySelector('.v-spo2').value;
-                    visitObj.hr = el.querySelector('.v-hr').value;
-                    visitObj.rr = el.querySelector('.v-rr') ? el.querySelector('.v-rr').value : '';
                     visitObj.labs = el.querySelector('.v-labs').value;
                     visitObj.scans = el.querySelector('.v-scans').value;
                     visitObj.drugs = el.querySelector('.v-drugs').value;
@@ -4203,6 +4201,8 @@
             const visitDateVal = v.date || getTodayFormatted();
             
             const bmiText = v.bmiScore ? `BMI: ${v.bmiScore} (${v.bmiWeight}kg / ${v.bmiHeight}cm)` : 'Open BMI Calculator';
+            
+            // تم السماح للسكرتير بالكتابة في حقول العلامات الحيوية والعناصر الخاصة بها
             const disabledAttr = isUserSecretary ? 'disabled readonly style="background:#f1f5f9; cursor:not-allowed;"' : '';
             const hideForSecStyle = isUserSecretary ? 'style="display:none;"' : '';
 
@@ -4221,15 +4221,17 @@
                     </button>
                 </div>
 
-                <div class="field-box" ${hideForSecStyle}>
+                <!-- زر حساب الـ BMI متاح للسكرتير والطبيب -->
+                <div class="field-box">
                     <span class="field-label"><i class="fa-solid fa-weight-scale" style="color:#0284c7;"></i> Optional Tools</span>
-                    <button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(${vId})" ${isUserSecretary ? 'disabled style="background:#f8fafc; color:#94a3b8; border-color:#cbd5e1; cursor:not-allowed;"' : ''}>
+                    <button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(${vId})">
                         <span id="bmi-label-${vId}"><i class="fa-solid fa-calculator"></i> ${bmiText}</span>
                         <i class="fa-solid fa-arrow-up-right-from-square"></i>
                     </button>
                 </div>
 
-                <div class="field-box" ${hideForSecStyle}>
+                <!-- حقول العلامات الحيوية متاحة الآن للسكرتير للإدخال والتعديل -->
+                <div class="field-box">
                     <span class="field-label"><i class="fa-solid fa-heart-pulse" style="color:#0d9488;"></i> Vital Signs</span>
                     <div class="vital-box">
                         <div class="vital-row">
@@ -4237,11 +4239,11 @@
                                 <span class="vital-label">Blood Pressure (BP)</span>
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <div class="vital-inputs" style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:4px 8px; flex:1;">
-                                        <input type="number" class="v-bp-sys" placeholder="SYS" value="${v.bpSystolic || ''}" ${disabledAttr} oninput="autoSaveMedicalRecord()">
+                                        <input type="number" class="v-bp-sys" placeholder="SYS" value="${v.bpSystolic || ''}" oninput="autoSaveMedicalRecord()">
                                     </div>
                                     <span style="font-weight:700; color:#94a3b8;">/</span>
                                     <div class="vital-inputs" style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:4px 8px; flex:1;">
-                                        <input type="number" class="v-bp-dia" placeholder="DIA" value="${v.bpDiastolic || ''}" ${disabledAttr} oninput="autoSaveMedicalRecord()">
+                                        <input type="number" class="v-bp-dia" placeholder="DIA" value="${v.bpDiastolic || ''}" oninput="autoSaveMedicalRecord()">
                                     </div>
                                     <span style="font-size:0.75rem; font-weight:700; color:#0d9488;">mmHg</span>
                                 </div>
@@ -4251,14 +4253,14 @@
                             <div class="vital-item">
                                 <span class="vital-label">SpO2</span>
                                 <div class="vital-inputs">
-                                    <input type="number" class="v-spo2" placeholder="98" value="${v.spo2 || ''}" ${disabledAttr} oninput="autoSaveMedicalRecord()">
+                                    <input type="number" class="v-spo2" placeholder="98" value="${v.spo2 || ''}" oninput="autoSaveMedicalRecord()">
                                     <span>%</span>
                                 </div>
                             </div>
                             <div class="vital-item">
                                 <span class="vital-label">Heart Rate (HR)</span>
                                 <div class="vital-inputs">
-                                    <input type="number" class="v-hr" placeholder="75" value="${v.hr || ''}" ${disabledAttr} oninput="autoSaveMedicalRecord()">
+                                    <input type="number" class="v-hr" placeholder="75" value="${v.hr || ''}" oninput="autoSaveMedicalRecord()">
                                     <span>bpm</span>
                                 </div>
                             </div>
@@ -4267,7 +4269,7 @@
                             <div class="vital-item" style="grid-column: span 2;">
                                 <span class="vital-label">Respiratory Rate (RR)</span>
                                 <div class="vital-inputs">
-                                    <input type="number" class="v-rr" placeholder="18" value="${v.rr || ''}" ${disabledAttr} oninput="autoSaveMedicalRecord()">
+                                    <input type="number" class="v-rr" placeholder="18" value="${v.rr || ''}" oninput="autoSaveMedicalRecord()">
                                     <span>cpm</span>
                                 </div>
                             </div>
