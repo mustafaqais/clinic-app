@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.66</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.67</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -34,7 +34,7 @@
         .auth-switch span { color: #0d9488; font-weight: 700; cursor: pointer; }
         .forgot-pass { font-size: 0.78rem; color: #0284c7; text-align: right; cursor: pointer; margin-top: -6px; font-weight: 600; }
 
-        .founder-panel { background: #f0fdfa; border: 2px dashed #0d9488; border-radius: 16px; padding: 14px; margin-bottom: 14px; text-align: center; }
+        .founder-panel { background: #f0fdfa; border: 2px dashed #0d9488; border-radius: 16px; padding: 14px; margin-bottom: 16px; text-align: center; }
         .founder-code-display { font-size: 1.3rem; font-weight: 900; color: #0f766e; letter-spacing: 2px; margin: 6px 0; background: #fff; padding: 6px; border-radius: 8px; border: 1px solid #ccfbf1; }
 
         .network-status-bar { background: #fef3c7; color: #b45309; font-size: 0.72rem; font-weight: 700; text-align: center; padding: 4px; display: none; }
@@ -50,10 +50,17 @@
         .logout-btn { right: 15px; color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
         .support-btn { right: 88px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
 
-        .content { padding: 20px 18px; flex: 1; overflow-y: auto; }
-        .main-menu { display: flex; flex-direction: column; gap: 16px; margin-top: 10px; }
-        .menu-card { background: #ffffff; border: 2px solid #e2e8f0; border-radius: 20px; padding: 18px; display: flex; align-items: center; gap: 16px; cursor: pointer; }
-        .menu-icon { width: 52px; height: 52px; border-radius: 16px; background: #ccfbf1; color: #0d9488; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; flex-shrink: 0; }
+        .content { padding: 20px 16px; flex: 1; overflow-y: auto; }
+        
+        /* تصاميم الأقسام والمجموعات المدمجة (شبكية أنيقة) */
+        .section-group { margin-bottom: 18px; }
+        .section-title { font-size: 0.82rem; font-weight: 800; color: #0d9488; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; padding-right: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        
+        .menu-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .menu-card:hover { border-color: #0d9488; transform: translateY(-2px); }
+        
+        .menu-icon { width: 44px; height: 44px; border-radius: 14px; background: #ccfbf1; color: #0d9488; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
         .menu-icon.archive-icon { background: #e0f2fe; color: #0284c7; }
         .menu-icon.dict-icon { background: #fef3c7; color: #d97706; }
         .menu-icon.network-icon { background: #f3e8ff; color: #9333ea; }
@@ -62,8 +69,9 @@
         .menu-icon.analytics-icon { background: #f0fdf4; color: #16a34a; }
         .menu-icon.settings-icon { background: #f1f5f9; color: #475569; }
         .menu-icon.backup-icon { background: #e0e7ff; color: #4f46e5; }
-        .menu-info h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
-        .menu-info p { font-size: 0.78rem; color: #64748b; }
+        
+        .menu-info h3 { font-family: 'Playfair Display', serif; font-size: 0.92rem; color: #0f172a; margin-bottom: 2px; font-weight: 700; line-height: 1.2; }
+        .menu-info p { font-size: 0.68rem; color: #64748b; line-height: 1.3; }
 
         .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 18px; margin-bottom: 16px; }
         .visit-card { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 20px; padding: 16px; margin-bottom: 20px; position: relative; }
@@ -295,84 +303,111 @@
         </div>
 
         <div class="content">
-            <div id="mainScreen" class="main-menu" style="display: none;">
+            <div id="mainScreen" style="display: none;">
+                
+                <!-- لوحة المؤسس المخفية/الظاهرة حصرياً لإيميلك -->
                 <div class="founder-panel" id="founderControlPanel" style="display: none;">
                     <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;">🔑 Single-Use Activation Code:</span>
                     <div class="founder-code-display" id="dynamicFounderCode">Loading...</div>
                     <span style="font-size: 0.72rem; color: #64748b;">Give this code to a new user. It burns permanently after 1 use.</span>
                 </div>
 
-                <div class="menu-card" onclick="navigateTo('addPatientScreen', 'Register New Patient', 'Fill in patient details accurately')">
-                    <div class="menu-icon"><i class="fa-solid fa-user-plus"></i></div>
-                    <div class="menu-info">
-                        <h3>Register New Patient</h3>
-                        <p>Enter patient details & save securely</p>
+                <!-- المجموعة الأولى: العمليات اليومية للعيادة -->
+                <div class="section-group">
+                    <div class="section-title"><i class="fa-solid fa-stethoscope"></i> العمليات اليومية</div>
+                    <div class="menu-grid">
+                        <div class="menu-card" onclick="navigateTo('addPatientScreen', 'Register New Patient', 'Fill in patient details accurately')">
+                            <div class="menu-icon"><i class="fa-solid fa-user-plus"></i></div>
+                            <div class="menu-info">
+                                <h3>مريض جديد</h3>
+                                <p>تسجيل وحفظ البيانات</p>
+                            </div>
+                        </div>
+
+                        <div class="menu-card" onclick="openPatientsArchive()">
+                            <div class="menu-icon archive-icon"><i class="fa-solid fa-address-book"></i></div>
+                            <div class="menu-info">
+                                <h3>أرشيف المرضى</h3>
+                                <p>بحث وسجل المراجعات</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="menu-card" onclick="openPatientsArchive()">
-                    <div class="menu-icon archive-icon"><i class="fa-solid fa-address-book"></i></div>
-                    <div class="menu-info">
-                        <h3>Patients Archive & Search</h3>
-                        <p>Search by Name, Phone, or Gender</p>
+                <!-- المجموعة الثانية: الأدوات الطبية والروشتات -->
+                <div class="section-group">
+                    <div class="section-title"><i class="fa-solid fa-file-prescription"></i> الروشتة والأدوات الطبية</div>
+                    <div class="menu-grid">
+                        <div class="menu-card" onclick="openRxTemplateManager()">
+                            <div class="menu-icon rx-icon"><i class="fa-solid fa-prescription-bottle-medical"></i></div>
+                            <div class="menu-info">
+                                <h3>تصميم الروشتة</h3>
+                                <p>صورة ترويسة العيادة</p>
+                            </div>
+                        </div>
+
+                        <div class="menu-card" onclick="openDictionaryManager()">
+                            <div class="menu-icon dict-icon"><i class="fa-solid fa-book-medical"></i></div>
+                            <div class="menu-info">
+                                <h3>القاموس الطبي</h3>
+                                <p>إدارة الأدوية والجرعات</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="menu-card" onclick="openAnalyticsDashboard()">
-                    <div class="menu-icon analytics-icon"><i class="fa-solid fa-chart-pie"></i></div>
-                    <div class="menu-info">
-                        <h3>Clinic Analytics & Stats</h3>
-                        <p>Smart reports, patient metrics & data</p>
+                <!-- المجموعة الثالثة: التقارير والإحصائيات -->
+                <div class="section-group">
+                    <div class="section-title"><i class="fa-solid fa-chart-pie"></i> التقارير والأداء</div>
+                    <div class="menu-grid">
+                        <div class="menu-card" onclick="openAnalyticsDashboard()" style="grid-column: span 2; flex-direction: row; text-align: right; padding: 12px 16px;">
+                            <div class="menu-icon analytics-icon"><i class="fa-solid fa-chart-column"></i></div>
+                            <div class="menu-info" style="flex: 1;">
+                                <h3>تحليعات وإحصائيات العيادة</h3>
+                                <p>تقارير الأداء ونسب المرضى والأدوية الأكثر صرفاً</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="menu-card" onclick="openBackupManager()">
-                    <div class="menu-icon backup-icon"><i class="fa-solid fa-database"></i></div>
-                    <div class="menu-info">
-                        <h3>Backup & Restore JSON</h3>
-                        <p>Export or restore full clinic database</p>
+                <!-- المجموعة الرابعة: إدارة النظام والصيانة -->
+                <div class="section-group">
+                    <div class="section-title"><i class="fa-solid fa-shield-halved"></i> إدارة النظام والصيانة</div>
+                    <div class="menu-grid">
+                        <div class="menu-card" onclick="openBackupManager()">
+                            <div class="menu-icon backup-icon"><i class="fa-solid fa-database"></i></div>
+                            <div class="menu-info">
+                                <h3>النسخ الاحتياطي</h3>
+                                <p>تصدير أو رفع ملف البيانات</p>
+                            </div>
+                        </div>
+
+                        <div class="menu-card" onclick="openTrashBin()">
+                            <div class="menu-icon trash-icon"><i class="fa-solid fa-trash-arrow-up"></i></div>
+                            <div class="menu-info">
+                                <h3>سلة المحذوفات</h3>
+                                <p>استرجاع الملفات المحذوفة</p>
+                            </div>
+                        </div>
+
+                        <div class="menu-card" onclick="openAccountSettings()">
+                            <div class="menu-icon settings-icon"><i class="fa-solid fa-user-gear"></i></div>
+                            <div class="menu-info">
+                                <h3>إعدادات الحساب</h3>
+                                <p>تغيير الإيميل وكلمة المرور</p>
+                            </div>
+                        </div>
+
+                        <div class="menu-card" id="networkMenuCard" onclick="openNetworkHierarchy()" style="display: none;">
+                            <div class="menu-icon network-icon"><i class="fa-solid fa-network-wired"></i></div>
+                            <div class="menu-info">
+                                <h3>شبكة المستخدمين</h3>
+                                <p>إدارة الحسابات وكلماتها</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="menu-card" onclick="openTrashBin()">
-                    <div class="menu-icon trash-icon"><i class="fa-solid fa-trash-arrow-up"></i></div>
-                    <div class="menu-info">
-                        <h3>Trash Bin</h3>
-                        <p>Recover deleted patients or visits</p>
-                    </div>
-                </div>
-
-                <div class="menu-card" onclick="openRxTemplateManager()">
-                    <div class="menu-icon rx-icon"><i class="fa-solid fa-file-prescription"></i></div>
-                    <div class="menu-info">
-                        <h3>RX Template Manager</h3>
-                        <p>Upload & update your clinic prescription header image</p>
-                    </div>
-                </div>
-
-                <div class="menu-card" onclick="openDictionaryManager()">
-                    <div class="menu-icon dict-icon"><i class="fa-solid fa-book-medical"></i></div>
-                    <div class="menu-info">
-                        <h3>Saved Medical Dictionary</h3>
-                        <p>Manage saved drugs, doses & phrases</p>
-                    </div>
-                </div>
-
-                <div class="menu-card" onclick="openAccountSettings()">
-                    <div class="menu-icon settings-icon"><i class="fa-solid fa-user-gear"></i></div>
-                    <div class="menu-info">
-                        <h3>Account Settings</h3>
-                        <p>Change email, password or reset via email</p>
-                    </div>
-                </div>
-
-                <div class="menu-card" id="networkMenuCard" onclick="openNetworkHierarchy()" style="display: none;">
-                    <div class="menu-icon network-icon"><i class="fa-solid fa-network-wired"></i></div>
-                    <div class="menu-info">
-                        <h3>Hierarchical Network</h3>
-                        <p>View connected users & credentials</p>
-                    </div>
-                </div>
             </div>
 
             <div id="backupScreen" style="display: none;">
@@ -675,7 +710,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.66</div>
+        <div class="footer">Clinic Master Network v16.67</div>
     </div>
 </div>
 
@@ -1486,7 +1521,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.66",
+            version: "16.67",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
