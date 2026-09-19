@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.67</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.68</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -597,7 +597,7 @@
                         <i class="fa-solid fa-prescription-bottle-medical" style="color:#0d9488;"></i> Clinic Prescription Template
                     </div>
                     <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;">
-                        Upload or change your official prescription image header.
+                        Upload or change your official prescription image header. (Compressed automatically)
                     </p>
 
                     <div id="currentRxPreviewContainer" style="margin-bottom: 16px; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 10px; background: #fff; min-height: 150px; display: flex; align-items: center; justify-content: center;">
@@ -613,7 +613,7 @@
                     </div>
 
                     <button class="btn-main" onclick="saveRxTemplateImage()" style="margin-top: 10px;">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Save RX Image
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Save Compressed RX Image
                     </button>
                 </div>
             </div>
@@ -709,7 +709,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.67</div>
+        <div class="footer">Clinic Master Network v16.68</div>
     </div>
 </div>
 
@@ -1520,7 +1520,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.67",
+            version: "16.68",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -1666,14 +1666,39 @@
     function saveRxTemplateImage() {
         const fileInput = document.getElementById('rxImageFileInput');
         if (fileInput.files && fileInput.files[0]) {
+            const file = fileInput.files[0];
             const reader = new FileReader();
             reader.onload = function(e) {
-                currentDoctorRxImage = e.target.result;
-                saveSettingsToCloudAndLocal();
-                alert('Prescription header image saved successfully!');
-                openRxTemplateManager();
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    let width = img.width;
+                    let height = img.height;
+                    const maxDim = 900; // Optimized dimension for RX template
+
+                    if (width > height && width > maxDim) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    } else if (height > maxDim) {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // High quality compression to keep size under ~50KB
+                    currentDoctorRxImage = canvas.toDataURL('image/jpeg', 0.70);
+                    saveSettingsToCloudAndLocal();
+                    alert('Prescription header image compressed and saved successfully!');
+                    openRxTemplateManager();
+                };
             };
-            reader.readAsDataURL(fileInput.files[0]);
+            reader.readAsDataURL(file);
         } else {
             alert('Please select an image first.');
         }
@@ -2148,6 +2173,7 @@
         if (el) el.focus();
     }
 
+    // High compression function for attachments (keeps images under ~60KB with high clarity)
     function handleFileUpload(input, visitId) {
         if (input.files && input.files.length > 0) {
             const files = Array.from(input.files);
@@ -2170,7 +2196,7 @@
                         
                         let width = img.width;
                         let height = img.height;
-                        const maxDim = 1000;
+                        const maxDim = 850; // Optimized max dimension for attachments storage
 
                         if (width > height && width > maxDim) {
                             height = Math.round((height * maxDim) / width);
@@ -2184,7 +2210,8 @@
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+                        // Compressed JPEG at 0.65 quality to ensure ultra-small storage footprint
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.65);
 
                         visit.attachments.push(compressedBase64);
                         processedCount++;
@@ -2220,7 +2247,7 @@
                         
                         let width = img.width;
                         let height = img.height;
-                        const maxDim = 1000;
+                        const maxDim = 850;
 
                         if (width > height && width > maxDim) {
                             height = Math.round((height * maxDim) / width);
@@ -2234,7 +2261,7 @@
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.65);
 
                         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
                         if (!patient) return;
@@ -3104,7 +3131,7 @@
                 </div>
 
                 <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-paperclip" style="color:#0d9488;"></i> Attachments</span>
+                    <span class="field-label"><i class="fa-solid fa-paperclip" style="color:#0d9488;"></i> Attachments (Auto-Compressed)</span>
                     <div class="attachments-container">
                         ${attachments.map((imgSrc, imgIdx) => `
                             <div class="attachment-thumb" onclick="previewAttachmentImage('${imgSrc}')">
@@ -3148,6 +3175,7 @@
         const newVisit = {
             visitId: Date.now(),
             date: today,
+        
             medHistory: {},
             bpSystolic: '',
             bpDiastolic: '',
