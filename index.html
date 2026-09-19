@@ -3,21 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.65</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.66</title>
     
-    <!-- إعدادات الأيقونات والشارات المحدثة خصيصاً لأندرويد -->
+    <!-- إعدادات الأيقونات -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
-    <link rel="shortcut icon" href="https://i.ibb.co/68n8910/1000111840.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="https://i.ibb.co/68n8910/1000111840.png">
-    <link rel="apple-touch-icon" sizes="512x512" href="https://i.ibb.co/68n8910/1000111840.png">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
 
-    <!-- ملف بيان الويب المحدث (Manifest) لضمان ظهور شعار عيادتي كأيقونة تطبيق رئيسية مستقلة -->
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%D8%B9%D9%8A%D8%A7%D8%AF%D8%AA%D9%8A%22%2C%22short_name%22%3A%22%D8%B9%D9%8A%D8%A7%D8%AF%D8%AA%D9%8A%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%230d9488%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi.ibb.co%2F68n8910%2F1000111840.png%22%2C%22sizes%22%3A%22192x192%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fi.ibb.co%2F68n8910%2F1000111840.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
+    <!-- ملف بيان الويب (Manifest) -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%D8%B9%D9%8A%D8%A7%D8%AF%D8%AA%D9%8A%22%2C%22short_name%22%3A%22%D8%B9%D9%8A%D8%A7%D8%AF%D8%AA%D9%8A%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%230d9488%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi.ibb.co%2F68n8910%2F1000111840.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
     <meta name="theme-color" content="#0d9488">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="عيادتي">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -652,7 +648,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.65</div>
+        <div class="footer">Clinic Master Network v16.66</div>
     </div>
 </div>
 
@@ -3016,4 +3012,36 @@
 
     function addNewVisit() {
         autoSaveMedicalRecord();
-        ...
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+
+        const today = getTodayFormatted();
+        const newVisit = {
+            visitId: Date.now(),
+            date: today,
+            medHistory: {},
+            bpSystolic: '',
+            bpDiastolic: '',
+            spo2: '',
+            hr: '',
+            rr: '',
+            labs: '',
+            scans: '',
+            drugs: '',
+            notes: '',
+            attachments: [],
+            bmiWeight: '',
+            bmiHeight: '',
+            bmiScore: ''
+        };
+
+        if (!Array.isArray(patient.visits)) patient.visits = [];
+        patient.visits.unshift(newVisit);
+
+        savePatientToCloudAndLocal(patient);
+        renderVisits(patient.visits);
+    }
+</script>
+
+</body>
+</html>
