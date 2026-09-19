@@ -1217,8 +1217,11 @@
             <button id="rxSaveLayoutBtn" class="btn-main" onclick="saveRxLayoutPositions()" style="display: none; background: #0284c7;">
                 <i class="fa-solid fa-floppy-disk"></i> Save RX Layout & Fonts
             </button>
+            <button class="btn-main" onclick="printPrescriptionDirectly()" id="btnPrintRxDirect" style="font-family: 'Plus Jakarta Sans', sans-serif; background: #16a34a; width: 100%;">
+                <i class="fa-solid fa-print"></i> طباعة الروشتة (PDF / طباعة مباشرة)
+            </button>
             <button class="btn-main" onclick="openPrescriptionPDF()" id="btnSaveRxPDF" style="font-family: 'Plus Jakarta Sans', sans-serif; background: #0284c7; width: 100%;">
-                <i class="fa-solid fa-file-pdf"></i> Save as PDF
+                <i class="fa-solid fa-file-pdf"></i> Save as PDF File
             </button>
         </div>
     </div>
@@ -2036,7 +2039,6 @@
                             } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
                                 const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
                                 if (pat) {
-                                    // منع إعادة رندر كامل السجل إذا كان المستخدم يكتب حالياً داخل الحقل لتفادي اختفاء الكيبورد
                                     if (document.activeElement && document.activeElement.tagName === 'TEXTAREA') return;
                                     renderVisits(pat.visits || [], false);
                                 } else {
@@ -3820,6 +3822,79 @@
         }
     }
 
+    // دالة لطباعة الروشتة مباشرة أو حفظها بصيغة PDF بدون تخزين بالجهاز
+    function printPrescriptionDirectly() {
+        const wasConfig = isConfigMode;
+        if (wasConfig) {
+            isConfigMode = false;
+            updateConfigModeUI();
+        }
+
+        const containerHtml = document.getElementById('rxCanvasContainer').innerHTML;
+        const printWindow = window.open('', '_blank', 'width=800,height=700');
+        
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <title>Print Prescription - RX</title>
+                <style>
+                    body {
+                        margin: 0;
+                        padding: 20px;
+                        background: #ffffff;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                    }
+                    .rx-canvas-container {
+                        position: relative;
+                        width: 100%;
+                        max-width: 600px;
+                        background: #ffffff;
+                        overflow: hidden;
+                    }
+                    .rx-bg-img {
+                        width: 100%;
+                        display: block;
+                    }
+                    .draggable-box {
+                        position: absolute;
+                        background: transparent;
+                        padding: 4px 8px;
+                    }
+                    .box-font-controls {
+                        display: none !important;
+                    }
+                    .rx-patient-details-text { color: #b91c1c; font-family: 'Amiri', serif; font-weight: 700; direction: ltr; text-align: left; } 
+                    .rx-date-text { color: #1e293b; font-family: 'Cinzel', serif; font-weight: 700; direction: ltr; text-align: left; background: rgba(255,255,255,0.95); padding: 2px 6px; border-radius: 6px; letter-spacing: 0.5px; }
+                    .rx-vitals-text { color: #0284c7; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; line-height: 1.6; direction: ltr; text-align: left; } 
+                    .rx-treatment-wrapper { direction: ltr; text-align: left; width: 100%; }
+                    .rx-rx-title { color: #b91c1c; font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-align: left; margin-bottom: 2px; } 
+                    .rx-treatment-text { color: #000000; font-family: 'Playfair Display', serif; font-weight: 700; white-space: pre-wrap; text-align: left; line-height: 1.6; }
+                </style>
+            </head>
+            <body>
+                <div class="rx-canvas-container">
+                    ${containerHtml}
+                </div>
+                <script>
+                    window.onload = function() {
+                        setTimeout(function() {
+                            window.print();
+                        }, 500);
+                        window.onafterprint = function() {
+                            window.close();
+                        };
+                    };
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+
     function openPrescriptionPDF() {
         const container = document.getElementById('rxCanvasContainer');
         const wasConfig = isConfigMode;
@@ -4104,7 +4179,6 @@
     }
 
     function renderVisits(visits, forceFullRender = true) {
-        // إذا لم يكن مطلوباً إعادة الرندر بالقوة، والمستخدم يكتب حالياً، نتخطى التحديث لمنع فقدان التركيز واختفاء الكيبورد
         if (!forceFullRender && document.activeElement && document.activeElement.tagName === 'TEXTAREA') {
             return;
         }
