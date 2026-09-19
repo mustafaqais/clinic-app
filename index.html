@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.69</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.70</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -36,6 +36,12 @@
 
         .founder-panel { background: #f0fdfa; border: 2px dashed #0d9488; border-radius: 16px; padding: 14px; margin-bottom: 16px; text-align: center; }
         .founder-code-display { font-size: 1.1rem; font-weight: 900; color: #0f766e; letter-spacing: 1px; margin: 4px 0; background: #fff; padding: 6px; border-radius: 8px; border: 1px solid #ccfbf1; word-break: break-all; }
+
+        .sub-status-banner { background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 14px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; text-align: left; }
+        .sub-status-banner.warning { background: #fef2f2; border-color: #fca5a5; }
+        .sub-status-info h4 { font-size: 0.82rem; font-weight: 800; color: #166534; display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+        .sub-status-banner.warning .sub-status-info h4 { color: #991b1b; }
+        .sub-status-info p { font-size: 0.75rem; color: #475569; }
 
         .network-status-bar { background: #fef3c7; color: #b45309; font-size: 0.72rem; font-weight: 700; text-align: center; padding: 4px; display: none; }
         .network-status-bar.offline { display: block; background: #fee2e2; color: #b91c1c; }
@@ -304,6 +310,15 @@
         <div class="content">
             <div id="mainScreen" style="display: none;">
                 
+                <!-- Subscription Status Countdown Banner for Doctor -->
+                <div class="sub-status-banner" id="subStatusBanner" style="display: none;">
+                    <div class="sub-status-info">
+                        <h4 id="subBannerTitle"><i class="fa-solid fa-clock"></i> Active Subscription</h4>
+                        <p id="subBannerText">Loading remaining days...</p>
+                    </div>
+                    <button onclick="openSupportModal()" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:6px 10px; font-size:0.75rem; font-weight:700; cursor:pointer; white-space:nowrap;">Renew</button>
+                </div>
+
                 <!-- Founder Control Panel (Visible only to founder email to generate keys) -->
                 <div class="founder-panel" id="founderControlPanel" style="display: none;">
                     <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;">🔑 Code Generator (Founder):</span>
@@ -714,14 +729,14 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.69</div>
+        <div class="footer">Clinic Master Network v16.70</div>
     </div>
 </div>
 
 <div id="supportModal" class="modal-overlay">
     <div class="modal-body" style="max-width: 400px; text-align: center;">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-headset" style="color:#0d9488;"></i> Technical Support</h3>
+            <h3><i class="fa-solid fa-headset" style="color:#0d9488;"></i> Technical Support & Renewal</h3>
             <button class="modal-close" onclick="closeSupportModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">
@@ -729,7 +744,7 @@
         </p>
 
         <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 5px;">
-            <a href="https://wa.me/9647739114548?text=Hello,%20I%20have%20an%20inquiry%20regarding%20Clinic%20Master" target="_blank" style="background: #25d366; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.25);">
+            <a href="https://wa.me/9647739114548?text=Hello,%20I%20want%20to%20renew%20my%20Clinic%20Master%20subscription" target="_blank" style="background: #25d366; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.25);">
                 <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i> WhatsApp Chat
             </a>
 
@@ -1324,35 +1339,26 @@
     });
 
     async function checkUserSubscriptionStatus(uid) {
-        if (!navigator.onLine) {
-            // Offline fallback check local storage subscription expiry
-            const expiryDate = localStorage.getItem(`sub_expiry_${uid}`);
-            if (expiryDate && new Date().getTime() < new Date(expiryDate).getTime()) {
-                setupClientInterface();
-            } else {
-                document.getElementById('authScreen').style.display = 'none';
-                document.getElementById('activationScreen').style.display = 'flex';
+        let expiryDateStr = localStorage.getItem(`sub_expiry_${uid}`);
+
+        if (navigator.onLine) {
+            try {
+                const docRef = await db.collection('network_hierarchy').doc(uid).get();
+                if (docRef.exists) {
+                    const data = docRef.data();
+                    if (data.expiryDate) {
+                        expiryDateStr = data.expiryDate;
+                        localStorage.setItem(`sub_expiry_${uid}`, expiryDateStr);
+                    }
+                }
+            } catch (e) {
+                console.log(e);
             }
-            return;
         }
 
-        try {
-            const docRef = await db.collection('network_hierarchy').doc(uid).get();
-            if (docRef.exists) {
-                const data = docRef.data();
-                const expiryDateStr = data.expiryDate;
-                if (expiryDateStr && new Date().getTime() < new Date(expiryDateStr).getTime()) {
-                    localStorage.setItem(`sub_expiry_${uid}`, expiryDateStr);
-                    setupClientInterface();
-                } else {
-                    document.getElementById('authScreen').style.display = 'none';
-                    document.getElementById('activationScreen').style.display = 'flex';
-                }
-            } else {
-                document.getElementById('authScreen').style.display = 'none';
-                document.getElementById('activationScreen').style.display = 'flex';
-            }
-        } catch (e) {
+        if (expiryDateStr && new Date().getTime() < new Date(expiryDateStr).getTime()) {
+            setupClientInterface(expiryDateStr);
+        } else {
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('activationScreen').style.display = 'flex';
         }
@@ -1409,7 +1415,7 @@
 
             alert(`System activated successfully! Valid until: ${expiryDate.toLocaleDateString()}`);
             document.getElementById('activationScreen').style.display = 'none';
-            setupClientInterface();
+            setupClientInterface(expiryDateIso);
 
         } catch (err) {
             alert('Error during activation: ' + err.message);
@@ -1516,15 +1522,40 @@
         document.getElementById('appContainer').style.display = 'flex';
         document.getElementById('founderControlPanel').style.display = 'block';
         document.getElementById('networkMenuCard').style.display = 'flex';
+        document.getElementById('subStatusBanner').style.display = 'none'; // Founder has permanent access
         navigateTo('mainScreen');
     }
 
-    function setupClientInterface() {
+    function setupClientInterface(expiryDateIso) {
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('activationScreen').style.display = 'none';
         document.getElementById('appContainer').style.display = 'flex';
         document.getElementById('founderControlPanel').style.display = 'none';
         document.getElementById('networkMenuCard').style.display = 'none';
+
+        // Calculate remaining days
+        if (expiryDateIso) {
+            const now = new Date().getTime();
+            const expiryTime = new Date(expiryDateIso).getTime();
+            const diffTime = expiryTime - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            const banner = document.getElementById('subStatusBanner');
+            const titleEl = document.getElementById('subBannerTitle');
+            const textEl = document.getElementById('subBannerText');
+            banner.style.display = 'flex';
+
+            if (diffDays <= 3) {
+                banner.classList.add('warning');
+                titleEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Subscription Expiring Soon!`;
+                textEl.innerText = `Only ${diffDays} day(s) remaining (Expires: ${new Date(expiryDateIso).toLocaleDateString()}). Contact support to renew.`;
+            } else {
+                banner.classList.remove('warning');
+                titleEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Active Subscription`;
+                textEl.innerText = `You have ${diffDays} day(s) remaining (Expires: ${new Date(expiryDateIso).toLocaleDateString()}).`;
+            }
+        }
+
         navigateTo('mainScreen');
     }
 
@@ -1555,7 +1586,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.69",
+            version: "16.70",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
