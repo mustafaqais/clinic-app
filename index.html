@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.93</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.94</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -24,7 +24,6 @@
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
         html, body { background-color: #eef2f6; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow-x: hidden; }
         
-        /* Responsive Desktop & Tablet Container */
         .mobile-container { background: #ffffff; width: 100%; max-width: 430px; height: 100vh; min-height: 100vh; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.12); position: relative; overflow: hidden; display: flex; flex-direction: column; transition: max-width 0.3s ease; }
         
         @media (min-width: 768px) {
@@ -65,7 +64,6 @@
         
         .back-btn { position: absolute; top: 15px; left: 15px; background: rgba(255, 255, 255, 0.12); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 10px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
 
-        /* Hamburger Menu Styling */
         .menu-dropdown-container { position: absolute; top: 15px; right: 15px; z-index: 50; }
         .hamburger-btn { background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; }
         .hamburger-btn:hover { background: rgba(255, 255, 255, 0.25); }
@@ -322,7 +320,6 @@
                 <i class="fa-solid fa-arrow-left"></i> <span id="txtBack">Back</span>
             </button>
 
-            <!-- Hamburger Dropdown Menu -->
             <div class="menu-dropdown-container">
                 <button class="hamburger-btn" onclick="toggleDropdownMenu(event)" title="Menu">
                     <i class="fa-solid fa-bars"></i>
@@ -348,7 +345,6 @@
         <div class="content">
             <div id="mainScreen" style="display: none;">
                 
-                <!-- Subscription Status Countdown Banner for Doctor -->
                 <div class="sub-status-banner" id="subStatusBanner" style="display: none;">
                     <div class="sub-status-info">
                         <h4 id="subBannerTitle"><i class="fa-solid fa-clock"></i> Active Subscription</h4>
@@ -357,7 +353,6 @@
                     <button onclick="openSupportModal()" id="btnRenew" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:6px 10px; font-size:0.75rem; font-weight:700; cursor:pointer; white-space:nowrap;">Renew</button>
                 </div>
 
-                <!-- Founder Control Panel -->
                 <div class="founder-panel" id="founderControlPanel" style="display: none;">
                     <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;" id="founderPanelTitle">🔑 Code Generator (Founder):</span>
                     <div style="display: flex; gap: 6px; margin: 6px 0;">
@@ -369,7 +364,6 @@
                     <span style="font-size: 0.7rem; color: #64748b;" id="keyTypeHint">Select type to create valid code.</span>
                 </div>
 
-                <!-- Group 1: Daily Clinic Operations -->
                 <div class="section-group">
                     <div class="section-title" id="secGroup1"><i class="fa-solid fa-stethoscope"></i> Daily Operations</div>
                     <div class="menu-grid">
@@ -391,7 +385,6 @@
                     </div>
                 </div>
 
-                <!-- Group 2: RX & Medical Tools -->
                 <div class="section-group">
                     <div class="section-title" id="secGroup2"><i class="fa-solid fa-file-prescription"></i> RX & Medical Tools</div>
                     <div class="menu-grid">
@@ -413,7 +406,6 @@
                     </div>
                 </div>
 
-                <!-- Group 3: Reports & Performance -->
                 <div class="section-group">
                     <div class="section-title" id="secGroup3"><i class="fa-solid fa-chart-pie"></i> Reports & Stats</div>
                     <div class="menu-grid">
@@ -427,7 +419,6 @@
                     </div>
                 </div>
 
-                <!-- Group 4: System & Maintenance -->
                 <div class="section-group">
                     <div class="section-title" id="secGroup4"><i class="fa-solid fa-shield-halved"></i> System & Maintenance</div>
                     <div class="menu-grid">
@@ -822,7 +813,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v16.93</div>
+        <div class="footer" id="footerText">Clinic Master Network v16.94</div>
     </div>
 </div>
 
@@ -958,15 +949,15 @@
         <div class="field-box">
             <span class="field-label" id="mhLblChronic">Chronic Diseases</span>
             <div class="checkbox-grid">
-                <label class="checkbox-item"><input type="checkbox" value="Hypertension" class="mh-cd"> Hypertension</label>
-                <label class="checkbox-item"><input type="checkbox" value="Diabetes" class="mh-cd"> Diabetes</label>
-                <label class="checkbox-item"><input type="checkbox" value="Asthma" class="mh-cd"> Asthma</label>
-                <label class="checkbox-item"><input type="checkbox" value="Epilepsy" class="mh-cd"> Epilepsy</label>
-                <label class="checkbox-item"><input type="checkbox" value="Arthritis" class="mh-cd"> Arthritis</label>
-                <label class="checkbox-item"><input type="checkbox" value="Malignancy" class="mh-cd"> Malignancy</label>
-                <label class="checkbox-item"><input type="checkbox" value="Hepatitis" class="mh-cd"> Hepatitis</label>
-                <label class="checkbox-item"><input type="checkbox" value="Chronic kidney dis" class="mh-cd"> Chronic kidney dis</label>
-                <label class="checkbox-item"><input type="checkbox" value="IHD" class="mh-cd"> IHD</label>
+                <label class="checkbox-item"><input type="checkbox" value="Hypertension" class="mh-cd"> <span class="mh-cond-text" data-cond="Hypertension">Hypertension</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="Diabetes" class="mh-cd"> <span class="mh-cond-text" data-cond="Diabetes">Diabetes</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="Asthma" class="mh-cd"> <span class="mh-cond-text" data-cond="Asthma">Asthma</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="Epilepsy" class="mh-cd"> <span class="mh-cond-text" data-cond="Epilepsy">Epilepsy</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="Arthritis" class="mh-cd"> <span class="mh-cond-text" data-cond="Arthritis">Arthritis</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="Malignancy" class="mh-cd"> <span class="mh-cond-text" data-cond="Malignancy">Malignancy</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="Hepatitis" class="mh-cd"> <span class="mh-cond-text" data-cond="Hepatitis">Hepatitis</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="Chronic kidney dis" class="mh-cd"> <span class="mh-cond-text" data-cond="Chronic kidney dis">Chronic kidney dis</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="IHD" class="mh-cd"> <span class="mh-cond-text" data-cond="IHD">IHD</span></label>
                 <label class="checkbox-item" style="grid-column: span 2;">
                     <input type="checkbox" id="mh-other-check" onchange="toggleOtherInput()"> <span id="mhOtherText">Other</span>
                 </label>
@@ -1278,7 +1269,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v16.93",
+            footer: "نظام عيادة ماستر المتقدم v16.94",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1326,7 +1317,64 @@
 
             trashTitleText: "سلة المهملات",
             txtEmptyTranslation: "إفراغ سلة المهملات",
-            trashSubText: "يمكنك استعادة المرضى أو الزيارات المحذوفة إلى أماكنها الأصلية فوراً، أو إفراغ السلة نهائياً."
+            trashSubText: "يمكنك استعادة المرضى أو الزيارات المحذوفة إلى أماكنها الأصلية فوراً، أو إفراغ السلة نهائياً.",
+
+            chronicNames: {
+                "Hypertension": "ارتفاع ضغط الدم",
+                "Diabetes": "مرض السكري",
+                "Asthma": "الربو",
+                "Epilepsy": "الصرع",
+                "Arthritis": "التهاب المفاصل",
+                "Malignancy": "أورام خبيثة",
+                "Hepatitis": "التهاب الكبد الوبائي",
+                "Chronic kidney dis": "أمراض الكلى المزمنة",
+                "IHD": "قصور الشريان التاجي"
+            },
+            mhOtherText: "أخرى",
+            mhLblChronic: "الأمراض المزمنة",
+            mhLblAdmission: "الدخول السابق للمستشفى",
+            mhLblSurgery: "العمليات الجراحية السابقة",
+            mhLblFamily: "التاريخ العائلي",
+            mhLblAllergy: "حساسية الأدوية",
+            mhLblChronicDrugs: "استخدام الأدوية المزمنة",
+            mhLblSmoking: "حالة التدخين",
+            mhLblAlcohol: "تناول الكحول",
+            mhLblNotes: "ملاحظات إضافية",
+            btnMhDone: "تم الحفظ",
+            optSmok1: "غير مدخن",
+            optSmok2: "مدخن",
+            optSmok3: "مدخن سلبي",
+            optAlc1: "لا يتناول الكحول",
+            optAlc2: "مدمن كحول",
+            optAlc3: "شارب اجتماعي",
+            bmiTitleText: "حساب مؤشر كتلة الجسم",
+            lblBmiWeight: "الوزن (كغ)",
+            lblBmiHeight: "الطول (سم)",
+            lblBmiScore: "مؤشر كتلة الجسم (BMI):",
+            bmiBadgeInitial: "أدخل الوزن والطول للحساب",
+            btnBmiAgree: "موافق وحفظ",
+            editPatHeader: "تعديل معلومات المريض",
+            editLblName: "الاسم الكامل *",
+            editLblAge: "العمر *",
+            editLblGender: "الجنس",
+            editOptGender: "اختر الجنس",
+            editOptMale: "ذكر",
+            editOptFemale: "أنثى",
+            editLblMarital: "الحالة الزوجية",
+            editOptMarital: "اختر الحالة",
+            editOptSingle: "أعزب / عزباء",
+            editOptMarried: "متزوج / متزوجة",
+            editOptDivorced: "مطلق / مطلقة",
+            editOptWidow: "أرمل / أرملة",
+            editLblJob: "المهنة",
+            editOptJob: "اختر المهنة",
+            editJobEmp: "موظف",
+            editJobFree: "عمل حر",
+            editJobHouse: "ربة منزل",
+            editJobStud: "طالب",
+            editJobOther: "أخرى",
+            editLblPhone: "رقم الهاتف",
+            btnSaveEdit: "حفظ التغييرات"
         },
         en: {
             loginTitle: "User Login",
@@ -1381,7 +1429,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v16.93",
+            footer: "Clinic Master Network v16.94",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -1429,7 +1477,64 @@
 
             trashTitleText: "Trash Bin",
             txtEmptyTranslation: "Empty Trash",
-            trashSubText: "You can restore deleted patients or specific visits back to their original locations instantly, or empty the trash completely."
+            trashSubText: "You can restore deleted patients or specific visits back to their original locations instantly, or empty the trash completely.",
+
+            chronicNames: {
+                "Hypertension": "Hypertension",
+                "Diabetes": "Diabetes",
+                "Asthma": "Asthma",
+                "Epilepsy": "Epilepsy",
+                "Arthritis": "Arthritis",
+                "Malignancy": "Malignancy",
+                "Hepatitis": "Hepatitis",
+                "Chronic kidney dis": "Chronic kidney dis",
+                "IHD": "IHD"
+            },
+            mhOtherText: "Other",
+            mhLblChronic: "Chronic Diseases",
+            mhLblAdmission: "Previous admission to hospital",
+            mhLblSurgery: "Past surgery",
+            mhLblFamily: "Family history",
+            mhLblAllergy: "Drugs allergy",
+            mhLblChronicDrugs: "Chronic use of drugs",
+            mhLblSmoking: "Smoking status",
+            mhLblAlcohol: "Drinking Alcohol",
+            mhLblNotes: "Notes",
+            btnMhDone: "Done & Save",
+            optSmok1: "Non-smoker",
+            optSmok2: "Smoker",
+            optSmok3: "Passive smoker",
+            optAlc1: "Non-drinker",
+            optAlc2: "Alcohol drinker",
+            optAlc3: "Social drinker",
+            bmiTitleText: "BMI Calculator",
+            lblBmiWeight: "Weight (kg)",
+            lblBmiHeight: "Height (cm)",
+            lblBmiScore: "Body Mass Index (BMI Score):",
+            bmiBadgeInitial: "Enter weight & height to calculate",
+            btnBmiAgree: "Agree & Save",
+            editPatHeader: "Edit Patient Information",
+            editLblName: "Full Name *",
+            editLblAge: "Age *",
+            editLblGender: "Gender",
+            editOptGender: "Select Gender",
+            editOptMale: "Male",
+            editOptFemale: "Female",
+            editLblMarital: "Marital Status",
+            editOptMarital: "Select Status",
+            editOptSingle: "Single",
+            editOptMarried: "Married",
+            editOptDivorced: "Divorced",
+            editOptWidow: "Widow",
+            editLblJob: "Occupation",
+            editOptJob: "Select Occupation",
+            editJobEmp: "Employee",
+            editJobFree: "Free Business",
+            editJobHouse: "Housewife",
+            editJobStud: "Student",
+            editJobOther: "Other",
+            editLblPhone: "Phone Number",
+            btnSaveEdit: "Save Changes"
         }
     };
 
@@ -1563,6 +1668,58 @@
         document.getElementById('txtEmptyTrash').innerText = t.txtEmptyTranslation;
         document.getElementById('trashSubText').innerText = t.trashSubText;
 
+        document.getElementById('mhHeaderTitle').innerHTML = `<i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> ${t.mhHeaderTitle || 'Medical History Details'}`;
+        document.getElementById('mhLblChronic').innerText = t.mhLblChronic;
+        document.getElementById('mhOtherText').innerText = t.mhOtherText;
+        document.getElementById('mhLblAdmission').innerText = t.mhLblAdmission;
+        document.getElementById('mhLblSurgery').innerText = t.mhLblSurgery;
+        document.getElementById('mhLblFamily').innerText = t.mhLblFamily;
+        document.getElementById('mhLblAllergy').innerText = t.mhLblAllergy;
+        document.getElementById('mhLblChronicDrugs').innerText = t.mhLblChronicDrugs;
+        document.getElementById('mhLblSmoking').innerText = t.mhLblSmoking;
+        document.getElementById('mhLblAlcohol').innerText = t.mhLblAlcohol;
+        document.getElementById('mhLblNotes').innerText = t.mhLblNotes;
+        document.getElementById('btnMhDone').innerHTML = `<i class="fa-solid fa-check"></i> ${t.btnMhDone}`;
+
+        document.getElementById('optSmok1').innerText = t.optSmok1;
+        document.getElementById('optSmok2').innerText = t.optSmok2;
+        document.getElementById('optSmok3').innerText = t.optSmok3;
+        document.getElementById('optAlc1').innerText = t.optAlc1;
+        document.getElementById('optAlc2').innerText = t.optAlc2;
+        document.getElementById('optAlc3').innerText = t.optAlc3;
+
+        document.getElementById('bmiTitleText').innerHTML = `<i class="fa-solid fa-calculator" style="color:#0284c7;"></i> ${t.bmiTitleText}`;
+        document.getElementById('lblBmiWeight').innerText = t.lblBmiWeight;
+        document.getElementById('lblBmiHeight').innerText = t.lblBmiHeight;
+        document.getElementById('lblBmiScore').innerText = t.lblBmiScore;
+        document.getElementById('bmiBadgeInitial').innerText = t.bmiBadgeInitial;
+        document.getElementById('btnBmiAgree').innerHTML = `<i class="fa-solid fa-check"></i> ${t.btnBmiAgree}`;
+
+        document.getElementById('editPatHeader').innerHTML = `<i class="fa-solid fa-user-pen" style="color:#0d9488;"></i> ${t.editPatHeader}`;
+        document.getElementById('editLblName').innerText = t.editLblName;
+        document.getElementById('editLblAge').innerText = t.editLblAge;
+        document.getElementById('editLblGender').innerText = t.editLblGender;
+        document.getElementById('editOptGender').innerText = t.editOptGender;
+        document.getElementById('editOptMale').innerText = t.editOptMale;
+        document.getElementById('editOptFemale').innerText = t.editOptFemale;
+        document.getElementById('editLblMarital').innerText = t.editLblMarital;
+        document.getElementById('editOptMarital').innerText = t.editOptMarital;
+        document.getElementById('editOptSingle').innerText = t.editOptSingle;
+        document.getElementById('editOptMarried').innerText = t.editOptMarried;
+        document.getElementById('editOptDivorced').innerText = t.editOptDivorced;
+        document.getElementById('editOptWidow').innerText = t.editOptWidow;
+        document.getElementById('editLblJob').innerText = t.editLblJob;
+        document.getElementById('editOptJob').innerText = t.editOptJob;
+        document.getElementById('editLblPhone').innerText = t.editLblPhone;
+        document.getElementById('btnSaveEdit').innerHTML = `<i class="fa-solid fa-check"></i> ${t.btnSaveEdit}`;
+
+        document.querySelectorAll('.mh-cond-text').forEach(span => {
+            const key = span.getAttribute('data-cond');
+            if (t.chronicNames && t.chronicNames[key]) {
+                span.innerText = t.chronicNames[key];
+            }
+        });
+
         document.getElementById('footerText').innerText = t.footer;
     }
 
@@ -1606,12 +1763,14 @@
     function syncLocalDataToCloud() {
         if (!currentUserId || !navigator.onLine) return;
         
+        const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
+
         patients.forEach(patient => {
-            db.collection('users_data').doc(currentUserId).collection('patients').doc(String(patient.id)).set(patient)
+            db.collection('users_data').doc(ownerUid).collection('patients').doc(String(patient.id)).set(patient)
                 .catch(err => console.log("Sync error:", err));
         });
         
-        db.collection('users_data').doc(currentUserId).set({
+        db.collection('users_data').doc(ownerUid).set({
             rxImage: currentDoctorRxImage,
             dictionary: medicalDict,
             trashBin: trashBin,
@@ -1756,14 +1915,32 @@
             bar.style.display = 'block';
         }
 
-        auth.onAuthStateChanged(user => {
+        auth.onAuthStateChanged(async user => {
             if (user) {
                 currentUserId = user.uid;
-                patients = JSON.parse(localStorage.getItem(`clinic_patients_${user.uid}`)) || patients;
-                trashBin = JSON.parse(localStorage.getItem(`clinic_trash_${user.uid}`)) || trashBin;
+                let dataOwnerUid = user.uid;
+
+                try {
+                    const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', user.email.toLowerCase()).get();
+                    if (!secQuery.empty) {
+                        const doctorDoc = secQuery.docs[0];
+                        dataOwnerUid = doctorDoc.id;
+                        sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
+                        const docData = doctorDoc.data();
+                        if (docData.secretaryPermissions) {
+                            secretaryPermissions = docData.secretaryPermissions;
+                            localStorage.setItem('clinic_sec_perms', JSON.stringify(secretaryPermissions));
+                        }
+                    }
+                } catch (e) {
+                    console.log("Secretary query error:", e);
+                }
+
+                patients = JSON.parse(localStorage.getItem(`clinic_patients_${dataOwnerUid}`)) || patients;
+                trashBin = JSON.parse(localStorage.getItem(`clinic_trash_${dataOwnerUid}`)) || trashBin;
 
                 if (navigator.onLine) {
-                    db.collection('users_data').doc(user.uid).get().then(doc => {
+                    db.collection('users_data').doc(dataOwnerUid).get().then(doc => {
                         if (doc.exists) {
                             const data = doc.data();
                             if (data.rxImage) {
@@ -1777,27 +1954,27 @@
                             }
                             if (data.trashBin) {
                                 trashBin = data.trashBin;
-                                localStorage.setItem(`clinic_trash_${user.uid}`, JSON.stringify(trashBin));
+                                localStorage.setItem(`clinic_trash_${dataOwnerUid}`, JSON.stringify(trashBin));
                             }
                             if (data.secretaryAccount) {
                                 secretaryAccount = data.secretaryAccount;
                                 localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
                             }
-                            if (data.secretaryPermissions) {
+                            if (data.secretaryPermissions && dataOwnerUid === user.uid) {
                                 secretaryPermissions = data.secretaryPermissions;
                                 localStorage.setItem('clinic_sec_perms', JSON.stringify(secretaryPermissions));
                             }
                         }
                     }).catch(err => console.log(err));
 
-                    db.collection('users_data').doc(user.uid).collection('patients').get().then(snapshot => {
+                    db.collection('users_data').doc(dataOwnerUid).collection('patients').get().then(snapshot => {
                         if (!snapshot.empty) {
                             let cloudPatients = [];
                             snapshot.forEach(doc => {
                                 cloudPatients.push(doc.data());
                             });
                             patients = cloudPatients;
-                            localStorage.setItem(`clinic_patients_${user.uid}`, JSON.stringify(patients));
+                            localStorage.setItem(`clinic_patients_${dataOwnerUid}`, JSON.stringify(patients));
                         }
                     }).catch(err => console.log(err));
                 }
@@ -1805,10 +1982,11 @@
                 if (user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
                     setupFounderInterfaceAfterAuth();
                 } else {
-                    checkUserSubscriptionStatus(user.uid);
+                    checkUserSubscriptionStatus(user.uid, dataOwnerUid !== user.uid);
                 }
             } else {
                 currentUserId = null;
+                sessionStorage.removeItem('target_doctor_uid');
                 document.getElementById('activationScreen').style.display = 'none';
                 document.getElementById('appContainer').style.display = 'none';
                 document.getElementById('authScreen').style.display = 'flex';
@@ -1819,7 +1997,7 @@
         loadSavedRxLayout();
     });
 
-    async function checkUserSubscriptionStatus(uid) {
+    async function checkUserSubscriptionStatus(uid, isSecretary = false) {
         let expiryDateStr = localStorage.getItem(`sub_expiry_${uid}`);
 
         if (navigator.onLine) {
@@ -1837,18 +2015,15 @@
             }
         }
 
-        const user = auth.currentUser;
-        const isSec = user && secretaryAccount.email && user.email.toLowerCase() === secretaryAccount.email.toLowerCase();
-
-        if (isSec) {
+        if (isSecretary) {
             document.getElementById('cardPermissions').style.display = 'none';
             applySecretaryUIVisibility();
-            setupClientInterfaceAfterAuth(null);
+            setupClientInterfaceAfterAuth(null, true);
             return;
         }
 
         if (expiryDateStr && new Date().getTime() < new Date(expiryDateStr).getTime()) {
-            setupClientInterfaceAfterAuth(expiryDateStr);
+            setupClientInterfaceAfterAuth(expiryDateStr, false);
         } else {
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('activationScreen').style.display = 'flex';
@@ -1866,25 +2041,23 @@
         restorePreviousScreenState();
     }
 
-    function setupClientInterfaceAfterAuth(expiryDateIso) {
+    function setupClientInterfaceAfterAuth(expiryDateIso, isSecretary = false) {
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('activationScreen').style.display = 'none';
         document.getElementById('appContainer').style.display = 'flex';
         document.getElementById('founderControlPanel').style.display = 'none';
         document.getElementById('networkMenuCard').style.display = 'none';
 
-        const user = auth.currentUser;
-        const isSec = user && secretaryAccount.email && user.email.toLowerCase() === secretaryAccount.email.toLowerCase();
-
-        if (isSec) {
+        if (isSecretary) {
             document.getElementById('cardPermissions').style.display = 'none';
             applySecretaryUIVisibility();
+            document.getElementById('subStatusBanner').style.display = 'none';
         } else {
             document.getElementById('cardPermissions').style.display = 'flex';
             showAllCardsForDoctor();
         }
 
-        if (expiryDateIso && !isSec) {
+        if (expiryDateIso && !isSecretary) {
             const now = new Date().getTime();
             const expiryTime = new Date(expiryDateIso).getTime();
             const diffTime = expiryTime - now;
@@ -1976,7 +2149,7 @@
 
             alert(`System activated successfully! Valid until: ${expiryDate.toLocaleDateString()}`);
             document.getElementById('activationScreen').style.display = 'none';
-            setupClientInterfaceAfterAuth(expiryDateIso);
+            setupClientInterfaceAfterAuth(expiryDateIso, false);
 
         } catch (err) {
             alert('Error during activation: ' + err.message);
@@ -1993,28 +2166,32 @@
 
     function savePatientToCloudAndLocal(patientObj) {
         if (!currentUserId) return;
+        const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
+
         const idx = patients.findIndex(p => Number(p.id) === Number(patientObj.id));
         if (idx !== -1) {
             patients[idx] = patientObj;
         } else {
             patients.unshift(patientObj);
         }
-        localStorage.setItem(`clinic_patients_${currentUserId}`, JSON.stringify(patients));
+        localStorage.setItem(`clinic_patients_${ownerUid}`, JSON.stringify(patients));
         localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
         if (navigator.onLine) {
-            db.collection('users_data').doc(currentUserId).collection('patients').doc(String(patientObj.id)).set(patientObj)
+            db.collection('users_data').doc(ownerUid).collection('patients').doc(String(patientObj.id)).set(patientObj)
                 .catch(err => console.log("Cloud save error:", err));
         }
     }
 
     function saveTrashToCloudAndLocal() {
         if (!currentUserId) return;
-        localStorage.setItem(`clinic_trash_${currentUserId}`, JSON.stringify(trashBin));
+        const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
+
+        localStorage.setItem(`clinic_trash_${ownerUid}`, JSON.stringify(trashBin));
         localStorage.setItem('clinic_trash', JSON.stringify(trashBin));
 
         if (navigator.onLine) {
-            db.collection('users_data').doc(currentUserId).set({
+            db.collection('users_data').doc(ownerUid).set({
                 trashBin: trashBin,
                 updatedAt: new Date().toISOString()
             }, { merge: true }).catch(err => console.log("Trash sync error:", err));
@@ -2023,13 +2200,15 @@
 
     function saveSettingsToCloudAndLocal() {
         if (!currentUserId) return;
+        const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
+
         localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
         localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
         localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
         localStorage.setItem('clinic_sec_perms', JSON.stringify(secretaryPermissions));
 
         if (navigator.onLine) {
-            db.collection('users_data').doc(currentUserId).set({
+            db.collection('users_data').doc(ownerUid).set({
                 rxImage: currentDoctorRxImage,
                 dictionary: medicalDict,
                 secretaryAccount: secretaryAccount,
@@ -2073,8 +2252,29 @@
                 .catch(err => alert(err.message));
         } else {
             auth.signInWithEmailAndPassword(email, pass)
-                .then(res => {
-                    if (secretaryAccount.email && email.toLowerCase() === secretaryAccount.email.toLowerCase()) {
+                .then(async res => {
+                    currentUserId = res.user.uid;
+                    let dataOwnerUid = res.user.uid;
+                    let isSec = false;
+
+                    try {
+                        const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', email.toLowerCase()).get();
+                        if (!secQuery.empty) {
+                            const doctorDoc = secQuery.docs[0];
+                            dataOwnerUid = doctorDoc.id;
+                            sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
+                            isSec = true;
+                            const docData = doctorDoc.data();
+                            if (docData.secretaryPermissions) {
+                                secretaryPermissions = docData.secretaryPermissions;
+                                localStorage.setItem('clinic_sec_perms', JSON.stringify(secretaryPermissions));
+                            }
+                        }
+                    } catch (e) {
+                        console.log(e);
+                    }
+
+                    if (isSec) {
                         document.getElementById('authScreen').style.display = 'none';
                         document.getElementById('appContainer').style.display = 'flex';
                         document.getElementById('cardPermissions').style.display = 'none';
@@ -2143,30 +2343,51 @@
         try {
             await auth.createUserWithEmailAndPassword(email, password);
             secretaryAccount = { email, password };
+            
+            if (currentUserId) {
+                await db.collection('network_hierarchy').doc(currentUserId).set({
+                    secretaryEmail: email.toLowerCase(),
+                    secretaryPermissions: secretaryPermissions
+                }, { merge: true });
+            }
+
             saveSettingsToCloudAndLocal();
-            alert('Secretary account created and registered successfully in Firebase Auth!');
+            alert('Secretary account created and registered successfully in Firebase Auth & Linked to Doctor!');
         } catch (e) {
             if (e.code === 'auth/email-already-in-use') {
                 secretaryAccount = { email, password };
+                if (currentUserId) {
+                    await db.collection('network_hierarchy').doc(currentUserId).set({
+                        secretaryEmail: email.toLowerCase(),
+                        secretaryPermissions: secretaryPermissions
+                    }, { merge: true });
+                }
                 saveSettingsToCloudAndLocal();
-                alert('Secretary account email updated successfully!');
+                alert('Secretary account email updated and linked successfully!');
             } else {
                 alert('Error creating secretary account: ' + e.message);
             }
         }
     }
 
-    function deleteSecretaryAccount() {
+    async function deleteSecretaryAccount() {
         if (confirm('Are you sure you want to delete and revoke access for the secretary account?')) {
             secretaryAccount = { email: "", password: "" };
             document.getElementById('secEmailInput').value = '';
             document.getElementById('secPassInput').value = '';
+            
+            if (currentUserId) {
+                await db.collection('network_hierarchy').doc(currentUserId).set({
+                    secretaryEmail: "",
+                }, { merge: true });
+            }
+
             saveSettingsToCloudAndLocal();
             alert('Secretary account revoked successfully.');
         }
     }
 
-    function saveSecretaryPermissions() {
+    async function saveSecretaryPermissions() {
         secretaryPermissions = {
             newPatient: document.getElementById('perm_newPatient').checked,
             archive: document.getElementById('perm_archive').checked,
@@ -2177,6 +2398,14 @@
             trash: document.getElementById('perm_trash').checked,
             settings: document.getElementById('perm_settings').checked
         };
+
+        if (currentUserId && secretaryAccount.email) {
+            await db.collection('network_hierarchy').doc(currentUserId).set({
+                secretaryEmail: secretaryAccount.email.toLowerCase(),
+                secretaryPermissions: secretaryPermissions
+            }, { merge: true }).catch(err => console.log(err));
+        }
+
         saveSettingsToCloudAndLocal();
         alert('Secretary permissions updated and saved successfully!');
         showMainMenu();
@@ -2210,7 +2439,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.93",
+            version: "16.94",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -2252,9 +2481,10 @@
                         if (parsed.secretaryAccount) secretaryAccount = parsed.secretaryAccount;
                         if (parsed.secretaryPermissions) secretaryPermissions = parsed.secretaryPermissions;
 
-                        if (currentUserId) {
-                            localStorage.setItem(`clinic_patients_${currentUserId}`, JSON.stringify(patients));
-                            localStorage.setItem(`clinic_trash_${currentUserId}`, JSON.stringify(trashBin));
+                        const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
+                        if (ownerUid) {
+                            localStorage.setItem(`clinic_patients_${ownerUid}`, JSON.stringify(patients));
+                            localStorage.setItem(`clinic_trash_${ownerUid}`, JSON.stringify(trashBin));
                         }
                         saveSettingsToCloudAndLocal();
                         syncLocalDataToCloud();
@@ -2416,11 +2646,12 @@
                 html += `
                     <div class="node-card">
                         <div class="node-info">
-                            <h5><i class="fa-solid fa-envelope" style="color:#0d9488;"></i> ${data.email}</h5>
+                            <h5><i class="fa-solid fa-envelope" style="color:#0d9488;"></i> ${data.email || data.secretaryEmail || 'User'}</h5>
                             <p><b>Password:</b> <span style="color:#9333ea; background:#f3e8ff; padding:2px 6px; border-radius:4px;">${data.password || 'N/A'}</span></p>
+                            ${data.secretaryEmail ? `<p style="font-size:0.75rem; color:#0284c7;"><b>Linked Secretary:</b> ${data.secretaryEmail}</p>` : ''}
                             <p style="font-size:0.7rem; color:#94a3b8;">Expires: ${data.expiryDate ? data.expiryDate.substring(0, 10) : 'N/A'}</p>
                         </div>
-                        <div><span class="node-badge">Client</span></div>
+                        <div><span class="node-badge">${data.role || 'Client'}</span></div>
                     </div>
                 `;
             });
@@ -3059,10 +3290,11 @@
                 });
                 saveTrashToCloudAndLocal();
 
-                if (currentUserId) {
-                    localStorage.setItem(`clinic_patients_${currentUserId}`, JSON.stringify(patients));
+                const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
+                if (ownerUid) {
+                    localStorage.setItem(`clinic_patients_${ownerUid}`, JSON.stringify(patients));
                     if (navigator.onLine) {
-                        db.collection('users_data').doc(currentUserId).collection('patients').doc(pIdStr).delete().catch(err => console.log(err));
+                        db.collection('users_data').doc(ownerUid).collection('patients').doc(pIdStr).delete().catch(err => console.log(err));
                     }
                 }
                 localStorage.setItem('clinic_patients', JSON.stringify(patients));
