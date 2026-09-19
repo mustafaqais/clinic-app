@@ -3,17 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.66</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.63</title>
     
-    <!-- إعدادات الأيقونات -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
-
-    <!-- ملف بيان الويب (Manifest) -->
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22%D8%B9%D9%8A%D8%A7%D8%AF%D8%AA%D9%8A%22%2C%22short_name%22%3A%22%D8%B9%D9%8A%D8%A7%D8%AF%D8%AA%D9%8A%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23ffffff%22%2C%22theme_color%22%3A%22%230d9488%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22https%3A%2F%2Fi.ibb.co%2F68n8910%2F1000111840.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2Fpng%22%2C%22purpose%22%3A%22any%20maskable%22%7D%5D%7D">
-    <meta name="theme-color" content="#0d9488">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon-precomposed" href="https://i.ibb.co/68n8910/1000111840.png">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -47,7 +41,7 @@
         .network-status-bar.offline { display: block; background: #fee2e2; color: #b91c1c; }
 
         .header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 35px 20px 30px 20px; text-align: center; border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
-        .header-icon { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; border: 2px solid #0d9488; display: inline-block; }
+        .header-icon { font-size: 42px; color: #0d9488; margin-bottom: 10px; }
         .header h1 { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; color: #f8fafc; letter-spacing: 0.5px; }
         .header p { font-size: 0.82rem; color: #94a3b8; }
         
@@ -250,7 +244,7 @@
     <div id="networkStatusBar" class="network-status-bar">⚠️ وضع عدم الاتصال (Offline Mode) - يتم الحفظ محلياً وسيتم المزامنة تلقائياً عند عودة الإنترنت</div>
 
     <div id="authScreen" class="auth-screen">
-        <div class="activ-icon"><img src="https://i.ibb.co/68n8910/1000111840.png" alt="عيادتي" style="width: 75px; height: 75px; border-radius: 50%; object-fit: cover; border: 3px solid #0d9488;"></div>
+        <div class="activ-icon"><i class="fa-solid fa-user-lock"></i></div>
         <div class="activ-title" id="authTitle">User Login</div>
         <div class="activ-sub">Sign in with your email and password securely</div>
 
@@ -294,7 +288,7 @@
             <button class="logout-btn" onclick="logoutUser()" title="تسجيل الخروج">
                 <i class="fa-solid fa-right-from-bracket"></i> خروج
             </button>
-            <img src="https://i.ibb.co/68n8910/1000111840.png" alt="عيادتي" class="header-icon">
+            <div class="header-icon"><i class="fa-solid fa-user-doctor"></i></div>
             <h1 id="headerTitle">Clinic Master System</h1>
             <p id="headerSub">Cloud Secure Dashboard</p>
         </div>
@@ -648,7 +642,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.66</div>
+        <div class="footer">Clinic Master Network v16.63</div>
     </div>
 </div>
 
