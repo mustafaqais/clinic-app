@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.94</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.95</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -497,14 +497,14 @@
 
                     <span style="font-size: 0.85rem; font-weight: 800; color: #0f172a; display: block; margin-bottom: 8px;" id="lblFeatPerm">Feature Permissions:</span>
                     <div class="checkbox-grid" style="grid-template-columns: 1fr; gap: 8px; margin-bottom: 16px;">
-                        <label class="checkbox-item"><input type="checkbox" id="perm_newPatient" checked> <span id="pNewPat">🟢 Register New Patient</span></label>
-                        <label class="checkbox-item"><input type="checkbox" id="perm_archive" checked> <span id="pArch">🟢 Patients Archive & Search</span></label>
-                        <label class="checkbox-item"><input type="checkbox" id="perm_rxTemplate"> <span id="pRx">🟡 RX Template Header</span></label>
-                        <label class="checkbox-item"><input type="checkbox" id="perm_dict"> <span id="pDict">🟡 Medical Dictionary Manager</span></label>
-                        <label class="checkbox-item"><input type="checkbox" id="perm_analytics"> <span id="pAnalytics">🟡 Clinic Analytics & Stats</span></label>
-                        <label class="checkbox-item"><input type="checkbox" id="perm_backup"> <span id="pBackup">🔴 Backup & Restore</span></label>
-                        <label class="checkbox-item"><input type="checkbox" id="perm_trash"> <span id="pTrash">🔴 Trash Bin & Deletions</span></label>
-                        <label class="checkbox-item"><input type="checkbox" id="perm_settings"> <span id="pSettings">🔴 Account Settings & Password</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_newPatient" checked> <span id="pNewPat">🟢 Register New Patient & Personal Info</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_archive" checked> <span id="pArch">🟢 Patients Archive, Search & Attachments</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_rxTemplate" disabled> <span id="pRx">🔴 RX Template Header (Doctor Only)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_dict" disabled> <span id="pDict">🔴 Medical Dictionary (Doctor Only)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_analytics" disabled> <span id="pAnalytics">🔴 Clinic Analytics (Doctor Only)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_backup" disabled> <span id="pBackup">🔴 Backup & Restore (Doctor Only)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_trash" disabled> <span id="pTrash">🔴 Trash Bin (Doctor Only)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_settings" disabled> <span id="pSettings">🔴 Account Settings (Doctor Only)</span></label>
                     </div>
 
                     <button class="btn-main" onclick="saveSecretaryPermissions()" id="btnSavePerms" style="background: #d946ef;">
@@ -762,11 +762,11 @@
 
             <div id="medicalRecordScreen" style="display: none;">
                 <div class="group-card" style="background: #f0fdfa; border-color: #99f6e4; position: relative;">
-                    <div style="position: absolute; top: 14px; right: 14px; display: flex; gap: 6px; z-index: 5;">
+                    <div style="position: absolute; top: 14px; right: 14px; display: flex; gap: 6px; z-index: 5;" id="patientRecordHeaderActions">
                         <button type="button" onclick="openEditPatientModal()" style="background: #0d9488; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
                             <i class="fa-solid fa-pen-to-square"></i> <span id="txtEdit">Edit</span>
                         </button>
-                        <button type="button" onclick="confirmDeletePatientRecord()" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                        <button type="button" onclick="confirmDeletePatientRecord()" id="btnDeletePatientMain" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
                             <i class="fa-solid fa-trash"></i> <span id="txtDelete">Delete</span>
                         </button>
                     </div>
@@ -813,7 +813,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v16.94</div>
+        <div class="footer" id="footerText">Clinic Master Network v16.95</div>
     </div>
 </div>
 
@@ -1212,6 +1212,7 @@
     let currentDoctorRxImage = localStorage.getItem('doctor_rx_template') || '';
     let isConfigMode = false;
     let activeMhInputKey = null;
+    let isUserSecretary = false;
 
     let currentLang = localStorage.getItem('clinic_lang') || 'ar';
 
@@ -1269,7 +1270,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v16.94",
+            footer: "نظام عيادة ماستر المتقدم v16.95",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1429,7 +1430,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v16.94",
+            footer: "Clinic Master Network v16.95",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -1734,16 +1735,6 @@
     };
 
     let secretaryAccount = JSON.parse(localStorage.getItem('clinic_sec_account')) || { email: "", password: "" };
-    let secretaryPermissions = JSON.parse(localStorage.getItem('clinic_sec_perms')) || {
-        newPatient: true,
-        archive: true,
-        rxTemplate: false,
-        dict: false,
-        analytics: false,
-        backup: false,
-        trash: false,
-        settings: false
-    };
 
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
@@ -1775,7 +1766,6 @@
             dictionary: medicalDict,
             trashBin: trashBin,
             secretaryAccount: secretaryAccount,
-            secretaryPermissions: secretaryPermissions,
             updatedAt: new Date().toISOString()
         }, { merge: true }).catch(err => console.log("Settings sync error:", err));
     }
@@ -1919,6 +1909,7 @@
             if (user) {
                 currentUserId = user.uid;
                 let dataOwnerUid = user.uid;
+                isUserSecretary = false;
 
                 try {
                     const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', user.email.toLowerCase()).get();
@@ -1926,11 +1917,7 @@
                         const doctorDoc = secQuery.docs[0];
                         dataOwnerUid = doctorDoc.id;
                         sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
-                        const docData = doctorDoc.data();
-                        if (docData.secretaryPermissions) {
-                            secretaryPermissions = docData.secretaryPermissions;
-                            localStorage.setItem('clinic_sec_perms', JSON.stringify(secretaryPermissions));
-                        }
+                        isUserSecretary = true;
                     }
                 } catch (e) {
                     console.log("Secretary query error:", e);
@@ -1960,10 +1947,6 @@
                                 secretaryAccount = data.secretaryAccount;
                                 localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
                             }
-                            if (data.secretaryPermissions && dataOwnerUid === user.uid) {
-                                secretaryPermissions = data.secretaryPermissions;
-                                localStorage.setItem('clinic_sec_perms', JSON.stringify(secretaryPermissions));
-                            }
                         }
                     }).catch(err => console.log(err));
 
@@ -1982,10 +1965,11 @@
                 if (user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
                     setupFounderInterfaceAfterAuth();
                 } else {
-                    checkUserSubscriptionStatus(user.uid, dataOwnerUid !== user.uid);
+                    checkUserSubscriptionStatus(user.uid, isUserSecretary);
                 }
             } else {
                 currentUserId = null;
+                isUserSecretary = false;
                 sessionStorage.removeItem('target_doctor_uid');
                 document.getElementById('activationScreen').style.display = 'none';
                 document.getElementById('appContainer').style.display = 'none';
@@ -2016,8 +2000,6 @@
         }
 
         if (isSecretary) {
-            document.getElementById('cardPermissions').style.display = 'none';
-            applySecretaryUIVisibility();
             setupClientInterfaceAfterAuth(null, true);
             return;
         }
@@ -2038,6 +2020,7 @@
         document.getElementById('networkMenuCard').style.display = 'flex';
         document.getElementById('cardPermissions').style.display = 'flex';
         document.getElementById('subStatusBanner').style.display = 'none'; 
+        isUserSecretary = false;
         restorePreviousScreenState();
     }
 
@@ -2049,10 +2032,17 @@
         document.getElementById('networkMenuCard').style.display = 'none';
 
         if (isSecretary) {
+            isUserSecretary = true;
             document.getElementById('cardPermissions').style.display = 'none';
-            applySecretaryUIVisibility();
+            document.getElementById('cardRxTemplate').style.display = 'none';
+            document.getElementById('cardDict').style.display = 'none';
+            document.getElementById('cardAnalytics').style.display = 'none';
+            document.getElementById('cardBackup').style.display = 'none';
+            document.getElementById('cardTrash').style.display = 'none';
+            document.getElementById('cardSettings').style.display = 'none';
             document.getElementById('subStatusBanner').style.display = 'none';
         } else {
+            isUserSecretary = false;
             document.getElementById('cardPermissions').style.display = 'flex';
             showAllCardsForDoctor();
         }
@@ -2089,6 +2079,10 @@
         const savedPatientId = sessionStorage.getItem('current_patient_id');
 
         if (savedScreen && savedScreen !== 'mainScreen' && document.getElementById(savedScreen)) {
+            if (isUserSecretary && ['rxTemplateScreen', 'dictScreen', 'analyticsScreen', 'backupScreen', 'trashScreen', 'settingsScreen', 'permissionsScreen'].includes(savedScreen)) {
+                navigateTo('mainScreen', translations[currentLang].headerTitle, translations[currentLang].headerSub, false);
+                return;
+            }
             if (savedScreen === 'medicalRecordScreen' && savedPatientId) {
                 openMedicalRecord(Number(savedPatientId), false);
             } else {
@@ -2205,14 +2199,12 @@
         localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
         localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
         localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
-        localStorage.setItem('clinic_sec_perms', JSON.stringify(secretaryPermissions));
 
         if (navigator.onLine) {
             db.collection('users_data').doc(ownerUid).set({
                 rxImage: currentDoctorRxImage,
                 dictionary: medicalDict,
                 secretaryAccount: secretaryAccount,
-                secretaryPermissions: secretaryPermissions,
                 updatedAt: new Date().toISOString()
             }, { merge: true }).catch(err => console.log("Settings save error:", err));
         }
@@ -2264,11 +2256,6 @@
                             dataOwnerUid = doctorDoc.id;
                             sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
                             isSec = true;
-                            const docData = doctorDoc.data();
-                            if (docData.secretaryPermissions) {
-                                secretaryPermissions = docData.secretaryPermissions;
-                                localStorage.setItem('clinic_sec_perms', JSON.stringify(secretaryPermissions));
-                            }
                         }
                     } catch (e) {
                         console.log(e);
@@ -2279,6 +2266,7 @@
                         document.getElementById('appContainer').style.display = 'flex';
                         document.getElementById('cardPermissions').style.display = 'none';
                         document.getElementById('subStatusBanner').style.display = 'none';
+                        isUserSecretary = true;
                         applySecretaryUIVisibility();
                         restorePreviousScreenState();
                     }
@@ -2300,14 +2288,14 @@
     }
 
     function applySecretaryUIVisibility() {
-        document.getElementById('cardNewPatient').style.display = secretaryPermissions.newPatient ? 'flex' : 'none';
-        document.getElementById('cardArchive').style.display = secretaryPermissions.archive ? 'flex' : 'none';
-        document.getElementById('cardRxTemplate').style.display = secretaryPermissions.rxTemplate ? 'flex' : 'none';
-        document.getElementById('cardDict').style.display = secretaryPermissions.dict ? 'flex' : 'none';
-        document.getElementById('cardAnalytics').style.display = secretaryPermissions.analytics ? 'flex' : 'none';
-        document.getElementById('cardBackup').style.display = secretaryPermissions.backup ? 'flex' : 'none';
-        document.getElementById('cardTrash').style.display = secretaryPermissions.trash ? 'flex' : 'none';
-        document.getElementById('cardSettings').style.display = secretaryPermissions.settings ? 'flex' : 'none';
+        document.getElementById('cardNewPatient').style.display = 'flex';
+        document.getElementById('cardArchive').style.display = 'flex';
+        document.getElementById('cardRxTemplate').style.display = 'none';
+        document.getElementById('cardDict').style.display = 'none';
+        document.getElementById('cardAnalytics').style.display = 'none';
+        document.getElementById('cardBackup').style.display = 'none';
+        document.getElementById('cardTrash').style.display = 'none';
+        document.getElementById('cardSettings').style.display = 'none';
         document.getElementById('cardPermissions').style.display = 'none';
     }
 
@@ -2315,15 +2303,6 @@
         navigateTo('permissionsScreen', 'Secretary Management', 'Create account & permissions');
         document.getElementById('secEmailInput').value = secretaryAccount.email || '';
         document.getElementById('secPassInput').value = secretaryAccount.password || '';
-
-        document.getElementById('perm_newPatient').checked = secretaryPermissions.newPatient;
-        document.getElementById('perm_archive').checked = secretaryPermissions.archive;
-        document.getElementById('perm_rxTemplate').checked = secretaryPermissions.rxTemplate;
-        document.getElementById('perm_dict').checked = secretaryPermissions.dict;
-        document.getElementById('perm_analytics').checked = secretaryPermissions.analytics;
-        document.getElementById('perm_backup').checked = secretaryPermissions.backup;
-        document.getElementById('perm_trash').checked = secretaryPermissions.trash;
-        document.getElementById('perm_settings').checked = secretaryPermissions.settings;
     }
 
     async function saveSecretaryAccount() {
@@ -2346,8 +2325,7 @@
             
             if (currentUserId) {
                 await db.collection('network_hierarchy').doc(currentUserId).set({
-                    secretaryEmail: email.toLowerCase(),
-                    secretaryPermissions: secretaryPermissions
+                    secretaryEmail: email.toLowerCase()
                 }, { merge: true });
             }
 
@@ -2358,8 +2336,7 @@
                 secretaryAccount = { email, password };
                 if (currentUserId) {
                     await db.collection('network_hierarchy').doc(currentUserId).set({
-                        secretaryEmail: email.toLowerCase(),
-                        secretaryPermissions: secretaryPermissions
+                        secretaryEmail: email.toLowerCase()
                     }, { merge: true });
                 }
                 saveSettingsToCloudAndLocal();
@@ -2387,27 +2364,8 @@
         }
     }
 
-    async function saveSecretaryPermissions() {
-        secretaryPermissions = {
-            newPatient: document.getElementById('perm_newPatient').checked,
-            archive: document.getElementById('perm_archive').checked,
-            rxTemplate: document.getElementById('perm_rxTemplate').checked,
-            dict: document.getElementById('perm_dict').checked,
-            analytics: document.getElementById('perm_analytics').checked,
-            backup: document.getElementById('perm_backup').checked,
-            trash: document.getElementById('perm_trash').checked,
-            settings: document.getElementById('perm_settings').checked
-        };
-
-        if (currentUserId && secretaryAccount.email) {
-            await db.collection('network_hierarchy').doc(currentUserId).set({
-                secretaryEmail: secretaryAccount.email.toLowerCase(),
-                secretaryPermissions: secretaryPermissions
-            }, { merge: true }).catch(err => console.log(err));
-        }
-
-        saveSettingsToCloudAndLocal();
-        alert('Secretary permissions updated and saved successfully!');
+    function saveSecretaryPermissions() {
+        alert('Secretary permissions are permanently configured: Secretary can register patients and upload/manage attachments. All medical, prescription, and system features are restricted to the Doctor.');
         showMainMenu();
     }
 
@@ -2424,6 +2382,7 @@
         sessionStorage.clear();
         auth.signOut().then(() => {
             currentUserId = null;
+            isUserSecretary = false;
             patients = [];
             trashBin = [];
             document.getElementById('appContainer').style.display = 'none';
@@ -2439,13 +2398,12 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.94",
+            version: "16.95",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
             rxImage: currentDoctorRxImage,
-            secretaryAccount: secretaryAccount,
-            secretaryPermissions: secretaryPermissions
+            secretaryAccount: secretaryAccount
         };
 
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
@@ -2479,7 +2437,6 @@
                         medicalDict = parsed.medicalDict || medicalDict;
                         if (parsed.rxImage) currentDoctorRxImage = parsed.rxImage;
                         if (parsed.secretaryAccount) secretaryAccount = parsed.secretaryAccount;
-                        if (parsed.secretaryPermissions) secretaryPermissions = parsed.secretaryPermissions;
 
                         const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
                         if (ownerUid) {
@@ -2826,6 +2783,7 @@
     }
 
     function openBmiCalculator(visitId) {
+        if (isUserSecretary) return; // Secretary restricted
         currentVisitIdForModal = visitId;
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
@@ -2846,6 +2804,10 @@
     }
 
     function closeBmiModal() {
+        if (isUserSecretary) {
+            document.getElementById('bmiCalculatorModal').style.display = 'none';
+            return;
+        }
         if (currentVisitIdForModal && currentPatientId) {
             const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
             if (patient) {
@@ -2914,11 +2876,13 @@
     }
 
     function handleDrugsInput(textarea, visitId) {
+        if (isUserSecretary) return;
         autoResizeTextarea(textarea);
         handleLiveInput(textarea, 'drugs', visitId);
     }
 
     function handleDrugsKeyDown(event, textarea, visitId) {
+        if (isUserSecretary) return;
         if (event.key === 'Enter') {
             event.preventDefault();
             const start = textarea.selectionStart;
@@ -2932,6 +2896,7 @@
     }
 
     function handleLiveInput(textarea, category, visitId) {
+        if (isUserSecretary) return;
         autoResizeTextarea(textarea);
         const lines = textarea.value.split('\n');
         const currentLine = lines[lines.length - 1].replace(/^\d+[-–]\s*/, '').trim();
@@ -2970,6 +2935,7 @@
     }
 
     function selectSuggestion(category, visitId, value) {
+        if (isUserSecretary) return;
         const textarea = document.querySelector(`[data-visit-id="${visitId}"] .v-${category}`);
         if (!textarea) return;
 
@@ -2993,6 +2959,7 @@
     }
 
     function saveLineToDict(event, category, visitId) {
+        if (isUserSecretary) return;
         if (event) event.preventDefault();
         const lineTextSpan = document.getElementById(`line-text-${category}-${visitId}`);
         const btn = document.getElementById(`btn-save-${category}-${visitId}`);
@@ -3011,6 +2978,7 @@
     }
 
     function handleMhLiveInput(inputEl, inputKey) {
+        if (isUserSecretary) return;
         activeMhInputKey = inputKey;
         const val = inputEl.value.trim();
         const bar = document.getElementById(`save-bar-${inputKey}`);
@@ -3045,6 +3013,7 @@
     }
 
     function selectMhSuggestion(inputKey, value) {
+        if (isUserSecretary) return;
         let el = null;
         if (inputKey === 'mh_other') el = document.getElementById('mh-cd-other');
         else if (inputKey === 'mh_admission') el = document.getElementById('mh-prev-admission');
@@ -3070,6 +3039,7 @@
     }
 
     function saveMhLineToDict(event, inputKey) {
+        if (isUserSecretary) return;
         if (event) event.preventDefault();
         const lineTextSpan = document.getElementById(`line-text-${inputKey}`);
         const btn = document.getElementById(`btn-save-${inputKey}`);
@@ -3274,6 +3244,10 @@
     }
 
     function confirmDeletePatientRecord() {
+        if (isUserSecretary) {
+            alert('Secretary is not authorized to delete patient records.');
+            return;
+        }
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
 
@@ -3305,6 +3279,10 @@
     }
 
     function confirmDeleteVisit(visitId) {
+        if (isUserSecretary) {
+            alert('Secretary is not authorized to delete visits.');
+            return;
+        }
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
 
@@ -3335,6 +3313,7 @@
     }
 
     function openTrashBin() {
+        if (isUserSecretary) return;
         navigateTo('trashScreen', 'Trash Bin', 'Restore deleted items');
         renderTrashItems();
     }
@@ -3435,6 +3414,7 @@
     }
 
     function openMedHistoryModal(visitId) {
+        if (isUserSecretary) return; // Secretary restricted
         currentVisitIdForModal = visitId;
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
@@ -3469,6 +3449,10 @@
     }
 
     function closeMedHistoryModal() {
+        if (isUserSecretary) {
+            document.getElementById('medHistoryModal').style.display = 'none';
+            return;
+        }
         if (currentVisitIdForModal && currentPatientId) {
             const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
             if (patient) {
@@ -3508,6 +3492,10 @@
     }
 
     function openRxModal(visitId) {
+        if (isUserSecretary) {
+            alert('Prescription (RX) creation is restricted to the Doctor.');
+            return;
+        }
         autoSaveMedicalRecord();
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
@@ -3758,18 +3746,20 @@
             if (visitObj) {
                 if (!visitObj.visitId) visitObj.visitId = vId || Date.now();
                 const dateInput = el.querySelector('.visit-date-input');
-                if (dateInput && dateInput.value) {
+                if (dateInput && dateInput.value && !isUserSecretary) {
                     visitObj.date = dateInput.value;
                 }
-                visitObj.bpSystolic = el.querySelector('.v-bp-sys').value;
-                visitObj.bpDiastolic = el.querySelector('.v-bp-dia').value;
-                visitObj.spo2 = el.querySelector('.v-spo2').value;
-                visitObj.hr = el.querySelector('.v-hr').value;
-                visitObj.rr = el.querySelector('.v-rr') ? el.querySelector('.v-rr').value : '';
-                visitObj.labs = el.querySelector('.v-labs').value;
-                visitObj.scans = el.querySelector('.v-scans').value;
-                visitObj.drugs = el.querySelector('.v-drugs').value;
-                visitObj.notes = el.querySelector('.v-notes').value;
+                if (!isUserSecretary) {
+                    visitObj.bpSystolic = el.querySelector('.v-bp-sys').value;
+                    visitObj.bpDiastolic = el.querySelector('.v-bp-dia').value;
+                    visitObj.spo2 = el.querySelector('.v-spo2').value;
+                    visitObj.hr = el.querySelector('.v-hr').value;
+                    visitObj.rr = el.querySelector('.v-rr') ? el.querySelector('.v-rr').value : '';
+                    visitObj.labs = el.querySelector('.v-labs').value;
+                    visitObj.scans = el.querySelector('.v-scans').value;
+                    visitObj.drugs = el.querySelector('.v-drugs').value;
+                    visitObj.notes = el.querySelector('.v-notes').value;
+                }
             }
         });
 
@@ -3786,11 +3776,13 @@
     }
 
     function openDictionaryManager() {
+        if (isUserSecretary) return;
         navigateTo('dictScreen', 'Dictionary Manager', 'Manage saved phrases & doses');
         renderDictTerms();
     }
 
     function renderDictTerms() {
+        if (isUserSecretary) return;
         const cat = document.getElementById('dictCategorySelect').value;
         const container = document.getElementById('dictItemsList');
         const items = medicalDict[cat] || [];
@@ -3809,6 +3801,7 @@
     }
 
     function removeDictTerm(category, index) {
+        if (isUserSecretary) return;
         medicalDict[category].splice(index, 1);
         saveSettingsToCloudAndLocal();
         renderDictTerms();
@@ -3912,6 +3905,12 @@
         document.getElementById('recPatientName').innerText = patient.name;
         document.getElementById('recPatientMeta').innerText = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
 
+        if (isUserSecretary) {
+            document.getElementById('patientRecordHeaderActions').style.display = 'none';
+        } else {
+            document.getElementById('patientRecordHeaderActions').style.display = 'flex';
+        }
+
         renderVisits(patient.visits || []);
     }
 
@@ -3936,31 +3935,33 @@
             const visitDateVal = v.date || getTodayFormatted();
             
             const bmiText = v.bmiScore ? `BMI: ${v.bmiScore} (${v.bmiWeight}kg / ${v.bmiHeight}cm)` : 'Open BMI Calculator';
+            const disabledAttr = isUserSecretary ? 'disabled readonly style="background:#f1f5f9; cursor:not-allowed;"' : '';
+            const hideForSecStyle = isUserSecretary ? 'style="display:none;"' : '';
 
             return `
             <div class="visit-card" id="visit-${vId}" data-visit-id="${vId}">
                 <div class="visit-header">
                     <span><i class="fa-solid fa-clock-rotate-left"></i> Visit Date:</span>
-                    <input type="date" value="${visitDateVal}" class="visit-date-input" onchange="autoSaveMedicalRecord()" style="background:transparent; border:none; color:white; font-weight:700; outline:none; text-align:right;">
+                    <input type="date" value="${visitDateVal}" class="visit-date-input" ${isUserSecretary ? 'disabled' : 'onchange="autoSaveMedicalRecord()"' } style="background:transparent; border:none; color:white; font-weight:700; outline:none; text-align:right;">
                 </div>
 
-                <div class="field-box">
+                <div class="field-box" ${hideForSecStyle}>
                     <span class="field-label"><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History</span>
-                    <button type="button" class="btn-med-history" onclick="openMedHistoryModal(${vId})">
+                    <button type="button" class="btn-med-history" onclick="openMedHistoryModal(${vId})" ${isUserSecretary ? 'disabled style="background:#f1f5f9; color:#94a3b8; border-color:#cbd5e1; cursor:not-allowed;"' : ''}>
                         <span id="mh-label-${vId}">${mhStatusText}</span>
                         <i class="fa-solid fa-sliders"></i>
                     </button>
                 </div>
 
-                <div class="field-box">
+                <div class="field-box" ${hideForSecStyle}>
                     <span class="field-label"><i class="fa-solid fa-weight-scale" style="color:#0284c7;"></i> Optional Tools</span>
-                    <button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(${vId})">
+                    <button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(${vId})" ${isUserSecretary ? 'disabled style="background:#f8fafc; color:#94a3b8; border-color:#cbd5e1; cursor:not-allowed;"' : ''}>
                         <span id="bmi-label-${vId}"><i class="fa-solid fa-calculator"></i> ${bmiText}</span>
                         <i class="fa-solid fa-arrow-up-right-from-square"></i>
                     </button>
                 </div>
 
-                <div class="field-box">
+                <div class="field-box" ${hideForSecStyle}>
                     <span class="field-label"><i class="fa-solid fa-heart-pulse" style="color:#0d9488;"></i> Vital Signs</span>
                     <div class="vital-box">
                         <div class="vital-row">
@@ -3968,11 +3969,11 @@
                                 <span class="vital-label">Blood Pressure (BP)</span>
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <div class="vital-inputs" style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:4px 8px; flex:1;">
-                                        <input type="number" class="v-bp-sys" placeholder="SYS" value="${v.bpSystolic || ''}" oninput="autoSaveMedicalRecord()">
+                                        <input type="number" class="v-bp-sys" placeholder="SYS" value="${v.bpSystolic || ''}" ${disabledAttr} oninput="autoSaveMedicalRecord()">
                                     </div>
                                     <span style="font-weight:700; color:#94a3b8;">/</span>
                                     <div class="vital-inputs" style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:4px 8px; flex:1;">
-                                        <input type="number" class="v-bp-dia" placeholder="DIA" value="${v.bpDiastolic || ''}" oninput="autoSaveMedicalRecord()">
+                                        <input type="number" class="v-bp-dia" placeholder="DIA" value="${v.bpDiastolic || ''}" ${disabledAttr} oninput="autoSaveMedicalRecord()">
                                     </div>
                                     <span style="font-size:0.75rem; font-weight:700; color:#0d9488;">mmHg</span>
                                 </div>
@@ -3982,14 +3983,14 @@
                             <div class="vital-item">
                                 <span class="vital-label">SpO2</span>
                                 <div class="vital-inputs">
-                                    <input type="number" class="v-spo2" placeholder="98" value="${v.spo2 || ''}" oninput="autoSaveMedicalRecord()">
+                                    <input type="number" class="v-spo2" placeholder="98" value="${v.spo2 || ''}" ${disabledAttr} oninput="autoSaveMedicalRecord()">
                                     <span>%</span>
                                 </div>
                             </div>
                             <div class="vital-item">
                                 <span class="vital-label">Heart Rate (HR)</span>
                                 <div class="vital-inputs">
-                                    <input type="number" class="v-hr" placeholder="75" value="${v.hr || ''}" oninput="autoSaveMedicalRecord()">
+                                    <input type="number" class="v-hr" placeholder="75" value="${v.hr || ''}" ${disabledAttr} oninput="autoSaveMedicalRecord()">
                                     <span>bpm</span>
                                 </div>
                             </div>
@@ -3998,7 +3999,7 @@
                             <div class="vital-item" style="grid-column: span 2;">
                                 <span class="vital-label">Respiratory Rate (RR)</span>
                                 <div class="vital-inputs">
-                                    <input type="number" class="v-rr" placeholder="18" value="${v.rr || ''}" oninput="autoSaveMedicalRecord()">
+                                    <input type="number" class="v-rr" placeholder="18" value="${v.rr || ''}" ${disabledAttr} oninput="autoSaveMedicalRecord()">
                                     <span>cpm</span>
                                 </div>
                             </div>
@@ -4006,10 +4007,10 @@
                     </div>
                 </div>
 
-                <div class="field-box">
+                <div class="field-box" ${hideForSecStyle}>
                     <span class="field-label"><i class="fa-solid fa-vial" style="color:#0d9488;"></i> Lab Tests</span>
                     <div class="input-wrapper">
-                        <textarea class="v-labs" rows="1" placeholder="Type lab tests..." oninput="handleLiveInput(this, 'labs', ${vId})" onblur="hideSuggestions('labs', ${vId})">${v.labs || ''}</textarea>
+                        <textarea class="v-labs" rows="1" placeholder="Type lab tests..." ${disabledAttr} oninput="handleLiveInput(this, 'labs', ${vId})" onblur="hideSuggestions('labs', ${vId})">${v.labs || ''}</textarea>
                         <div class="suggestions-box" id="suggestions-labs-${vId}"></div>
                         <div class="live-save-bar" id="save-bar-labs-${vId}">
                             <span>Save: "<strong id="line-text-labs-${vId}"></strong>"</span>
@@ -4018,10 +4019,10 @@
                     </div>
                 </div>
 
-                <div class="field-box">
+                <div class="field-box" ${hideForSecStyle}>
                     <span class="field-label"><i class="fa-solid fa-x-ray" style="color:#0d9488;"></i> Scans & Imaging</span>
                     <div class="input-wrapper">
-                        <textarea class="v-scans" rows="1" placeholder="Type scans..." oninput="handleLiveInput(this, 'scans', ${vId})" onblur="hideSuggestions('scans', ${vId})">${v.scans || ''}</textarea>
+                        <textarea class="v-scans" rows="1" placeholder="Type scans..." ${disabledAttr} oninput="handleLiveInput(this, 'scans', ${vId})" onblur="hideSuggestions('scans', ${vId})">${v.scans || ''}</textarea>
                         <div class="suggestions-box" id="suggestions-scans-${vId}"></div>
                         <div class="live-save-bar" id="save-bar-scans-${vId}">
                             <span>Save: "<strong id="line-text-scans-${vId}"></strong>"</span>
@@ -4030,10 +4031,10 @@
                     </div>
                 </div>
 
-                <div class="field-box">
+                <div class="field-box" ${hideForSecStyle}>
                     <span class="field-label"><i class="fa-solid fa-pills" style="color:#0d9488;"></i> Medications & Treatment</span>
                     <div class="input-wrapper">
-                        <textarea class="v-drugs" rows="2" placeholder="Type medications..." oninput="handleDrugsInput(this, ${vId})" onkeydown="handleDrugsKeyDown(event, this, ${vId})" onblur="hideSuggestions('drugs', ${vId})">${v.drugs || ''}</textarea>
+                        <textarea class="v-drugs" rows="2" placeholder="Type medications..." ${disabledAttr} oninput="handleDrugsInput(this, ${vId})" onkeydown="handleDrugsKeyDown(event, this, ${vId})" onblur="hideSuggestions('drugs', ${vId})">${v.drugs || ''}</textarea>
                         <div class="suggestions-box" id="suggestions-drugs-${vId}"></div>
                         <div class="live-save-bar" id="save-bar-drugs-${vId}">
                             <span>Save: "<strong id="line-text-drugs-${vId}"></strong>"</span>
@@ -4042,10 +4043,10 @@
                     </div>
                 </div>
 
-                <div class="field-box">
+                <div class="field-box" ${hideForSecStyle}>
                     <span class="field-label"><i class="fa-solid fa-clipboard-user" style="color:#0d9488;"></i> Diagnosis & Notes</span>
                     <div class="input-wrapper">
-                        <textarea class="v-notes" rows="1" placeholder="Notes..." oninput="handleLiveInput(this, 'notes', ${vId})" onblur="hideSuggestions('notes', ${vId})">${v.notes || ''}</textarea>
+                        <textarea class="v-notes" rows="1" placeholder="Notes..." ${disabledAttr} oninput="handleLiveInput(this, 'notes', ${vId})" onblur="hideSuggestions('notes', ${vId})">${v.notes || ''}</textarea>
                         <div class="suggestions-box" id="suggestions-notes-${vId}"></div>
                         <div class="live-save-bar" id="save-bar-notes-${vId}">
                             <span>Save: "<strong id="line-text-notes-${vId}"></strong>"</span>
@@ -4075,11 +4076,11 @@
                     </div>
                 </div>
 
-                <button type="button" class="btn-rx-action" onclick="openRxModal(${vId})">
+                <button type="button" class="btn-rx-action" onclick="openRxModal(${vId})" ${hideForSecStyle}>
                     <i class="fa-solid fa-file-prescription"></i> Prescription (RX)
                 </button>
 
-                <button type="button" class="btn-danger" onclick="confirmDeleteVisit(${vId})">
+                <button type="button" class="btn-danger" onclick="confirmDeleteVisit(${vId})" ${hideForSecStyle}>
                     <i class="fa-solid fa-trash-can"></i> Delete This Visit
                 </button>
             </div>
