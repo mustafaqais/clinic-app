@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.80</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.90</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -51,10 +51,11 @@
         .header h1 { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; color: #f8fafc; letter-spacing: 0.5px; }
         .header p { font-size: 0.82rem; color: #94a3b8; }
         
-        .back-btn, .logout-btn, .support-btn { position: absolute; top: 15px; background: rgba(255, 255, 255, 0.12); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 10px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .back-btn, .logout-btn, .support-btn, .lang-btn { position: absolute; top: 15px; background: rgba(255, 255, 255, 0.12); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 10px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
         .back-btn { left: 15px; } 
         .logout-btn { right: 15px; color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
-        .support-btn { right: 88px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
+        .support-btn { right: 82px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
+        .lang-btn { right: 152px; color: #facc15; border-color: rgba(250, 204, 21, 0.3); }
 
         .content { padding: 20px 16px; flex: 1; overflow-y: auto; }
         
@@ -79,8 +80,8 @@
         .menu-info h3 { font-family: 'Playfair Display', serif; font-size: 0.92rem; color: #0f172a; margin-bottom: 2px; font-weight: 700; line-height: 1.2; }
         .menu-info p { font-size: 0.68rem; color: #64748b; line-height: 1.3; }
 
-        .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 18px; margin-bottom: 16px; }
-        .visit-card { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 20px; padding: 16px; margin-bottom: 20px; position: relative; }
+        .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 18px; margin-bottom: 16px; text-align: left; }
+        .visit-card { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 20px; padding: 16px; margin-bottom: 20px; position: relative; text-align: left; }
         .visit-header { background: #0f172a; color: #ffffff; padding: 8px 14px; border-radius: 12px; font-size: 0.88rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         
         .field-box { margin-bottom: 14px; position: relative; text-align: left; }
@@ -162,14 +163,14 @@
         .bmi-value { font-size: 1.8rem; font-weight: 900; color: #0f172a; margin: 4px 0; }
         .bmi-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 800; margin-top: 4px; }
 
-        .patient-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .patient-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; text-align: left; }
         .patient-info h4 { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
         .patient-info p { font-size: 0.78rem; color: #64748b; }
         .badge-gender { padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; }
         .gender-male { background: #e0f2fe; color: #0369a1; }
         .gender-female { background: #fce7f3; color: #be185d; }
 
-        .trash-card { background: #fff5f5; border: 1.5px solid #feb2b2; border-radius: 16px; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .trash-card { background: #fff5f5; border: 1.5px solid #feb2b2; border-radius: 16px; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; text-align: left; }
 
         .dict-tag { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #334155; }
         .dict-tag button { background: #fee2e2; color: #ef4444; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 0.75rem; }
@@ -259,17 +260,20 @@
     <div id="networkStatusBar" class="network-status-bar">⚠️ Offline Mode - Changes saved locally, will sync when online</div>
 
     <div id="authScreen" class="auth-screen">
+        <div style="position: absolute; top: 15px; right: 15px;">
+            <button onclick="toggleLanguage()" id="authLangBtn" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; color: #0f172a;">عربي / EN</button>
+        </div>
         <div class="activ-icon"><i class="fa-solid fa-user-lock"></i></div>
         <div class="activ-title" id="authTitle">User Login</div>
-        <div class="activ-sub">Sign in with your email and password securely</div>
+        <div class="activ-sub" id="authSubText">Sign in with your email and password securely</div>
 
         <form id="authForm" class="auth-form" onsubmit="handleAuthSubmit(event)">
             <div class="field-box" style="text-align: left;">
-                <span class="field-label">Email Address</span>
+                <span class="field-label" id="lblEmail">Email Address</span>
                 <div class="input-wrapper"><input type="email" id="authEmail" placeholder="user@clinic.com" required></div>
             </div>
             <div class="field-box" style="text-align: left;">
-                <span class="field-label">Password</span>
+                <span class="field-label" id="lblPass">Password</span>
                 <div class="input-wrapper"><input type="password" id="authPassword" placeholder="••••••••" required></div>
             </div>
             <div class="forgot-pass" id="forgotPassBtn" onclick="resetPassword()">Forgot Password?</div>
@@ -283,25 +287,28 @@
 
     <div id="activationScreen" class="auth-screen" style="display: none;">
         <div class="activ-icon"><i class="fa-solid fa-shield-halved"></i></div>
-        <div class="activ-title">Account Activation Required</div>
-        <div class="activ-sub">Please enter your 14-Day Trial, 7-Day Extension, or Annual Subscription code.</div>
+        <div class="activ-title" id="activTitle">Account Activation Required</div>
+        <div class="activ-sub" id="activSub">Please enter your 14-Day Trial, 7-Day Extension, or Annual Subscription code.</div>
         <div class="field-box" style="width: 100%; text-align: left;">
-            <span class="field-label">Activation / Subscription Code</span>
+            <span class="field-label" id="lblActivCode">Activation / Subscription Code</span>
             <div class="input-wrapper"><input type="text" id="activationInput" placeholder="Enter code..." style="text-align: center; letter-spacing: 2px; text-transform: uppercase;"></div>
         </div>
-        <button class="btn-main" onclick="verifyActivationCode()">Activate System</button>
+        <button class="btn-main" onclick="verifyActivationCode()" id="btnActivate">Activate System</button>
     </div>
 
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column;">
         <div class="header">
             <button id="backBtn" class="back-btn" onclick="goBackScreen()" style="display: none;">
-                <i class="fa-solid fa-arrow-left"></i> Back
+                <i class="fa-solid fa-arrow-left"></i> <span id="txtBack">Back</span>
+            </button>
+            <button class="lang-btn" onclick="toggleLanguage()" title="Toggle Language">
+                <i class="fa-solid fa-language"></i> <span id="txtLangBadge">EN / AR</span>
             </button>
             <button class="support-btn" onclick="openSupportModal()" title="Technical Support">
-                <i class="fa-solid fa-headset"></i> Support
+                <i class="fa-solid fa-headset"></i> <span id="txtSupport">Support</span>
             </button>
             <button class="logout-btn" onclick="logoutUser()" title="Logout">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout
+                <i class="fa-solid fa-right-from-bracket"></i> <span id="txtLogout">Logout</span>
             </button>
             <div class="header-icon"><i class="fa-solid fa-user-doctor"></i></div>
             <h1 id="headerTitle">Clinic Master System</h1>
@@ -317,7 +324,7 @@
                         <h4 id="subBannerTitle"><i class="fa-solid fa-clock"></i> Active Subscription</h4>
                         <p id="subBannerText">Loading remaining days...</p>
                     </div>
-                    <button onclick="openSupportModal()" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:6px 10px; font-size:0.75rem; font-weight:700; cursor:pointer; white-space:nowrap;">Renew</button>
+                    <button onclick="openSupportModal()" id="btnRenew" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:6px 10px; font-size:0.75rem; font-weight:700; cursor:pointer; white-space:nowrap;">Renew</button>
                 </div>
 
                 <!-- Founder Control Panel -->
@@ -334,21 +341,21 @@
 
                 <!-- Group 1: Daily Clinic Operations -->
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-stethoscope"></i> Daily Operations</div>
+                    <div class="section-title" id="secGroup1"><i class="fa-solid fa-stethoscope"></i> Daily Operations</div>
                     <div class="menu-grid">
-                        <div class="menu-card" id="cardNewPatient" onclick="navigateTo('addPatientScreen', 'Register New Patient', 'Fill in patient details accurately')">
+                        <div class="menu-card" id="cardNewPatient" onclick="navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub)">
                             <div class="menu-icon"><i class="fa-solid fa-user-plus"></i></div>
                             <div class="menu-info">
-                                <h3>New Patient</h3>
-                                <p>Register & save records</p>
+                                <h3 id="menuNewPatientTitle">New Patient</h3>
+                                <p id="menuNewPatientSub">Register & save records</p>
                             </div>
                         </div>
 
                         <div class="menu-card" id="cardArchive" onclick="openPatientsArchive()">
                             <div class="menu-icon archive-icon"><i class="fa-solid fa-address-book"></i></div>
                             <div class="menu-info">
-                                <h3>Patients Archive</h3>
-                                <p>Search & visit history</p>
+                                <h3 id="menuArchiveTitle">Patients Archive</h3>
+                                <p id="menuArchiveSub">Search & visit history</p>
                             </div>
                         </div>
                     </div>
@@ -356,21 +363,21 @@
 
                 <!-- Group 2: RX & Medical Tools -->
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-file-prescription"></i> RX & Medical Tools</div>
+                    <div class="section-title" id="secGroup2"><i class="fa-solid fa-file-prescription"></i> RX & Medical Tools</div>
                     <div class="menu-grid">
                         <div class="menu-card" id="cardRxTemplate" onclick="openRxTemplateManager()">
                             <div class="menu-icon rx-icon"><i class="fa-solid fa-prescription-bottle-medical"></i></div>
                             <div class="menu-info">
-                                <h3>RX Template</h3>
-                                <p>Prescription header image</p>
+                                <h3 id="menuRxTitle">RX Template</h3>
+                                <p id="menuRxSub">Prescription header image</p>
                             </div>
                         </div>
 
                         <div class="menu-card" id="cardDict" onclick="openDictionaryManager()">
                             <div class="menu-icon dict-icon"><i class="fa-solid fa-book-medical"></i></div>
                             <div class="menu-info">
-                                <h3>Medical Dictionary</h3>
-                                <p>Manage drugs & doses</p>
+                                <h3 id="menuDictTitle">Medical Dictionary</h3>
+                                <p id="menuDictSub">Manage drugs & doses</p>
                             </div>
                         </div>
                     </div>
@@ -378,13 +385,13 @@
 
                 <!-- Group 3: Reports & Performance -->
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-chart-pie"></i> Reports & Stats</div>
+                    <div class="section-title" id="secGroup3"><i class="fa-solid fa-chart-pie"></i> Reports & Stats</div>
                     <div class="menu-grid">
                         <div class="menu-card" id="cardAnalytics" onclick="openAnalyticsDashboard()" style="grid-column: span 2; flex-direction: row; text-align: left; padding: 12px 16px;">
                             <div class="menu-icon analytics-icon"><i class="fa-solid fa-chart-column"></i></div>
                             <div class="menu-info" style="flex: 1;">
-                                <h3>Clinic Analytics & Stats</h3>
-                                <p>Performance metrics, patient ratios & top prescribed medications</p>
+                                <h3 id="menuAnalyticsTitle">Clinic Analytics & Stats</h3>
+                                <p id="menuAnalyticsSub">Performance metrics, patient ratios & top prescribed medications</p>
                             </div>
                         </div>
                     </div>
@@ -392,45 +399,45 @@
 
                 <!-- Group 4: System & Maintenance -->
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-shield-halved"></i> System & Maintenance</div>
+                    <div class="section-title" id="secGroup4"><i class="fa-solid fa-shield-halved"></i> System & Maintenance</div>
                     <div class="menu-grid">
                         <div class="menu-card" id="cardBackup" onclick="openBackupManager()">
                             <div class="menu-icon backup-icon"><i class="fa-solid fa-database"></i></div>
                             <div class="menu-info">
-                                <h3>Backup & Restore</h3>
-                                <p>Export or upload data file</p>
+                                <h3 id="menuBackupTitle">Backup & Restore</h3>
+                                <p id="menuBackupSub">Export or upload data file</p>
                             </div>
                         </div>
 
                         <div class="menu-card" id="cardTrash" onclick="openTrashBin()">
                             <div class="menu-icon trash-icon"><i class="fa-solid fa-trash-arrow-up"></i></div>
                             <div class="menu-info">
-                                <h3>Trash Bin</h3>
-                                <p>Recover deleted items</p>
+                                <h3 id="menuTrashTitle">Trash Bin</h3>
+                                <p id="menuTrashSub">Recover deleted items</p>
                             </div>
                         </div>
 
                         <div class="menu-card" id="cardSettings" onclick="openAccountSettings()">
                             <div class="menu-icon settings-icon"><i class="fa-solid fa-user-gear"></i></div>
                             <div class="menu-info">
-                                <h3>Account Settings</h3>
-                                <p>Email & password options</p>
+                                <h3 id="menuSettingsTitle">Account Settings</h3>
+                                <p id="menuSettingsSub">Email & password options</p>
                             </div>
                         </div>
 
                         <div class="menu-card" id="cardPermissions" onclick="openPermissionsManager()" style="display: none;">
                             <div class="menu-icon permissions-icon"><i class="fa-solid fa-user-shield"></i></div>
                             <div class="menu-info">
-                                <h3>Secretary Management</h3>
-                                <p>Create account & permissions</p>
+                                <h3 id="menuPermTitle">Secretary Management</h3>
+                                <p id="menuPermSub">Create account & permissions</p>
                             </div>
                         </div>
 
                         <div class="menu-card" id="networkMenuCard" onclick="openNetworkHierarchy()" style="display: none;">
                             <div class="menu-icon network-icon"><i class="fa-solid fa-network-wired"></i></div>
                             <div class="menu-info">
-                                <h3>Network Database</h3>
-                                <p>Users & credentials</p>
+                                <h3 id="menuNetTitle">Network Database</h3>
+                                <p id="menuNetSub">Users & credentials</p>
                             </div>
                         </div>
                     </div>
@@ -440,46 +447,46 @@
 
             <div id="permissionsScreen" style="display: none;">
                 <div class="group-card">
-                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="permHeadTitle">
                         <i class="fa-solid fa-user-shield" style="color:#d946ef;"></i> Secretary Account & Permissions
                     </div>
-                    <p style="font-size: 0.80rem; color: #64748b; margin-bottom: 14px; line-height: 1.5;">
+                    <p style="font-size: 0.80rem; color: #64748b; margin-bottom: 14px; line-height: 1.5;" id="permHeadSub">
                         Create or update the secretary login credentials, and select the specific features you wish to grant them.
                     </p>
 
                     <div class="field-box">
-                        <span class="field-label">Secretary Email Address</span>
+                        <span class="field-label" id="lblSecEmail">Secretary Email Address</span>
                         <div class="input-wrapper"><input type="email" id="secEmailInput" placeholder="secretary@clinic.com"></div>
                     </div>
                     <div class="field-box">
-                        <span class="field-label">Secretary Password</span>
+                        <span class="field-label" id="lblSecPass">Secretary Password</span>
                         <div class="input-wrapper"><input type="password" id="secPassInput" placeholder="••••••••"></div>
                     </div>
 
                     <div style="display: flex; gap: 8px; margin-bottom: 14px;">
-                        <button class="btn-main" onclick="saveSecretaryAccount()" style="flex: 1; background: #0d9488; padding: 10px; font-size: 0.85rem;">
+                        <button class="btn-main" onclick="saveSecretaryAccount()" id="btnSaveSec" style="flex: 1; background: #0d9488; padding: 10px; font-size: 0.85rem;">
                             <i class="fa-solid fa-user-plus"></i> Save Secretary Account
                         </button>
-                        <button class="btn-danger" onclick="deleteSecretaryAccount()" style="flex: 1; margin-top: 0; padding: 10px; font-size: 0.85rem;">
+                        <button class="btn-danger" onclick="deleteSecretaryAccount()" id="btnDelSec" style="flex: 1; margin-top: 0; padding: 10px; font-size: 0.85rem;">
                             <i class="fa-solid fa-trash"></i> Delete Account
                         </button>
                     </div>
 
                     <hr style="border:0; border-top:1px solid #cbd5e1; margin:14px 0;">
 
-                    <span style="font-size: 0.85rem; font-weight: 800; color: #0f172a; display: block; margin-bottom: 8px;">Feature Permissions:</span>
+                    <span style="font-size: 0.85rem; font-weight: 800; color: #0f172a; display: block; margin-bottom: 8px;" id="lblFeatPerm">Feature Permissions:</span>
                     <div class="checkbox-grid" style="grid-template-columns: 1fr; gap: 8px; margin-bottom: 16px;">
-                        <label class="checkbox-item"><input type="checkbox" id="perm_newPatient" checked> 🟢 Register New Patient</label>
-                        <label class="checkbox-item"><input type="checkbox" id="perm_archive" checked> 🟢 Patients Archive & Search</label>
-                        <label class="checkbox-item"><input type="checkbox" id="perm_rxTemplate"> 🟡 RX Template Header</label>
-                        <label class="checkbox-item"><input type="checkbox" id="perm_dict"> 🟡 Medical Dictionary Manager</label>
-                        <label class="checkbox-item"><input type="checkbox" id="perm_analytics"> 🟡 Clinic Analytics & Stats</label>
-                        <label class="checkbox-item"><input type="checkbox" id="perm_backup"> 🔴 Backup & Restore</label>
-                        <label class="checkbox-item"><input type="checkbox" id="perm_trash"> 🔴 Trash Bin & Deletions</label>
-                        <label class="checkbox-item"><input type="checkbox" id="perm_settings"> 🔴 Account Settings & Password</label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_newPatient" checked> <span id="pNewPat">🟢 Register New Patient</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_archive" checked> <span id="pArch">🟢 Patients Archive & Search</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_rxTemplate"> <span id="pRx">🟡 RX Template Header</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_dict"> <span id="pDict">🟡 Medical Dictionary Manager</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_analytics"> <span id="pAnalytics">🟡 Clinic Analytics & Stats</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_backup"> <span id="pBackup">🔴 Backup & Restore</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_trash"> <span id="pTrash">🔴 Trash Bin & Deletions</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_settings"> <span id="pSettings">🔴 Account Settings & Password</span></label>
                     </div>
 
-                    <button class="btn-main" onclick="saveSecretaryPermissions()" style="background: #d946ef;">
+                    <button class="btn-main" onclick="saveSecretaryPermissions()" id="btnSavePerms" style="background: #d946ef;">
                         <i class="fa-solid fa-floppy-disk"></i> Save Permissions
                     </button>
                 </div>
@@ -487,21 +494,21 @@
 
             <div id="backupScreen" style="display: none;">
                 <div class="group-card">
-                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="backupHeadTitle">
                         <i class="fa-solid fa-database" style="color:#4f46e5;"></i> Direct Backup Manager
                     </div>
-                    <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+                    <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;" id="backupHeadSub">
                         Export your full database backup or upload a backup file (`.json` or `.txt`) directly to restore all data instantly!
                     </p>
 
-                    <button class="btn-main" onclick="exportJsonBackup()" style="background: #4f46e5; margin-bottom: 16px;">
+                    <button class="btn-main" onclick="exportJsonBackup()" id="btnExport" style="background: #4f46e5; margin-bottom: 16px;">
                         <i class="fa-solid fa-download"></i> Export Backup File
                     </button>
 
                     <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
 
                     <div class="field-box" style="text-align: left;">
-                        <span class="field-label" style="color:#16a34a; font-weight:800;"><i class="fa-solid fa-file-arrow-up"></i> Upload Backup File Directly (Recommended)</span>
+                        <span class="field-label" id="lblUploadBackup" style="color:#16a34a; font-weight:800;"><i class="fa-solid fa-file-arrow-up"></i> Upload Backup File Directly (Recommended)</span>
                         <div class="input-wrapper" style="padding: 10px; border: 2px dashed #16a34a; background: #f0fdf4; text-align: center;">
                             <input type="file" id="backupFileInput" accept=".json,.txt" style="font-size: 0.85rem; cursor: pointer;" onchange="restoreFromUploadedFile(this)">
                         </div>
@@ -511,42 +518,42 @@
 
             <div id="settingsScreen" style="display: none;">
                 <div class="group-card">
-                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:14px;">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:14px;" id="settingsHeadTitle">
                         <i class="fa-solid fa-user-shield" style="color:#0d9488;"></i> Security & Account Settings
                     </div>
 
                     <div class="field-box">
-                        <span class="field-label">Current Email Address</span>
+                        <span class="field-label" id="lblCurrEmail">Current Email Address</span>
                         <div class="input-wrapper"><input type="email" id="currentAccountEmail" readonly style="color:#64748b; background:#f1f5f9;"></div>
                     </div>
 
                     <div class="field-box">
-                        <span class="field-label">New Email Address</span>
+                        <span class="field-label" id="lblNewEmail">New Email Address</span>
                         <div class="input-wrapper"><input type="email" id="newAccountEmail" placeholder="Enter new email..."></div>
                     </div>
                     <div class="field-box">
-                        <span class="field-label">Current Password (To Confirm Email Change)</span>
+                        <span class="field-label" id="lblConfirmPass">Current Password (To Confirm Email Change)</span>
                         <div class="input-wrapper"><input type="password" id="confirmEmailPass" placeholder="••••••••"></div>
                     </div>
-                    <button class="btn-main" onclick="updateAccountEmail()" style="margin-bottom: 16px; background:#0284c7;">
+                    <button class="btn-main" onclick="updateAccountEmail()" id="btnUpdateEmail" style="margin-bottom: 16px; background:#0284c7;">
                         <i class="fa-solid fa-envelope"></i> Update Email Address
                     </button>
 
                     <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
 
                     <div class="field-box">
-                        <span class="field-label">New Password</span>
+                        <span class="field-label" id="lblNewPass">New Password</span>
                         <div class="input-wrapper"><input type="password" id="newAccountPassword" placeholder="••••••••"></div>
                     </div>
-                    <button class="btn-main" onclick="updateAccountPassword()" style="margin-bottom: 16px;">
+                    <button class="btn-main" onclick="updateAccountPassword()" id="btnUpdatePass" style="margin-bottom: 16px;">
                         <i class="fa-solid fa-key"></i> Change Password
                     </button>
 
                     <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
 
                     <div style="text-align: center;">
-                        <p style="font-size:0.8rem; color:#64748b; margin-bottom:10px;">Forgot password and want to reset via email?</p>
-                        <button class="btn-main" onclick="sendPasswordResetEmailFromSettings()" style="background: #d97706;">
+                        <p style="font-size:0.8rem; color:#64748b; margin-bottom:10px;" id="txtForgotReset">Forgot password and want to reset via email?</p>
+                        <button class="btn-main" onclick="sendPasswordResetEmailFromSettings()" id="btnSendReset" style="background: #d97706;">
                             <i class="fa-solid fa-paper-plane"></i> Send Password Reset Link
                         </button>
                     </div>
@@ -556,25 +563,25 @@
             <div id="analyticsScreen" style="display: none;">
                 <div class="analytics-grid">
                     <div class="analytics-box">
-                        <span class="analytics-label"><i class="fa-solid fa-users" style="color:#0d9488;"></i> Total Patients</span>
+                        <span class="analytics-label" id="statTotLabel"><i class="fa-solid fa-users" style="color:#0d9488;"></i> Total Patients</span>
                         <div class="analytics-num" id="statTotalPatients">0</div>
                     </div>
                     <div class="analytics-box">
-                        <span class="analytics-label"><i class="fa-solid fa-calendar-check" style="color:#0284c7;"></i> Today's Visits</span>
+                        <span class="analytics-label" id="statTodayLabel"><i class="fa-solid fa-calendar-check" style="color:#0284c7;"></i> Today's Visits</span>
                         <div class="analytics-num" id="statTodayVisits">0</div>
                     </div>
                     <div class="analytics-box">
-                        <span class="analytics-label"><i class="fa-solid fa-mars" style="color:#0369a1;"></i> Male Patients</span>
+                        <span class="analytics-label" id="statMaleLabel"><i class="fa-solid fa-mars" style="color:#0369a1;"></i> Male Patients</span>
                         <div class="analytics-num" id="statMaleCount">0</div>
                     </div>
                     <div class="analytics-box">
-                        <span class="analytics-label"><i class="fa-solid fa-venus" style="color:#be185d;"></i> Female Patients</span>
+                        <span class="analytics-label" id="statFemaleLabel"><i class="fa-solid fa-venus" style="color:#be185d;"></i> Female Patients</span>
                         <div class="analytics-num" id="statFemaleCount">0</div>
                     </div>
                 </div>
 
                 <div class="group-card">
-                    <div style="font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="statRatioTitle">
                         <i class="fa-solid fa-chart-bar" style="color:#0d9488;"></i> Gender Distribution Ratio
                     </div>
                     <div style="background:#e2e8f0; height:12px; border-radius:6px; overflow:hidden; display:flex; margin-bottom:8px;">
@@ -588,7 +595,7 @@
                 </div>
 
                 <div class="group-card">
-                    <div style="font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="statTopDrugsTitle">
                         <i class="fa-solid fa-pills" style="color:#0d9488;"></i> Top Prescribed Medications
                     </div>
                     <div id="topDrugsList" style="display:flex; flex-direction:column; gap:6px;"></div>
@@ -598,70 +605,70 @@
             <div id="addPatientScreen" style="display: none;">
                 <form id="patientForm" onsubmit="saveNewPatient(event)">
                     <div class="group-card">
-                        <div class="group-title" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:12px; color:#0f172a;"><i class="fa-solid fa-id-card"></i> Personal Information</div>
+                        <div class="group-title" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:12px; color:#0f172a;" id="patInfoTitle"><i class="fa-solid fa-id-card"></i> Personal Information</div>
                         
                         <div class="field-box">
-                            <span class="field-label">Full Name *</span>
+                            <span class="field-label" id="lblPatName">Full Name *</span>
                             <div class="input-wrapper"><input type="text" id="pName" placeholder="Enter patient full name..." required></div>
                         </div>
 
                         <div style="display: flex; gap: 10px;">
                             <div class="field-box" style="flex: 1;">
-                                <span class="field-label">Age *</span>
+                                <span class="field-label" id="lblPatAge">Age *</span>
                                 <div class="input-wrapper"><input type="number" id="pAge" placeholder="Age..." required></div>
                             </div>
 
                             <div class="field-box" style="flex: 1;">
-                                <span class="field-label">Gender</span>
+                                <span class="field-label" id="lblPatGender">Gender</span>
                                 <div class="input-wrapper">
                                     <select id="pGender">
-                                        <option value="">Select Gender</option>
-                                        <option value="Male">Male</option>
-                                        <option value="Female">Female</option>
+                                        <option value="" id="optSelGender">Select Gender</option>
+                                        <option value="Male" id="optMale">Male</option>
+                                        <option value="Female" id="optFemale">Female</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
 
                         <div class="field-box">
-                            <span class="field-label">Marital Status</span>
+                            <span class="field-label" id="lblPatMarital">Marital Status</span>
                             <div class="input-wrapper">
                                 <select id="pMarital">
-                                    <option value="">Select Status</option>
-                                    <option value="Single">Single</option>
-                                    <option value="Married">Married</option>
-                                    <option value="Divorced">Divorced</option>
-                                    <option value="Widow">Widow</option>
+                                    <option value="" id="optSelMarital">Select Status</option>
+                                    <option value="Single" id="optSingle">Single</option>
+                                    <option value="Married" id="optMarried">Married</option>
+                                    <option value="Divorced" id="optDivorced">Divorced</option>
+                                    <option value="Widow" id="optWidow">Widow</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="field-box">
-                            <span class="field-label">Occupation</span>
+                            <span class="field-label" id="lblPatJob">Occupation</span>
                             <div class="input-wrapper">
                                 <select id="pJob">
-                                    <option value="">Select Occupation</option>
-                                    <option value="Employee">Employee</option>
-                                    <option value="Free Business">Free Business</option>
-                                    <option value="Housewife">Housewife</option>
-                                    <option value="Student">Student</option>
-                                    <option value="Other">Other</option>
+                                    <option value="" id="optSelJob">Select Occupation</option>
+                                    <option value="Employee" id="optJobEmp">Employee</option>
+                                    <option value="Free Business" id="optJobFree">Free Business</option>
+                                    <option value="Housewife" id="optJobHouse">Housewife</option>
+                                    <option value="Student" id="optJobStud">Student</option>
+                                    <option value="Other" id="optJobOther">Other</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="field-box">
-                            <span class="field-label">Phone Number</span>
+                            <span class="field-label" id="lblPatPhone">Phone Number</span>
                             <div class="input-wrapper"><input type="tel" id="pPhone" placeholder="07XXXXXXXXX"></div>
                         </div>
 
                         <div class="field-box">
-                            <span class="field-label">Initial Visit Date</span>
+                            <span class="field-label" id="lblPatDate">Initial Visit Date</span>
                             <div class="input-wrapper"><input type="date" id="pDate"></div>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn-main">
+                    <button type="submit" class="btn-main" id="btnSavePatRec">
                         <i class="fa-solid fa-floppy-disk"></i> Save & Open Medical Record
                     </button>
                 </form>
@@ -669,10 +676,10 @@
 
             <div id="rxTemplateScreen" style="display: none;">
                 <div class="group-card" style="text-align: center;">
-                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:8px;">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:8px;" id="rxTemplHead">
                         <i class="fa-solid fa-prescription-bottle-medical" style="color:#0d9488;"></i> Clinic Prescription Template
                     </div>
-                    <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;">
+                    <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;" id="rxTemplSub">
                         Upload or change your official prescription image header. (Compressed automatically)
                     </p>
 
@@ -682,13 +689,13 @@
                     </div>
 
                     <div class="field-box" style="text-align: left;">
-                        <span class="field-label">Select Prescription Image</span>
+                        <span class="field-label" id="lblSelectRxImg">Select Prescription Image</span>
                         <div class="input-wrapper" style="padding: 10px;">
                             <input type="file" id="rxImageFileInput" accept="image/*" style="font-size: 0.85rem;">
                         </div>
                     </div>
 
-                    <button class="btn-main" onclick="saveRxTemplateImage()" style="margin-top: 10px;">
+                    <button class="btn-main" onclick="saveRxTemplateImage()" id="btnSaveRxImg" style="margin-top: 10px;">
                         <i class="fa-solid fa-cloud-arrow-up"></i> Save Compressed RX Image
                     </button>
                 </div>
@@ -703,15 +710,15 @@
                     </div>
                     <div class="filter-row">
                         <select id="filterGender" onchange="filterPatients()">
-                            <option value="">All Genders</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
+                            <option value="" id="optAllGenders">All Genders</option>
+                            <option value="Male" id="optFilterMale">Male</option>
+                            <option value="Female" id="optFilterFemale">Female</option>
                         </select>
                         <select id="filterAgeGroup" onchange="filterPatients()">
-                            <option value="">All Age Groups</option>
-                            <option value="child">Children (&lt; 18)</option>
-                            <option value="adult">Adults (18 - 50)</option>
-                            <option value="senior">Seniors (&gt; 50)</option>
+                            <option value="" id="optAllAges">All Age Groups</option>
+                            <option value="child" id="optChild">Children (&lt; 18)</option>
+                            <option value="adult" id="optAdult">Adults (18 - 50)</option>
+                            <option value="senior" id="optSenior">Seniors (&gt; 50)</option>
                         </select>
                     </div>
                 </div>
@@ -722,12 +729,12 @@
             <div id="trashScreen" style="display: none;">
                 <div class="group-card">
                     <div style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:10px; color:#ef4444; display: flex; justify-content: space-between; align-items: center;">
-                        <span><i class="fa-solid fa-trash-can"></i> Trash Bin</span>
+                        <span id="trashTitleText"><i class="fa-solid fa-trash-can"></i> Trash Bin</span>
                         <button type="button" id="emptyTrashBtn" onclick="confirmEmptyTrash()" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: none; align-items: center; gap: 4px;">
-                            <i class="fa-solid fa-trash-can-arrow-up"></i> Empty Trash
+                            <i class="fa-solid fa-trash-can-arrow-up"></i> <span id="txtEmptyTrash">Empty Trash</span>
                         </button>
                     </div>
-                    <p style="font-size:0.78rem; color:#64748b; margin-bottom:14px;">You can restore deleted patients or specific visits back to their original locations instantly, or empty the trash completely.</p>
+                    <p style="font-size:0.78rem; color:#64748b; margin-bottom:14px;" id="trashSubText">You can restore deleted patients or specific visits back to their original locations instantly, or empty the trash completely.</p>
                     <div id="trashItemsContainer"></div>
                 </div>
             </div>
@@ -736,10 +743,10 @@
                 <div class="group-card" style="background: #f0fdfa; border-color: #99f6e4; position: relative;">
                     <div style="position: absolute; top: 14px; right: 14px; display: flex; gap: 6px; z-index: 5;">
                         <button type="button" onclick="openEditPatientModal()" style="background: #0d9488; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                            <i class="fa-solid fa-pen-to-square"></i> <span id="txtEdit">Edit</span>
                         </button>
                         <button type="button" onclick="confirmDeletePatientRecord()" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                            <i class="fa-solid fa-trash"></i> Delete
+                            <i class="fa-solid fa-trash"></i> <span id="txtDelete">Delete</span>
                         </button>
                     </div>
                     <div class="field-box" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color: #0f766e; margin-bottom:4px; padding-right: 125px;">
@@ -747,12 +754,12 @@
                     </div>
                     <p style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin-bottom: 10px;" id="recPatientMeta"></p>
                     
-                    <button type="button" class="btn-main" onclick="exportPatientMedicalReportPDF()" style="background: #0284c7; padding: 12px; font-size: 0.9rem;">
+                    <button type="button" class="btn-main" onclick="exportPatientMedicalReportPDF()" id="btnDownloadPDF" style="background: #0284c7; padding: 12px; font-size: 0.9rem;">
                         <i class="fa-solid fa-file-pdf"></i> Download Comprehensive PDF Report
                     </button>
                 </div>
 
-                <button class="btn-main btn-secondary" onclick="addNewVisit()">
+                <button class="btn-main btn-secondary" onclick="addNewVisit()" id="btnAddVisit">
                     <i class="fa-solid fa-calendar-plus"></i> + Add New Visit
                 </button>
 
@@ -762,14 +769,14 @@
             <div id="dictScreen" style="display: none;">
                 <div class="group-card">
                     <div class="field-box">
-                        <span class="field-label">Category</span>
+                        <span class="field-label" id="lblDictCat">Category</span>
                         <div class="input-wrapper">
                             <select id="dictCategorySelect" onchange="renderDictTerms()">
-                                <option value="drugs">Medications & Doses</option>
-                                <option value="labs">Lab Tests</option>
-                                <option value="scans">Radiology & Scans</option>
-                                <option value="notes">Diagnosis & Notes</option>
-                                <option value="mh_history">Medical History Terms</option>
+                                <option value="drugs" id="optCatDrugs">Medications & Doses</option>
+                                <option value="labs" id="optCatLabs">Lab Tests</option>
+                                <option value="scans" id="optCatScans">Radiology & Scans</option>
+                                <option value="notes" id="optCatNotes">Diagnosis & Notes</option>
+                                <option value="mh_history" id="optCatMh">Medical History Terms</option>
                             </select>
                         </div>
                     </div>
@@ -779,23 +786,23 @@
 
             <div id="networkScreen" style="display: none;">
                 <div class="group-card">
-                    <div style="font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; margin-bottom:10px; color:#0f172a;"><i class="fa-solid fa-sitemap" style="color:#9333ea;"></i> Registered Users & Passwords Database</div>
+                    <div style="font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; margin-bottom:10px; color:#0f172a;" id="netTitle"><i class="fa-solid fa-sitemap" style="color:#9333ea;"></i> Registered Users & Passwords Database</div>
                     <div id="networkTreeContainer"></div>
                 </div>
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.80</div>
+        <div class="footer" id="footerText">Clinic Master Network v16.90</div>
     </div>
 </div>
 
 <div id="supportModal" class="modal-overlay">
     <div class="modal-body" style="max-width: 400px; text-align: center;">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-headset" style="color:#0d9488;"></i> Technical Support & Renewal</h3>
+            <h3 id="suppHeaderTitle"><i class="fa-solid fa-headset" style="color:#0d9488;"></i> Technical Support & Renewal</h3>
             <button class="modal-close" onclick="closeSupportModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;" id="suppSubText">
             Contact us directly via WhatsApp or Telegram at: <br><strong style="color: #0f172a; direction: ltr; display: inline-block;">+964 773 911 4548</strong>
         </p>
 
@@ -814,30 +821,30 @@
 <div id="bmiCalculatorModal" class="modal-overlay">
     <div class="modal-body">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> BMI Calculator</h3>
+            <h3 id="bmiTitleText"><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> BMI Calculator</h3>
             <button class="modal-close" onclick="closeBmiModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div style="display: flex; gap: 10px;">
             <div class="field-box" style="flex: 1;">
-                <span class="field-label">Weight (kg)</span>
+                <span class="field-label" id="lblBmiWeight">Weight (kg)</span>
                 <div class="input-wrapper"><input type="number" id="bmiWeight" placeholder="e.g. 70" oninput="calculateBmiLive()"></div>
             </div>
             <div class="field-box" style="flex: 1;">
-                <span class="field-label">Height (cm)</span>
+                <span class="field-label" id="lblBmiHeight">Height (cm)</span>
                 <div class="input-wrapper"><input type="number" id="bmiHeight" placeholder="e.g. 175" oninput="calculateBmiLive()"></div>
             </div>
         </div>
 
         <div class="bmi-result-card">
-            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b;">Body Mass Index (BMI Score):</span>
+            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b;" id="lblBmiScore">Body Mass Index (BMI Score):</span>
             <div class="bmi-value" id="bmiScoreDisplay">—</div>
             <div id="bmiBadgeContainer">
-                <span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">Enter weight & height to calculate</span>
+                <span class="bmi-badge" id="bmiBadgeInitial" style="background:#f1f5f9; color:#64748b;">Enter weight & height to calculate</span>
             </div>
         </div>
 
-        <button class="btn-main" onclick="closeBmiModal()" style="background: #0284c7; margin-top: 6px;">
+        <button class="btn-main" onclick="closeBmiModal()" id="btnBmiAgree" style="background: #0284c7; margin-top: 6px;">
             <i class="fa-solid fa-check"></i> Agree & Save
         </button>
     </div>
@@ -846,66 +853,66 @@
 <div id="editPatientModal" class="modal-overlay">
     <div class="modal-body">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-user-pen" style="color:#0d9488;"></i> Edit Patient Information</h3>
+            <h3 id="editPatHeader"><i class="fa-solid fa-user-pen" style="color:#0d9488;"></i> Edit Patient Information</h3>
             <button class="modal-close" onclick="closeEditPatientModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div class="field-box">
-            <span class="field-label">Full Name *</span>
+            <span class="field-label" id="editLblName">Full Name *</span>
             <div class="input-wrapper"><input type="text" id="editPName" placeholder="Enter patient full name..." required></div>
         </div>
 
         <div style="display: flex; gap: 10px;">
             <div class="field-box" style="flex: 1;">
-                <span class="field-label">Age *</span>
+                <span class="field-label" id="editLblAge">Age *</span>
                 <div class="input-wrapper"><input type="number" id="editPAge" placeholder="Age..." required></div>
             </div>
 
             <div class="field-box" style="flex: 1;">
-                <span class="field-label">Gender</span>
+                <span class="field-label" id="editLblGender">Gender</span>
                 <div class="input-wrapper">
                     <select id="editPGender">
-                        <option value="">Select Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
+                        <option value="" id="editOptGender">Select Gender</option>
+                        <option value="Male" id="editOptMale">Male</option>
+                        <option value="Female" id="editOptFemale">Female</option>
                     </select>
                 </div>
             </div>
         </div>
 
         <div class="field-box">
-            <span class="field-label">Marital Status</span>
+            <span class="field-label" id="editLblMarital">Marital Status</span>
             <div class="input-wrapper">
                 <select id="editPMarital">
-                    <option value="">Select Status</option>
-                    <option value="Single">Single</option>
-                    <option value="Married">Married</option>
-                    <option value="Divorced">Divorced</option>
-                    <option value="Widow">Widow</option>
+                    <option value="" id="editOptMarital">Select Status</option>
+                    <option value="Single" id="editOptSingle">Single</option>
+                    <option value="Married" id="editOptMarried">Married</option>
+                    <option value="Divorced" id="editOptDivorced">Divorced</option>
+                    <option value="Widow" id="editOptWidow">Widow</option>
                 </select>
             </div>
         </div>
 
         <div class="field-box">
-            <span class="field-label">Occupation</span>
+            <span class="field-label" id="editLblJob">Occupation</span>
             <div class="input-wrapper">
                 <select id="editPJob">
-                    <option value="">Select Occupation</option>
-                    <option value="Employee">Employee</option>
-                    <option value="Free Business">Free Business</option>
-                    <option value="Housewife">Housewife</option>
-                    <option value="Student">Student</option>
-                    <option value="Other">Other</option>
+                    <option value="" id="editOptJob">Select Occupation</option>
+                    <option value="Employee" id="editJobEmp">Employee</option>
+                    <option value="Free Business" id="editJobFree">Free Business</option>
+                    <option value="Housewife" id="editJobHouse">Housewife</option>
+                    <option value="Student" id="editJobStud">Student</option>
+                    <option value="Other" id="editJobOther">Other</option>
                 </select>
             </div>
         </div>
 
         <div class="field-box">
-            <span class="field-label">Phone Number</span>
+            <span class="field-label" id="editLblPhone">Phone Number</span>
             <div class="input-wrapper"><input type="tel" id="editPPhone" placeholder="07XXXXXXXXX"></div>
         </div>
 
-        <button class="btn-main" onclick="saveEditedPatient()" style="margin-top: 10px;">
+        <button class="btn-main" onclick="saveEditedPatient()" id="btnSaveEdit" style="margin-top: 10px;">
             <i class="fa-solid fa-check"></i> Save Changes
         </button>
     </div>
@@ -914,12 +921,12 @@
 <div id="medHistoryModal" class="modal-overlay">
     <div class="modal-body">
         <div class="modal-header">
-            <h3><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History Details</h3>
+            <h3 id="mhHeaderTitle"><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History Details</h3>
             <button class="modal-close" onclick="closeMedHistoryModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
         <div class="field-box">
-            <span class="field-label">Chronic Diseases</span>
+            <span class="field-label" id="mhLblChronic">Chronic Diseases</span>
             <div class="checkbox-grid">
                 <label class="checkbox-item"><input type="checkbox" value="Hypertension" class="mh-cd"> Hypertension</label>
                 <label class="checkbox-item"><input type="checkbox" value="Diabetes" class="mh-cd"> Diabetes</label>
@@ -931,7 +938,7 @@
                 <label class="checkbox-item"><input type="checkbox" value="Chronic kidney dis" class="mh-cd"> Chronic kidney dis</label>
                 <label class="checkbox-item"><input type="checkbox" value="IHD" class="mh-cd"> IHD</label>
                 <label class="checkbox-item" style="grid-column: span 2;">
-                    <input type="checkbox" id="mh-other-check" onchange="toggleOtherInput()"> Other
+                    <input type="checkbox" id="mh-other-check" onchange="toggleOtherInput()"> <span id="mhOtherText">Other</span>
                 </label>
             </div>
             <div class="input-wrapper" id="mh-other-box" style="display:none; margin-top: 8px; position: relative;">
@@ -945,7 +952,7 @@
         </div>
 
         <div class="field-box">
-            <span class="field-label">Previous admission to hospital</span>
+            <span class="field-label" id="mhLblAdmission">Previous admission to hospital</span>
             <div class="input-wrapper" style="position: relative;">
                 <input type="text" id="mh-prev-admission" placeholder="Details & dates..." oninput="handleMhLiveInput(this, 'mh_admission')" onblur="hideMhSuggestions('mh_admission')">
                 <div class="suggestions-box" id="suggestions-mh_admission"></div>
@@ -957,7 +964,7 @@
         </div>
 
         <div class="field-box">
-            <span class="field-label">Past surgery</span>
+            <span class="field-label" id="mhLblSurgery">Past surgery</span>
             <div class="input-wrapper" style="position: relative;">
                 <input type="text" id="mh-past-surgery" placeholder="Surgical history..." oninput="handleMhLiveInput(this, 'mh_surgery')" onblur="hideMhSuggestions('mh_surgery')">
                 <div class="suggestions-box" id="suggestions-mh_surgery"></div>
@@ -969,7 +976,7 @@
         </div>
 
         <div class="field-box">
-            <span class="field-label">Family history</span>
+            <span class="field-label" id="mhLblFamily">Family history</span>
             <div class="input-wrapper" style="position: relative;">
                 <input type="text" id="mh-family-history" placeholder="Hereditary diseases..." oninput="handleMhLiveInput(this, 'mh_family')" onblur="hideMhSuggestions('mh_family')">
                 <div class="suggestions-box" id="suggestions-mh_family"></div>
@@ -981,7 +988,7 @@
         </div>
 
         <div class="field-box">
-            <span class="field-label">Drugs allergy</span>
+            <span class="field-label" id="mhLblAllergy">Drugs allergy</span>
             <div class="input-wrapper" style="position: relative;">
                 <input type="text" id="mh-drug-allergy" placeholder="Known drug allergies..." oninput="handleMhLiveInput(this, 'mh_allergy')" onblur="hideMhSuggestions('mh_allergy')">
                 <div class="suggestions-box" id="suggestions-mh_allergy"></div>
@@ -993,7 +1000,7 @@
         </div>
 
         <div class="field-box">
-            <span class="field-label">Chronic use of drugs</span>
+            <span class="field-label" id="mhLblChronicDrugs">Chronic use of drugs</span>
             <div class="input-wrapper" style="position: relative;">
                 <input type="text" id="mh-chronic-drugs" placeholder="Long-term medications..." oninput="handleMhLiveInput(this, 'mh_chronic_drugs')" onblur="hideMhSuggestions('mh_chronic_drugs')">
                 <div class="suggestions-box" id="suggestions-mh_chronic_drugs"></div>
@@ -1005,12 +1012,18 @@
         </div>
 
         <div style="display:flex; gap:10px;">
-            <div class="field-box" style="flex:1;"><span class="field-label">Smoking status</span><div class="input-wrapper"><select id="mh-smoking"><option value="Non-smoker">Non-smoker</option><option value="Smoker">Smoker</option><option value="Passive smoker">Passive smoker</option></select></div></div>
-            <div class="field-box" style="flex:1;"><span class="field-label">Drinking Alcohol</span><div class="input-wrapper"><select id="mh-alcohol"><option value="Non-drinker">Non-drinker</option><option value="Alcohol drinker">Alcohol drinker</option><option value="Social drinker">Social drinker</option></select></div></div>
+            <div class="field-box" style="flex:1;">
+                <span class="field-label" id="mhLblSmoking">Smoking status</span>
+                <div class="input-wrapper"><select id="mh-smoking"><option value="Non-smoker">Non-smoker</option><option value="Smoker">Smoker</option><option value="Passive smoker">Passive smoker</option></select></div>
+            </div>
+            <div class="field-box" style="flex:1;">
+                <span class="field-label" id="mhLblAlcohol">Drinking Alcohol</span>
+                <div class="input-wrapper"><select id="mh-alcohol"><option value="Non-drinker">Non-drinker</option><option value="Alcohol drinker">Alcohol drinker</option><option value="Social drinker">Social drinker</option></select></div>
+            </div>
         </div>
 
         <div class="field-box">
-            <span class="field-label">Notes</span>
+            <span class="field-label" id="mhLblNotes">Notes</span>
             <div class="input-wrapper" style="position: relative;">
                 <textarea id="mh-notes" rows="2" placeholder="Additional clinical notes..." oninput="handleMhLiveInput(this, 'mh_notes')" onblur="hideMhSuggestions('mh_notes')"></textarea>
                 <div class="suggestions-box" id="suggestions-mh_notes"></div>
@@ -1021,7 +1034,7 @@
             </div>
         </div>
 
-        <button class="btn-main" onclick="closeMedHistoryModal()" style="margin-top: 10px;">
+        <button class="btn-main" onclick="closeMedHistoryModal()" id="btnMhDone" style="margin-top: 10px;">
             <i class="fa-solid fa-check"></i> Done & Save
         </button>
     </div>
@@ -1101,7 +1114,7 @@
             <button id="rxSaveLayoutBtn" class="btn-main" onclick="saveRxLayoutPositions()" style="display: none; background: #0284c7;">
                 <i class="fa-solid fa-floppy-disk"></i> Save RX Layout & Fonts
             </button>
-            <button class="btn-main" onclick="openPrescriptionPDF()" style="font-family: 'Plus Jakarta Sans', sans-serif; background: #0284c7; width: 100%;">
+            <button class="btn-main" onclick="openPrescriptionPDF()" id="btnSaveRxPDF" style="font-family: 'Plus Jakarta Sans', sans-serif; background: #0284c7; width: 100%;">
                 <i class="fa-solid fa-file-pdf"></i> Save as PDF
             </button>
         </div>
@@ -1178,6 +1191,189 @@
     let currentDoctorRxImage = localStorage.getItem('doctor_rx_template') || '';
     let isConfigMode = false;
     let activeMhInputKey = null;
+
+    let currentLang = localStorage.getItem('clinic_lang') || 'ar';
+
+    const translations = {
+        ar: {
+            loginTitle: "تسجيل الدخول",
+            loginSub: "سجل دخولك باستخدام البريد الإلكتروني وكلمة المرور بأمان",
+            registerTitle: "إنشاء حساب جديد",
+            registerSub: "أنشئ حساباً جديداً لإدارة عيادتك بكفاءة",
+            emailLabel: "البريد الإلكتروني",
+            passLabel: "كلمة المرور",
+            forgotPass: "نسيت كلمة المرور؟",
+            btnLogin: "تسجيل الدخول",
+            btnRegister: "تسجيل حساب",
+            switchRegister: "ليس لديك حساب؟ <span>سجل الآن</span>",
+            switchLogin: "لديك حساب بالفعل؟ <span>سجل الدخول</span>",
+            
+            activTitle: "تفعيل الحساب مطلوب",
+            activSub: "يرجى إدخال رمز التفعيل الخاص بك (تجريبي 14 يوم، تمديد 7 أيام، أو اشتراك سنوي).",
+            lblActivCode: "رمز التفعيل / الاشتراك",
+            btnActivate: "تفعيل النظام",
+
+            headerTitle: "نظام عيادة ماستر",
+            headerSub: "لوحة التحكم السحابية الآمنة",
+            txtBack: "رجوع",
+            txtSupport: "الدعم",
+            txtLogout: "خروج",
+            txtLangBadge: "EN / AR",
+
+            group1: "العمليات اليومية",
+            newPatient: "مريض جديد",
+            newPatientSub: "تسجيل وحفظ السجلات",
+            archive: "أرشيف المرضى",
+            archiveSub: "البحث وسجل الزيارات",
+
+            group2: "الوصفات والأدوات الطبية",
+            rxTemplate: "قالب الوصفة (RX)",
+            rxTemplateSub: "صورة ترويسة الوصفة",
+            dict: "القاموس الطبي",
+            dictSub: "إدارة الأدوية والجرعات",
+
+            group3: "التقارير والإحصائيات",
+            analytics: "إحصائيات العيادة والتقارير",
+            analyticsSub: "مؤشرات الأداء، نسب المرضى والأدوية الأكثر صرفاً",
+
+            group4: "النظام والصيانة",
+            backup: "النسخ الاحتياطي واستعادة البيانات",
+            backupSub: "تصدير أو رفع ملف البيانات",
+            trash: "سلة المهملات",
+            trashSub: "استعادة العناصر المحذوفة",
+            settings: "إعدادات الحساب",
+            settingsSub: "خيارات البريد وكلمة المرور",
+            permissions: "إدارة السكرتير",
+            permissionsSub: "إنشاء الحساب والصلاحيات",
+            networkDb: "قاعدة بيانات الشبكة",
+            networkDbSub: "المستخدمين وبيانات الدخول",
+
+            footer: "نظام عيادة ماستر المتقدم v16.90"
+        },
+        en: {
+            loginTitle: "User Login",
+            loginSub: "Sign in with your email and password securely",
+            registerTitle: "Register New Account",
+            registerSub: "Create a new account to manage your clinic efficiently",
+            emailLabel: "Email Address",
+            passLabel: "Password",
+            forgotPass: "Forgot Password?",
+            btnLogin: "Login",
+            btnRegister: "Register Account",
+            switchRegister: "Don't have an account? <span>Register Now</span>",
+            switchLogin: "Already have an account? <span>Login</span>",
+            
+            activTitle: "Account Activation Required",
+            activSub: "Please enter your 14-Day Trial, 7-Day Extension, or Annual Subscription code.",
+            lblActivCode: "Activation / Subscription Code",
+            btnActivate: "Activate System",
+
+            headerTitle: "Clinic Master System",
+            headerSub: "Cloud Secure Dashboard",
+            txtBack: "Back",
+            txtSupport: "Support",
+            txtLogout: "Logout",
+            txtLangBadge: "EN / AR",
+
+            group1: "Daily Operations",
+            newPatient: "New Patient",
+            newPatientSub: "Register & save records",
+            archive: "Patients Archive",
+            archiveSub: "Search & visit history",
+
+            group2: "RX & Medical Tools",
+            rxTemplate: "RX Template",
+            rxTemplateSub: "Prescription header image",
+            dict: "Medical Dictionary",
+            dictSub: "Manage drugs & doses",
+
+            group3: "Reports & Stats",
+            analytics: "Clinic Analytics & Stats",
+            analyticsSub: "Performance metrics, patient ratios & top prescribed medications",
+
+            group4: "System & Maintenance",
+            backup: "Backup & Restore",
+            backupSub: "Export or upload data file",
+            trash: "Trash Bin",
+            trashSub: "Recover deleted items",
+            settings: "Account Settings",
+            settingsSub: "Email & password options",
+            permissions: "Secretary Management",
+            permissionsSub: "Create account & permissions",
+            networkDb: "Network Database",
+            networkDbSub: "Users & credentials",
+
+            footer: "Clinic Master Network v16.90"
+        }
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+        localStorage.setItem('clinic_lang', currentLang);
+        applyLanguage();
+    }
+
+    function applyLanguage() {
+        const t = translations[currentLang];
+        
+        // Direction
+        const isAr = currentLang === 'ar';
+        document.body.style.direction = isAr ? 'rtl' : 'ltr';
+
+        // Auth Screen
+        document.getElementById('authTitle').innerText = isRegisterMode ? t.registerTitle : t.loginTitle;
+        document.getElementById('authSubText').innerText = isRegisterMode ? t.registerSub : t.loginSub;
+        document.getElementById('lblEmail').innerText = t.emailLabel;
+        document.getElementById('lblPass').innerText = t.passLabel;
+        document.getElementById('forgotPassBtn').innerText = t.forgotPass;
+        document.getElementById('authSubmitBtn').innerText = isRegisterMode ? t.btnRegister : t.btnLogin;
+        document.getElementById('authSwitchText').innerHTML = isRegisterMode ? t.switchLogin : t.switchRegister;
+
+        // Activation Screen
+        document.getElementById('activTitle').innerText = t.activTitle;
+        document.getElementById('activSub').innerText = t.activSub;
+        document.getElementById('lblActivCode').innerText = t.lblActivCode;
+        document.getElementById('btnActivate').innerText = t.btnActivate;
+
+        // Header & Nav
+        document.getElementById('headerTitle').innerText = t.headerTitle;
+        document.getElementById('headerSub').innerText = t.headerSub;
+        document.getElementById('txtBack').innerText = t.txtBack;
+        document.getElementById('txtSupport').innerText = t.txtSupport;
+        document.getElementById('txtLogout').innerText = t.txtLogout;
+        document.getElementById('txtLangBadge').innerText = t.txtLangBadge;
+
+        // Menu Groups & Cards
+        document.getElementById('secGroup1').innerHTML = `<i class="fa-solid fa-stethoscope"></i> ${t.group1}`;
+        document.getElementById('menuNewPatientTitle').innerText = t.newPatient;
+        document.getElementById('menuNewPatientSub').innerText = t.newPatientSub;
+        document.getElementById('menuArchiveTitle').innerText = t.archive;
+        document.getElementById('menuArchiveSub').innerText = t.archiveSub;
+
+        document.getElementById('secGroup2').innerHTML = `<i class="fa-solid fa-file-prescription"></i> ${t.group2}`;
+        document.getElementById('menuRxTitle').innerText = t.rxTemplate;
+        document.getElementById('menuRxSub').innerText = t.rxTemplateSub;
+        document.getElementById('menuDictTitle').innerText = t.dict;
+        document.getElementById('menuDictSub').innerText = t.dictSub;
+
+        document.getElementById('secGroup3').innerHTML = `<i class="fa-solid fa-chart-pie"></i> ${t.group3}`;
+        document.getElementById('menuAnalyticsTitle').innerText = t.analytics;
+        document.getElementById('menuAnalyticsSub').innerText = t.analyticsSub;
+
+        document.getElementById('secGroup4').innerHTML = `<i class="fa-solid fa-shield-halved"></i> ${t.group4}`;
+        document.getElementById('menuBackupTitle').innerText = t.backup;
+        document.getElementById('menuBackupSub').innerText = t.backupSub;
+        document.getElementById('menuTrashTitle').innerText = t.trash;
+        document.getElementById('menuTrashSub').innerText = t.trashSub;
+        document.getElementById('menuSettingsTitle').innerText = t.settings;
+        document.getElementById('menuSettingsSub').innerText = t.settingsSub;
+        document.getElementById('menuPermTitle').innerText = t.permissions;
+        document.getElementById('menuPermSub').innerText = t.permissionsSub;
+        document.getElementById('menuNetTitle').innerText = t.networkDb;
+        document.getElementById('menuNetSub').innerText = t.networkDbSub;
+
+        document.getElementById('footerText').innerText = t.footer;
+    }
 
     let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
     let trashBin = JSON.parse(localStorage.getItem('clinic_trash')) || [];
@@ -1302,10 +1498,10 @@
 
             if (prevScreen === 'mainScreen') {
                 document.getElementById('backBtn').style.display = 'none';
-                document.getElementById('headerTitle').innerText = 'Clinic Master System';
-                document.getElementById('headerSub').innerText = 'Cloud Secure Dashboard';
+                document.getElementById('headerTitle').innerText = translations[currentLang].headerTitle;
+                document.getElementById('headerSub').innerText = translations[currentLang].headerSub;
             } else if (prevScreen === 'archiveScreen') {
-                document.getElementById('headerTitle').innerText = 'Smart Patients Archive';
+                document.getElementById('headerTitle').innerText = translations[currentLang].archive;
                 document.getElementById('headerSub').innerText = 'Advanced search, filters & records';
             } else if (prevScreen === 'medicalRecordScreen') {
                 document.getElementById('headerTitle').innerText = 'Patient Medical Record';
@@ -1325,8 +1521,8 @@
 
             if (prevScreen === 'mainScreen') {
                 document.getElementById('backBtn').style.display = 'none';
-                document.getElementById('headerTitle').innerText = 'Clinic Master System';
-                document.getElementById('headerSub').innerText = 'Cloud Secure Dashboard';
+                document.getElementById('headerTitle').innerText = translations[currentLang].headerTitle;
+                document.getElementById('headerSub').innerText = translations[currentLang].headerSub;
             }
         }
     });
@@ -1348,6 +1544,8 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         document.getElementById('pDate').value = getTodayFormatted();
+        applyLanguage();
+
         if (!navigator.onLine) {
             const bar = document.getElementById('networkStatusBar');
             bar.classList.add('offline');
@@ -1573,12 +1771,8 @@
 
     function toggleAuthMode() {
         isRegisterMode = !isRegisterMode;
-        document.getElementById('authTitle').innerText = isRegisterMode ? 'Register New Account' : 'User Login';
-        document.getElementById('authSubmitBtn').innerText = isRegisterMode ? 'Register Account' : 'Login';
+        applyLanguage();
         document.getElementById('forgotPassBtn').style.display = isRegisterMode ? 'none' : 'block';
-        document.getElementById('authSwitchText').innerHTML = isRegisterMode ? 
-            'Already have an account? <span onclick="toggleAuthMode()">Login</span>' : 
-            'Don\'t have an account? <span onclick="toggleAuthMode()">Register Now</span>';
     }
 
     function handleAuthSubmit(e) {
@@ -1605,7 +1799,6 @@
         } else {
             auth.signInWithEmailAndPassword(email, pass)
                 .then(res => {
-                    // Check if logged in as secretary
                     if (secretaryAccount.email && email.toLowerCase() === secretaryAccount.email.toLowerCase()) {
                         document.getElementById('authScreen').style.display = 'none';
                         document.getElementById('appContainer').style.display = 'flex';
@@ -1727,7 +1920,6 @@
         }
 
         try {
-            // Create Firebase Auth user for secretary
             await auth.createUserWithEmailAndPassword(email, password);
             secretaryAccount = { email, password };
             saveSettingsToCloudAndLocal();
@@ -1796,7 +1988,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.80",
+            version: "16.90",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -1907,7 +2099,7 @@
                 alert('Password changed successfully!');
                 document.getElementById('newAccountPassword').value = '';
             }).catch(error => {
-                alert('Error (You may need to re-login to update password for security reasons): ' + error.message);
+                alert('Error: ' + error.message);
             });
         }
     }
@@ -1920,7 +2112,7 @@
         }
 
         auth.sendPasswordResetEmail(user.email).then(() => {
-            alert(`Password reset link sent to your email (${user.email}) successfully! Check your inbox or spam folder.`);
+            alert(`Password reset link sent to your email (${user.email}) successfully!`);
         }).catch(error => {
             alert('Error sending email: ' + error.message);
         });
@@ -3135,7 +3327,7 @@
     }
 
     function openPatientsArchive() {
-        navigateTo('archiveScreen', 'Smart Patients Archive', 'Advanced search, filters & records');
+        navigateTo('archiveScreen', translations[currentLang].archive, 'Advanced search, filters & records');
         renderPatientsList(patients);
     }
 
