@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.65</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.66</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -378,27 +378,24 @@
             <div id="backupScreen" style="display: none;">
                 <div class="group-card">
                     <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
-                        <i class="fa-solid fa-database" style="color:#4f46e5;"></i> نظام النسخ الاحتياطي السريع (Text / JSON)
+                        <i class="fa-solid fa-database" style="color:#4f46e5;"></i> نظام النسخ الاحتياطي المباشر
                     </div>
                     <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
-                        قم بتنزيل النسخة الاحتياطية. إذا واجهتك مشكلة في اختيار الملف، يمكنك فتح ملف النسخة الاحتياطية كملف نصي (.txt) أو لصق الكود أدناه مباشرة لاسترجاع البيانات بضغطة زر!
+                        قم بتنزيل النسخة الاحتياطية أو ارفع ملف النسخة الاحتياطية (`.json` أو `.txt`) مباشرة لاسترجاع البيانات بكاملها فورا ودون أي نسخ أو لصق!
                     </p>
 
-                    <button class="btn-main" onclick="exportJsonBackup()" style="background: #4f46e5; margin-bottom: 14px;">
+                    <button class="btn-main" onclick="exportJsonBackup()" style="background: #4f46e5; margin-bottom: 16px;">
                         <i class="fa-solid fa-download"></i> تصدير النسخة الاحتياطية (Export Backup)
                     </button>
 
                     <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
 
                     <div class="field-box" style="text-align: left;">
-                        <span class="field-label">طريقة بديلة مضمونة 100%: الصق كود النسخة الاحتياطية هنا</span>
-                        <div class="input-wrapper" style="padding: 6px;">
-                            <textarea id="jsonPasteArea" rows="4" placeholder="الصق محتوى ملف النسخة الاحتياطية هنا..." style="font-size: 0.8rem; font-family: monospace;"></textarea>
+                        <span class="field-label" style="color:#16a34a; font-weight:800;"><i class="fa-solid fa-file-arrow-up"></i> رفع ملف النسخة الاحتياطية مباشرة (موصى به جداً)</span>
+                        <div class="input-wrapper" style="padding: 10px; border: 2px dashed #16a34a; background: #f0fdf4; text-align: center;">
+                            <input type="file" id="backupFileInput" accept=".json,.txt" style="font-size: 0.85rem; cursor: pointer;" onchange="restoreFromUploadedFile(this)">
                         </div>
                     </div>
-                    <button class="btn-main" onclick="restoreFromJsonPaste()" style="background: #16a34a; margin-top: 6px;">
-                        <i class="fa-solid fa-rotate-left"></i> استرجاع البيانات من اللصق النصي فوراً
-                    </button>
                 </div>
             </div>
 
@@ -678,7 +675,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.65</div>
+        <div class="footer">Clinic Master Network v16.66</div>
     </div>
 </div>
 
@@ -1483,13 +1480,13 @@
 
     function openBackupManager() {
         navigateTo('backupScreen', 'النسخ الاحتياطي', 'تصدير واسترجاع بيانات العيادة');
-        document.getElementById('jsonPasteArea').value = '';
+        document.getElementById('backupFileInput').value = '';
     }
 
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.65",
+            version: "16.66",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -1506,40 +1503,45 @@
         alert('تم تصدير وتنزيل النسخة الاحتياطية بنجاح!');
     }
 
-    function restoreFromJsonPaste() {
-        const rawText = document.getElementById('jsonPasteArea').value.trim();
-        if (!rawText) {
-            alert('الرجاء لصق محتوى النسخة الاحتياطية في الحقل المخصص أولاً.');
-            return;
-        }
+    function restoreFromUploadedFile(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    const rawText = e.target.result;
+                    const parsed = JSON.parse(rawText);
+                    
+                    if (!parsed.patients || !Array.isArray(parsed.patients)) {
+                        alert('الملف المرفوع غير صالح أو تالف (لا يحتوي على بيانات المرضى).');
+                        return;
+                    }
 
-        try {
-            const parsed = JSON.parse(rawText);
-            if (!parsed.patients || !Array.isArray(parsed.patients)) {
-                alert('النص المنسوخ غير صالح أو تارف (لا يحتوي على بيانات المرضى).');
-                return;
-            }
+                    if (confirm(`هل أنت متأكد من استرجاع البيانات؟ سيتم دمج واستبدال البيانات الحالية بـ (${parsed.patients.length}) مريضاً.`)) {
+                        patients = parsed.patients;
+                        trashBin = parsed.trashBin || [];
+                        medicalDict = parsed.medicalDict || medicalDict;
+                        if (parsed.rxImage) {
+                            currentDoctorRxImage = parsed.rxImage;
+                        }
 
-            if (confirm(`هل أنت متأكد من استرجاع البيانات؟ سيتم دمج واستبدال البيانات الحالية بـ (${parsed.patients.length}) مريضاً.`)) {
-                patients = parsed.patients;
-                trashBin = parsed.trashBin || [];
-                medicalDict = parsed.medicalDict || medicalDict;
-                if (parsed.rxImage) {
-                    currentDoctorRxImage = parsed.rxImage;
+                        if (currentUserId) {
+                            localStorage.setItem(`clinic_patients_${currentUserId}`, JSON.stringify(patients));
+                            localStorage.setItem(`clinic_trash_${currentUserId}`, JSON.stringify(trashBin));
+                        }
+                        saveSettingsToCloudAndLocal();
+                        syncLocalDataToCloud();
+
+                        alert('تم استرجاع النسخة الاحتياطية من الملف بنجاح وتحديث النظام!');
+                        showMainMenu();
+                    }
+                } catch (err) {
+                    alert('خطأ في قراءة ملف النسخة الاحتياطية: تأكد من أنه ملف JSON أو TXT صحيح. التفاصيل: ' + err.message);
                 }
-
-                if (currentUserId) {
-                    localStorage.setItem(`clinic_patients_${currentUserId}`, JSON.stringify(patients));
-                    localStorage.setItem(`clinic_trash_${currentUserId}`, JSON.stringify(trashBin));
-                }
-                saveSettingsToCloudAndLocal();
-                syncLocalDataToCloud();
-
-                alert('تم استرجاع النسخة الاحتياطية بنجاح وتحديث النظام!');
-                showMainMenu();
-            }
-        } catch (err) {
-            alert('خطأ في صيغة النص المنسوخ: تأكد من نسخ الكود كاملاً بشكل صحيح. التفاصيل: ' + err.message);
+            };
+            
+            reader.readAsText(file);
         }
     }
 
