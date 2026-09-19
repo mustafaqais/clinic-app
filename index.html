@@ -5,9 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Clinic Master System - Cloud Ultimate Edition v17.00</title>
     
+    <!-- PWA & App Icons Integration -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon-precomposed" href="https://i.ibb.co/68n8910/1000111840.png">
+    <meta name="theme-color" content="#0f172a">
+    
+    <script>
+        // Inject PWA Manifest dynamically to ensure desktop & mobile pick up the custom icon instantly
+        const manifestData = {
+            "name": "عيادتي - Clinic Master",
+            "short_name": "عيادتي",
+            "start_url": "./",
+            "display": "standalone",
+            "background_color": "#ffffff",
+            "theme_color": "#0f172a",
+            "icons": [
+                {
+                    "src": "https://i.ibb.co/68n8910/1000111840.png",
+                    "sizes": "512x512",
+                    "type": "image/png"
+                }
+            ]
+        };
+        const stringManifest = JSON.stringify(manifestData);
+        const blob = new Blob([stringManifest], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(blob);
+        const linkTag = document.createElement('link');
+        linkTag.rel = 'manifest';
+        linkTag.href = manifestURL;
+        document.head.appendChild(linkTag);
+    </script>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -168,7 +196,7 @@
         .modal-header h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; font-weight: 700; }
         .modal-close { background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; color: #475569; cursor: pointer; }
 
-        /* تعديل نافذة معاينة الصور لتكون كبيرة وتملأ الشاشة */
+        /* نافذة معاينة الصور */
         #imagePreviewModal {
             position: fixed;
             top: 0;
