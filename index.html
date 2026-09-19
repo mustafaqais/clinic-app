@@ -168,6 +168,43 @@
         .modal-header h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; font-weight: 700; }
         .modal-close { background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; color: #475569; cursor: pointer; }
 
+        /* تعديل نافذة معاينة الصور لتكون كبيرة وتملأ الشاشة */
+        #imagePreviewModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        #imagePreviewModal .modal-body {
+            background: transparent;
+            max-width: 95vw;
+            max-height: 95vh;
+            width: auto;
+            height: auto;
+            padding: 0;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: visible;
+        }
+        #previewModalImg {
+            max-width: 92vw;
+            max-height: 90vh;
+            width: auto;
+            height: auto;
+            border-radius: 12px;
+            object-fit: contain;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
         .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
         .checkbox-item { display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: #334155; cursor: pointer; }
         .checkbox-item input { accent-color: #0d9488; width: 16px; height: 16px; }
@@ -1080,10 +1117,10 @@
     </div>
 </div>
 
-<div id="imagePreviewModal" class="modal-overlay" onclick="closeImagePreview()">
-    <div class="modal-body" style="max-width: 420px; background: rgba(15, 23, 42, 0.95); align-items: center; justify-content: center; padding: 15px;" onclick="event.stopPropagation()">
+<div id="imagePreviewModal" onclick="closeImagePreview()">
+    <div class="modal-body" onclick="event.stopPropagation()">
         <button class="modal-close" style="position: absolute; top: 15px; right: 15px; background: #fff; z-index: 10;" onclick="closeImagePreview()"><i class="fa-solid fa-xmark"></i></button>
-        <img id="previewModalImg" src="" alt="Preview" style="max-width: 100%; max-height: 80vh; border-radius: 12px; object-fit: contain;">
+        <img id="previewModalImg" src="" alt="Preview">
     </div>
 </div>
 
@@ -3301,7 +3338,8 @@
     }
 
     function previewAttachmentImage(imgSrc) {
-        document.getElementById('previewModalImg').src = imgSrc;
+        const modalImg = document.getElementById('previewModalImg');
+        modalImg.src = imgSrc;
         document.getElementById('imagePreviewModal').style.display = 'flex';
     }
 
