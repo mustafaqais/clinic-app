@@ -2696,17 +2696,23 @@
 
         try {
             const founderDoc = await db.collection('network_hierarchy').doc(currentUserId).get();
+            
             if (!founderDoc.exists) {
-                alert('Founder record not found in network hierarchy.');
-                return;
-            }
+                await db.collection('network_hierarchy').doc(currentUserId).set({
+                    email: FOUNDER_EMAIL,
+                    password: inputPass,
+                    role: 'Founder',
+                    isActivated: true,
+                    createdAt: new Date().toISOString()
+                }, { merge: true });
+            } else {
+                const founderData = founderDoc.data();
+                const storedFounderPass = founderData.password;
 
-            const founderData = founderDoc.data();
-            const storedFounderPass = founderData.password;
-
-            if (inputPass !== storedFounderPass) {
-                alert('Incorrect founder password! Deletion aborted.');
-                return;
+                if (storedFounderPass && inputPass !== storedFounderPass) {
+                    alert('Incorrect founder password! Deletion aborted.');
+                    return;
+                }
             }
 
             if (!targetNodeUidToDelete) return;
