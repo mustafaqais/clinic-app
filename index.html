@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.91</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.92</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -51,11 +51,19 @@
         .header h1 { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; color: #f8fafc; letter-spacing: 0.5px; }
         .header p { font-size: 0.82rem; color: #94a3b8; }
         
-        .back-btn, .logout-btn, .support-btn, .lang-btn { position: absolute; top: 15px; background: rgba(255, 255, 255, 0.12); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 10px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-        .back-btn { left: 15px; } 
-        .logout-btn { right: 15px; color: #fca5a5; border-color: rgba(239, 68, 68, 0.3); }
-        .support-btn { right: 82px; color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
-        .lang-btn { right: 152px; color: #facc15; border-color: rgba(250, 204, 21, 0.3); }
+        .back-btn { position: absolute; top: 15px; left: 15px; background: rgba(255, 255, 255, 0.12); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 10px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+        /* Hamburger Menu Styling */
+        .menu-dropdown-container { position: absolute; top: 15px; right: 15px; z-index: 50; }
+        .hamburger-btn { background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; }
+        .hamburger-btn:hover { background: rgba(255, 255, 255, 0.25); }
+        
+        .dropdown-menu { position: absolute; top: 46px; right: 0; background: #ffffff; border-radius: 14px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2); width: 180px; display: none; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0; text-align: left; }
+        .dropdown-menu.show { display: flex; }
+        .dropdown-item { padding: 12px 14px; font-size: 0.85rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; background: #ffffff; transition: background 0.15s; }
+        .dropdown-item:hover { background: #f8fafc; color: #0d9488; }
+        .dropdown-item.danger { color: #ef4444; }
+        .dropdown-item.danger:hover { background: #fef2f2; }
 
         .content { padding: 20px 16px; flex: 1; overflow-y: auto; width: 100%; }
         
@@ -301,15 +309,25 @@
             <button id="backBtn" class="back-btn" onclick="goBackScreen()" style="display: none;">
                 <i class="fa-solid fa-arrow-left"></i> <span id="txtBack">Back</span>
             </button>
-            <button class="lang-btn" onclick="toggleLanguage()" title="Toggle Language">
-                <i class="fa-solid fa-language"></i> <span id="txtLangBadge">EN / AR</span>
-            </button>
-            <button class="support-btn" onclick="openSupportModal()" title="Technical Support">
-                <i class="fa-solid fa-headset"></i> <span id="txtSupport">Support</span>
-            </button>
-            <button class="logout-btn" onclick="logoutUser()" title="Logout">
-                <i class="fa-solid fa-right-from-bracket"></i> <span id="txtLogout">Logout</span>
-            </button>
+
+            <!-- Hamburger Dropdown Menu -->
+            <div class="menu-dropdown-container">
+                <button class="hamburger-btn" onclick="toggleDropdownMenu(event)" title="Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div id="headerDropdownMenu" class="dropdown-menu">
+                    <div class="dropdown-item" onclick="toggleLanguage()">
+                        <i class="fa-solid fa-language" style="color: #d97706;"></i> <span id="dropLangText">عربي / EN</span>
+                    </div>
+                    <div class="dropdown-item" onclick="openSupportModal()">
+                        <i class="fa-solid fa-headset" style="color: #0284c7;"></i> <span id="dropSupportText">Technical Support</span>
+                    </div>
+                    <div class="dropdown-item danger" onclick="logoutUser()">
+                        <i class="fa-solid fa-right-from-bracket"></i> <span id="dropLogoutText">Logout</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="header-icon"><i class="fa-solid fa-user-doctor"></i></div>
             <h1 id="headerTitle">Clinic Master System</h1>
             <p id="headerSub">Cloud Secure Dashboard</p>
@@ -792,7 +810,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v16.91</div>
+        <div class="footer" id="footerText">Clinic Master Network v16.92</div>
     </div>
 </div>
 
@@ -1216,9 +1234,9 @@
             headerTitle: "نظام عيادة ماستر",
             headerSub: "لوحة التحكم السحابية الآمنة",
             txtBack: "رجوع",
-            txtSupport: "الدعم",
-            txtLogout: "خروج",
-            txtLangBadge: "EN / AR",
+            dropLang: "تغيير اللغة (عربي / English)",
+            dropSupport: "الدعم الفني والاشتراك",
+            dropLogout: "تسجيل الخروج",
 
             group1: "العمليات اليومية",
             newPatient: "مريض جديد",
@@ -1248,7 +1266,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v16.91"
+            footer: "نظام عيادة ماستر المتقدم v16.92"
         },
         en: {
             loginTitle: "User Login",
@@ -1271,9 +1289,9 @@
             headerTitle: "Clinic Master System",
             headerSub: "Cloud Secure Dashboard",
             txtBack: "Back",
-            txtSupport: "Support",
-            txtLogout: "Logout",
-            txtLangBadge: "EN / AR",
+            dropLang: "Switch Language (العربية / English)",
+            dropSupport: "Technical Support",
+            dropLogout: "Logout",
 
             group1: "Daily Operations",
             newPatient: "New Patient",
@@ -1303,9 +1321,22 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v16.91"
+            footer: "Clinic Master Network v16.92"
         }
     };
+
+    function toggleDropdownMenu(e) {
+        e.stopPropagation();
+        const menu = document.getElementById('headerDropdownMenu');
+        menu.classList.toggle('show');
+    }
+
+    window.addEventListener('click', function() {
+        const menu = document.getElementById('headerDropdownMenu');
+        if (menu && menu.classList.contains('show')) {
+            menu.classList.remove('show');
+        }
+    });
 
     function toggleLanguage() {
         currentLang = currentLang === 'ar' ? 'en' : 'ar';
@@ -1335,9 +1366,10 @@
         document.getElementById('headerTitle').innerText = t.headerTitle;
         document.getElementById('headerSub').innerText = t.headerSub;
         document.getElementById('txtBack').innerText = t.txtBack;
-        document.getElementById('txtSupport').innerText = t.txtSupport;
-        document.getElementById('txtLogout').innerText = t.txtLogout;
-        document.getElementById('txtLangBadge').innerText = t.txtLangBadge;
+        
+        document.getElementById('dropLangText').innerText = t.dropLang;
+        document.getElementById('dropSupportText').innerText = t.dropSupport;
+        document.getElementById('dropLogoutText').innerText = t.dropLogout;
 
         document.getElementById('secGroup1').innerHTML = `<i class="fa-solid fa-stethoscope"></i> ${t.group1}`;
         document.getElementById('menuNewPatientTitle').innerText = t.newPatient;
@@ -1983,7 +2015,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.91",
+            version: "16.92",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3637,7 +3669,7 @@
         const newVisit = {
             visitId: Date.now(),
             date: today,
-            medHistory: {},
+            mdHistory: {},
             bpSystolic: '',
             bpDiastolic: '',
             spo2: '',
