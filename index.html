@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.92</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.93</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -23,13 +23,25 @@
     <style>
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
         html, body { background-color: #eef2f6; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow-x: hidden; }
-        .mobile-container { background: #ffffff; width: 100%; max-width: 430px; height: 100vh; min-height: 100vh; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.12); position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        
+        /* Responsive Desktop & Tablet Container */
+        .mobile-container { background: #ffffff; width: 100%; max-width: 430px; height: 100vh; min-height: 100vh; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.12); position: relative; overflow: hidden; display: flex; flex-direction: column; transition: max-width 0.3s ease; }
+        
+        @media (min-width: 768px) {
+            .mobile-container { max-width: 768px; border-radius: 24px; height: 94vh; min-height: 94vh; border: 1px solid #cbd5e1; }
+            .menu-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
+
+        @media (min-width: 1024px) {
+            .mobile-container { max-width: 1050px; border-radius: 24px; height: 92vh; min-height: 92vh; border: 1px solid #cbd5e1; }
+            .menu-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
         
         .auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px 20px; flex: 1; text-align: center; }
         .activ-icon { font-size: 50px; color: #0d9488; margin-bottom: 15px; }
         .activ-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
         .activ-sub { font-size: 0.82rem; color: #64748b; margin-bottom: 20px; line-height: 1.5; }
-        .auth-form { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+        .auth-form { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
         .auth-switch { margin-top: 15px; font-size: 0.82rem; color: #64748b; }
         .auth-switch span { color: #0d9488; font-weight: 700; cursor: pointer; }
         .forgot-pass { font-size: 0.78rem; color: #0284c7; text-align: right; cursor: pointer; margin-top: -6px; font-weight: 600; }
@@ -297,11 +309,11 @@
         <div class="activ-icon"><i class="fa-solid fa-shield-halved"></i></div>
         <div class="activ-title" id="activTitle">Account Activation Required</div>
         <div class="activ-sub" id="activSub">Please enter your 14-Day Trial, 7-Day Extension, or Annual Subscription code.</div>
-        <div class="field-box" style="width: 100%; text-align: left;">
+        <div class="field-box" style="width: 100%; max-width: 400px; text-align: left;">
             <span class="field-label" id="lblActivCode">Activation / Subscription Code</span>
             <div class="input-wrapper"><input type="text" id="activationInput" placeholder="Enter code..." style="text-align: center; letter-spacing: 2px; text-transform: uppercase;"></div>
         </div>
-        <button class="btn-main" onclick="verifyActivationCode()" id="btnActivate">Activate System</button>
+        <button class="btn-main" style="max-width: 400px;" onclick="verifyActivationCode()" id="btnActivate">Activate System</button>
     </div>
 
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column; overflow: hidden;">
@@ -810,7 +822,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v16.92</div>
+        <div class="footer" id="footerText">Clinic Master Network v16.93</div>
     </div>
 </div>
 
@@ -1266,9 +1278,8 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v16.92",
+            footer: "نظام عيادة ماستر المتقدم v16.93",
 
-            // New Patient Form
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
             lblPatAge: "العمر *",
@@ -1293,7 +1304,6 @@
             lblPatDate: "تاريخ الزيارة الأولية",
             btnSavePatRec: "حفظ وفتح السجل الطبي",
 
-            // Archive Filter
             searchPlaceholder: "🔍 البحث بالاسم أو رقم الهاتف...",
             optAllGenders: "جميع الأجناس",
             optFilterMale: "ذكور",
@@ -1303,20 +1313,17 @@
             optAdult: "بالغين (18 - 50)",
             optSenior: "كبار السن (> 50)",
 
-            // Medical Record Screen
             txtEdit: "تعديل",
             txtDelete: "حذف",
             btnDownloadPDF: "تحميل تقرير ملف المريض الشامل PDF",
             btnAddVisit: "+ إضافة زيارة جديدة",
 
-            // Dictionary Screen
             optCatDrugs: "الأدوية والجرعات",
             optCatLabs: "تحاليل المختبر",
             optCatScans: "الأشعة والرنين",
             optCatNotes: "التشخيص والملاحظات",
             optCatMh: "مصطلحات التاريخ المرضي",
 
-            // Trash Screen
             trashTitleText: "سلة المهملات",
             txtEmptyTranslation: "إفراغ سلة المهملات",
             trashSubText: "يمكنك استعادة المرضى أو الزيارات المحذوفة إلى أماكنها الأصلية فوراً، أو إفراغ السلة نهائياً."
@@ -1374,9 +1381,8 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v16.92",
+            footer: "Clinic Master Network v16.93",
 
-            // New Patient Form
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
             lblPatAge: "Age *",
@@ -1401,7 +1407,6 @@
             lblPatDate: "Initial Visit Date",
             btnSavePatRec: "Save & Open Medical Record",
 
-            // Archive Filter
             searchPlaceholder: "🔍 Search by Name or Phone Number...",
             optAllGenders: "All Genders",
             optFilterMale: "Male",
@@ -1411,20 +1416,17 @@
             optAdult: "Adults (18 - 50)",
             optSenior: "Seniors (> 50)",
 
-            // Medical Record Screen
             txtEdit: "Edit",
             txtDelete: "Delete",
             btnDownloadPDF: "Download Comprehensive PDF Report",
             btnAddVisit: "+ Add New Visit",
 
-            // Dictionary Screen
             optCatDrugs: "Medications & Doses",
             optCatLabs: "Lab Tests",
             optCatScans: "Radiology & Scans",
             optCatNotes: "Diagnosis & Notes",
             optCatMh: "Medical History Terms",
 
-            // Trash Screen
             trashTitleText: "Trash Bin",
             txtEmptyTranslation: "Empty Trash",
             trashSubText: "You can restore deleted patients or specific visits back to their original locations instantly, or empty the trash completely."
@@ -1449,7 +1451,6 @@
         localStorage.setItem('clinic_lang', currentLang);
         applyLanguage();
         
-        // Refresh active views if open
         if (document.getElementById('archiveScreen').style.display === 'block') {
             openPatientsArchive();
         } else if (document.getElementById('dictScreen').style.display === 'block') {
@@ -1486,7 +1487,6 @@
         document.getElementById('dropSupportText').innerText = t.dropSupport;
         document.getElementById('dropLogoutText').innerText = t.dropLogout;
 
-        // Main Menu Groups & Cards
         document.getElementById('secGroup1').innerHTML = `<i class="fa-solid fa-stethoscope"></i> ${t.group1}`;
         document.getElementById('menuNewPatientTitle').innerText = t.newPatient;
         document.getElementById('menuNewPatientSub').innerText = t.newPatientSub;
@@ -1515,7 +1515,6 @@
         document.getElementById('menuNetTitle').innerText = t.networkDb;
         document.getElementById('menuNetSub').innerText = t.networkDbSub;
 
-        // New Patient Form
         document.getElementById('patInfoTitle').innerHTML = `<i class="fa-solid fa-id-card"></i> ${t.patInfoTitle}`;
         document.getElementById('lblPatName').innerText = t.lblPatName;
         document.getElementById('lblPatAge').innerText = t.lblPatAge;
@@ -1540,7 +1539,6 @@
         document.getElementById('lblPatDate').innerText = t.lblPatDate;
         document.getElementById('btnSavePatRec').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> ${t.btnSavePatRec}`;
 
-        // Archive Search Placeholders & Filters
         document.getElementById('searchInput').placeholder = t.searchPlaceholder;
         document.getElementById('optAllGenders').innerText = t.optAllGenders;
         document.getElementById('optFilterMale').innerText = t.optFilterMale;
@@ -1550,20 +1548,17 @@
         document.getElementById('optAdult').innerText = t.optAdult;
         document.getElementById('optSenior').innerText = t.optSenior;
 
-        // Medical Record Screen buttons
         document.getElementById('txtEdit').innerText = t.txtEdit;
         document.getElementById('txtDelete').innerText = t.txtDelete;
         document.getElementById('btnDownloadPDF').innerHTML = `<i class="fa-solid fa-file-pdf"></i> ${t.btnDownloadPDF}`;
         document.getElementById('btnAddVisit').innerHTML = `<i class="fa-solid fa-calendar-plus"></i> ${t.btnAddVisit}`;
 
-        // Dictionary Options
         document.getElementById('optCatDrugs').innerText = t.optCatDrugs;
         document.getElementById('optCatLabs').innerText = t.optCatLabs;
         document.getElementById('optCatScans').innerText = t.optCatScans;
         document.getElementById('optCatNotes').innerText = t.optCatNotes;
         document.getElementById('optCatMh').innerText = t.optCatMh;
 
-        // Trash Screen
         document.getElementById('trashTitleText').innerHTML = `<i class="fa-solid fa-trash-can"></i> ${t.trashTitleText}`;
         document.getElementById('txtEmptyTrash').innerText = t.txtEmptyTranslation;
         document.getElementById('trashSubText').innerText = t.trashSubText;
@@ -1661,7 +1656,7 @@
 
     let screenHistory = ['mainScreen'];
 
-    function navigateTo(screenId, title = 'Clinic Master System', sub = 'Cloud Secure Dashboard') {
+    function navigateTo(screenId, title = 'Clinic Master System', sub = 'Cloud Secure Dashboard', saveState = true) {
         autoSaveMedicalRecord();
         hideAllScreensInner();
         
@@ -1670,6 +1665,15 @@
 
         document.getElementById('headerTitle').innerText = title;
         document.getElementById('headerSub').innerText = sub;
+
+        if (saveState) {
+            sessionStorage.setItem('current_screen', screenId);
+            sessionStorage.setItem('header_title', title);
+            sessionStorage.setItem('header_sub', sub);
+            if (screenId !== 'medicalRecordScreen') {
+                sessionStorage.removeItem('current_patient_id');
+            }
+        }
 
         if (screenId === 'mainScreen') {
             document.getElementById('backBtn').style.display = 'none';
@@ -1691,11 +1695,14 @@
             
             hideAllScreensInner();
             document.getElementById(prevScreen).style.display = 'block';
+            sessionStorage.setItem('current_screen', prevScreen);
 
             if (prevScreen === 'mainScreen') {
                 document.getElementById('backBtn').style.display = 'none';
                 document.getElementById('headerTitle').innerText = translations[currentLang].headerTitle;
                 document.getElementById('headerSub').innerText = translations[currentLang].headerSub;
+                sessionStorage.setItem('header_title', translations[currentLang].headerTitle);
+                sessionStorage.setItem('header_sub', translations[currentLang].headerSub);
             } else if (prevScreen === 'archiveScreen') {
                 document.getElementById('headerTitle').innerText = translations[currentLang].archive;
                 document.getElementById('headerSub').innerText = 'Advanced search, filters & records';
@@ -1714,6 +1721,7 @@
             const prevScreen = screenHistory[screenHistory.length - 1];
             hideAllScreensInner();
             document.getElementById(prevScreen).style.display = 'block';
+            sessionStorage.setItem('current_screen', prevScreen);
 
             if (prevScreen === 'mainScreen') {
                 document.getElementById('backBtn').style.display = 'none';
@@ -1795,7 +1803,7 @@
                 }
 
                 if (user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
-                    setupFounderInterface();
+                    setupFounderInterfaceAfterAuth();
                 } else {
                     checkUserSubscriptionStatus(user.uid);
                 }
@@ -1835,15 +1843,86 @@
         if (isSec) {
             document.getElementById('cardPermissions').style.display = 'none';
             applySecretaryUIVisibility();
-            navigateTo('mainScreen');
+            setupClientInterfaceAfterAuth(null);
             return;
         }
 
         if (expiryDateStr && new Date().getTime() < new Date(expiryDateStr).getTime()) {
-            setupClientInterface(expiryDateStr);
+            setupClientInterfaceAfterAuth(expiryDateStr);
         } else {
             document.getElementById('authScreen').style.display = 'none';
             document.getElementById('activationScreen').style.display = 'flex';
+        }
+    }
+
+    function setupFounderInterfaceAfterAuth() {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('activationScreen').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'flex';
+        document.getElementById('founderControlPanel').style.display = 'block';
+        document.getElementById('networkMenuCard').style.display = 'flex';
+        document.getElementById('cardPermissions').style.display = 'flex';
+        document.getElementById('subStatusBanner').style.display = 'none'; 
+        restorePreviousScreenState();
+    }
+
+    function setupClientInterfaceAfterAuth(expiryDateIso) {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('activationScreen').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'flex';
+        document.getElementById('founderControlPanel').style.display = 'none';
+        document.getElementById('networkMenuCard').style.display = 'none';
+
+        const user = auth.currentUser;
+        const isSec = user && secretaryAccount.email && user.email.toLowerCase() === secretaryAccount.email.toLowerCase();
+
+        if (isSec) {
+            document.getElementById('cardPermissions').style.display = 'none';
+            applySecretaryUIVisibility();
+        } else {
+            document.getElementById('cardPermissions').style.display = 'flex';
+            showAllCardsForDoctor();
+        }
+
+        if (expiryDateIso && !isSec) {
+            const now = new Date().getTime();
+            const expiryTime = new Date(expiryDateIso).getTime();
+            const diffTime = expiryTime - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            const banner = document.getElementById('subStatusBanner');
+            const titleEl = document.getElementById('subBannerTitle');
+            const textEl = document.getElementById('subBannerText');
+            banner.style.display = 'flex';
+
+            if (diffDays <= 3) {
+                banner.classList.add('warning');
+                titleEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Subscription Expiring Soon!`;
+                textEl.innerText = `Only ${diffDays} day(s) remaining (Expires: ${new Date(expiryDateIso).toLocaleDateString()}). Contact support to renew.`;
+            } else {
+                banner.classList.remove('warning');
+                titleEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Active Subscription`;
+                textEl.innerText = `You have ${diffDays} day(s) remaining (Expires: ${new Date(expiryDateIso).toLocaleDateString()}).`;
+            }
+        }
+
+        restorePreviousScreenState();
+    }
+
+    function restorePreviousScreenState() {
+        const savedScreen = sessionStorage.getItem('current_screen');
+        const savedTitle = sessionStorage.getItem('header_title') || translations[currentLang].headerTitle;
+        const savedSub = sessionStorage.getItem('header_sub') || translations[currentLang].headerSub;
+        const savedPatientId = sessionStorage.getItem('current_patient_id');
+
+        if (savedScreen && savedScreen !== 'mainScreen' && document.getElementById(savedScreen)) {
+            if (savedScreen === 'medicalRecordScreen' && savedPatientId) {
+                openMedicalRecord(Number(savedPatientId), false);
+            } else {
+                navigateTo(savedScreen, savedTitle, savedSub, false);
+            }
+        } else {
+            navigateTo('mainScreen', translations[currentLang].headerTitle, translations[currentLang].headerSub, false);
         }
     }
 
@@ -1897,7 +1976,7 @@
 
             alert(`System activated successfully! Valid until: ${expiryDate.toLocaleDateString()}`);
             document.getElementById('activationScreen').style.display = 'none';
-            setupClientInterface(expiryDateIso);
+            setupClientInterfaceAfterAuth(expiryDateIso);
 
         } catch (err) {
             alert('Error during activation: ' + err.message);
@@ -1985,7 +2064,7 @@
                         const expiryDate = new Date();
                         expiryDate.setFullYear(expiryDate.getFullYear() + 10);
                         localStorage.setItem(`sub_expiry_${res.user.uid}`, expiryDate.toISOString());
-                        setupFounderInterface();
+                        setupFounderInterfaceAfterAuth();
                     } else {
                         document.getElementById('authScreen').style.display = 'none';
                         document.getElementById('activationScreen').style.display = 'flex';
@@ -2001,65 +2080,11 @@
                         document.getElementById('cardPermissions').style.display = 'none';
                         document.getElementById('subStatusBanner').style.display = 'none';
                         applySecretaryUIVisibility();
-                        navigateTo('mainScreen');
+                        restorePreviousScreenState();
                     }
                 })
                 .catch(err => alert(err.message));
         }
-    }
-
-    async function setupFounderInterface() {
-        document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('activationScreen').style.display = 'none';
-        document.getElementById('appContainer').style.display = 'flex';
-        document.getElementById('founderControlPanel').style.display = 'block';
-        document.getElementById('networkMenuCard').style.display = 'flex';
-        document.getElementById('cardPermissions').style.display = 'flex';
-        document.getElementById('subStatusBanner').style.display = 'none'; 
-        navigateTo('mainScreen');
-    }
-
-    function setupClientInterface(expiryDateIso) {
-        document.getElementById('authScreen').style.display = 'none';
-        document.getElementById('activationScreen').style.display = 'none';
-        document.getElementById('appContainer').style.display = 'flex';
-        document.getElementById('founderControlPanel').style.display = 'none';
-        document.getElementById('networkMenuCard').style.display = 'none';
-
-        const user = auth.currentUser;
-        const isSec = user && secretaryAccount.email && user.email.toLowerCase() === secretaryAccount.email.toLowerCase();
-
-        if (isSec) {
-            document.getElementById('cardPermissions').style.display = 'none';
-            applySecretaryUIVisibility();
-        } else {
-            document.getElementById('cardPermissions').style.display = 'flex';
-            showAllCardsForDoctor();
-        }
-
-        if (expiryDateIso && !isSec) {
-            const now = new Date().getTime();
-            const expiryTime = new Date(expiryDateIso).getTime();
-            const diffTime = expiryTime - now;
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-            const banner = document.getElementById('subStatusBanner');
-            const titleEl = document.getElementById('subBannerTitle');
-            const textEl = document.getElementById('subBannerText');
-            banner.style.display = 'flex';
-
-            if (diffDays <= 3) {
-                banner.classList.add('warning');
-                titleEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Subscription Expiring Soon!`;
-                textEl.innerText = `Only ${diffDays} day(s) remaining (Expires: ${new Date(expiryDateIso).toLocaleDateString()}). Contact support to renew.`;
-            } else {
-                banner.classList.remove('warning');
-                titleEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Active Subscription`;
-                textEl.innerText = `You have ${diffDays} day(s) remaining (Expires: ${new Date(expiryDateIso).toLocaleDateString()}).`;
-            }
-        }
-
-        navigateTo('mainScreen');
     }
 
     function showAllCardsForDoctor() {
@@ -2167,6 +2192,7 @@
 
     function logoutUser() {
         autoSaveMedicalRecord();
+        sessionStorage.clear();
         auth.signOut().then(() => {
             currentUserId = null;
             patients = [];
@@ -2184,7 +2210,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.92",
+            version: "16.93",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3641,12 +3667,15 @@
         renderPatientsList(filtered);
     }
 
-    function openMedicalRecord(id) {
+    function openMedicalRecord(id, saveState = true) {
         const patient = patients.find(p => Number(p.id) === Number(id));
         if (!patient) return;
 
         currentPatientId = id;
-        navigateTo('medicalRecordScreen', 'Patient Medical Record', 'View & update medical history');
+        navigateTo('medicalRecordScreen', 'Patient Medical Record', 'View & update medical history', saveState);
+        if (saveState) {
+            sessionStorage.setItem('current_patient_id', id);
+        }
 
         document.getElementById('recPatientName').innerText = patient.name;
         document.getElementById('recPatientMeta').innerText = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
