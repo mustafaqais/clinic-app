@@ -58,7 +58,7 @@
         .hamburger-btn { background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; }
         .hamburger-btn:hover { background: rgba(255, 255, 255, 0.25); }
         
-        .dropdown-menu { position: absolute; top: 46px; right: 0; background: #ffffff; border-radius: 14px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2); width: 180px; display: none; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0; text-align: left; }
+        .dropdown-menu { position: absolute; top: 46px; right: 0; background: #ffffff; border-radius: 14px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2); width: 190px; display: none; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0; text-align: left; }
         .dropdown-menu.show { display: flex; }
         .dropdown-item { padding: 12px 14px; font-size: 0.85rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; background: #ffffff; transition: background 0.15s; }
         .dropdown-item:hover { background: #f8fafc; color: #0d9488; }
@@ -347,7 +347,7 @@
 
                 <!-- Founder Control Panel -->
                 <div class="founder-panel" id="founderControlPanel" style="display: none;">
-                    <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;">🔑 Code Generator (Founder):</span>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;" id="founderPanelTitle">🔑 Code Generator (Founder):</span>
                     <div style="display: flex; gap: 6px; margin: 6px 0;">
                         <button onclick="generateNewKey('TRIAL')" style="flex:1; background:#0d9488; color:#fff; border:none; border-radius:6px; padding:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">14d Trial</button>
                         <button onclick="generateNewKey('EXT')" style="flex:1; background:#d97706; color:#fff; border:none; border-radius:6px; padding:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">7d Extension</button>
@@ -1032,11 +1032,11 @@
         <div style="display:flex; gap:10px;">
             <div class="field-box" style="flex:1;">
                 <span class="field-label" id="mhLblSmoking">Smoking status</span>
-                <div class="input-wrapper"><select id="mh-smoking"><option value="Non-smoker">Non-smoker</option><option value="Smoker">Smoker</option><option value="Passive smoker">Passive smoker</option></select></div>
+                <div class="input-wrapper"><select id="mh-smoking"><option value="Non-smoker" id="optSmok1">Non-smoker</option><option value="Smoker" id="optSmok2">Smoker</option><option value="Passive smoker" id="optSmok3">Passive smoker</option></select></div>
             </div>
             <div class="field-box" style="flex:1;">
                 <span class="field-label" id="mhLblAlcohol">Drinking Alcohol</span>
-                <div class="input-wrapper"><select id="mh-alcohol"><option value="Non-drinker">Non-drinker</option><option value="Alcohol drinker">Alcohol drinker</option><option value="Social drinker">Social drinker</option></select></div>
+                <div class="input-wrapper"><select id="mh-alcohol"><option value="Non-drinker" id="optAlc1">Non-drinker</option><option value="Alcohol drinker" id="optAlc2">Alcohol drinker</option><option value="Social drinker" id="optAlc3">Social drinker</option></select></div>
             </div>
         </div>
 
@@ -1266,7 +1266,60 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v16.92"
+            footer: "نظام عيادة ماستر المتقدم v16.92",
+
+            // New Patient Form
+            patInfoTitle: "المعلومات الشخصية",
+            lblPatName: "الاسم الكامل *",
+            lblPatAge: "العمر *",
+            lblPatGender: "الجنس",
+            optSelGender: "اختر الجنس",
+            optMale: "ذكر",
+            optFemale: "أنثى",
+            lblPatMarital: "الحالة الزوجية",
+            optSelMarital: "اختر الحالة",
+            optSingle: "أعزب / عزباء",
+            optMarried: "متزوج / متزوجة",
+            optDivorced: "مطلق / مطلقة",
+            optWidow: "أرمل / أرملة",
+            lblPatJob: "المهنة",
+            optSelJob: "اختر المهنة",
+            optJobEmp: "موظف",
+            optJobFree: "عمل حر",
+            optJobHouse: "ربة منزل",
+            optJobStud: "طالب",
+            optJobOther: "أخرى",
+            lblPatPhone: "رقم الهاتـف",
+            lblPatDate: "تاريخ الزيارة الأولية",
+            btnSavePatRec: "حفظ وفتح السجل الطبي",
+
+            // Archive Filter
+            searchPlaceholder: "🔍 البحث بالاسم أو رقم الهاتف...",
+            optAllGenders: "جميع الأجناس",
+            optFilterMale: "ذكور",
+            optFilterFemale: "إناث",
+            optAllAges: "جميع الأعمار",
+            optChild: "أطفال (< 18)",
+            optAdult: "بالغين (18 - 50)",
+            optSenior: "كبار السن (> 50)",
+
+            // Medical Record Screen
+            txtEdit: "تعديل",
+            txtDelete: "حذف",
+            btnDownloadPDF: "تحميل تقرير ملف المريض الشامل PDF",
+            btnAddVisit: "+ إضافة زيارة جديدة",
+
+            // Dictionary Screen
+            optCatDrugs: "الأدوية والجرعات",
+            optCatLabs: "تحاليل المختبر",
+            optCatScans: "الأشعة والرنين",
+            optCatNotes: "التشخيص والملاحظات",
+            optCatMh: "مصطلحات التاريخ المرضي",
+
+            // Trash Screen
+            trashTitleText: "سلة المهملات",
+            txtEmptyTranslation: "إفراغ سلة المهملات",
+            trashSubText: "يمكنك استعادة المرضى أو الزيارات المحذوفة إلى أماكنها الأصلية فوراً، أو إفراغ السلة نهائياً."
         },
         en: {
             loginTitle: "User Login",
@@ -1321,7 +1374,60 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v16.92"
+            footer: "Clinic Master Network v16.92",
+
+            // New Patient Form
+            patInfoTitle: "Personal Information",
+            lblPatName: "Full Name *",
+            lblPatAge: "Age *",
+            lblPatGender: "Gender",
+            optSelGender: "Select Gender",
+            optMale: "Male",
+            optFemale: "Female",
+            lblPatMarital: "Marital Status",
+            optSelMarital: "Select Status",
+            optSingle: "Single",
+            optMarried: "Married",
+            optDivorced: "Divorced",
+            optWidow: "Widow",
+            lblPatJob: "Occupation",
+            optSelJob: "Select Occupation",
+            optJobEmp: "Employee",
+            optJobFree: "Free Business",
+            optJobHouse: "Housewife",
+            optJobStud: "Student",
+            optJobOther: "Other",
+            lblPatPhone: "Phone Number",
+            lblPatDate: "Initial Visit Date",
+            btnSavePatRec: "Save & Open Medical Record",
+
+            // Archive Filter
+            searchPlaceholder: "🔍 Search by Name or Phone Number...",
+            optAllGenders: "All Genders",
+            optFilterMale: "Male",
+            optFilterFemale: "Female",
+            optAllAges: "All Age Groups",
+            optChild: "Children (< 18)",
+            optAdult: "Adults (18 - 50)",
+            optSenior: "Seniors (> 50)",
+
+            // Medical Record Screen
+            txtEdit: "Edit",
+            txtDelete: "Delete",
+            btnDownloadPDF: "Download Comprehensive PDF Report",
+            btnAddVisit: "+ Add New Visit",
+
+            // Dictionary Screen
+            optCatDrugs: "Medications & Doses",
+            optCatLabs: "Lab Tests",
+            optCatScans: "Radiology & Scans",
+            optCatNotes: "Diagnosis & Notes",
+            optCatMh: "Medical History Terms",
+
+            // Trash Screen
+            trashTitleText: "Trash Bin",
+            txtEmptyTranslation: "Empty Trash",
+            trashSubText: "You can restore deleted patients or specific visits back to their original locations instantly, or empty the trash completely."
         }
     };
 
@@ -1342,11 +1448,20 @@
         currentLang = currentLang === 'ar' ? 'en' : 'ar';
         localStorage.setItem('clinic_lang', currentLang);
         applyLanguage();
+        
+        // Refresh active views if open
+        if (document.getElementById('archiveScreen').style.display === 'block') {
+            openPatientsArchive();
+        } else if (document.getElementById('dictScreen').style.display === 'block') {
+            renderDictTerms();
+        } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
+            const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+            if (patient) renderVisits(patient.visits || []);
+        }
     }
 
     function applyLanguage() {
         const t = translations[currentLang];
-        
         const isAr = currentLang === 'ar';
         document.body.style.direction = isAr ? 'rtl' : 'ltr';
 
@@ -1371,6 +1486,7 @@
         document.getElementById('dropSupportText').innerText = t.dropSupport;
         document.getElementById('dropLogoutText').innerText = t.dropLogout;
 
+        // Main Menu Groups & Cards
         document.getElementById('secGroup1').innerHTML = `<i class="fa-solid fa-stethoscope"></i> ${t.group1}`;
         document.getElementById('menuNewPatientTitle').innerText = t.newPatient;
         document.getElementById('menuNewPatientSub').innerText = t.newPatientSub;
@@ -1398,6 +1514,59 @@
         document.getElementById('menuPermSub').innerText = t.permissionsSub;
         document.getElementById('menuNetTitle').innerText = t.networkDb;
         document.getElementById('menuNetSub').innerText = t.networkDbSub;
+
+        // New Patient Form
+        document.getElementById('patInfoTitle').innerHTML = `<i class="fa-solid fa-id-card"></i> ${t.patInfoTitle}`;
+        document.getElementById('lblPatName').innerText = t.lblPatName;
+        document.getElementById('lblPatAge').innerText = t.lblPatAge;
+        document.getElementById('lblPatGender').innerText = t.lblPatGender;
+        document.getElementById('optSelGender').innerText = t.optSelGender;
+        document.getElementById('optMale').innerText = t.optMale;
+        document.getElementById('optFemale').innerText = t.optFemale;
+        document.getElementById('lblPatMarital').innerText = t.lblPatMarital;
+        document.getElementById('optSelMarital').innerText = t.optSelMarital;
+        document.getElementById('optSingle').innerText = t.optSingle;
+        document.getElementById('optMarried').innerText = t.optMarried;
+        document.getElementById('optDivorced').innerText = t.optDivorced;
+        document.getElementById('optWidow').innerText = t.optWidow;
+        document.getElementById('lblPatJob').innerText = t.lblPatJob;
+        document.getElementById('optSelJob').innerText = t.optSelJob;
+        document.getElementById('optJobEmp').innerText = t.optJobEmp;
+        document.getElementById('optJobFree').innerText = t.optJobFree;
+        document.getElementById('optJobHouse').innerText = t.optJobHouse;
+        document.getElementById('optJobStud').innerText = t.optJobStud;
+        document.getElementById('optJobOther').innerText = t.optJobOther;
+        document.getElementById('lblPatPhone').innerText = t.lblPatPhone;
+        document.getElementById('lblPatDate').innerText = t.lblPatDate;
+        document.getElementById('btnSavePatRec').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> ${t.btnSavePatRec}`;
+
+        // Archive Search Placeholders & Filters
+        document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+        document.getElementById('optAllGenders').innerText = t.optAllGenders;
+        document.getElementById('optFilterMale').innerText = t.optFilterMale;
+        document.getElementById('optFilterFemale').innerText = t.optFilterFemale;
+        document.getElementById('optAllAges').innerText = t.optAllAges;
+        document.getElementById('optChild').innerText = t.optChild;
+        document.getElementById('optAdult').innerText = t.optAdult;
+        document.getElementById('optSenior').innerText = t.optSenior;
+
+        // Medical Record Screen buttons
+        document.getElementById('txtEdit').innerText = t.txtEdit;
+        document.getElementById('txtDelete').innerText = t.txtDelete;
+        document.getElementById('btnDownloadPDF').innerHTML = `<i class="fa-solid fa-file-pdf"></i> ${t.btnDownloadPDF}`;
+        document.getElementById('btnAddVisit').innerHTML = `<i class="fa-solid fa-calendar-plus"></i> ${t.btnAddVisit}`;
+
+        // Dictionary Options
+        document.getElementById('optCatDrugs').innerText = t.optCatDrugs;
+        document.getElementById('optCatLabs').innerText = t.optCatLabs;
+        document.getElementById('optCatScans').innerText = t.optCatScans;
+        document.getElementById('optCatNotes').innerText = t.optCatNotes;
+        document.getElementById('optCatMh').innerText = t.optCatMh;
+
+        // Trash Screen
+        document.getElementById('trashTitleText').innerHTML = `<i class="fa-solid fa-trash-can"></i> ${t.trashTitleText}`;
+        document.getElementById('txtEmptyTrash').innerText = t.txtEmptyTranslation;
+        document.getElementById('trashSubText').innerText = t.trashSubText;
 
         document.getElementById('footerText').innerText = t.footer;
     }
@@ -3669,7 +3838,7 @@
         const newVisit = {
             visitId: Date.now(),
             date: today,
-            mdHistory: {},
+            medHistory: {},
             bpSystolic: '',
             bpDiastolic: '',
             spo2: '',
