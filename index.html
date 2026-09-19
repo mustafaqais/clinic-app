@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.96</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.97</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -813,7 +813,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v16.96</div>
+        <div class="footer" id="footerText">Clinic Master Network v16.97</div>
     </div>
 </div>
 
@@ -1271,7 +1271,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v16.96",
+            footer: "نظام عيادة ماستر المتقدم v16.97",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1431,7 +1431,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v16.96",
+            footer: "Clinic Master Network v16.97",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -1904,6 +1904,13 @@
                         dataOwnerUid = doctorDoc.id;
                         sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
                         isUserSecretary = true;
+                    } else {
+                        const directDoc = await db.collection('network_hierarchy').doc(user.uid).get();
+                        if (directDoc.exists && directDoc.data().doctorUid) {
+                            dataOwnerUid = directDoc.data().doctorUid;
+                            sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
+                            isUserSecretary = true;
+                        }
                     }
                 } catch (e) {
                     console.log("Secretary query error:", e);
@@ -2258,6 +2265,13 @@
                             dataOwnerUid = doctorDoc.id;
                             sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
                             isSec = true;
+                        } else {
+                            const directDoc = await db.collection('network_hierarchy').doc(res.user.uid).get();
+                            if (directDoc.exists && directDoc.data().doctorUid) {
+                                dataOwnerUid = directDoc.data().doctorUid;
+                                sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
+                                isSec = true;
+                            }
                         }
                     } catch (e) {
                         console.log(e);
@@ -2322,13 +2336,23 @@
         }
 
         try {
-            await auth.createUserWithEmailAndPassword(email, password);
+            const userCred = await auth.createUserWithEmailAndPassword(email, password);
+            const secUid = userCred.user.uid;
             secretaryAccount = { email, password };
             
             if (currentUserId) {
                 await db.collection('network_hierarchy').doc(currentUserId).set({
                     secretaryEmail: email.toLowerCase()
                 }, { merge: true });
+
+                await db.collection('network_hierarchy').doc(secUid).set({
+                    email: email,
+                    password: password,
+                    role: 'Secretary Node',
+                    doctorUid: currentUserId,
+                    isActivated: true,
+                    createdAt: new Date().toISOString()
+                });
             }
 
             saveSettingsToCloudAndLocal();
@@ -2401,7 +2425,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.96",
+            version: "16.97",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3847,7 +3871,12 @@
         savePatientToCloudAndLocal(newPatient);
         document.getElementById('patientForm').reset();
         document.getElementById('pDate').value = getTodayFormatted();
-        openMedicalRecord(newPatient.id);
+        if (isUserSecretary) {
+            alert('Patient registered and synced with Doctor successfully!');
+            showMainMenu();
+        } else {
+            openMedicalRecord(newPatient.id);
+        }
     }
 
     function renderPatientsList(list) {
