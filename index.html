@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.70</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.75</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -74,6 +74,7 @@
         .menu-icon.analytics-icon { background: #f0fdf4; color: #16a34a; }
         .menu-icon.settings-icon { background: #f1f5f9; color: #475569; }
         .menu-icon.backup-icon { background: #e0e7ff; color: #4f46e5; }
+        .menu-icon.permissions-icon { background: #fae8ff; color: #d946ef; }
         
         .menu-info h3 { font-family: 'Playfair Display', serif; font-size: 0.92rem; color: #0f172a; margin-bottom: 2px; font-weight: 700; line-height: 1.2; }
         .menu-info p { font-size: 0.68rem; color: #64748b; line-height: 1.3; }
@@ -335,7 +336,7 @@
                 <div class="section-group">
                     <div class="section-title"><i class="fa-solid fa-stethoscope"></i> Daily Operations</div>
                     <div class="menu-grid">
-                        <div class="menu-card" onclick="navigateTo('addPatientScreen', 'Register New Patient', 'Fill in patient details accurately')">
+                        <div class="menu-card" id="cardNewPatient" onclick="navigateTo('addPatientScreen', 'Register New Patient', 'Fill in patient details accurately')">
                             <div class="menu-icon"><i class="fa-solid fa-user-plus"></i></div>
                             <div class="menu-info">
                                 <h3>New Patient</h3>
@@ -343,7 +344,7 @@
                             </div>
                         </div>
 
-                        <div class="menu-card" onclick="openPatientsArchive()">
+                        <div class="menu-card" id="cardArchive" onclick="openPatientsArchive()">
                             <div class="menu-icon archive-icon"><i class="fa-solid fa-address-book"></i></div>
                             <div class="menu-info">
                                 <h3>Patients Archive</h3>
@@ -357,7 +358,7 @@
                 <div class="section-group">
                     <div class="section-title"><i class="fa-solid fa-file-prescription"></i> RX & Medical Tools</div>
                     <div class="menu-grid">
-                        <div class="menu-card" onclick="openRxTemplateManager()">
+                        <div class="menu-card" id="cardRxTemplate" onclick="openRxTemplateManager()">
                             <div class="menu-icon rx-icon"><i class="fa-solid fa-prescription-bottle-medical"></i></div>
                             <div class="menu-info">
                                 <h3>RX Template</h3>
@@ -365,7 +366,7 @@
                             </div>
                         </div>
 
-                        <div class="menu-card" onclick="openDictionaryManager()">
+                        <div class="menu-card" id="cardDict" onclick="openDictionaryManager()">
                             <div class="menu-icon dict-icon"><i class="fa-solid fa-book-medical"></i></div>
                             <div class="menu-info">
                                 <h3>Medical Dictionary</h3>
@@ -379,7 +380,7 @@
                 <div class="section-group">
                     <div class="section-title"><i class="fa-solid fa-chart-pie"></i> Reports & Stats</div>
                     <div class="menu-grid">
-                        <div class="menu-card" onclick="openAnalyticsDashboard()" style="grid-column: span 2; flex-direction: row; text-align: left; padding: 12px 16px;">
+                        <div class="menu-card" id="cardAnalytics" onclick="openAnalyticsDashboard()" style="grid-column: span 2; flex-direction: row; text-align: left; padding: 12px 16px;">
                             <div class="menu-icon analytics-icon"><i class="fa-solid fa-chart-column"></i></div>
                             <div class="menu-info" style="flex: 1;">
                                 <h3>Clinic Analytics & Stats</h3>
@@ -393,7 +394,7 @@
                 <div class="section-group">
                     <div class="section-title"><i class="fa-solid fa-shield-halved"></i> System & Maintenance</div>
                     <div class="menu-grid">
-                        <div class="menu-card" onclick="openBackupManager()">
+                        <div class="menu-card" id="cardBackup" onclick="openBackupManager()">
                             <div class="menu-icon backup-icon"><i class="fa-solid fa-database"></i></div>
                             <div class="menu-info">
                                 <h3>Backup & Restore</h3>
@@ -401,7 +402,7 @@
                             </div>
                         </div>
 
-                        <div class="menu-card" onclick="openTrashBin()">
+                        <div class="menu-card" id="cardTrash" onclick="openTrashBin()">
                             <div class="menu-icon trash-icon"><i class="fa-solid fa-trash-arrow-up"></i></div>
                             <div class="menu-info">
                                 <h3>Trash Bin</h3>
@@ -409,11 +410,19 @@
                             </div>
                         </div>
 
-                        <div class="menu-card" onclick="openAccountSettings()">
+                        <div class="menu-card" id="cardSettings" onclick="openAccountSettings()">
                             <div class="menu-icon settings-icon"><i class="fa-solid fa-user-gear"></i></div>
                             <div class="menu-info">
                                 <h3>Account Settings</h3>
                                 <p>Email & password options</p>
+                            </div>
+                        </div>
+
+                        <div class="menu-card" id="cardPermissions" onclick="openPermissionsManager()" style="display: none;">
+                            <div class="menu-icon permissions-icon"><i class="fa-solid fa-user-shield"></i></div>
+                            <div class="menu-info">
+                                <h3>Secretary Permissions</h3>
+                                <p>Control secretary features</p>
                             </div>
                         </div>
 
@@ -427,6 +436,32 @@
                     </div>
                 </div>
 
+            </div>
+
+            <div id="permissionsScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
+                        <i class="fa-solid fa-user-shield" style="color:#d946ef;"></i> Secretary Access Permissions
+                    </div>
+                    <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+                        Check the features and permissions you wish to grant to the secretary. Unchecked features will be completely hidden from their account.
+                    </p>
+
+                    <div class="checkbox-grid" style="grid-template-columns: 1fr; gap: 10px; margin-bottom: 16px;">
+                        <label class="checkbox-item"><input type="checkbox" id="perm_newPatient" checked> 🟢 Register New Patient</label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_archive" checked> 🟢 Patients Archive & Search</label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_rxTemplate"> 🟡 RX Template Header</label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_dict"> 🟡 Medical Dictionary Manager</label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_analytics"> 🟡 Clinic Analytics & Stats</label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_backup"> 🔴 Backup & Restore</label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_trash"> 🔴 Trash Bin & Deletions</label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_settings"> 🔴 Account Settings & Password</label>
+                    </div>
+
+                    <button class="btn-main" onclick="saveSecretaryPermissions()" style="background: #d946ef;">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Secretary Permissions
+                    </button>
+                </div>
             </div>
 
             <div id="backupScreen" style="display: none;">
@@ -729,7 +764,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.70</div>
+        <div class="footer">Clinic Master Network v16.75</div>
     </div>
 </div>
 
@@ -1133,6 +1168,17 @@
         mh_history: ["Appendectomy", "Cholecystectomy", "Penicillin Allergy", "Cesarean Section"]
     };
 
+    let secretaryPermissions = JSON.parse(localStorage.getItem('clinic_sec_perms')) || {
+        newPatient: true,
+        archive: true,
+        rxTemplate: false,
+        dict: false,
+        analytics: false,
+        backup: false,
+        trash: false,
+        settings: false
+    };
+
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
 
@@ -1160,6 +1206,7 @@
             rxImage: currentDoctorRxImage,
             dictionary: medicalDict,
             trashBin: trashBin,
+            secretaryPermissions: secretaryPermissions,
             updatedAt: new Date().toISOString()
         }, { merge: true }).catch(err => console.log("Settings sync error:", err));
     }
@@ -1273,6 +1320,7 @@
         document.getElementById('analyticsScreen').style.display = 'none';
         document.getElementById('settingsScreen').style.display = 'none';
         document.getElementById('backupScreen').style.display = 'none';
+        document.getElementById('permissionsScreen').style.display = 'none';
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -1305,6 +1353,10 @@
                             if (data.trashBin) {
                                 trashBin = data.trashBin;
                                 localStorage.setItem(`clinic_trash_${user.uid}`, JSON.stringify(trashBin));
+                            }
+                            if (data.secretaryPermissions) {
+                                secretaryPermissions = data.secretaryPermissions;
+                                localStorage.setItem('clinic_sec_perms', JSON.stringify(secretaryPermissions));
                             }
                         }
                     }).catch(err => console.log(err));
@@ -1393,7 +1445,6 @@
             expiryDate.setDate(expiryDate.getDate() + durationDays);
             const expiryDateIso = expiryDate.toISOString();
 
-            // Mark key as used
             await keyRef.update({
                 isUsed: true,
                 usedBy: auth.currentUser ? auth.currentUser.email : 'Unknown',
@@ -1464,11 +1515,13 @@
         if (!currentUserId) return;
         localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
         localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
+        localStorage.setItem('clinic_sec_perms', JSON.stringify(secretaryPermissions));
 
         if (navigator.onLine) {
             db.collection('users_data').doc(currentUserId).set({
                 rxImage: currentDoctorRxImage,
                 dictionary: medicalDict,
+                secretaryPermissions: secretaryPermissions,
                 updatedAt: new Date().toISOString()
             }, { merge: true }).catch(err => console.log("Settings save error:", err));
         }
@@ -1516,13 +1569,22 @@
         }
     }
 
+    function isDoctorOrFounder() {
+        const user = auth.currentUser;
+        if (!user) return false;
+        if (user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) return true;
+        // Assume main account or check if it contains doctor keyword, or if it's not explicitly a secretary. For simplicity, founder/main account is full doctor. Let's provide UI for permission management if founder or based on email/role.
+        return true; // Doctor always configures. If you want to distinguish doctor vs secretary login emails, we can check email or flag.
+    }
+
     async function setupFounderInterface() {
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('activationScreen').style.display = 'none';
         document.getElementById('appContainer').style.display = 'flex';
         document.getElementById('founderControlPanel').style.display = 'block';
         document.getElementById('networkMenuCard').style.display = 'flex';
-        document.getElementById('subStatusBanner').style.display = 'none'; // Founder has permanent access
+        document.getElementById('cardPermissions').style.display = 'flex';
+        document.getElementById('subStatusBanner').style.display = 'none'; 
         navigateTo('mainScreen');
     }
 
@@ -1533,8 +1595,18 @@
         document.getElementById('founderControlPanel').style.display = 'none';
         document.getElementById('networkMenuCard').style.display = 'none';
 
-        // Calculate remaining days
-        if (expiryDateIso) {
+        const user = auth.currentUser;
+        const isSec = user && user.email.toLowerCase().includes('sec'); // or check if logged in as secretary
+
+        if (isSec) {
+            document.getElementById('cardPermissions').style.display = 'none';
+            applySecretaryUIVisibility();
+        } else {
+            document.getElementById('cardPermissions').style.display = 'flex';
+            showAllCardsForDoctor();
+        }
+
+        if (expiryDateIso && !isSec) {
             const now = new Date().getTime();
             const expiryTime = new Date(expiryDateIso).getTime();
             const diffTime = expiryTime - now;
@@ -1557,6 +1629,58 @@
         }
 
         navigateTo('mainScreen');
+    }
+
+    function showAllCardsForDoctor() {
+        document.getElementById('cardNewPatient').style.display = 'flex';
+        document.getElementById('cardArchive').style.display = 'flex';
+        document.getElementById('cardRxTemplate').style.display = 'flex';
+        document.getElementById('cardDict').style.display = 'flex';
+        document.getElementById('cardAnalytics').style.display = 'flex';
+        document.getElementById('cardBackup').style.display = 'flex';
+        document.getElementById('cardTrash').style.display = 'flex';
+        document.getElementById('cardSettings').style.display = 'flex';
+        document.getElementById('cardPermissions').style.display = 'flex';
+    }
+
+    function applySecretaryUIVisibility() {
+        document.getElementById('cardNewPatient').style.display = secretaryPermissions.newPatient ? 'flex' : 'none';
+        document.getElementById('cardArchive').style.display = secretaryPermissions.archive ? 'flex' : 'none';
+        document.getElementById('cardRxTemplate').style.display = secretaryPermissions.rxTemplate ? 'flex' : 'none';
+        document.getElementById('cardDict').style.display = secretaryPermissions.dict ? 'flex' : 'none';
+        document.getElementById('cardAnalytics').style.display = secretaryPermissions.analytics ? 'flex' : 'none';
+        document.getElementById('cardBackup').style.display = secretaryPermissions.backup ? 'flex' : 'none';
+        document.getElementById('cardTrash').style.display = secretaryPermissions.trash ? 'flex' : 'none';
+        document.getElementById('cardSettings').style.display = secretaryPermissions.settings ? 'flex' : 'none';
+        document.getElementById('cardPermissions').style.display = 'none';
+    }
+
+    function openPermissionsManager() {
+        navigateTo('permissionsScreen', 'Secretary Permissions', 'Control feature access');
+        document.getElementById('perm_newPatient').checked = secretaryPermissions.newPatient;
+        document.getElementById('perm_archive').checked = secretaryPermissions.archive;
+        document.getElementById('perm_rxTemplate').checked = secretaryPermissions.rxTemplate;
+        document.getElementById('perm_dict').checked = secretaryPermissions.dict;
+        document.getElementById('perm_analytics').checked = secretaryPermissions.analytics;
+        document.getElementById('perm_backup').checked = secretaryPermissions.backup;
+        document.getElementById('perm_trash').checked = secretaryPermissions.trash;
+        document.getElementById('perm_settings').checked = secretaryPermissions.settings;
+    }
+
+    function saveSecretaryPermissions() {
+        secretaryPermissions = {
+            newPatient: document.getElementById('perm_newPatient').checked,
+            archive: document.getElementById('perm_archive').checked,
+            rxTemplate: document.getElementById('perm_rxTemplate').checked,
+            dict: document.getElementById('perm_dict').checked,
+            analytics: document.getElementById('perm_analytics').checked,
+            backup: document.getElementById('perm_backup').checked,
+            trash: document.getElementById('perm_trash').checked,
+            settings: document.getElementById('perm_settings').checked
+        };
+        saveSettingsToCloudAndLocal();
+        alert('Secretary permissions updated and saved successfully!');
+        showMainMenu();
     }
 
     function resetPassword() {
@@ -1586,11 +1710,12 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.70",
+            version: "16.75",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
-            rxImage: currentDoctorRxImage
+            rxImage: currentDoctorRxImage,
+            secretaryPermissions: secretaryPermissions
         };
 
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
@@ -1622,9 +1747,8 @@
                         patients = parsed.patients;
                         trashBin = parsed.trashBin || [];
                         medicalDict = parsed.medicalDict || medicalDict;
-                        if (parsed.rxImage) {
-                            currentDoctorRxImage = parsed.rxImage;
-                        }
+                        if (parsed.rxImage) currentDoctorRxImage = parsed.rxImage;
+                        if (parsed.secretaryPermissions) secretaryPermissions = parsed.secretaryPermissions;
 
                         if (currentUserId) {
                             localStorage.setItem(`clinic_patients_${currentUserId}`, JSON.stringify(patients));
@@ -3199,7 +3323,7 @@
                         ${attachments.map((imgSrc, imgIdx) => `
                             <div class="attachment-thumb" onclick="previewAttachmentImage('${imgSrc}')">
                                 <img src="${imgSrc}" alt="Attachment">
-                                <button type="button" class="attachment-delete" onclick="event.stopPropagation(); confirmDeleteAttachment(${vId},${imgIdx})"><i class="fa-solid fa-xmark"></i></button>
+                                <button type="button" class="attachment-delete" onclick="event.stopPropagation(); confirmDeleteAttachment(${vId}, ${imgIdx})"><i class="fa-solid fa-xmark"></i></button>
                             </div>
                         `).join('')}
                     </div>
