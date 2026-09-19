@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.68</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.69</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -35,7 +35,7 @@
         .forgot-pass { font-size: 0.78rem; color: #0284c7; text-align: right; cursor: pointer; margin-top: -6px; font-weight: 600; }
 
         .founder-panel { background: #f0fdfa; border: 2px dashed #0d9488; border-radius: 16px; padding: 14px; margin-bottom: 16px; text-align: center; }
-        .founder-code-display { font-size: 1.3rem; font-weight: 900; color: #0f766e; letter-spacing: 2px; margin: 6px 0; background: #fff; padding: 6px; border-radius: 8px; border: 1px solid #ccfbf1; }
+        .founder-code-display { font-size: 1.1rem; font-weight: 900; color: #0f766e; letter-spacing: 1px; margin: 4px 0; background: #fff; padding: 6px; border-radius: 8px; border: 1px solid #ccfbf1; word-break: break-all; }
 
         .network-status-bar { background: #fef3c7; color: #b45309; font-size: 0.72rem; font-weight: 700; text-align: center; padding: 4px; display: none; }
         .network-status-bar.offline { display: block; background: #fee2e2; color: #b91c1c; }
@@ -277,12 +277,12 @@
     <div id="activationScreen" class="auth-screen" style="display: none;">
         <div class="activ-icon"><i class="fa-solid fa-shield-halved"></i></div>
         <div class="activ-title">Account Activation Required</div>
-        <div class="activ-sub">Please enter the one-time activation code. Once used, it will expire permanently.</div>
+        <div class="activ-sub">Please enter your 14-Day Trial, 7-Day Extension, or Annual Subscription code.</div>
         <div class="field-box" style="width: 100%; text-align: left;">
-            <span class="field-label">One-Time Activation Code</span>
+            <span class="field-label">Activation / Subscription Code</span>
             <div class="input-wrapper"><input type="text" id="activationInput" placeholder="Enter code..." style="text-align: center; letter-spacing: 2px; text-transform: uppercase;"></div>
         </div>
-        <button class="btn-main" onclick="verifyOneTimeCode()">Activate Account</button>
+        <button class="btn-main" onclick="verifyActivationCode()">Activate System</button>
     </div>
 
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column;">
@@ -304,11 +304,16 @@
         <div class="content">
             <div id="mainScreen" style="display: none;">
                 
-                <!-- Founder Control Panel (Visible only to founder email) -->
+                <!-- Founder Control Panel (Visible only to founder email to generate keys) -->
                 <div class="founder-panel" id="founderControlPanel" style="display: none;">
-                    <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;">🔑 Single-Use Activation Code:</span>
-                    <div class="founder-code-display" id="dynamicFounderCode">Loading...</div>
-                    <span style="font-size: 0.72rem; color: #64748b;">Give this code to a new user. It burns permanently after 1 use.</span>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;">🔑 Code Generator (Founder):</span>
+                    <div style="display: flex; gap: 6px; margin: 6px 0;">
+                        <button onclick="generateNewKey('TRIAL')" style="flex:1; background:#0d9488; color:#fff; border:none; border-radius:6px; padding:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">14d Trial</button>
+                        <button onclick="generateNewKey('EXT')" style="flex:1; background:#d97706; color:#fff; border:none; border-radius:6px; padding:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">7d Extension</button>
+                        <button onclick="generateNewKey('ANNUAL')" style="flex:1; background:#4f46e5; color:#fff; border:none; border-radius:6px; padding:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">1y Annual</button>
+                    </div>
+                    <div class="founder-code-display" id="dynamicFounderCode">Click buttons above to generate key</div>
+                    <span style="font-size: 0.7rem; color: #64748b;" id="keyTypeHint">Select type to create valid code.</span>
                 </div>
 
                 <!-- Group 1: Daily Clinic Operations -->
@@ -709,7 +714,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.68</div>
+        <div class="footer">Clinic Master Network v16.69</div>
     </div>
 </div>
 
@@ -1144,13 +1149,37 @@
         }, { merge: true }).catch(err => console.log("Settings sync error:", err));
     }
 
-    function generateUniqueCode() {
+    function generateKey(type) {
         const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        let code = "ONCE-";
-        for (let i = 0; i < 6; i++) {
+        let code = type + "-";
+        for (let i = 0; i < 8; i++) {
             code += chars.charAt(Math.floor(Math.random() * chars.length));
         }
         return code;
+    }
+
+    async function generateNewKey(type) {
+        let prefix = "TRL"; // 14 Days Trial
+        let days = 14;
+        if (type === 'EXT') { prefix = "EXT"; days = 7; }
+        else if (type === 'ANNUAL') { prefix = "ANN"; days = 365; }
+
+        const newCode = generateKey(prefix);
+        const codeDocRef = db.collection('activation_keys').doc(newCode);
+
+        try {
+            await codeDocRef.set({
+                code: newCode,
+                type: type,
+                durationDays: days,
+                isUsed: false,
+                createdAt: new Date().toISOString()
+            });
+            document.getElementById('dynamicFounderCode').innerText = newCode;
+            document.getElementById('keyTypeHint').innerText = `Generated (${type}) valid for ${days} days.`;
+        } catch (e) {
+            alert('Error generating key: ' + e.message);
+        }
     }
 
     let screenHistory = ['mainScreen'];
@@ -1280,27 +1309,7 @@
                 if (user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
                     setupFounderInterface();
                 } else {
-                    const isActivated = localStorage.getItem(`activated_${user.uid}`) === 'true';
-                    if (!isActivated) {
-                        if (navigator.onLine) {
-                            db.collection('network_hierarchy').doc(user.uid).get().then(docRef => {
-                                if (docRef.exists && docRef.data().isActivated === true) {
-                                    localStorage.setItem(`activated_${user.uid}`, 'true');
-                                    setupClientInterface();
-                                } else {
-                                    document.getElementById('authScreen').style.display = 'none';
-                                    document.getElementById('activationScreen').style.display = 'flex';
-                                }
-                            }).catch(() => {
-                                document.getElementById('authScreen').style.display = 'none';
-                                document.getElementById('activationScreen').style.display = 'flex';
-                            });
-                        } else {
-                            setupClientInterface();
-                        }
-                    } else {
-                        setupClientInterface();
-                    }
+                    checkUserSubscriptionStatus(user.uid);
                 }
             } else {
                 currentUserId = null;
@@ -1313,6 +1322,99 @@
         initDraggableElements();
         loadSavedRxLayout();
     });
+
+    async function checkUserSubscriptionStatus(uid) {
+        if (!navigator.onLine) {
+            // Offline fallback check local storage subscription expiry
+            const expiryDate = localStorage.getItem(`sub_expiry_${uid}`);
+            if (expiryDate && new Date().getTime() < new Date(expiryDate).getTime()) {
+                setupClientInterface();
+            } else {
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('activationScreen').style.display = 'flex';
+            }
+            return;
+        }
+
+        try {
+            const docRef = await db.collection('network_hierarchy').doc(uid).get();
+            if (docRef.exists) {
+                const data = docRef.data();
+                const expiryDateStr = data.expiryDate;
+                if (expiryDateStr && new Date().getTime() < new Date(expiryDateStr).getTime()) {
+                    localStorage.setItem(`sub_expiry_${uid}`, expiryDateStr);
+                    setupClientInterface();
+                } else {
+                    document.getElementById('authScreen').style.display = 'none';
+                    document.getElementById('activationScreen').style.display = 'flex';
+                }
+            } else {
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('activationScreen').style.display = 'flex';
+            }
+        } catch (e) {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('activationScreen').style.display = 'flex';
+        }
+    }
+
+    async function verifyActivationCode() {
+        const inputCode = document.getElementById('activationInput').value.trim().toUpperCase();
+        if (!inputCode) { alert('Please enter an activation code.'); return; }
+
+        if (!navigator.onLine) {
+            alert('Internet connection required to verify activation code.');
+            return;
+        }
+
+        try {
+            const keyRef = db.collection('activation_keys').doc(inputCode);
+            const keyDoc = await keyRef.get();
+
+            if (!keyDoc.exists) {
+                alert('Invalid activation code! Please check with the system founder.');
+                return;
+            }
+
+            const keyData = keyDoc.data();
+            if (keyData.isUsed === true) {
+                alert('This activation code has already been used!');
+                return;
+            }
+
+            const durationDays = keyData.durationDays || 14;
+            const expiryDate = new Date();
+            expiryDate.setDate(expiryDate.getDate() + durationDays);
+            const expiryDateIso = expiryDate.toISOString();
+
+            // Mark key as used
+            await keyRef.update({
+                isUsed: true,
+                usedBy: auth.currentUser ? auth.currentUser.email : 'Unknown',
+                usedAt: new Date().toISOString()
+            });
+
+            const user = auth.currentUser;
+            if (user) {
+                localStorage.setItem(`sub_expiry_${user.uid}`, expiryDateIso);
+                await db.collection('network_hierarchy').doc(user.uid).set({
+                    email: user.email,
+                    password: pendingUserPass || 'Saved',
+                    role: 'Client Node',
+                    isActivated: true,
+                    expiryDate: expiryDateIso,
+                    activatedAt: new Date().toISOString()
+                }, { merge: true });
+            }
+
+            alert(`System activated successfully! Valid until: ${expiryDate.toLocaleDateString()}`);
+            document.getElementById('activationScreen').style.display = 'none';
+            setupClientInterface();
+
+        } catch (err) {
+            alert('Error during activation: ' + err.message);
+        }
+    }
 
     function openSupportModal() {
         document.getElementById('supportModal').style.display = 'flex';
@@ -1392,7 +1494,9 @@
                     pendingUserPass = pass;
                     currentUserId = res.user.uid;
                     if (email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
-                        localStorage.setItem(`activated_${res.user.uid}`, 'true');
+                        const expiryDate = new Date();
+                        expiryDate.setFullYear(expiryDate.getFullYear() + 10);
+                        localStorage.setItem(`sub_expiry_${res.user.uid}`, expiryDate.toISOString());
                         setupFounderInterface();
                     } else {
                         document.getElementById('authScreen').style.display = 'none';
@@ -1406,68 +1510,6 @@
         }
     }
 
-    async function getOrInitActiveCode() {
-        const codeDocRef = db.collection('system_settings').doc('active_code');
-        try {
-            const doc = await codeDocRef.get();
-            if (doc.exists && doc.data().code && doc.data().isUsed === false) {
-                return doc.data().code;
-            } else {
-                const newCode = generateUniqueCode();
-                await codeDocRef.set({ code: newCode, isUsed: false, createdAt: new Date().toISOString() });
-                return newCode;
-            }
-        } catch (e) {
-            return "ONCE-EXPIRED";
-        }
-    }
-
-    async function verifyOneTimeCode() {
-        const inputCode = document.getElementById('activationInput').value.trim().toUpperCase();
-        const codeDocRef = db.collection('system_settings').doc('active_code');
-
-        try {
-            const doc = await codeDocRef.get();
-            if (!doc.exists) {
-                alert('System error: Activation code not found.');
-                return;
-            }
-
-            const data = doc.data();
-            if (data.isUsed === true || data.code !== inputCode) {
-                alert('This activation code is invalid or has already been used by someone else!');
-                return;
-            }
-
-            const freshNewCode = generateUniqueCode();
-            await codeDocRef.update({
-                code: freshNewCode,
-                isUsed: true,
-                usedBy: auth.currentUser ? auth.currentUser.email : 'Unknown',
-                usedAt: new Date().toISOString()
-            });
-
-            const user = auth.currentUser;
-            if (user) {
-                localStorage.setItem(`activated_${user.uid}`, 'true');
-                await db.collection('network_hierarchy').doc(user.uid).set({
-                    email: user.email,
-                    password: pendingUserPass || 'Saved',
-                    role: 'Client Node',
-                    isActivated: true,
-                    registeredAt: new Date().toISOString()
-                }, { merge: true });
-            }
-
-            alert('Account activated successfully and code burned permanently!');
-            document.getElementById('activationScreen').style.display = 'none';
-            setupClientInterface();
-
-        } catch (err) {
-            alert('Error during code verification: ' + err.message);
-        }
-    }
-
     async function setupFounderInterface() {
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('activationScreen').style.display = 'none';
@@ -1475,13 +1517,6 @@
         document.getElementById('founderControlPanel').style.display = 'block';
         document.getElementById('networkMenuCard').style.display = 'flex';
         navigateTo('mainScreen');
-
-        if (navigator.onLine) {
-            const activeCode = await getOrInitActiveCode();
-            document.getElementById('dynamicFounderCode').innerText = activeCode;
-        } else {
-            document.getElementById('dynamicFounderCode').innerText = "OFFLINE-MODE";
-        }
     }
 
     function setupClientInterface() {
@@ -1520,7 +1555,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.68",
+            version: "16.69",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -1677,7 +1712,7 @@
                     
                     let width = img.width;
                     let height = img.height;
-                    const maxDim = 900; // Optimized dimension for RX template
+                    const maxDim = 900;
 
                     if (width > height && width > maxDim) {
                         height = Math.round((height * maxDim) / width);
@@ -1691,7 +1726,6 @@
                     canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    // High quality compression to keep size under ~50KB
                     currentDoctorRxImage = canvas.toDataURL('image/jpeg', 0.70);
                     saveSettingsToCloudAndLocal();
                     alert('Prescription header image compressed and saved successfully!');
@@ -1727,7 +1761,7 @@
                         <div class="node-info">
                             <h5><i class="fa-solid fa-envelope" style="color:#0d9488;"></i> ${data.email}</h5>
                             <p><b>Password:</b> <span style="color:#9333ea; background:#f3e8ff; padding:2px 6px; border-radius:4px;">${data.password || 'N/A'}</span></p>
-                            <p style="font-size:0.7rem; color:#94a3b8;">Registered: ${data.registeredAt ? data.registeredAt.substring(0, 10) : 'N/A'}</p>
+                            <p style="font-size:0.7rem; color:#94a3b8;">Expires: ${data.expiryDate ? data.expiryDate.substring(0, 10) : 'N/A'}</p>
                         </div>
                         <div><span class="node-badge">Client</span></div>
                     </div>
@@ -2173,7 +2207,6 @@
         if (el) el.focus();
     }
 
-    // High compression function for attachments (keeps images under ~60KB with high clarity)
     function handleFileUpload(input, visitId) {
         if (input.files && input.files.length > 0) {
             const files = Array.from(input.files);
@@ -2196,7 +2229,7 @@
                         
                         let width = img.width;
                         let height = img.height;
-                        const maxDim = 850; // Optimized max dimension for attachments storage
+                        const maxDim = 850;
 
                         if (width > height && width > maxDim) {
                             height = Math.round((height * maxDim) / width);
@@ -2210,7 +2243,6 @@
                         canvas.height = height;
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // Compressed JPEG at 0.65 quality to ensure ultra-small storage footprint
                         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.65);
 
                         visit.attachments.push(compressedBase64);
@@ -3175,7 +3207,6 @@
         const newVisit = {
             visitId: Date.now(),
             date: today,
-        
             medHistory: {},
             bpSystolic: '',
             bpDiastolic: '',
