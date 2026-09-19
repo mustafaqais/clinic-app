@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.64</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.65</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -378,24 +378,27 @@
             <div id="backupScreen" style="display: none;">
                 <div class="group-card">
                     <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
-                        <i class="fa-solid fa-database" style="color:#4f46e5;"></i> نظام النسخ الاحتياطي اليدوي التام
+                        <i class="fa-solid fa-database" style="color:#4f46e5;"></i> نظام النسخ الاحتياطي السريع (Text / JSON)
                     </div>
                     <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
-                        قم بتنزيل نسخة احتياطية كاملة لجميع بيانات مرضاك وسجلاتهم وقاموسك الطبي بصيغة JSON واحفظها على جهازك. يمكنك أيضاً استرجاع البيانات في أي وقت برفع نفس الملف.
+                        قم بتنزيل النسخة الاحتياطية. إذا واجهتك مشكلة في اختيار الملف، يمكنك فتح ملف النسخة الاحتياطية كملف نصي (.txt) أو لصق الكود أدناه مباشرة لاسترجاع البيانات بضغطة زر!
                     </p>
 
                     <button class="btn-main" onclick="exportJsonBackup()" style="background: #4f46e5; margin-bottom: 14px;">
-                        <i class="fa-solid fa-download"></i> تصدير وتحميل النسخة الاحتياطية (Export JSON)
+                        <i class="fa-solid fa-download"></i> تصدير النسخة الاحتياطية (Export Backup)
                     </button>
 
                     <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
 
                     <div class="field-box" style="text-align: left;">
-                        <span class="field-label">استرجاع البيانات من ملف سابق (Restore JSON)</span>
-                        <div class="input-wrapper" style="padding: 10px;">
-                            <input type="file" id="importJsonFileInput" accept=".json" style="font-size: 0.85rem;" onchange="importJsonBackup(this)">
+                        <span class="field-label">طريقة بديلة مضمونة 100%: الصق كود النسخة الاحتياطية هنا</span>
+                        <div class="input-wrapper" style="padding: 6px;">
+                            <textarea id="jsonPasteArea" rows="4" placeholder="الصق محتوى ملف النسخة الاحتياطية هنا..." style="font-size: 0.8rem; font-family: monospace;"></textarea>
                         </div>
                     </div>
+                    <button class="btn-main" onclick="restoreFromJsonPaste()" style="background: #16a34a; margin-top: 6px;">
+                        <i class="fa-solid fa-rotate-left"></i> استرجاع البيانات من اللصق النصي فوراً
+                    </button>
                 </div>
             </div>
 
@@ -675,7 +678,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.64</div>
+        <div class="footer">Clinic Master Network v16.65</div>
     </div>
 </div>
 
@@ -1480,13 +1483,13 @@
 
     function openBackupManager() {
         navigateTo('backupScreen', 'النسخ الاحتياطي', 'تصدير واسترجاع بيانات العيادة');
-        document.getElementById('importJsonFileInput').value = '';
+        document.getElementById('jsonPasteArea').value = '';
     }
 
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "16.64",
+            version: "16.65",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -1503,41 +1506,40 @@
         alert('تم تصدير وتنزيل النسخة الاحتياطية بنجاح!');
     }
 
-    function importJsonBackup(input) {
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const parsed = JSON.parse(e.target.result);
-                    if (!parsed.patients || !Array.isArray(parsed.patients)) {
-                        alert('ملف النسخة الاحتياطية غير صالح أو تالف.');
-                        return;
-                    }
+    function restoreFromJsonPaste() {
+        const rawText = document.getElementById('jsonPasteArea').value.trim();
+        if (!rawText) {
+            alert('الرجاء لصق محتوى النسخة الاحتياطية في الحقل المخصص أولاً.');
+            return;
+        }
 
-                    if (confirm(`هل أنت متأكد من استرجاع البيانات؟ سيتم دمج واستبدال البيانات الحالية بـ (${parsed.patients.length}) مريضاً.`)) {
-                        patients = parsed.patients;
-                        trashBin = parsed.trashBin || [];
-                        medicalDict = parsed.medicalDict || medicalDict;
-                        if (parsed.rxImage) {
-                            currentDoctorRxImage = parsed.rxImage;
-                        }
+        try {
+            const parsed = JSON.parse(rawText);
+            if (!parsed.patients || !Array.isArray(parsed.patients)) {
+                alert('النص المنسوخ غير صالح أو تارف (لا يحتوي على بيانات المرضى).');
+                return;
+            }
 
-                        if (currentUserId) {
-                            localStorage.setItem(`clinic_patients_${currentUserId}`, JSON.stringify(patients));
-                            localStorage.setItem(`clinic_trash_${currentUserId}`, JSON.stringify(trashBin));
-                        }
-                        saveSettingsToCloudAndLocal();
-                        syncLocalDataToCloud();
-
-                        alert('تم استرجاع النسخة الاحتياطية بنجاح وتحديث النظام!');
-                        showMainMenu();
-                    }
-                } catch (err) {
-                    alert('حدث خطأ أثناء قراءة ملف JSON: ' + err.message);
+            if (confirm(`هل أنت متأكد من استرجاع البيانات؟ سيتم دمج واستبدال البيانات الحالية بـ (${parsed.patients.length}) مريضاً.`)) {
+                patients = parsed.patients;
+                trashBin = parsed.trashBin || [];
+                medicalDict = parsed.medicalDict || medicalDict;
+                if (parsed.rxImage) {
+                    currentDoctorRxImage = parsed.rxImage;
                 }
-            };
-            reader.readAsText(file);
+
+                if (currentUserId) {
+                    localStorage.setItem(`clinic_patients_${currentUserId}`, JSON.stringify(patients));
+                    localStorage.setItem(`clinic_trash_${currentUserId}`, JSON.stringify(trashBin));
+                }
+                saveSettingsToCloudAndLocal();
+                syncLocalDataToCloud();
+
+                alert('تم استرجاع النسخة الاحتياطية بنجاح وتحديث النظام!');
+                showMainMenu();
+            }
+        } catch (err) {
+            alert('خطأ في صيغة النص المنسوخ: تأكد من نسخ الكود كاملاً بشكل صحيح. التفاصيل: ' + err.message);
         }
     }
 
