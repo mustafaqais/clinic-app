@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinic Master System - Cloud Ultimate Edition v16.63</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v16.64</title>
     
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -61,6 +61,7 @@
         .menu-icon.trash-icon { background: #fee2e2; color: #ef4444; }
         .menu-icon.analytics-icon { background: #f0fdf4; color: #16a34a; }
         .menu-icon.settings-icon { background: #f1f5f9; color: #475569; }
+        .menu-icon.backup-icon { background: #e0e7ff; color: #4f46e5; }
         .menu-info h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
         .menu-info p { font-size: 0.78rem; color: #64748b; }
 
@@ -325,6 +326,14 @@
                     </div>
                 </div>
 
+                <div class="menu-card" onclick="openBackupManager()">
+                    <div class="menu-icon backup-icon"><i class="fa-solid fa-database"></i></div>
+                    <div class="menu-info">
+                        <h3>Backup & Restore JSON</h3>
+                        <p>Export or restore full clinic database</p>
+                    </div>
+                </div>
+
                 <div class="menu-card" onclick="openTrashBin()">
                     <div class="menu-icon trash-icon"><i class="fa-solid fa-trash-arrow-up"></i></div>
                     <div class="menu-info">
@@ -362,6 +371,30 @@
                     <div class="menu-info">
                         <h3>Hierarchical Network</h3>
                         <p>View connected users & credentials</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="backupScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
+                        <i class="fa-solid fa-database" style="color:#4f46e5;"></i> نظام النسخ الاحتياطي اليدوي التام
+                    </div>
+                    <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+                        قم بتنزيل نسخة احتياطية كاملة لجميع بيانات مرضاك وسجلاتهم وقاموسك الطبي بصيغة JSON واحفظها على جهازك. يمكنك أيضاً استرجاع البيانات في أي وقت برفع نفس الملف.
+                    </p>
+
+                    <button class="btn-main" onclick="exportJsonBackup()" style="background: #4f46e5; margin-bottom: 14px;">
+                        <i class="fa-solid fa-download"></i> تصدير وتحميل النسخة الاحتياطية (Export JSON)
+                    </button>
+
+                    <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
+
+                    <div class="field-box" style="text-align: left;">
+                        <span class="field-label">استرجاع البيانات من ملف سابق (Restore JSON)</span>
+                        <div class="input-wrapper" style="padding: 10px;">
+                            <input type="file" id="importJsonFileInput" accept=".json" style="font-size: 0.85rem;" onchange="importJsonBackup(this)">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -642,7 +675,7 @@
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v16.63</div>
+        <div class="footer">Clinic Master Network v16.64</div>
     </div>
 </div>
 
@@ -1161,6 +1194,7 @@
         document.getElementById('networkScreen').style.display = 'none';
         document.getElementById('analyticsScreen').style.display = 'none';
         document.getElementById('settingsScreen').style.display = 'none';
+        document.getElementById('backupScreen').style.display = 'none';
     }
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -1442,6 +1476,69 @@
             document.getElementById('appContainer').style.display = 'none';
             document.getElementById('authScreen').style.display = 'flex';
         });
+    }
+
+    function openBackupManager() {
+        navigateTo('backupScreen', 'النسخ الاحتياطي', 'تصدير واسترجاع بيانات العيادة');
+        document.getElementById('importJsonFileInput').value = '';
+    }
+
+    function exportJsonBackup() {
+        const backupData = {
+            exportDate: new Date().toISOString(),
+            version: "16.64",
+            patients: patients,
+            trashBin: trashBin,
+            medicalDict: medicalDict,
+            rxImage: currentDoctorRxImage
+        };
+
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+        const downloadAnchor = document.createElement('a');
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", `Clinic_Master_Backup_${getTodayFormatted()}.json`);
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
+        alert('تم تصدير وتنزيل النسخة الاحتياطية بنجاح!');
+    }
+
+    function importJsonBackup(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (!parsed.patients || !Array.isArray(parsed.patients)) {
+                        alert('ملف النسخة الاحتياطية غير صالح أو تالف.');
+                        return;
+                    }
+
+                    if (confirm(`هل أنت متأكد من استرجاع البيانات؟ سيتم دمج واستبدال البيانات الحالية بـ (${parsed.patients.length}) مريضاً.`)) {
+                        patients = parsed.patients;
+                        trashBin = parsed.trashBin || [];
+                        medicalDict = parsed.medicalDict || medicalDict;
+                        if (parsed.rxImage) {
+                            currentDoctorRxImage = parsed.rxImage;
+                        }
+
+                        if (currentUserId) {
+                            localStorage.setItem(`clinic_patients_${currentUserId}`, JSON.stringify(patients));
+                            localStorage.setItem(`clinic_trash_${currentUserId}`, JSON.stringify(trashBin));
+                        }
+                        saveSettingsToCloudAndLocal();
+                        syncLocalDataToCloud();
+
+                        alert('تم استرجاع النسخة الاحتياطية بنجاح وتحديث النظام!');
+                        showMainMenu();
+                    }
+                } catch (err) {
+                    alert('حدث خطأ أثناء قراءة ملف JSON: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
     }
 
     function openAccountSettings() {
