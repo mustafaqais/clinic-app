@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.04</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.05</title>
     
     <!-- PWA & App Icons Integration -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -77,8 +77,10 @@
 
         .sub-status-banner { background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 14px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; text-align: left; }
         .sub-status-banner.warning { background: #fef2f2; border-color: #fca5a5; }
+        .sub-status-banner.expired { background: #fefce8; border-color: #fde047; }
         .sub-status-info h4 { font-size: 0.82rem; font-weight: 800; color: #166534; display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
         .sub-status-banner.warning .sub-status-info h4 { color: #991b1b; }
+        .sub-status-banner.expired .sub-status-info h4 { color: #854d0e; }
         .sub-status-info p { font-size: 0.75rem; color: #475569; }
 
         .network-status-bar { background: #fef3c7; color: #b45309; font-size: 0.72rem; font-weight: 700; text-align: center; padding: 4px; display: none; }
@@ -110,6 +112,8 @@
         
         .menu-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
         .menu-card:hover { border-color: #0d9488; transform: translateY(-2px); }
+        .menu-card.disabled-card { opacity: 0.55; cursor: not-allowed; border-color: #cbd5e1; }
+        .menu-card.disabled-card:hover { transform: none; border-color: #cbd5e1; }
         
         .menu-icon { width: 44px; height: 44px; border-radius: 14px; background: #ccfbf1; color: #0d9488; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
         .menu-icon.archive-icon { background: #e0f2fe; color: #0284c7; }
@@ -366,6 +370,7 @@
         </div>
     </div>
 
+    <!-- نافذة التفعيل تظهر فقط عند التسجيل لأول مرة أو إذا أراد تفعيل اشتراك جديد -->
     <div id="activationScreen" class="auth-screen" style="display: none;">
         <div class="activ-icon"><i class="fa-solid fa-shield-halved"></i></div>
         <div class="activ-title" id="activTitle">Account Activation Required</div>
@@ -827,7 +832,7 @@
             <div id="medicalRecordScreen" style="display: none;">
                 <div class="group-card" style="background: #f0fdfa; border-color: #99f6e4; position: relative;">
                     <div style="position: absolute; top: 14px; right: 14px; display: flex; gap: 6px; z-index: 5;" id="patientRecordHeaderActions">
-                        <button type="button" onclick="openEditPatientModal()" style="background: #0d9488; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                        <button type="button" id="editPatientBtnMain" onclick="openEditPatientModal()" style="background: #0d9488; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
                             <i class="fa-solid fa-pen-to-square"></i> <span id="txtEdit">Edit</span>
                         </button>
                         <button type="button" onclick="confirmDeletePatientRecord()" id="btnDeletePatientMain" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
@@ -844,7 +849,7 @@
                     </button>
                 </div>
 
-                <button class="btn-main btn-secondary" onclick="addNewVisit()" id="btnAddVisit">
+                <button type="button" id="btnAddVisitMain" class="btn-main btn-secondary" onclick="addNewVisit()">
                     <i class="fa-solid fa-calendar-plus"></i> + Add New Visit
                 </button>
 
@@ -877,11 +882,11 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.04</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.05</div>
     </div>
 </div>
 
-<!-- نافذة النسخ الاحتياطي الإجباري الشهري (تظهر يوم 1 من كل شهر) -->
+<!-- نافذة النسخ الاحتياطي الإجباري الشهري -->
 <div id="mandatoryBackupModal" class="modal-overlay" style="z-index: 99999;">
     <div class="modal-body" style="max-width: 420px; text-align: center;">
         <div style="font-size: 45px; color: #4f46e5; margin-bottom: 4px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
@@ -1313,6 +1318,7 @@
     let isConfigMode = false;
     let activeMhInputKey = null;
     let isUserSecretary = false;
+    let isSubscriptionExpired = false; // متغير وضع القراءة فقط
     let patientsListenerUnsubscribe = null;
     let targetNodeUidToDelete = null;
     let targetNodeEmailToDelete = null;
@@ -1373,7 +1379,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.04",
+            footer: "نظام عيادة ماستر المتقدم v17.05",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل (يُفضل إدخال اسم الجد الرابع لمنع التكرار) *",
@@ -1528,7 +1534,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.04",
+            footer: "Clinic Master Network v17.05",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name (Include 4th Grandfather to prevent duplication) *",
@@ -1750,7 +1756,7 @@
         document.getElementById('txtEdit').innerText = t.txtEdit;
         document.getElementById('txtDelete').innerText = t.txtDelete;
         document.getElementById('btnDownloadPDF').innerHTML = `<i class="fa-solid fa-file-pdf"></i> ${t.btnDownloadPDF}`;
-        document.getElementById('btnAddVisit').innerHTML = `<i class="fa-solid fa-calendar-plus"></i> ${t.btnAddVisit}`;
+        document.getElementById('btnAddVisitMain').innerHTML = `<i class="fa-solid fa-calendar-plus"></i> ${t.btnAddVisit}`;
 
         document.getElementById('optCatDrugs').innerText = t.optCatDrugs;
         document.getElementById('optCatLabs').innerText = t.optCatLabs;
@@ -1899,7 +1905,9 @@
     let screenHistory = ['mainScreen'];
 
     function navigateTo(screenId, title = 'Clinic Master System', sub = 'Cloud Secure Dashboard', saveState = true) {
-        autoSaveMedicalRecord();
+        if (!isSubscriptionExpired) {
+            autoSaveMedicalRecord();
+        }
         hideAllScreensInner();
         
         const target = document.getElementById(screenId);
@@ -1930,7 +1938,9 @@
     }
 
     function goBackScreen() {
-        autoSaveMedicalRecord();
+        if (!isSubscriptionExpired) {
+            autoSaveMedicalRecord();
+        }
         if (screenHistory.length > 1) {
             screenHistory.pop();
             const prevScreen = screenHistory[screenHistory.length - 1];
@@ -1958,7 +1968,6 @@
         }
     }
 
-    // تفعيل زر الرجوع الفيزيائي في الهاتف أو المتصفح للرجوع بالتدريج وتجنب الخروج من التطبيق
     window.addEventListener('popstate', function(event) {
         event.preventDefault();
         if (document.getElementById('medHistoryModal').style.display === 'flex') {
@@ -2104,6 +2113,7 @@
                 if (patientsListenerUnsubscribe) patientsListenerUnsubscribe();
                 currentUserId = null;
                 isUserSecretary = false;
+                isSubscriptionExpired = false;
                 sessionStorage.removeItem('target_doctor_uid');
                 document.getElementById('activationScreen').style.display = 'none';
                 document.getElementById('appContainer').style.display = 'none';
@@ -2138,15 +2148,48 @@
             return;
         }
 
+        // فحص ما إذا كان الاشتراك منتهياً لتفعيل "وضع القراءة فقط" بدلاً من قفل التطبيق
         if (expiryDateStr && new Date().getTime() < new Date(expiryDateStr).getTime()) {
+            isSubscriptionExpired = false;
             setupClientInterfaceAfterAuth(expiryDateStr, false);
         } else {
-            document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('activationScreen').style.display = 'flex';
+            // الاشتراك منتهٍ: فتح التطبيق في وضع القراءة فقط (Read-Only Mode)
+            isSubscriptionExpired = true;
+            setupReadOnlyModeAfterExpiration(expiryDateStr);
         }
     }
 
+    function setupReadOnlyModeAfterExpiration(expiryDateIso) {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('activationScreen').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'flex';
+        document.getElementById('founderControlPanel').style.display = 'none';
+        document.getElementById('networkMenuCard').style.display = 'none';
+        document.getElementById('cardPermissions').style.display = 'none';
+        showAllCardsForDoctor();
+
+        // تفعيل تصميم بطاقة مريض جديد كمعطل (Read-Only)
+        const cardNewPat = document.getElementById('cardNewPatient');
+        cardNewPat.classList.add('disabled-card');
+        cardNewPat.onclick = function() {
+            alert('⚠️ انتهت صلاحية الاشتراك السنوي. التطبيق يعمل حالياً في وضع القراءة فقط. يرجى التواصل مع الدعم الفني لتجديد الاشتراك وإضافة مرضى جدد.');
+            openSupportModal();
+        };
+
+        // إظهار بانر منبثق يفيد بأن الاشتراك منتهٍ والتطبيق في وضع القراءة فقط
+        const banner = document.getElementById('subStatusBanner');
+        const titleEl = document.getElementById('subBannerTitle');
+        const textEl = document.getElementById('subBannerText');
+        banner.style.display = 'flex';
+        banner.className = 'sub-status-banner expired';
+        titleEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> انتهت صلاحية الاشتراك - وضع القراءة فقط`;
+        textEl.innerText = `انتهى اشتراكك السنوي في (${expiryDateIso ? expiryDateIso.substring(0, 10) : 'تاريخ سابق'}). يمكنك تصفح الأرشيف وقراءة الملفات والتقارير بحرية تامة، بينما تتطلب إضافة مرضى أو زيارات جديدة تجديد الاشتراك.`;
+
+        restorePreviousScreenState();
+    }
+
     function setupFounderInterfaceAfterAuth() {
+        isSubscriptionExpired = false;
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('activationScreen').style.display = 'none';
         document.getElementById('appContainer').style.display = 'flex';
@@ -2155,16 +2198,32 @@
         document.getElementById('cardPermissions').style.display = 'flex';
         document.getElementById('subStatusBanner').style.display = 'none'; 
         isUserSecretary = false;
+        
+        // إعادة تفعيل بطاقة مريض جديد طبيعي
+        const cardNewPat = document.getElementById('cardNewPatient');
+        cardNewPat.classList.remove('disabled-card');
+        cardNewPat.onclick = function() {
+            navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub);
+        };
+
         restorePreviousScreenState();
         checkMandatoryMonthlyBackup();
     }
 
     function setupClientInterfaceAfterAuth(expiryDateIso, isSecretary = false) {
+        isSubscriptionExpired = false;
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('activationScreen').style.display = 'none';
         document.getElementById('appContainer').style.display = 'flex';
         document.getElementById('founderControlPanel').style.display = 'none';
         document.getElementById('networkMenuCard').style.display = 'none';
+
+        // إعادة تفعيل بطاقة مريض جديد طبيعي
+        const cardNewPat = document.getElementById('cardNewPatient');
+        cardNewPat.classList.remove('disabled-card');
+        cardNewPat.onclick = function() {
+            navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub);
+        };
 
         if (isSecretary) {
             isUserSecretary = true;
@@ -2210,7 +2269,6 @@
         }
     }
 
-    // فحص ما إذا كان اليوم هو 1 في الشهر ولم يتم عمل نسخة احتياطية اليوم
     function checkMandatoryMonthlyBackup() {
         const today = new Date();
         const dayOfMonth = today.getDate();
@@ -2301,6 +2359,7 @@
 
             alert(`System activated successfully! Valid until: ${expiryDate.toLocaleDateString()}`);
             document.getElementById('activationScreen').style.display = 'none';
+            isSubscriptionExpired = false;
             setupClientInterfaceAfterAuth(expiryDateIso, false);
 
         } catch (err) {
@@ -2317,7 +2376,7 @@
     }
 
     function savePatientToCloudAndLocal(patientObj) {
-        if (!currentUserId) return;
+        if (!currentUserId || isSubscriptionExpired) return;
         const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
 
         const idx = patients.findIndex(p => Number(p.id) === Number(patientObj.id));
@@ -2336,7 +2395,7 @@
     }
 
     function saveTrashToCloudAndLocal() {
-        if (!currentUserId) return;
+        if (!currentUserId || isSubscriptionExpired) return;
         const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
 
         localStorage.setItem(`clinic_trash_${ownerUid}`, JSON.stringify(trashBin));
@@ -2351,7 +2410,7 @@
     }
 
     function saveSettingsToCloudAndLocal() {
-        if (!currentUserId) return;
+        if (!currentUserId || isSubscriptionExpired) return;
         const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
 
         localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
@@ -2471,6 +2530,10 @@
     }
 
     async function saveSecretaryAccount() {
+        if (isSubscriptionExpired) {
+            alert('التطبيق في وضع القراءة فقط. يرجى تجديد الاشتراك لتنفيذ الإجراءات.');
+            return;
+        }
         const email = document.getElementById('secEmailInput').value.trim();
         const password = document.getElementById('secPassInput').value;
 
@@ -2523,6 +2586,10 @@
     }
 
     async function deleteSecretaryAccount() {
+        if (isSubscriptionExpired) {
+            alert('التطبيق في وضع القراءة فقط.');
+            return;
+        }
         if (confirm('Are you sure you want to delete and revoke access for the secretary account?')) {
             secretaryAccount = { email: "", password: "" };
             document.getElementById('secEmailInput').value = '';
@@ -2540,7 +2607,7 @@
     }
 
     function saveSecretaryPermissions() {
-        alert('Secretary permissions are permanently configured: Secretary can register patients, enter Vital Signs & BMI, and upload/manage attachments. All medical prescriptions and system features are restricted to the Doctor.');
+        alert('Secretary permissions are permanently configured.');
         showMainMenu();
     }
 
@@ -2553,12 +2620,15 @@
     }
 
     function logoutUser() {
-        autoSaveMedicalRecord();
+        if (!isSubscriptionExpired) {
+            autoSaveMedicalRecord();
+        }
         sessionStorage.clear();
         if (patientsListenerUnsubscribe) patientsListenerUnsubscribe();
         auth.signOut().then(() => {
             currentUserId = null;
             isUserSecretary = false;
+            isSubscriptionExpired = false;
             patients = [];
             trashBin = [];
             document.getElementById('appContainer').style.display = 'none';
@@ -2574,7 +2644,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.04",
+            version: "17.05",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -2593,6 +2663,10 @@
     }
 
     function restoreFromUploadedFile(input) {
+        if (isSubscriptionExpired) {
+            alert('التطبيق في وضع القراءة فقط. يرجى تجديد الاشتراك أولاً.');
+            return;
+        }
         if (input.files && input.files[0]) {
             const file = input.files[0];
             const reader = new FileReader();
@@ -2626,10 +2700,9 @@
                         showMainMenu();
                     }
                 } catch (err) {
-                    alert('Error reading backup file: Make sure it is a valid JSON or TXT file. Details: ' + err.message);
+                    alert('Error reading backup file: ' + err.message);
                 }
             };
-            
             reader.readAsText(file);
         }
     }
@@ -2719,6 +2792,10 @@
     }
 
     function saveRxTemplateImage() {
+        if (isSubscriptionExpired) {
+            alert('التطبيق في وضع القراءة فقط. يرجى تجديد الاشتراك لتعديل ترويسة الروشتة.');
+            return;
+        }
         const fileInput = document.getElementById('rxImageFileInput');
         if (fileInput.files && fileInput.files[0]) {
             const file = fileInput.files[0];
@@ -3043,7 +3120,7 @@
     }
 
     function closeBmiModal() {
-        if (currentVisitIdForModal && currentPatientId) {
+        if (!isSubscriptionExpired && currentVisitIdForModal && currentPatientId) {
             const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
             if (patient) {
                 const visit = patient.visits.find(v => Number(v.visitId) === Number(currentVisitIdForModal));
@@ -3111,13 +3188,13 @@
     }
 
     function handleDrugsInput(textarea, visitId) {
-        if (isUserSecretary) return;
+        if (isUserSecretary || isSubscriptionExpired) return;
         autoResizeTextarea(textarea);
         handleLiveInput(textarea, 'drugs', visitId);
     }
 
     function handleDrugsKeyDown(event, textarea, visitId) {
-        if (isUserSecretary) return;
+        if (isUserSecretary || isSubscriptionExpired) return;
         if (event.key === 'Enter') {
             event.preventDefault();
             const start = textarea.selectionStart;
@@ -3131,7 +3208,7 @@
     }
 
     function handleLiveInput(textarea, category, visitId) {
-        if (isUserSecretary) return;
+        if (isUserSecretary || isSubscriptionExpired) return;
         autoResizeTextarea(textarea);
         const lines = textarea.value.split('\n');
         const currentLine = lines[lines.length - 1].replace(/^\d+[-–]\s*/, '').trim();
@@ -3170,7 +3247,7 @@
     }
 
     function selectSuggestion(category, visitId, value) {
-        if (isUserSecretary) return;
+        if (isUserSecretary || isSubscriptionExpired) return;
         const textarea = document.querySelector(`[data-visit-id="${visitId}"] .v-${category}`);
         if (!textarea) return;
 
@@ -3194,7 +3271,7 @@
     }
 
     function saveLineToDict(event, category, visitId) {
-        if (isUserSecretary) return;
+        if (isUserSecretary || isSubscriptionExpired) return;
         if (event) event.preventDefault();
         const lineTextSpan = document.getElementById(`line-text-${category}-${visitId}`);
         const btn = document.getElementById(`btn-save-${category}-${visitId}`);
@@ -3213,7 +3290,7 @@
     }
 
     function handleMhLiveInput(inputEl, inputKey) {
-        if (isUserSecretary) return;
+        if (isUserSecretary || isSubscriptionExpired) return;
         autoResizeTextarea(inputEl);
         activeMhInputKey = inputKey;
         const val = inputEl.value.trim();
@@ -3249,7 +3326,7 @@
     }
 
     function selectMhSuggestion(inputKey, value) {
-        if (isUserSecretary) return;
+        if (isUserSecretary || isSubscriptionExpired) return;
         let el = null;
         if (inputKey === 'mh_other') el = document.getElementById('mh-cd-other');
         else if (inputKey === 'mh_admission') el = document.getElementById('mh-prev-admission');
@@ -3276,7 +3353,7 @@
     }
 
     function saveMhLineToDict(event, inputKey) {
-        if (isUserSecretary) return;
+        if (isUserSecretary || isSubscriptionExpired) return;
         if (event) event.preventDefault();
         const lineTextSpan = document.getElementById(`line-text-${inputKey}`);
         const btn = document.getElementById(`btn-save-${inputKey}`);
@@ -3303,6 +3380,10 @@
     }
 
     function handleFileUpload(input, visitId) {
+        if (isSubscriptionExpired) {
+            alert('التطبيق في وضع القراءة فقط. لا يمكن رفع صور جديدة.');
+            return;
+        }
         if (input.files && input.files.length > 0) {
             const files = Array.from(input.files);
             const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
@@ -3356,6 +3437,10 @@
     }
 
     function handleScannerScan(visitId) {
+        if (isSubscriptionExpired) {
+            alert('التطبيق في وضع القراءة فقط.');
+            return;
+        }
         const scannerInput = document.createElement('input');
         scannerInput.type = 'file';
         scannerInput.accept = 'image/*';
@@ -3409,6 +3494,10 @@
     }
 
     function confirmDeleteAttachment(visitId, index) {
+        if (isSubscriptionExpired) {
+            alert('التطبيق في وضع القراءة فقط.');
+            return;
+        }
         if (confirm("Are you sure you want to delete this attachment?")) {
             deleteAttachment(visitId, index);
         }
@@ -3436,6 +3525,10 @@
     }
 
     function openEditPatientModal() {
+        if (isSubscriptionExpired) {
+            alert('التطبيق في وضع القراءة فقط. يرجى تجديد الاشتراك لتعديل بيانات المريض.');
+            return;
+        }
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
 
@@ -3454,6 +3547,7 @@
     }
 
     function saveEditedPatient() {
+        if (isSubscriptionExpired) return;
         const name = document.getElementById('editPName').value.trim();
         const age = Number(document.getElementById('editPAge').value);
 
@@ -3489,6 +3583,10 @@
     }
 
     function confirmDeletePatientRecord() {
+        if (isSubscriptionExpired) {
+            alert('التطبيق في وضع القراءة فقط.');
+            return;
+        }
         if (isUserSecretary) {
             alert('Secretary is not authorized to delete patient records.');
             return;
@@ -3524,6 +3622,10 @@
     }
 
     function confirmDeleteVisit(visitId) {
+        if (isSubscriptionExpired) {
+            alert('التطبيق في وضع القراءة فقط.');
+            return;
+        }
         if (isUserSecretary) {
             alert('Secretary is not authorized to delete visits.');
             return;
@@ -3573,9 +3675,11 @@
             return;
         }
 
-        if (emptyBtn) emptyBtn.style.display = 'flex';
+        if (emptyBtn && !isSubscriptionExpired) emptyBtn.style.display = 'flex';
+        else if (emptyBtn) emptyBtn.style.display = 'none';
 
         container.innerHTML = trashBin.map((item, index) => {
+            const restoreBtnHtml = isSubscriptionExpired ? '' : `<button class="btn-restore" onclick="restoreTrashItem(${index})"><i class="fa-solid fa-rotate-left"></i> Restore</button>`;
             if (item.type === 'patient') {
                 return `
                     <div class="trash-card">
@@ -3584,9 +3688,7 @@
                             <p style="font-size:0.75rem; color:#64748b;">Age: ${item.data.age} | Phone: ${item.data.phone || 'N/A'}</p>
                             <p style="font-size:0.7rem; color:#ef4444; margin-top:2px;">Deleted at: ${item.deletedAt}</p>
                         </div>
-                        <button class="btn-restore" onclick="restoreTrashItem(${index})">
-                            <i class="fa-solid fa-rotate-left"></i> Restore
-                        </button>
+                        ${restoreBtnHtml}
                     </div>
                 `;
             } else {
@@ -3597,9 +3699,7 @@
                             <p style="font-size:0.75rem; color:#64748b;">Visit Date: ${item.data.date || 'N/A'}</p>
                             <p style="font-size:0.7rem; color:#ef4444; margin-top:2px;">Deleted at: ${item.deletedAt}</p>
                         </div>
-                        <button class="btn-restore" onclick="restoreTrashItem(${index})">
-                            <i class="fa-solid fa-rotate-left"></i> Restore
-                        </button>
+                        ${restoreBtnHtml}
                     </div>
                 `;
             }
@@ -3607,6 +3707,7 @@
     }
 
     function restoreTrashItem(index) {
+        if (isSubscriptionExpired) return;
         const item = trashBin[index];
         if (!item) return;
 
@@ -3649,7 +3750,7 @@
     }
 
     function confirmEmptyTrash() {
-        if (trashBin.length === 0) return;
+        if (isSubscriptionExpired || trashBin.length === 0) return;
         if (confirm("Are you sure you want to empty the trash bin? This action cannot be undone.")) {
             trashBin = [];
             saveTrashToCloudAndLocal();
@@ -3669,21 +3770,38 @@
         const mh = visit.medHistory || {};
         document.querySelectorAll('.mh-cd').forEach(cb => {
             cb.checked = (mh.chronicDiseases || []).includes(cb.value);
+            if (isSubscriptionExpired) cb.disabled = true;
         });
 
         const otherVal = mh.chronicOther || '';
         document.getElementById('mh-other-check').checked = !!otherVal;
+        document.getElementById('mh-other-check').disabled = isSubscriptionExpired;
         document.getElementById('mh-other-box').style.display = otherVal ? 'block' : 'none';
         document.getElementById('mh-cd-other').value = otherVal;
+        document.getElementById('mh-cd-other').readOnly = isSubscriptionExpired;
 
         document.getElementById('mh-prev-admission').value = mh.prevAdmission || '';
+        document.getElementById('mh-prev-admission').readOnly = isSubscriptionExpired;
         document.getElementById('mh-past-surgery').value = mh.pastSurgery || '';
+        document.getElementById('mh-past-surgery').readOnly = isSubscriptionExpired;
         document.getElementById('mh-family-history').value = mh.familyHistory || '';
+        document.getElementById('mh-family-history').readOnly = isSubscriptionExpired;
         document.getElementById('mh-drug-allergy').value = mh.drugAllergy || '';
+        document.getElementById('mh-drug-allergy').readOnly = isSubscriptionExpired;
         document.getElementById('mh-chronic-drugs').value = mh.chronicDrugs || '';
+        document.getElementById('mh-chronic-drugs').readOnly = isSubscriptionExpired;
         document.getElementById('mh-smoking').value = mh.smoking || 'Non-smoker';
+        document.getElementById('mh-smoking').disabled = isSubscriptionExpired;
         document.getElementById('mh-alcohol').value = mh.alcohol || 'Non-drinker';
+        document.getElementById('mh-alcohol').disabled = isSubscriptionExpired;
         document.getElementById('mh-notes').value = mh.notes || '';
+        document.getElementById('mh-notes').readOnly = isSubscriptionExpired;
+
+        if (isSubscriptionExpired) {
+            document.getElementById('btnMhDone').style.display = 'none';
+        } else {
+            document.getElementById('btnMhDone').style.display = 'flex';
+        }
 
         document.getElementById('medHistoryModal').style.display = 'flex';
 
@@ -3693,12 +3811,13 @@
     }
 
     function toggleOtherInput() {
+        if (isSubscriptionExpired) return;
         const isChecked = document.getElementById('mh-other-check').checked;
         document.getElementById('mh-other-box').style.display = isChecked ? 'block' : 'none';
     }
 
     function closeMedHistoryModal() {
-        if (isUserSecretary) {
+        if (isUserSecretary || isSubscriptionExpired) {
             document.getElementById('medHistoryModal').style.display = 'none';
             return;
         }
@@ -3745,7 +3864,9 @@
             alert('Prescription (RX) creation is restricted to the Doctor.');
             return;
         }
-        autoSaveMedicalRecord();
+        if (!isSubscriptionExpired) {
+            autoSaveMedicalRecord();
+        }
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
         const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
@@ -3847,6 +3968,10 @@
     }
 
     function saveRxLayoutPositions() {
+        if (isSubscriptionExpired) {
+            alert('التطبيق في وضع القراءة فقط.');
+            return;
+        }
         const pdBox = document.getElementById('dragBoxPatientDetails');
         const dBox = document.getElementById('dragBoxDate');
         const vBox = document.getElementById('dragBoxVitals');
@@ -4056,7 +4181,7 @@
     }
 
     function autoSaveMedicalRecord() {
-        if (!currentPatientId) return;
+        if (isSubscriptionExpired || !currentPatientId) return;
         const index = patients.findIndex(p => Number(p.id) === Number(currentPatientId));
         if (index === -1) return;
 
@@ -4118,13 +4243,13 @@
         container.innerHTML = items.map((item, idx) => `
             <div class="dict-tag">
                 <span>${item}</span>
-                <button onclick="removeDictTerm('${cat}', ${idx})"><i class="fa-solid fa-trash"></i> Delete</button>
+                ${isSubscriptionExpired ? '' : `<button onclick="removeDictTerm('${cat}', ${idx})"><i class="fa-solid fa-trash"></i> Delete</button>`}
             </div>
         `).join('');
     }
 
     function removeDictTerm(category, index) {
-        if (isUserSecretary) return;
+        if (isUserSecretary || isSubscriptionExpired) return;
         medicalDict[category].splice(index, 1);
         saveSettingsToCloudAndLocal();
         renderDictTerms();
@@ -4132,6 +4257,10 @@
 
     function saveNewPatient(e) {
         e.preventDefault();
+        if (isSubscriptionExpired) {
+            alert('التطبيق في وضع القراءة فقط. يرجى تجديد الاشتراك لإضافة مريض جديد.');
+            return;
+        }
         const rawName = document.getElementById('pName').value.trim();
         const nameNormalized = rawName.toLowerCase().replace(/\s+/g, ' ');
 
@@ -4242,10 +4371,19 @@
         document.getElementById('recPatientName').innerText = patient.name;
         document.getElementById('recPatientMeta').innerText = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
 
-        if (isUserSecretary) {
-            document.getElementById('patientRecordHeaderActions').style.display = 'none';
+        if (isUserSecretary || isSubscriptionExpired) {
+            document.getElementById('patientRecordHeaderActions').style.display = isSubscriptionExpired ? 'flex' : 'none';
+            if (isSubscriptionExpired) {
+                // في وضع القراءة فقط نسمح بالرؤية ونخفي زر التعديل والحذف
+                document.getElementById('editPatientBtnMain').style.display = 'none';
+                document.getElementById('btnDeletePatientMain').style.display = 'none';
+                document.getElementById('btnAddVisitMain').style.display = 'none';
+            }
         } else {
             document.getElementById('patientRecordHeaderActions').style.display = 'flex';
+            document.getElementById('editPatientBtnMain').style.display = 'flex';
+            document.getElementById('btnDeletePatientMain').style.display = 'flex';
+            document.getElementById('btnAddVisitMain').style.display = 'flex';
         }
 
         renderVisits(patient.visits || [], true);
@@ -4277,19 +4415,19 @@
             
             const bmiText = v.bmiScore ? `BMI: ${v.bmiScore} (${v.bmiWeight}kg / ${v.bmiHeight}cm)` : 'Open BMI Calculator';
             
-            const disabledAttr = isUserSecretary ? 'disabled readonly style="background:#f1f5f9; cursor:not-allowed;"' : '';
-            const hideForSecStyle = isUserSecretary ? 'style="display:none;"' : '';
+            const readOnlyOrDisabled = (isUserSecretary || isSubscriptionExpired) ? 'disabled readonly style="background:#f1f5f9; cursor:not-allowed;"' : '';
+            const hideForSecOrExpired = (isUserSecretary || isSubscriptionExpired) ? '' : '';
 
             return `
             <div class="visit-card" id="visit-${vId}" data-visit-id="${vId}">
                 <div class="visit-header">
                     <span><i class="fa-solid fa-clock-rotate-left"></i> Visit Date:</span>
-                    <input type="date" value="${visitDateVal}" class="visit-date-input" ${isUserSecretary ? 'disabled' : 'onchange="autoSaveMedicalRecord()"' } style="background:transparent; border:none; color:white; font-weight:700; outline:none; text-align:right;">
+                    <input type="date" value="${visitDateVal}" class="visit-date-input" ${(isUserSecretary || isSubscriptionExpired) ? 'disabled' : 'onchange="autoSaveMedicalRecord()"' } style="background:transparent; border:none; color:white; font-weight:700; outline:none; text-align:right;">
                 </div>
 
-                <div class="field-box" ${hideForSecStyle}>
+                <div class="field-box">
                     <span class="field-label"><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History</span>
-                    <button type="button" class="btn-med-history" onclick="openMedHistoryModal(${vId})" ${isUserSecretary ? 'disabled style="background:#f1f5f9; color:#94a3b8; border-color:#cbd5e1; cursor:not-allowed;"' : ''}>
+                    <button type="button" class="btn-med-history" onclick="openMedHistoryModal(${vId})">
                         <span id="mh-label-${vId}">${mhStatusText}</span>
                         <i class="fa-solid fa-sliders"></i>
                     </button>
@@ -4311,11 +4449,11 @@
                                 <span class="vital-label">Blood Pressure (BP)</span>
                                 <div style="display: flex; align-items: center; gap: 8px;">
                                     <div class="vital-inputs" style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:4px 8px; flex:1;">
-                                        <input type="number" class="v-bp-sys" placeholder="SYS" value="${v.bpSystolic || ''}" oninput="autoSaveMedicalRecord()">
+                                        <input type="number" class="v-bp-sys" placeholder="SYS" value="${v.bpSystolic || ''}" ${readOnlyOrDisabled} oninput="autoSaveMedicalRecord()">
                                     </div>
                                     <span style="font-weight:700; color:#94a3b8;">/</span>
                                     <div class="vital-inputs" style="background:#fff; border:1px solid #cbd5e1; border-radius:8px; padding:4px 8px; flex:1;">
-                                        <input type="number" class="v-bp-dia" placeholder="DIA" value="${v.bpDiastolic || ''}" oninput="autoSaveMedicalRecord()">
+                                        <input type="number" class="v-bp-dia" placeholder="DIA" value="${v.bpDiastolic || ''}" ${readOnlyOrDisabled} oninput="autoSaveMedicalRecord()">
                                     </div>
                                     <span style="font-size:0.75rem; font-weight:700; color:#0d9488;">mmHg</span>
                                 </div>
@@ -4325,14 +4463,14 @@
                             <div class="vital-item">
                                 <span class="vital-label">SpO2</span>
                                 <div class="vital-inputs">
-                                    <input type="number" class="v-spo2" placeholder="98" value="${v.spo2 || ''}" oninput="autoSaveMedicalRecord()">
+                                    <input type="number" class="v-spo2" placeholder="98" value="${v.spo2 || ''}" ${readOnlyOrDisabled} oninput="autoSaveMedicalRecord()">
                                     <span>%</span>
                                 </div>
                             </div>
                             <div class="vital-item">
                                 <span class="vital-label">Heart Rate (HR)</span>
                                 <div class="vital-inputs">
-                                    <input type="number" class="v-hr" placeholder="75" value="${v.hr || ''}" oninput="autoSaveMedicalRecord()">
+                                    <input type="number" class="v-hr" placeholder="75" value="${v.hr || ''}" ${readOnlyOrDisabled} oninput="autoSaveMedicalRecord()">
                                     <span>bpm</span>
                                 </div>
                             </div>
@@ -4341,7 +4479,7 @@
                             <div class="vital-item" style="grid-column: span 2;">
                                 <span class="vital-label">Respiratory Rate (RR)</span>
                                 <div class="vital-inputs">
-                                    <input type="number" class="v-rr" placeholder="18" value="${v.rr || ''}" oninput="autoSaveMedicalRecord()">
+                                    <input type="number" class="v-rr" placeholder="18" value="${v.rr || ''}" ${readOnlyOrDisabled} oninput="autoSaveMedicalRecord()">
                                     <span>cpm</span>
                                 </div>
                             </div>
@@ -4349,10 +4487,10 @@
                     </div>
                 </div>
 
-                <div class="field-box" ${hideForSecStyle}>
+                <div class="field-box">
                     <span class="field-label"><i class="fa-solid fa-vial" style="color:#0d9488;"></i> Lab Tests</span>
                     <div class="input-wrapper">
-                        <textarea class="v-labs" rows="1" placeholder="Type lab tests..." ${disabledAttr} oninput="handleLiveInput(this, 'labs', ${vId})" onblur="hideSuggestions('labs', ${vId})">${v.labs || ''}</textarea>
+                        <textarea class="v-labs" rows="1" placeholder="Type lab tests..." ${readOnlyOrDisabled} oninput="handleLiveInput(this, 'labs', ${vId})" onblur="hideSuggestions('labs', ${vId})">${v.labs || ''}</textarea>
                         <div class="suggestions-box" id="suggestions-labs-${vId}"></div>
                         <div class="live-save-bar" id="save-bar-labs-${vId}">
                             <span>Save: "<strong id="line-text-labs-${vId}"></strong>"</span>
@@ -4361,10 +4499,10 @@
                     </div>
                 </div>
 
-                <div class="field-box" ${hideForSecStyle}>
+                <div class="field-box">
                     <span class="field-label"><i class="fa-solid fa-x-ray" style="color:#0d9488;"></i> Scans & Imaging</span>
                     <div class="input-wrapper">
-                        <textarea class="v-scans" rows="1" placeholder="Type scans..." ${disabledAttr} oninput="handleLiveInput(this, 'scans', ${vId})" onblur="hideSuggestions('scans', ${vId})">${v.scans || ''}</textarea>
+                        <textarea class="v-scans" rows="1" placeholder="Type scans..." ${readOnlyOrDisabled} oninput="handleLiveInput(this, 'scans', ${vId})" onblur="hideSuggestions('scans', ${vId})">${v.scans || ''}</textarea>
                         <div class="suggestions-box" id="suggestions-scans-${vId}"></div>
                         <div class="live-save-bar" id="save-bar-scans-${vId}">
                             <span>Save: "<strong id="line-text-scans-${vId}"></strong>"</span>
@@ -4373,10 +4511,10 @@
                     </div>
                 </div>
 
-                <div class="field-box" ${hideForSecStyle}>
+                <div class="field-box">
                     <span class="field-label"><i class="fa-solid fa-pills" style="color:#0d9488;"></i> Medications & Treatment</span>
                     <div class="input-wrapper">
-                        <textarea class="v-drugs" rows="2" placeholder="Type medications..." ${disabledAttr} oninput="handleDrugsInput(this, ${vId})" onkeydown="handleDrugsKeyDown(event, this, ${vId})" onblur="hideSuggestions('drugs', ${vId})">${v.drugs || ''}</textarea>
+                        <textarea class="v-drugs" rows="2" placeholder="Type medications..." ${readOnlyOrDisabled} oninput="handleDrugsInput(this, ${vId})" onkeydown="handleDrugsKeyDown(event, this, ${vId})" onblur="hideSuggestions('drugs', ${vId})">${v.drugs || ''}</textarea>
                         <div class="suggestions-box" id="suggestions-drugs-${vId}"></div>
                         <div class="live-save-bar" id="save-bar-drugs-${vId}">
                             <span>Save: "<strong id="line-text-drugs-${vId}"></strong>"</span>
@@ -4385,10 +4523,10 @@
                     </div>
                 </div>
 
-                <div class="field-box" ${hideForSecStyle}>
+                <div class="field-box">
                     <span class="field-label"><i class="fa-solid fa-clipboard-user" style="color:#0d9488;"></i> Diagnosis & Notes</span>
                     <div class="input-wrapper">
-                        <textarea class="v-notes" rows="1" placeholder="Notes..." ${disabledAttr} oninput="handleLiveInput(this, 'notes', ${vId})" onblur="hideSuggestions('notes', ${vId})">${v.notes || ''}</textarea>
+                        <textarea class="v-notes" rows="1" placeholder="Notes..." ${readOnlyOrDisabled} oninput="handleLiveInput(this, 'notes', ${vId})" onblur="hideSuggestions('notes', ${vId})">${v.notes || ''}</textarea>
                         <div class="suggestions-box" id="suggestions-notes-${vId}"></div>
                         <div class="live-save-bar" id="save-bar-notes-${vId}">
                             <span>Save: "<strong id="line-text-notes-${vId}"></strong>"</span>
@@ -4403,10 +4541,11 @@
                         ${attachments.map((imgSrc, imgIdx) => `
                             <div class="attachment-thumb" onclick="previewAttachmentImage('${imgSrc}')">
                                 <img src="${imgSrc}" alt="Attachment">
-                                <button type="button" class="attachment-delete" onclick="event.stopPropagation(); confirmDeleteAttachment(${vId}, ${imgIdx})"><i class="fa-solid fa-xmark"></i></button>
+                                ${isSubscriptionExpired ? '' : `<button type="button" class="attachment-delete" onclick="event.stopPropagation(); confirmDeleteAttachment(${vId}, ${imgIdx})"><i class="fa-solid fa-xmark"></i></button>`}
                             </div>
                         `).join('')}
                     </div>
+                    ${isSubscriptionExpired ? '' : `
                     <div style="display: flex; gap: 6px; margin-top: 6px;">
                         <label class="btn-upload-attach" style="flex: 1;">
                             <i class="fa-solid fa-cloud-arrow-up"></i> Upload Multiple
@@ -4415,16 +4554,17 @@
                         <button type="button" class="btn-scan-attach" onclick="handleScannerScan(${vId})" style="flex: 1;">
                             <i class="fa-solid fa-print"></i> Scan Document
                         </button>
-                    </div>
+                    </div>`}
                 </div>
 
-                <button type="button" class="btn-rx-action" onclick="openRxModal(${vId})" ${hideForSecStyle}>
+                <button type="button" class="btn-rx-action" onclick="openRxModal(${vId})">
                     <i class="fa-solid fa-file-prescription"></i> Prescription (RX)
                 </button>
 
-                <button type="button" class="btn-danger" onclick="confirmDeleteVisit(${vId})" ${hideForSecStyle}>
+                ${isSubscriptionExpired || isUserSecretary ? '' : `
+                <button type="button" class="btn-danger" onclick="confirmDeleteVisit(${vId})">
                     <i class="fa-solid fa-trash-can"></i> Delete This Visit
-                </button>
+                </button>`}
             </div>
         `}).join('');
 
@@ -4434,6 +4574,10 @@
     }
 
     function addNewVisit() {
+        if (isSubscriptionExpired) {
+            alert('التطبيق في وضع القراءة فقط. يرجى تجديد الاشتراك لإضافة زيارة جديدة للمريض.');
+            return;
+        }
         autoSaveMedicalRecord();
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
