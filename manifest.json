@@ -1,0 +1,16 @@
+{
+  "name": "Clinic Master System",
+  "short_name": "عيادتي",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "https://i.ibb.co/68n8910/1000111840.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
