@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.05</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.04</title>
     
     <!-- PWA & App Icons Integration -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -41,8 +41,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- استيراد خطوط Google Fonts العربية والإنجليزية الفخمة -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Tajawal:wght@400;500;700;900&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Amiri:wght@400;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Amiri:wght@400;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -50,12 +49,6 @@
 
     <style>
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
-        
-        /* تخصيص الخط التلقائي حسب لغة التطبيق */
-        body[dir="rtl"] *, body[dir="rtl"] input, body[dir="rtl"] select, body[dir="rtl"] textarea, body[dir="rtl"] button {
-            font-family: 'Cairo', 'Tajawal', sans-serif !important;
-        }
-
         html, body { background-color: #eef2f6; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow-x: hidden; }
         
         .mobile-container { background: #ffffff; width: 100%; max-width: 430px; height: 100vh; min-height: 100vh; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.12); position: relative; overflow: hidden; display: flex; flex-direction: column; transition: max-width 0.3s ease; }
@@ -72,7 +65,7 @@
         
         .auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px 20px; flex: 1; text-align: center; }
         .activ-icon { font-size: 50px; color: #0d9488; margin-bottom: 15px; }
-        .activ-title { font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+        .activ-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
         .activ-sub { font-size: 0.82rem; color: #64748b; margin-bottom: 20px; line-height: 1.5; }
         .auth-form { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
         .auth-switch { margin-top: 15px; font-size: 0.82rem; color: #64748b; }
@@ -93,20 +86,16 @@
 
         .header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 35px 20px 30px 20px; text-align: center; border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.15); flex-shrink: 0; }
         .header-icon { font-size: 42px; color: #0d9488; margin-bottom: 10px; }
-        .header h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; color: #f8fafc; letter-spacing: 0.5px; }
+        .header h1 { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; color: #f8fafc; letter-spacing: 0.5px; }
         .header p { font-size: 0.82rem; color: #94a3b8; }
         
         .back-btn { position: absolute; top: 15px; left: 15px; background: rgba(255, 255, 255, 0.12); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 10px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-        body[dir="rtl"] .back-btn { left: auto; right: 15px; }
 
         .menu-dropdown-container { position: absolute; top: 15px; right: 15px; z-index: 50; }
-        body[dir="rtl"] .menu-dropdown-container { right: auto; left: 15px; }
-
         .hamburger-btn { background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; }
         .hamburger-btn:hover { background: rgba(255, 255, 255, 0.25); }
         
         .dropdown-menu { position: absolute; top: 46px; right: 0; background: #ffffff; border-radius: 14px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2); width: 190px; display: none; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0; text-align: left; }
-        body[dir="rtl"] .dropdown-menu { right: auto; left: 0; text-align: right; }
         .dropdown-menu.show { display: flex; }
         .dropdown-item { padding: 12px 14px; font-size: 0.85rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; background: #ffffff; transition: background 0.15s; }
         .dropdown-item:hover { background: #f8fafc; color: #0d9488; }
@@ -117,7 +106,6 @@
         
         .section-group { margin-bottom: 18px; }
         .section-title { font-size: 0.82rem; font-weight: 800; color: #0d9488; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; padding-left: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-        body[dir="rtl"] .section-title { padding-left: 0; padding-right: 4px; }
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
         .menu-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
@@ -134,19 +122,14 @@
         .menu-icon.backup-icon { background: #e0e7ff; color: #4f46e5; }
         .menu-icon.permissions-icon { background: #fae8ff; color: #d946ef; }
         
-        .menu-info h3 { font-size: 0.92rem; color: #0f172a; margin-bottom: 2px; font-weight: 700; line-height: 1.2; }
+        .menu-info h3 { font-family: 'Playfair Display', serif; font-size: 0.92rem; color: #0f172a; margin-bottom: 2px; font-weight: 700; line-height: 1.2; }
         .menu-info p { font-size: 0.68rem; color: #64748b; line-height: 1.3; }
 
         .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 18px; margin-bottom: 16px; text-align: left; }
-        body[dir="rtl"] .group-card { text-align: right; }
-
         .visit-card { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 20px; padding: 16px; margin-bottom: 20px; position: relative; text-align: left; }
-        body[dir="rtl"] .visit-card { text-align: right; }
-
         .visit-header { background: #0f172a; color: #ffffff; padding: 8px 14px; border-radius: 12px; font-size: 0.88rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         
         .field-box { margin-bottom: 14px; position: relative; text-align: left; }
-        body[dir="rtl"] .field-box { text-align: right; }
         .field-label { font-size: 0.82rem; color: #475569; margin-bottom: 6px; font-weight: 700; display: block; }
         .input-wrapper { background-color: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; display: flex; flex-direction: column; padding: 4px 10px; position: relative; }
         .input-wrapper input, .input-wrapper select, .input-wrapper textarea { width: 100%; border: none; outline: none; padding: 8px 0; font-size: 0.92rem; font-weight: 600; color: #0f172a; background: transparent; resize: none; overflow: hidden; }
@@ -166,9 +149,7 @@
             z-index: 100;
             display: none;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            text-align: left;
         }
-        body[dir="rtl"] .suggestions-box { text-align: right; }
         .suggestion-item {
             padding: 8px 12px;
             font-size: 0.85rem;
@@ -181,8 +162,7 @@
 
         .vital-box { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
         .vital-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .vital-item { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; text-align: left; }
-        body[dir="rtl"] .vital-item { text-align: right; }
+        .vital-item { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; }
         .vital-label { font-size: 0.72rem; font-weight: 700; color: #64748b; display: flex; align-items: center; gap: 4px; }
         .vital-inputs { display: flex; align-items: center; gap: 4px; }
         .vital-inputs input { width: 100%; border: none; outline: none; font-size: 0.95rem; font-weight: 700; color: #0f172a; background: transparent; text-align: center; }
@@ -211,9 +191,8 @@
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 999; display: none; justify-content: center; align-items: flex-end; }
         .modal-body { background: #ffffff; width: 100%; max-width: 480px; max-height: 92vh; border-top-left-radius: 25px; border-top-right-radius: 25px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; text-align: left; }
-        body[dir="rtl"] .modal-body { text-align: right; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; }
-        .modal-header h3 { font-size: 1.15rem; color: #0f172a; font-weight: 700; }
+        .modal-header h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; font-weight: 700; }
         .modal-close { background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; color: #475569; cursor: pointer; }
 
         #imagePreviewModal {
@@ -253,8 +232,7 @@
         }
 
         .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
-        .checkbox-item { display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: #334155; cursor: pointer; text-align: left; }
-        body[dir="rtl"] .checkbox-item { text-align: right; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: #334155; cursor: pointer; }
         .checkbox-item input { accent-color: #0d9488; width: 16px; height: 16px; }
 
         .btn-main { width: 100%; background: #0d9488; color: white; border: none; border-radius: 14px; padding: 14px; font-size: 0.98rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); }
@@ -267,22 +245,19 @@
         .bmi-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 800; margin-top: 4px; }
 
         .patient-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; text-align: left; }
-        body[dir="rtl"] .patient-card { text-align: right; }
-        .patient-info h4 { font-size: 1.05rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
+        .patient-info h4 { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
         .patient-info p { font-size: 0.78rem; color: #64748b; }
         .badge-gender { padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; }
         .gender-male { background: #e0f2fe; color: #0369a1; }
         .gender-female { background: #fce7f3; color: #be185d; }
 
         .trash-card { background: #fff5f5; border: 1.5px solid #feb2b2; border-radius: 16px; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; text-align: left; }
-        body[dir="rtl"] .trash-card { text-align: right; }
 
         .dict-tag { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #334155; }
         .dict-tag button { background: #fee2e2; color: #ef4444; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 0.75rem; }
 
         .node-card { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; text-align: left; }
-        body[dir="rtl"] .node-card { text-align: right; }
-        .node-info h5 { font-size: 1rem; color: #0f172a; font-weight: 700; }
+        .node-info h5 { font-family: 'Playfair Display', serif; font-size: 1rem; color: #0f172a; font-weight: 700; }
         .node-info p { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
         .node-badge { background: #ccfbf1; color: #0f766e; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
         
@@ -556,7 +531,7 @@
 
             <div id="permissionsScreen" style="display: none;">
                 <div class="group-card">
-                    <div style="font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="permHeadTitle">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="permHeadTitle">
                         <i class="fa-solid fa-user-shield" style="color:#d946ef;"></i> Secretary Account & Permissions
                     </div>
                     <p style="font-size: 0.80rem; color: #64748b; margin-bottom: 14px; line-height: 1.5;" id="permHeadSub">
@@ -604,7 +579,7 @@
 
             <div id="backupScreen" style="display: none;">
                 <div class="group-card">
-                    <div style="font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="backupHeadTitle">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="backupHeadTitle">
                         <i class="fa-solid fa-database" style="color:#4f46e5;"></i> Direct Backup Manager
                     </div>
                     <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;" id="backupHeadSub">
@@ -628,7 +603,7 @@
 
             <div id="settingsScreen" style="display: none;">
                 <div class="group-card">
-                    <div style="font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:14px;" id="settingsHeadTitle">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:14px;" id="settingsHeadTitle">
                         <i class="fa-solid fa-user-shield" style="color:#0d9488;"></i> Security & Account Settings
                     </div>
 
@@ -691,7 +666,7 @@
                 </div>
 
                 <div class="group-card">
-                    <div style="font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="statRatioTitle">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="statRatioTitle">
                         <i class="fa-solid fa-chart-bar" style="color:#0d9488;"></i> Gender Distribution Ratio
                     </div>
                     <div style="background:#e2e8f0; height:12px; border-radius:6px; overflow:hidden; display:flex; margin-bottom:8px;">
@@ -705,7 +680,7 @@
                 </div>
 
                 <div class="group-card">
-                    <div style="font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="statTopDrugsTitle">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="statTopDrugsTitle">
                         <i class="fa-solid fa-pills" style="color:#0d9488;"></i> Top Prescribed Medications
                     </div>
                     <div id="topDrugsList" style="display:flex; flex-direction:column; gap:6px;"></div>
@@ -715,7 +690,7 @@
             <div id="addPatientScreen" style="display: none;">
                 <form id="patientForm" onsubmit="saveNewPatient(event)">
                     <div class="group-card">
-                        <div class="group-title" style="font-size:1.1rem; font-weight:700; margin-bottom:12px; color:#0f172a;" id="patInfoTitle"><i class="fa-solid fa-id-card"></i> Personal Information</div>
+                        <div class="group-title" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:12px; color:#0f172a;" id="patInfoTitle"><i class="fa-solid fa-id-card"></i> Personal Information</div>
                         
                         <div class="field-box">
                             <span class="field-label" id="lblPatName">Full Name *</span>
@@ -786,7 +761,7 @@
 
             <div id="rxTemplateScreen" style="display: none;">
                 <div class="group-card" style="text-align: center;">
-                    <div style="font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:8px;" id="rxTemplHead">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:8px;" id="rxTemplHead">
                         <i class="fa-solid fa-prescription-bottle-medical" style="color:#0d9488;"></i> Clinic Prescription Template
                     </div>
                     <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;" id="rxTemplSub">
@@ -838,7 +813,7 @@
 
             <div id="trashScreen" style="display: none;">
                 <div class="group-card">
-                    <div style="font-size:1.1rem; font-weight:700; margin-bottom:10px; color:#ef4444; display: flex; justify-content: space-between; align-items: center;">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:10px; color:#ef4444; display: flex; justify-content: space-between; align-items: center;">
                         <span id="trashTitleText"><i class="fa-solid fa-trash-can"></i> Trash Bin</span>
                         <button type="button" id="emptyTrashBtn" onclick="confirmEmptyTrash()" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: none; align-items: center; gap: 4px;">
                             <i class="fa-solid fa-trash-can-arrow-up"></i> <span id="txtEmptyTrash">Empty Trash</span>
@@ -859,7 +834,7 @@
                             <i class="fa-solid fa-trash"></i> <span id="txtDelete">Delete</span>
                         </button>
                     </div>
-                    <div class="field-box" style="font-size:1.1rem; font-weight:700; color: #0f766e; margin-bottom:4px; padding-right: 125px;">
+                    <div class="field-box" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color: #0f766e; margin-bottom:4px; padding-right: 125px;">
                         <i class="fa-solid fa-user-check"></i> <span id="recPatientName">—</span>
                     </div>
                     <p style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin-bottom: 10px;" id="recPatientMeta"></p>
@@ -896,13 +871,13 @@
 
             <div id="networkScreen" style="display: none;">
                 <div class="group-card">
-                    <div style="font-size:1.05rem; font-weight:700; margin-bottom:10px; color:#0f172a;" id="netTitle"><i class="fa-solid fa-sitemap" style="color:#9333ea;"></i> Registered Users & Passwords Database</div>
+                    <div style="font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; margin-bottom:10px; color:#0f172a;" id="netTitle"><i class="fa-solid fa-sitemap" style="color:#9333ea;"></i> Registered Users & Passwords Database</div>
                     <div id="networkTreeContainer"></div>
                 </div>
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.05</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.04</div>
     </div>
 </div>
 
@@ -910,7 +885,7 @@
 <div id="mandatoryBackupModal" class="modal-overlay" style="z-index: 99999;">
     <div class="modal-body" style="max-width: 420px; text-align: center;">
         <div style="font-size: 45px; color: #4f46e5; margin-bottom: 4px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
-        <h3 style="font-size: 1.2rem; color: #0f172a; margin-bottom: 6px;" id="mandBackupTitle">النسخ الاحتياطي الشهري الإجباري</h3>
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #0f172a; margin-bottom: 6px;" id="mandBackupTitle">النسخ الاحتياطي الشهري الإجباري</h3>
         <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 14px; line-height: 1.5;" id="mandBackupSub">
             اليوم هو الأول من الشهر! حرصاً منا على عدم فقدان أي بيانات للعيادة، يرجى تحميل نسخة احتياطية جديدة لحفظ ملفات المرضى قبل المتابعة.
         </p>
@@ -1269,13 +1244,13 @@
 
 <div id="pdfReportExportContainer" style="position: absolute; left: -9999px; top: 0; width: 750px; background: #ffffff; padding: 40px; font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; direction: ltr; text-align: left;">
     <div style="text-align: center; border-bottom: 2.5px solid #0d9488; padding-bottom: 15px; margin-bottom: 20px;">
-        <div style="font-size: 1.5rem; font-weight: 900; color: #0f172a; margin-bottom: 4px;">CLINIC MASTER MEDICAL RECORD</div>
+        <div style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: #0f172a; margin-bottom: 4px;">CLINIC MASTER MEDICAL RECORD</div>
         <div style="font-size: 0.8rem; color: #0d9488; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Official Comprehensive Patient Clinical Report</div>
         <div style="font-size: 0.72rem; color: #64748b; margin-top: 4px;" id="pdfRepDateLabel">Generated on: —</div>
     </div>
 
     <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px; margin-bottom: 20px;">
-        <div style="font-size: 1rem; font-weight: 700; color: #0f766e; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;"><i class="fa-solid fa-id-card"></i> Patient Profile</div>
+        <div style="font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: #0f766e; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;"><i class="fa-solid fa-id-card"></i> Patient Profile</div>
         <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
             <tr>
                 <td style="padding: 4px 0; font-weight: 700; color: #475569; width: 22%;">Full Name:</td>
@@ -1299,7 +1274,7 @@
     </div>
 
     <div>
-        <div style="font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 10px;"><i class="fa-solid fa-notes-medical"></i> Clinical Visits & Prescriptions Timeline</div>
+        <div style="font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 10px;"><i class="fa-solid fa-notes-medical"></i> Clinical Visits & Prescriptions Timeline</div>
         <div id="pdfRepVisitsContainer" style="display: flex; flex-direction: column; gap: 14px;"></div>
     </div>
 
@@ -1308,7 +1283,7 @@
             <span style="color: #64748b; font-weight: 700;">Clinic Master System — Certified Document</span>
         </div>
         <div style="text-align: right;">
-            <span style="font-size: 0.95rem; font-weight: 900; color: #0f172a;">Attending Doctor Signature</span>
+            <span style="font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 900; color: #0f172a;">Attending Doctor Signature</span>
         </div>
     </div>
 </div>
@@ -1398,7 +1373,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.05",
+            footer: "نظام عيادة ماستر المتقدم v17.04",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل (يُفضل إدخال اسم الجد الرابع لمنع التكرار) *",
@@ -1553,7 +1528,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.05",
+            footer: "Clinic Master Network v17.04",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name (Include 4th Grandfather to prevent duplication) *",
@@ -1688,7 +1663,7 @@
     function applyLanguage() {
         const t = translations[currentLang];
         const isAr = currentLang === 'ar';
-        document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+        document.body.style.direction = isAr ? 'rtl' : 'ltr';
 
         document.getElementById('authTitle').innerText = isRegisterMode ? t.registerTitle : t.loginTitle;
         document.getElementById('authSubText').innerText = isRegisterMode ? t.registerSub : t.loginSub;
@@ -1983,6 +1958,7 @@
         }
     }
 
+    // تفعيل زر الرجوع الفيزيائي في الهاتف أو المتصفح للرجوع بالتدريج وتجنب الخروج من التطبيق
     window.addEventListener('popstate', function(event) {
         event.preventDefault();
         if (document.getElementById('medHistoryModal').style.display === 'flex') {
@@ -2234,6 +2210,7 @@
         }
     }
 
+    // فحص ما إذا كان اليوم هو 1 في الشهر ولم يتم عمل نسخة احتياطية اليوم
     function checkMandatoryMonthlyBackup() {
         const today = new Date();
         const dayOfMonth = today.getDate();
@@ -2597,7 +2574,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.05",
+            version: "17.04",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3603,7 +3580,7 @@
                 return `
                     <div class="trash-card">
                         <div>
-                            <h4 style="color:#0f172a; font-size:1rem;">👤 Patient: ${item.data.name}</h4>
+                            <h4 style="font-family:'Playfair Display',serif; color:#0f172a; font-size:1rem;">👤 Patient: ${item.data.name}</h4>
                             <p style="font-size:0.75rem; color:#64748b;">Age: ${item.data.age} | Phone: ${item.data.phone || 'N/A'}</p>
                             <p style="font-size:0.7rem; color:#ef4444; margin-top:2px;">Deleted at: ${item.deletedAt}</p>
                         </div>
@@ -3616,7 +3593,7 @@
                 return `
                     <div class="trash-card">
                         <div>
-                            <h4 style="color:#0f172a; font-size:1.02rem;">📋 Visit for: ${item.patientName}</h4>
+                            <h4 style="font-family:'Playfair Display',serif; color:#0f172a; font-size:1.02rem;">📋 Visit for: ${item.patientName}</h4>
                             <p style="font-size:0.75rem; color:#64748b;">Visit Date: ${item.data.date || 'N/A'}</p>
                             <p style="font-size:0.7rem; color:#ef4444; margin-top:2px;">Deleted at: ${item.deletedAt}</p>
                         </div>
