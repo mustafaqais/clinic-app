@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Clinic Master System - Cloud Ultimate Edition v17.05</title>
     
-    <!-- PWA & App Icons Integration -->
+    <!-- PWA & Fullscreen Mobile Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon-precomposed" href="https://i.ibb.co/68n8910/1000111840.png">
     <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -2124,12 +2127,10 @@
             return;
         }
 
-        // فحص ما إذا كان الاشتراك منتهياً لتفعيل "وضع القراءة فقط" بدلاً من قفل التطبيق
         if (expiryDateStr && new Date().getTime() < new Date(expiryDateStr).getTime()) {
             isSubscriptionExpired = false;
             setupClientInterfaceAfterAuth(expiryDateStr, false);
         } else {
-            // الاشتراك منتهٍ: فتح التطبيق في وضع القراءة فقط (Read-Only Mode)
             isSubscriptionExpired = true;
             setupReadOnlyModeAfterExpiration(expiryDateStr);
         }
@@ -2144,7 +2145,6 @@
         document.getElementById('cardPermissions').style.display = 'none';
         showAllCardsForDoctor();
 
-        // تفعيل تصميم بطاقة مريض جديد كمعطل (Read-Only)
         const cardNewPat = document.getElementById('cardNewPatient');
         cardNewPat.classList.add('disabled-card');
         cardNewPat.onclick = function() {
@@ -2152,7 +2152,6 @@
             openSupportModal();
         };
 
-        // إظهار بانر منبثق يفيد بأن الاشتراك منتهٍ والتطبيق في وضع القراءة فقط
         const banner = document.getElementById('subStatusBanner');
         const titleEl = document.getElementById('subBannerTitle');
         const textEl = document.getElementById('subBannerText');
@@ -2175,7 +2174,6 @@
         document.getElementById('subStatusBanner').style.display = 'none'; 
         isUserSecretary = false;
         
-        // إعادة تفعيل بطاقة مريض جديد طبيعي
         const cardNewPat = document.getElementById('cardNewPatient');
         cardNewPat.classList.remove('disabled-card');
         cardNewPat.onclick = function() {
@@ -2194,7 +2192,6 @@
         document.getElementById('founderControlPanel').style.display = 'none';
         document.getElementById('networkMenuCard').style.display = 'none';
 
-        // إعادة تفعيل بطاقة مريض جديد طبيعي
         const cardNewPat = document.getElementById('cardNewPatient');
         cardNewPat.classList.remove('disabled-card');
         cardNewPat.onclick = function() {
@@ -4350,7 +4347,6 @@
         if (isUserSecretary || isSubscriptionExpired) {
             document.getElementById('patientRecordHeaderActions').style.display = isSubscriptionExpired ? 'flex' : 'none';
             if (isSubscriptionExpired) {
-                // في وضع القراءة فقط نسمح بالرؤية ونخفي زر التعديل والحذف
                 document.getElementById('editPatientBtnMain').style.display = 'none';
                 document.getElementById('btnDeletePatientMain').style.display = 'none';
                 document.getElementById('btnAddVisitMain').style.display = 'none';
@@ -4392,7 +4388,6 @@
             const bmiText = v.bmiScore ? `BMI: ${v.bmiScore} (${v.bmiWeight}kg / ${v.bmiHeight}cm)` : 'Open BMI Calculator';
             
             const readOnlyOrDisabled = (isUserSecretary || isSubscriptionExpired) ? 'disabled readonly style="background:#f1f5f9; cursor:not-allowed;"' : '';
-            const hideForSecOrExpired = (isUserSecretary || isSubscriptionExpired) ? '' : '';
 
             return `
             <div class="visit-card" id="visit-${vId}" data-visit-id="${vId}">
