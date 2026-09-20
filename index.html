@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.03</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.04</title>
     
     <!-- PWA & App Icons Integration -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -877,7 +877,21 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.03</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.04</div>
+    </div>
+</div>
+
+<!-- نافذة النسخ الاحتياطي الإجباري الشهري (تظهر يوم 1 من كل شهر) -->
+<div id="mandatoryBackupModal" class="modal-overlay" style="z-index: 99999;">
+    <div class="modal-body" style="max-width: 420px; text-align: center;">
+        <div style="font-size: 45px; color: #4f46e5; margin-bottom: 4px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #0f172a; margin-bottom: 6px;" id="mandBackupTitle">النسخ الاحتياطي الشهري الإجباري</h3>
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 14px; line-height: 1.5;" id="mandBackupSub">
+            اليوم هو الأول من الشهر! حرصاً منا على عدم فقدان أي بيانات للعيادة، يرجى تحميل نسخة احتياطية جديدة لحفظ ملفات المرضى قبل المتابعة.
+        </p>
+        <button class="btn-main" onclick="executeMandatoryBackup()" id="btnMandatoryBackup" style="background: #4f46e5; margin-bottom: 10px;">
+            <i class="fa-solid fa-download"></i> تحميل نسخة الاحتياط الآن ومتابعة العمل
+        </button>
     </div>
 </div>
 
@@ -1058,7 +1072,7 @@
         <div class="field-box">
             <span class="field-label" id="mhLblAdmission">Previous admission to hospital</span>
             <div class="input-wrapper" style="position: relative;">
-                <input type="text" id="mh-prev-admission" placeholder="Details & dates..." oninput="handleMhLiveInput(this, 'mh_admission')" onblur="hideMhSuggestions('mh_admission')">
+                <textarea id="mh-prev-admission" rows="1" placeholder="Details & dates..." oninput="handleMhLiveInput(this, 'mh_admission')" onblur="hideMhSuggestions('mh_admission')"></textarea>
                 <div class="suggestions-box" id="suggestions-mh_admission"></div>
                 <div class="live-save-bar" id="save-bar-mh_admission">
                     <span>Save: "<strong id="line-text-mh_admission"></strong>"</span>
@@ -1070,7 +1084,7 @@
         <div class="field-box">
             <span class="field-label" id="mhLblSurgery">Past surgery</span>
             <div class="input-wrapper" style="position: relative;">
-                <input type="text" id="mh-past-surgery" placeholder="Surgical history..." oninput="handleMhLiveInput(this, 'mh_surgery')" onblur="hideMhSuggestions('mh_surgery')">
+                <textarea id="mh-past-surgery" rows="1" placeholder="Surgical history..." oninput="handleMhLiveInput(this, 'mh_surgery')" onblur="hideMhSuggestions('mh_surgery')"></textarea>
                 <div class="suggestions-box" id="suggestions-mh_surgery"></div>
                 <div class="live-save-bar" id="save-bar-mh_surgery">
                     <span>Save: "<strong id="line-text-mh_surgery"></strong>"</span>
@@ -1082,7 +1096,7 @@
         <div class="field-box">
             <span class="field-label" id="mhLblFamily">Family history</span>
             <div class="input-wrapper" style="position: relative;">
-                <input type="text" id="mh-family-history" placeholder="Hereditary diseases..." oninput="handleMhLiveInput(this, 'mh_family')" onblur="hideMhSuggestions('mh_family')">
+                <textarea id="mh-family-history" rows="1" placeholder="Hereditary diseases..." oninput="handleMhLiveInput(this, 'mh_family')" onblur="hideMhSuggestions('mh_family')"></textarea>
                 <div class="suggestions-box" id="suggestions-mh_family"></div>
                 <div class="live-save-bar" id="save-bar-mh_family">
                     <span>Save: "<strong id="line-text-mh_family"></strong>"</span>
@@ -1094,7 +1108,7 @@
         <div class="field-box">
             <span class="field-label" id="mhLblAllergy">Drugs allergy</span>
             <div class="input-wrapper" style="position: relative;">
-                <input type="text" id="mh-drug-allergy" placeholder="Known drug allergies..." oninput="handleMhLiveInput(this, 'mh_allergy')" onblur="hideMhSuggestions('mh_allergy')">
+                <textarea id="mh-drug-allergy" rows="1" placeholder="Known drug allergies..." oninput="handleMhLiveInput(this, 'mh_allergy')" onblur="hideMhSuggestions('mh_allergy')"></textarea>
                 <div class="suggestions-box" id="suggestions-mh_allergy"></div>
                 <div class="live-save-bar" id="save-bar-mh_allergy">
                     <span>Save: "<strong id="line-text-mh_allergy"></strong>"</span>
@@ -1106,7 +1120,7 @@
         <div class="field-box">
             <span class="field-label" id="mhLblChronicDrugs">Chronic use of drugs</span>
             <div class="input-wrapper" style="position: relative;">
-                <input type="text" id="mh-chronic-drugs" placeholder="Long-term medications..." oninput="handleMhLiveInput(this, 'mh_chronic_drugs')" onblur="hideMhSuggestions('mh_chronic_drugs')">
+                <textarea id="mh-chronic-drugs" rows="1" placeholder="Long-term medications..." oninput="handleMhLiveInput(this, 'mh_chronic_drugs')" onblur="hideMhSuggestions('mh_chronic_drugs')"></textarea>
                 <div class="suggestions-box" id="suggestions-mh_chronic_drugs"></div>
                 <div class="live-save-bar" id="save-bar-mh_chronic_drugs">
                     <span>Save: "<strong id="line-text-mh_chronic_drugs"></strong>"</span>
@@ -1359,7 +1373,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.03",
+            footer: "نظام عيادة ماستر المتقدم v17.04",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل (يُفضل إدخال اسم الجد الرابع لمنع التكرار) *",
@@ -1514,7 +1528,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.03",
+            footer: "Clinic Master Network v17.04",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name (Include 4th Grandfather to prevent duplication) *",
@@ -1944,6 +1958,38 @@
         }
     }
 
+    // تفعيل زر الرجوع الفيزيائي في الهاتف أو المتصفح للرجوع بالتدريج وتجنب الخروج من التطبيق
+    window.addEventListener('popstate', function(event) {
+        event.preventDefault();
+        if (document.getElementById('medHistoryModal').style.display === 'flex') {
+            closeMedHistoryModal();
+            return;
+        }
+        if (document.getElementById('bmiCalculatorModal').style.display === 'flex') {
+            closeBmiModal();
+            return;
+        }
+        if (document.getElementById('rxModal').style.display === 'flex') {
+            closeRxModal();
+            return;
+        }
+        if (document.getElementById('editPatientModal').style.display === 'flex') {
+            closeEditPatientModal();
+            return;
+        }
+        if (document.getElementById('supportModal').style.display === 'flex') {
+            closeSupportModal();
+            return;
+        }
+        if (screenHistory.length > 1) {
+            goBackScreen();
+        } else {
+            history.pushState(null, '', window.location.href);
+        }
+    });
+
+    history.pushState(null, '', window.location.href);
+
     function hideAllScreensInner() {
         document.getElementById('mainScreen').style.display = 'none';
         document.getElementById('addPatientScreen').style.display = 'none';
@@ -2110,6 +2156,7 @@
         document.getElementById('subStatusBanner').style.display = 'none'; 
         isUserSecretary = false;
         restorePreviousScreenState();
+        checkMandatoryMonthlyBackup();
     }
 
     function setupClientInterfaceAfterAuth(expiryDateIso, isSecretary = false) {
@@ -2158,6 +2205,29 @@
         }
 
         restorePreviousScreenState();
+        if (!isSecretary) {
+            checkMandatoryMonthlyBackup();
+        }
+    }
+
+    // فحص ما إذا كان اليوم هو 1 في الشهر ولم يتم عمل نسخة احتياطية اليوم
+    function checkMandatoryMonthlyBackup() {
+        const today = new Date();
+        const dayOfMonth = today.getDate();
+        const todayDateStr = getTodayFormatted();
+        const lastMandatoryBackupDate = localStorage.getItem('last_mandatory_backup_date');
+
+        if (dayOfMonth === 1 && lastMandatoryBackupDate !== todayDateStr) {
+            document.getElementById('mandatoryBackupModal').style.display = 'flex';
+        }
+    }
+
+    function executeMandatoryBackup() {
+        exportJsonBackup();
+        const todayDateStr = getTodayFormatted();
+        localStorage.setItem('last_mandatory_backup_date', todayDateStr);
+        document.getElementById('mandatoryBackupModal').style.display = 'none';
+        alert('تم حفظ النسخة الاحتياطية بنجاح! شكراً لحرصك على أمان ملفات العيادة.');
     }
 
     function restorePreviousScreenState() {
@@ -2504,7 +2574,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.03",
+            version: "17.04",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3144,6 +3214,7 @@
 
     function handleMhLiveInput(inputEl, inputKey) {
         if (isUserSecretary) return;
+        autoResizeTextarea(inputEl);
         activeMhInputKey = inputKey;
         const val = inputEl.value.trim();
         const bar = document.getElementById(`save-bar-${inputKey}`);
@@ -3190,6 +3261,7 @@
 
         if (el) {
             el.value = value;
+            autoResizeTextarea(el);
             el.focus();
         }
         const suggestBox = document.getElementById(`suggestions-${inputKey}`);
@@ -3614,6 +3686,10 @@
         document.getElementById('mh-notes').value = mh.notes || '';
 
         document.getElementById('medHistoryModal').style.display = 'flex';
+
+        setTimeout(() => {
+            document.querySelectorAll('#medHistoryModal textarea').forEach(ta => autoResizeTextarea(ta));
+        }, 50);
     }
 
     function toggleOtherInput() {
@@ -3995,7 +4071,6 @@
                     visitObj.date = dateInput.value;
                 }
 
-                // السماح بحفظ العلامات الحيوية سواء للطبيب أو السكرتير
                 visitObj.bpSystolic = el.querySelector('.v-bp-sys').value;
                 visitObj.bpDiastolic = el.querySelector('.v-bp-dia').value;
                 visitObj.spo2 = el.querySelector('.v-spo2').value;
@@ -4202,7 +4277,6 @@
             
             const bmiText = v.bmiScore ? `BMI: ${v.bmiScore} (${v.bmiWeight}kg / ${v.bmiHeight}cm)` : 'Open BMI Calculator';
             
-            // تم السماح للسكرتير بالكتابة في حقول العلامات الحيوية والعناصر الخاصة بها
             const disabledAttr = isUserSecretary ? 'disabled readonly style="background:#f1f5f9; cursor:not-allowed;"' : '';
             const hideForSecStyle = isUserSecretary ? 'style="display:none;"' : '';
 
@@ -4221,7 +4295,6 @@
                     </button>
                 </div>
 
-                <!-- زر حساب الـ BMI متاح للسكرتير والطبيب -->
                 <div class="field-box">
                     <span class="field-label"><i class="fa-solid fa-weight-scale" style="color:#0284c7;"></i> Optional Tools</span>
                     <button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(${vId})">
@@ -4230,7 +4303,6 @@
                     </button>
                 </div>
 
-                <!-- حقول العلامات الحيوية متاحة الآن للسكرتير للإدخال والتعديل -->
                 <div class="field-box">
                     <span class="field-label"><i class="fa-solid fa-heart-pulse" style="color:#0d9488;"></i> Vital Signs</span>
                     <div class="vital-box">
