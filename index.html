@@ -28,17 +28,17 @@
 
     <style>
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
-        html, body { background-color: #eef2f6; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow-x: hidden; }
+        html, body { background-color: #ffffff; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow-x: hidden; }
         
-        .mobile-container { background: #ffffff; width: 100%; max-width: 430px; height: 100vh; min-height: 100vh; box-shadow: 0 15px 35px rgba(15, 23, 42, 0.12); position: relative; overflow: hidden; display: flex; flex-direction: column; transition: max-width 0.3s ease; }
+        .mobile-container { background: #ffffff; width: 100%; max-width: 100%; height: 100vh; min-height: 100vh; position: relative; overflow: hidden; display: flex; flex-direction: column; }
         
         @media (min-width: 768px) {
-            .mobile-container { max-width: 768px; border-radius: 24px; height: 94vh; min-height: 94vh; border: 1px solid #cbd5e1; }
+            .mobile-container { max-width: 100%; border-radius: 0; height: 100vh; min-height: 100vh; border: none; }
             .menu-grid { grid-template-columns: repeat(3, 1fr) !important; }
         }
 
         @media (min-width: 1024px) {
-            .mobile-container { max-width: 1050px; border-radius: 24px; height: 92vh; min-height: 92vh; border: 1px solid #cbd5e1; }
+            .mobile-container { max-width: 100%; border-radius: 0; height: 100vh; min-height: 100vh; border: none; }
             .menu-grid { grid-template-columns: repeat(3, 1fr) !important; }
         }
         
@@ -83,7 +83,7 @@
         .dropdown-item.danger { color: #ef4444; }
         .dropdown-item.danger:hover { background: #fef2f2; }
 
-        .content { padding: 20px 16px; flex: 1; overflow-y: auto; width: 100%; }
+        .content { padding: 20px 16px; flex: 1; overflow-y: auto; width: 100%; max-width: 800px; margin: 0 auto; }
         
         .section-group { margin-bottom: 18px; }
         .section-title { font-size: 0.82rem; font-weight: 800; color: #0d9488; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; padding-left: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -1297,7 +1297,7 @@
     let isConfigMode = false;
     let activeMhInputKey = null;
     let isUserSecretary = false;
-    let isSubscriptionExpired = false; // متغير وضع القراءة فقط
+    let isSubscriptionExpired = false;
     let patientsListenerUnsubscribe = null;
     let targetNodeUidToDelete = null;
     let targetNodeEmailToDelete = null;
