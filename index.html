@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.05</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.06</title>
     
     <!-- PWA & Fullscreen Mobile Meta Tags -->
     <link rel="manifest" href="manifest.json">
@@ -43,12 +43,12 @@
         }
         
         .auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px 20px; flex: 1; text-align: center; }
-        .activ-icon { font-size: 50px; color: #0d9488; margin-bottom: 15px; }
+        .activ-icon { font-size: 50px; color: #0d9488; margin-bottom: 15px; transition: all 0.3s ease; }
         .activ-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
         .activ-sub { font-size: 0.82rem; color: #64748b; margin-bottom: 20px; line-height: 1.5; }
         .auth-form { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
         .auth-switch { margin-top: 15px; font-size: 0.82rem; color: #64748b; }
-        .auth-switch span { color: #0d9488; font-weight: 700; cursor: pointer; }
+        .auth-switch span { color: #0d9488; font-weight: 700; cursor: pointer; text-decoration: underline; }
         .forgot-pass { font-size: 0.78rem; color: #0284c7; text-align: right; cursor: pointer; margin-top: -6px; font-weight: 600; }
 
         .founder-panel { background: #f0fdfa; border: 2px dashed #0d9488; border-radius: 16px; padding: 14px; margin-bottom: 16px; text-align: center; }
@@ -327,7 +327,7 @@
         <div style="position: absolute; top: 15px; right: 15px;">
             <button onclick="toggleLanguage()" id="authLangBtn" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; color: #0f172a;">عربي / EN</button>
         </div>
-        <div class="activ-icon"><i class="fa-solid fa-user-lock"></i></div>
+        <div class="activ-icon" id="authScreenIcon"><i class="fa-solid fa-user-lock"></i></div>
         <div class="activ-title" id="authTitle">User Login</div>
         <div class="activ-sub" id="authSubText">Sign in with your email and password securely</div>
 
@@ -861,7 +861,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.05</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.06</div>
     </div>
 </div>
 
@@ -1306,16 +1306,16 @@
 
     const translations = {
         ar: {
-            loginTitle: "تسجيل الدخول",
-            loginSub: "سجل دخولك باستخدام البريد الإلكتروني وكلمة المرور بأمان",
-            registerTitle: "إنشاء حساب جديد",
-            registerSub: "أنشئ حساباً جديداً لإدارة عيادتك بكفاءة",
+            loginTitle: "تسجيل الدخول للعيادة",
+            loginSub: "سجل دخولك باستخدام البريد الإلكتروني وكلمة المرور بأمان للوصول إلى لوحة التحكم",
+            registerTitle: "إنشاء حساب عيادة جديد",
+            registerSub: "أنشئ حساباً جديداً لإدارة عيادتك الطبية وسجلات المرضى بكفاءة عالية",
             emailLabel: "البريد الإلكتروني",
             passLabel: "كلمة المرور",
             forgotPass: "نسيت كلمة المرور؟",
             btnLogin: "تسجيل الدخول",
-            btnRegister: "تسجيل حساب",
-            switchRegister: "ليس لديك حساب؟ <span>سجل الآن</span>",
+            btnRegister: "إنشاء الحساب الآن",
+            switchRegister: "ليس لديك حساب عيادة؟ <span>سجل الآن</span>",
             switchLogin: "لديك حساب بالفعل؟ <span>سجل الدخول</span>",
             
             activTitle: "تفعيل الحساب مطلوب",
@@ -1358,7 +1358,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.05",
+            footer: "نظام عيادة ماستر المتقدم v17.06",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل (يُفضل إدخال اسم الجد الرابع لمنع التكرار) *",
@@ -1461,16 +1461,16 @@
             btnSaveEdit: "حفظ التغييرات"
         },
         en: {
-            loginTitle: "User Login",
-            loginSub: "Sign in with your email and password securely",
-            registerTitle: "Register New Account",
-            registerSub: "Create a new account to manage your clinic efficiently",
+            loginTitle: "Clinic User Login",
+            loginSub: "Sign in securely with your email and password to access dashboard",
+            registerTitle: "Register New Clinic Account",
+            registerSub: "Create a new account to manage your medical clinic & patients efficiently",
             emailLabel: "Email Address",
             passLabel: "Password",
             forgotPass: "Forgot Password?",
             btnLogin: "Login",
-            btnRegister: "Register Account",
-            switchRegister: "Don't have an account? <span>Register Now</span>",
+            btnRegister: "Register Account Now",
+            switchRegister: "Don't have a clinic account? <span>Register Now</span>",
             switchLogin: "Already have an account? <span>Login</span>",
             
             activTitle: "Account Activation Required",
@@ -1513,7 +1513,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.05",
+            footer: "Clinic Master Network v17.06",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name (Include 4th Grandfather to prevent duplication) *",
@@ -1657,6 +1657,13 @@
         document.getElementById('forgotPassBtn').innerText = t.forgotPass;
         document.getElementById('authSubmitBtn').innerText = isRegisterMode ? t.btnRegister : t.btnLogin;
         document.getElementById('authSwitchText').innerHTML = isRegisterMode ? t.switchLogin : t.switchRegister;
+
+        const iconContainer = document.getElementById('authScreenIcon');
+        if (isRegisterMode) {
+            iconContainer.innerHTML = '<i class="fa-solid fa-user-plus" style="color: #4f46e5;"></i>';
+        } else {
+            iconContainer.innerHTML = '<i class="fa-solid fa-user-lock" style="color: #0d9488;"></i>';
+        }
 
         document.getElementById('activTitle').innerText = t.activTitle;
         document.getElementById('activSub').innerText = t.activSub;
@@ -2348,63 +2355,6 @@
         document.getElementById('supportModal').style.display = 'none';
     }
 
-    function savePatientToCloudAndLocal(patientObj) {
-        if (!currentUserId || isSubscriptionExpired) return;
-        const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
-
-        const idx = patients.findIndex(p => Number(p.id) === Number(patientObj.id));
-        if (idx !== -1) {
-            patients[idx] = patientObj;
-        } else {
-            patients.unshift(patientObj);
-        }
-        localStorage.setItem(`clinic_patients_${ownerUid}`, JSON.stringify(patients));
-        localStorage.setItem('clinic_patients', JSON.stringify(patients));
-
-        if (navigator.onLine) {
-            db.collection('users_data').doc(ownerUid).collection('patients').doc(String(patientObj.id)).set(patientObj)
-                .catch(err => console.log("Cloud save error:", err));
-        }
-    }
-
-    function saveTrashToCloudAndLocal() {
-        if (!currentUserId || isSubscriptionExpired) return;
-        const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
-
-        localStorage.setItem(`clinic_trash_${ownerUid}`, JSON.stringify(trashBin));
-        localStorage.setItem('clinic_trash', JSON.stringify(trashBin));
-
-        if (navigator.onLine) {
-            db.collection('users_data').doc(ownerUid).set({
-                trashBin: trashBin,
-                updatedAt: new Date().toISOString()
-            }, { merge: true }).catch(err => console.log("Trash sync error:", err));
-        }
-    }
-
-    function saveSettingsToCloudAndLocal() {
-        if (!currentUserId || isSubscriptionExpired) return;
-        const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
-
-        localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
-        localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
-        localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
-
-        if (navigator.onLine) {
-            db.collection('users_data').doc(ownerUid).set({
-                rxImage: currentDoctorRxImage,
-                dictionary: medicalDict,
-                secretaryAccount: secretaryAccount,
-                updatedAt: new Date().toISOString()
-            }, { merge: true }).catch(err => console.log("Settings save error:", err));
-        }
-    }
-
-    function getTodayFormatted() {
-        const d = new Date();
-        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    }
-
     function toggleAuthMode() {
         isRegisterMode = !isRegisterMode;
         applyLanguage();
@@ -2617,7 +2567,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.05",
+            version: "17.06",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
