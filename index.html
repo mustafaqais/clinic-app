@@ -109,16 +109,68 @@
         .menu-info p { font-size: 0.68rem; color: #64748b; line-height: 1.3; }
 
         .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 18px; margin-bottom: 16px; text-align: left; }
+        .visit-card { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 20px; padding: 16px; margin-bottom: 20px; position: relative; text-align: left; }
+        .visit-header { background: #0f172a; color: #ffffff; padding: 8px 14px; border-radius: 12px; font-size: 0.88rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         
         .field-box { margin-bottom: 14px; position: relative; text-align: left; }
         .field-label { font-size: 0.82rem; color: #475569; margin-bottom: 6px; font-weight: 700; display: block; }
         .input-wrapper { background-color: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; display: flex; flex-direction: column; padding: 4px 10px; position: relative; }
         .input-wrapper input, .input-wrapper select, .input-wrapper textarea { width: 100%; border: none; outline: none; padding: 8px 0; font-size: 0.92rem; font-weight: 600; color: #0f172a; background: transparent; resize: none; overflow: hidden; }
 
+        .suggestions-box {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border: 1.5px solid #0d9488;
+            border-top: none;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .suggestion-item {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            color: #0f172a;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 600;
+        }
+        .suggestion-item:hover, .suggestion-item:active { background: #f0fdfa; color: #0d9488; }
+
+        .vital-box { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+        .vital-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .vital-item { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; }
+        .vital-label { font-size: 0.72rem; font-weight: 700; color: #64748b; display: flex; align-items: center; gap: 4px; }
+        .vital-inputs { display: flex; align-items: center; gap: 4px; }
+        .vital-inputs input { width: 100%; border: none; outline: none; font-size: 0.95rem; font-weight: 700; color: #0f172a; background: transparent; text-align: center; }
+        .vital-inputs span { font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
+
+        .live-save-bar { display: none; justify-content: space-between; align-items: center; background: #f0fdfa; border-top: 1px dashed #0d9488; padding: 6px 4px; margin-top: 4px; }
+        .live-save-bar span { font-size: 0.76rem; color: #0f766e; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 230px; }
+        .btn-live-save { background: #0d9488; color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+        .btn-live-save.saved { background: #16a34a; }
+
+        .btn-med-history { width: 100%; background: #f0fdfa; color: #0d9488; border: 1.5px dashed #0d9488; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+        .btn-bmi-trigger { width: 100%; background: #f0f9ff; color: #0284c7; border: 1.5px dashed #0284c7; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+        .btn-rx-action { width: 100%; background: #0f172a; color: #38bdf8; border: 2px solid #38bdf8; border-radius: 12px; padding: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; letter-spacing: 1px; }
+
         .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
         .analytics-box { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
         .analytics-num { font-size: 1.8rem; font-weight: 900; color: #0f172a; margin-top: 4px; }
         .analytics-label { font-size: 0.78rem; font-weight: 700; color: #64748b; display: flex; align-items: center; gap: 6px; }
+
+        .attachments-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .attachment-thumb { position: relative; width: 70px; height: 70px; border-radius: 10px; overflow: hidden; border: 1.5px solid #cbd5e1; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .attachment-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .attachment-delete { position: absolute; top: 2px; right: 2px; background: rgba(239, 68, 68, 0.95); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 5; }
+        .btn-upload-attach { background: #f0fdfa; color: #0d9488; border: 1.5px dashed #0d9488; border-radius: 10px; padding: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 6px; }
+        .btn-scan-attach { background: #e0f2fe; color: #0284c7; border: 1.5px dashed #0284c7; border-radius: 10px; padding: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 6px; }
 
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 999; display: none; justify-content: center; align-items: flex-end; }
         .modal-body { background: #ffffff; width: 100%; max-width: 480px; max-height: 92vh; border-top-left-radius: 25px; border-top-right-radius: 25px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; text-align: left; }
@@ -126,13 +178,143 @@
         .modal-header h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; font-weight: 700; }
         .modal-close { background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; color: #475569; cursor: pointer; }
 
+        #imagePreviewModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        #imagePreviewModal .modal-body {
+            background: transparent;
+            max-width: 95vw;
+            max-height: 95vh;
+            width: auto;
+            height: auto;
+            padding: 0;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: visible;
+        }
+        #previewModalImg {
+            max-width: 92vw;
+            max-height: 90vh;
+            width: auto;
+            height: auto;
+            border-radius: 12px;
+            object-fit: contain;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: #334155; cursor: pointer; }
+        .checkbox-item input { accent-color: #0d9488; width: 16px; height: 16px; }
+
         .btn-main { width: 100%; background: #0d9488; color: white; border: none; border-radius: 14px; padding: 14px; font-size: 0.98rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); }
         .btn-secondary { background: #0284c7; margin-bottom: 14px; }
+        .btn-danger { background: #ef4444; color: white; border: none; border-radius: 10px; padding: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 10px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
+        .btn-restore { background: #16a34a; color: white; border: none; border-radius: 10px; padding: 8px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+        .bmi-result-card { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px; text-align: center; margin-top: 10px; }
+        .bmi-value { font-size: 1.8rem; font-weight: 900; color: #0f172a; margin: 4px 0; }
+        .bmi-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 800; margin-top: 4px; }
 
         .patient-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; text-align: left; }
-        .filter-container { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 10px; }
+        .patient-info h4 { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
+        .patient-info p { font-size: 0.78rem; color: #64748b; }
+        .badge-gender { padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; }
+        .gender-male { background: #e0f2fe; color: #0369a1; }
+        .gender-female { background: #fce7f3; color: #be185d; }
+
+        .trash-card { background: #fff5f5; border: 1.5px solid #feb2b2; border-radius: 16px; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+
+        .dict-tag { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #334155; }
+        .dict-tag button { background: #fee2e2; color: #ef4444; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 0.75rem; }
+
+        .node-card { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; text-align: left; }
+        .node-info h5 { font-family: 'Playfair Display', serif; font-size: 1rem; color: #0f172a; font-weight: 700; }
+        .node-info p { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+        .node-badge { background: #ccfbf1; color: #0f766e; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
         
-        .rx-canvas-container { position: relative; width: 100%; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 14px; overflow: hidden; user-select: none; min-height: 480px; }
+        .filter-container { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 10px; }
+        .filter-row { display: flex; gap: 8px; }
+        .filter-row select { flex: 1; padding: 6px 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.78rem; font-weight: 600; outline: none; background: #fff; color: #0f172a; }
+
+        .rx-canvas-container {
+            position: relative;
+            width: 100%;
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 14px;
+            overflow: hidden;
+            user-select: none;
+            min-height: 480px;
+        }
+        .rx-bg-img {
+            width: 100%;
+            display: block;
+            pointer-events: none;
+        }
+        .draggable-box {
+            position: absolute;
+            background: transparent;
+            border: 1px dashed transparent;
+            padding: 4px 8px;
+            cursor: move;
+            touch-action: none;
+            z-index: 10;
+        }
+        .draggable-box.config-mode {
+            border: 1px dashed #0d9488;
+            background: rgba(255, 255, 255, 0.85);
+        }
+        .draggable-box:hover {
+            border: 1px dashed #0d9488;
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .box-font-controls {
+            display: none;
+            gap: 4px;
+            margin-bottom: 4px;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 6px;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: #0f172a;
+        }
+        .config-mode .box-font-controls {
+            display: flex;
+        }
+        .box-font-controls button {
+            background: #0d9488;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 20px;
+            height: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .rx-patient-details-text { color: #b91c1c; font-family: 'Amiri', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; } 
+        .rx-date-text { color: #1e293b; font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; background: rgba(255,255,255,0.95); padding: 2px 6px; border-radius: 6px; border: 1px solid #cbd5e1; letter-spacing: 0.5px; }
+        .rx-vitals-text { color: #0284c7; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.85rem; line-height: 1.6; direction: ltr; text-align: left; } 
+        .rx-treatment-wrapper { direction: ltr; text-align: left; width: 100%; }
+        .rx-rx-title { color: #b91c1c; font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-align: left; margin-bottom: 2px; direction: ltr; } 
+        .rx-treatment-text { color: #000000; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.05rem; white-space: pre-wrap; text-align: left; direction: ltr; line-height: 1.6; } 
+
         .footer { text-align: center; padding: 16px; color: #334155; font-size: 0.85rem; font-weight: 700; margin-top: auto; border-top: 1px solid #e2e8f0; background: #f8fafc; flex-shrink: 0; }
     </style>
 </head>
@@ -259,95 +441,104 @@
                         <button onclick="generateNewKey('ANNUAL')" style="flex:1; background:#4f46e5; color:#fff; border:none; border-radius:6px; padding:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">سنوي 1 سنة</button>
                     </div>
                     <div class="founder-code-display" id="dynamicFounderCode">اضغط الأزرار أعلاه لتوليد الرمز</div>
+                    <span style="font-size: 0.7rem; color: #64748b;" id="keyTypeHint">اختر النوع لتوليد رمز جديد.</span>
                 </div>
 
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-stethoscope"></i> العمليات اليومية</div>
+                    <div class="section-title" id="secGroup1"><i class="fa-solid fa-stethoscope"></i> العمليات اليومية</div>
                     <div class="menu-grid">
-                        <div class="menu-card" onclick="navigateTo('addPatientScreen')">
+                        <div class="menu-card" id="cardNewPatient" onclick="navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub)">
                             <div class="menu-icon"><i class="fa-solid fa-user-plus"></i></div>
                             <div class="menu-info">
-                                <h3>مريض جديد</h3>
-                                <p>تسجيل وحفظ السجلات</p>
+                                <h3 id="menuNewPatientTitle">مريض جديد</h3>
+                                <p id="menuNewPatientSub">تسجيل وحفظ السجلات</p>
                             </div>
                         </div>
 
-                        <div class="menu-card" onclick="openPatientsArchive()">
+                        <div class="menu-card" id="cardArchive" onclick="openPatientsArchive()">
                             <div class="menu-icon archive-icon"><i class="fa-solid fa-address-book"></i></div>
                             <div class="menu-info">
-                                <h3>أرشيف المرضى</h3>
-                                <p>البحث وسجل الزيارات</p>
+                                <h3 id="menuArchiveTitle">أرشيف المرضى</h3>
+                                <p id="menuArchiveSub">البحث وسجل الزيارات</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-file-prescription"></i> الوصفات والأدوات الطبية</div>
+                    <div class="section-title" id="secGroup2"><i class="fa-solid fa-file-prescription"></i> الوصفات والأدوات الطبية</div>
                     <div class="menu-grid">
-                        <div class="menu-card" onclick="openRxTemplateManager()">
+                        <div class="menu-card" id="cardRxTemplate" onclick="openRxTemplateManager()">
                             <div class="menu-icon rx-icon"><i class="fa-solid fa-prescription-bottle-medical"></i></div>
                             <div class="menu-info">
-                                <h3>قالب الوصفة (RX)</h3>
-                                <p>صورة ترويسة الوصفة</p>
+                                <h3 id="menuRxTitle">قالب الوصفة (RX)</h3>
+                                <p id="menuRxSub">صورة ترويسة الوصفة</p>
                             </div>
                         </div>
 
-                        <div class="menu-card" onclick="openDictionaryManager()">
+                        <div class="menu-card" id="cardDict" onclick="openDictionaryManager()">
                             <div class="menu-icon dict-icon"><i class="fa-solid fa-book-medical"></i></div>
                             <div class="menu-info">
-                                <h3>القاموس الطبي</h3>
-                                <p>إدارة الأدوية والجرعات</p>
+                                <h3 id="menuDictTitle">القاموس الطبي</h3>
+                                <p id="menuDictSub">إدارة الأدوية والجرعات</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-chart-pie"></i> التقارير والإحصائيات</div>
+                    <div class="section-title" id="secGroup3"><i class="fa-solid fa-chart-pie"></i> التقارير والإحصائيات</div>
                     <div class="menu-grid">
-                        <div class="menu-card" onclick="openAnalyticsDashboard()" style="grid-column: span 2; flex-direction: row; text-align: left; padding: 12px 16px;">
+                        <div class="menu-card" id="cardAnalytics" onclick="openAnalyticsDashboard()" style="grid-column: span 2; flex-direction: row; text-align: left; padding: 12px 16px;">
                             <div class="menu-icon analytics-icon"><i class="fa-solid fa-chart-column"></i></div>
                             <div class="menu-info" style="flex: 1;">
-                                <h3>إحصائيات العيادة والتقارير</h3>
-                                <p>مؤشرات الأداء، نسب المرضى والأدوية الأكثر صرفاً</p>
+                                <h3 id="menuAnalyticsTitle">إحصائيات العيادة والتقارير</h3>
+                                <p id="menuAnalyticsSub">مؤشرات الأداء، نسب المرضى والأدوية الأكثر صرفاً</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-shield-halved"></i> النظام والصيانة</div>
+                    <div class="section-title" id="secGroup4"><i class="fa-solid fa-shield-halved"></i> النظام والصيانة</div>
                     <div class="menu-grid">
-                        <div class="menu-card" onclick="openBackupManager()">
+                        <div class="menu-card" id="cardBackup" onclick="openBackupManager()">
                             <div class="menu-icon backup-icon"><i class="fa-solid fa-database"></i></div>
                             <div class="menu-info">
-                                <h3>النسخ الاحتياطي</h3>
-                                <p>تصدير أو استعادة الملف</p>
+                                <h3 id="menuBackupTitle">النسخ الاحتياطي</h3>
+                                <p id="menuBackupSub">تصدير أو استعادة الملف</p>
                             </div>
                         </div>
 
-                        <div class="menu-card" onclick="openTrashBin()">
+                        <div class="menu-card" id="cardTrash" onclick="openTrashBin()">
                             <div class="menu-icon trash-icon"><i class="fa-solid fa-trash-arrow-up"></i></div>
                             <div class="menu-info">
-                                <h3>سلة المهملات</h3>
-                                <p>استعادة العناصر المحذوفة</p>
+                                <h3 id="menuTrashTitle">سلة المهملات</h3>
+                                <p id="menuTrashSub">استعادة العناصر المحذوفة</p>
                             </div>
                         </div>
 
-                        <div class="menu-card" onclick="openAccountSettings()">
+                        <div class="menu-card" id="cardSettings" onclick="openAccountSettings()">
                             <div class="menu-icon settings-icon"><i class="fa-solid fa-user-gear"></i></div>
                             <div class="menu-info">
-                                <h3>إعدادات الحساب</h3>
-                                <p>خيارات البريد وكلمة المرور</p>
+                                <h3 id="menuSettingsTitle">إعدادات الحساب</h3>
+                                <p id="menuSettingsSub">خيارات البريد وكلمة المرور</p>
                             </div>
                         </div>
 
                         <div class="menu-card" id="cardPermissions" onclick="openPermissionsManager()" style="display: none;">
                             <div class="menu-icon permissions-icon"><i class="fa-solid fa-user-shield"></i></div>
                             <div class="menu-info">
-                                <h3>إدارة السكرتير</h3>
-                                <p>إنشاء الحساب والصلاحيات</p>
+                                <h3 id="menuPermTitle">إدارة السكرتير</h3>
+                                <p id="menuPermSub">إنشاء الحساب والصلاحيات</p>
+                            </div>
+                        </div>
+
+                        <div class="menu-card" id="networkMenuCard" onclick="openNetworkHierarchy()" style="display: none;">
+                            <div class="menu-icon network-icon"><i class="fa-solid fa-network-wired"></i></div>
+                            <div class="menu-info">
+                                <h3 id="menuNetTitle">قاعدة بيانات الشبكة</h3>
+                                <p id="menuNetSub">المستخدمين وبيانات الدخول</p>
                             </div>
                         </div>
                     </div>
@@ -355,11 +546,13 @@
 
             </div>
 
-            <!-- شاشات التطبيق الفرعية -->
+            <!-- بقية شاشات التطبيق الكاملة (أرشيف المرضى، السجل الطبي، إحصائيات العيادة، النسخ الاحتياطي، سلة المهملات، القاموس، الروشتة) -->
             <div id="permissionsScreen" style="display: none;">
                 <div class="group-card">
-                    <h3>حساب وصلاحيات السكرتير</h3>
-                    <div class="field-box" style="margin-top:10px;">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
+                        <i class="fa-solid fa-user-shield" style="color:#d946ef;"></i> حساب وصلاحيات السكرتير
+                    </div>
+                    <div class="field-box">
                         <span class="field-label">البريد الإلكتروني للسكرتير</span>
                         <div class="input-wrapper"><input type="email" id="secEmailInput" placeholder="secretary@clinic.com"></div>
                     </div>
@@ -367,7 +560,7 @@
                         <span class="field-label">كلمة المرور</span>
                         <div class="input-wrapper"><input type="password" id="secPassInput" placeholder="••••••••"></div>
                     </div>
-                    <button class="btn-main" onclick="saveSecretaryAccount()">حفظ حساب السكرتير</button>
+                    <button class="btn-main" onclick="saveSecretaryAccount()" style="background: #0d9488;">حفظ حساب السكرتير</button>
                 </div>
             </div>
 
@@ -405,16 +598,16 @@
                 <form id="patientForm" onsubmit="saveNewPatient(event)">
                     <div class="group-card">
                         <div class="field-box">
-                            <span class="field-label">الاسم الكامل (يُفضل إدخال اسم الجد الرابع لمنع التكرار) *</span>
+                            <span class="field-label" id="lblPatName">الاسم الكامل (يُفضل إدخال اسم الجد الرابع لمنع التكرار) *</span>
                             <div class="input-wrapper"><input type="text" id="pName" placeholder="أدخل اسم المريض..." required></div>
                         </div>
                         <div style="display: flex; gap: 10px;">
                             <div class="field-box" style="flex: 1;">
-                                <span class="field-label">العمر *</span>
+                                <span class="field-label" id="lblPatAge">العمر *</span>
                                 <div class="input-wrapper"><input type="number" id="pAge" placeholder="العمر..." required></div>
                             </div>
                             <div class="field-box" style="flex: 1;">
-                                <span class="field-label">الجنس</span>
+                                <span class="field-label" id="lblPatGender">الجنس</span>
                                 <div class="input-wrapper">
                                     <select id="pGender">
                                         <option value="Male">ذكر</option>
@@ -424,11 +617,15 @@
                             </div>
                         </div>
                         <div class="field-box">
-                            <span class="field-label">رقم الهاتف</span>
+                            <span class="field-label" id="lblPatPhone">رقم الهاتف</span>
                             <div class="input-wrapper"><input type="tel" id="pPhone" placeholder="07XXXXXXXXX"></div>
                         </div>
+                        <div class="field-box">
+                            <span class="field-label" id="lblPatDate">تاريخ الزيارة الأولية</span>
+                            <div class="input-wrapper"><input type="date" id="pDate"></div>
+                        </div>
                     </div>
-                    <button type="submit" class="btn-main">حفظ وفتح السجل الطبي</button>
+                    <button type="submit" class="btn-main" id="btnSavePatRec">حفظ وفتح السجل الطبي</button>
                 </form>
             </div>
 
@@ -474,13 +671,20 @@
                     <div id="dictItemsList"></div>
                 </div>
             </div>
+
+            <div id="networkScreen" style="display: none;">
+                <div class="group-card">
+                    <h3>قاعدة بيانات الشبكة</h3>
+                    <div id="networkTreeContainer"></div>
+                </div>
+            </div>
         </div>
 
         <div class="footer" id="footerText">Clinic Master Network v17.06</div>
     </div>
 </div>
 
-<!-- نافذة الدعم -->
+<!-- النوافذ المنبثقة (Modal) الدعم والروشتة -->
 <div id="supportModal" class="modal-overlay">
     <div class="modal-body" style="max-width: 400px; text-align: center;">
         <div class="modal-header">
@@ -488,6 +692,24 @@
             <button class="modal-close" onclick="closeSupportModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">تواصل معنا عبر واتساب أو تيليجرام:<br><strong>+964 773 911 4548</strong></p>
+    </div>
+</div>
+
+<div id="rxModal" class="modal-overlay">
+    <div class="modal-body" style="max-width: 480px; text-align: left; direction: ltr;">
+        <div class="modal-header">
+            <h3>RX Prescription</h3>
+            <button class="modal-close" onclick="closeRxModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="rxCanvasContainer" class="rx-canvas-container">
+            <div id="dragBoxTreatment" class="draggable-box" style="top: 150px; left: 15px; min-width: 220px;">
+                <div class="rx-treatment-wrapper">
+                    <div class="rx-rx-title">RX</div>
+                    <div id="rxDragTreatmentText" class="rx-treatment-text">-</div>
+                </div>
+            </div>
+        </div>
+        <button class="btn-main" onclick="openPrescriptionPDF()" style="background: #0284c7; margin-top: 10px;">Save as PDF File</button>
     </div>
 </div>
 
@@ -507,8 +729,10 @@
     const db = firebase.firestore();
 
     const FOUNDER_EMAIL = "musqaqa009@gmail.com"; 
+    let pendingUserPass = "";
     let currentUserId = null;
     let currentPatientId = null;
+    let currentDoctorRxImage = localStorage.getItem('doctor_rx_template') || '';
     let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
     let trashBin = JSON.parse(localStorage.getItem('clinic_trash')) || [];
     let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || { labs: [], scans: [], drugs: [], notes: [], mh_history: [] };
@@ -534,16 +758,14 @@
         document.getElementById('footerText').innerText = t.footer;
     }
 
-    // دوال التبديل المستقلة تماماً بين شاشة تسجيل الدخول وشاشة إنشاء الحساب
+    // دوال الانتقال المستقلة بين شاشة تسجيل الدخول وإنشاء الحساب
     function switchToRegisterMode() {
         document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('activationScreen').style.display = 'none';
         document.getElementById('registerScreen').style.display = 'flex';
     }
 
     function switchToLoginMode() {
         document.getElementById('registerScreen').style.display = 'none';
-        document.getElementById('activationScreen').style.display = 'none';
         document.getElementById('loginScreen').style.display = 'flex';
     }
 
@@ -578,6 +800,7 @@
 
         auth.createUserWithEmailAndPassword(email, pass)
             .then(res => {
+                pendingUserPass = pass;
                 currentUserId = res.user.uid;
                 if (email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
                     const expiryDate = new Date();
@@ -643,6 +866,7 @@
         document.getElementById('backupScreen').style.display = 'none';
         document.getElementById('settingsScreen').style.display = 'none';
         document.getElementById('permissionsScreen').style.display = 'none';
+        document.getElementById('networkScreen').style.display = 'none';
         
         const target = document.getElementById(screenId);
         if (target) target.style.display = 'block';
@@ -657,8 +881,11 @@
     function openTrashBin() { navigateTo('trashScreen'); }
     function openAccountSettings() { navigateTo('settingsScreen'); }
     function openPermissionsManager() { navigateTo('permissionsScreen'); }
+    function openNetworkHierarchy() { navigateTo('networkScreen'); }
     function openSupportModal() { document.getElementById('supportModal').style.display = 'flex'; }
     function closeSupportModal() { document.getElementById('supportModal').style.display = 'none'; }
+    function closeRxModal() { document.getElementById('rxModal').style.display = 'none'; }
+    function openRxModal(vId) { document.getElementById('rxModal').style.display = 'flex'; }
 
     function renderPatientsList(list) {
         const container = document.getElementById('patientsList');
@@ -788,3 +1015,4 @@
 
 </body>
 </html>
+
