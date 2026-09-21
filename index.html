@@ -42,7 +42,7 @@
             .menu-grid { grid-template-columns: repeat(3, 1fr) !important; }
         }
         
-        /* شاشة تسجيل دخول مبسطة، أنيقة، وسلسة جداً */
+        /* شاشة تسجيل الدخول وإنشاء الحساب المبسطة والسلسة */
         .auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px 20px; flex: 1; text-align: center; background: #ffffff; }
         .activ-icon { font-size: 42px; color: #0d9488; margin-bottom: 10px; }
         .activ-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
@@ -51,6 +51,10 @@
         .auth-switch { margin-top: 14px; font-size: 0.8rem; color: #64748b; }
         .auth-switch span { color: #0d9488; font-weight: 700; cursor: pointer; }
         .forgot-pass { font-size: 0.75rem; color: #0284c7; text-align: right; cursor: pointer; margin-top: -4px; font-weight: 600; }
+
+        .password-wrapper { position: relative; display: flex; align-items: center; }
+        .password-wrapper input { width: 100%; padding-right: 40px; }
+        .toggle-password { position: absolute; right: 12px; cursor: pointer; color: #64748b; font-size: 0.9rem; }
 
         .founder-panel { background: #f0fdfa; border: 2px dashed #0d9488; border-radius: 16px; padding: 14px; margin-bottom: 16px; text-align: center; }
         .founder-code-display { font-size: 1.1rem; font-weight: 900; color: #0f766e; letter-spacing: 1px; margin: 4px 0; background: #fff; padding: 6px; border-radius: 8px; border: 1px solid #ccfbf1; word-break: break-all; }
@@ -325,7 +329,7 @@
 <div class="mobile-container">
     <div id="networkStatusBar" class="network-status-bar">⚠️ Offline Mode - Changes saved locally, will sync when online</div>
 
-    <!-- شاشة تسجيل الدخول المبسطة والسلسة -->
+    <!-- شاشة تسجيل الدخول وإنشاء الحساب المبسطة -->
     <div id="authScreen" class="auth-screen">
         <div style="position: absolute; top: 15px; right: 15px;">
             <button onclick="toggleLanguage()" id="authLangBtn" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; color: #0f172a;">عربي / EN</button>
@@ -335,14 +339,27 @@
         <div class="activ-sub" id="authSubText">تسجيل الدخول إلى نظام العيادة السحابي</div>
 
         <form id="authForm" class="auth-form" onsubmit="handleAuthSubmit(event)">
+            <!-- حقل البريد أو رقم الموبايل لتسجيل الدخول / أو البريد لإنشاء الحساب -->
             <div class="field-box" style="text-align: left; margin-bottom: 8px;">
-                <span class="field-label" id="lblEmail">البريد الإلكتروني</span>
-                <div class="input-wrapper"><input type="email" id="authEmail" placeholder="user@clinic.com" required></div>
+                <span class="field-label" id="lblEmail">البريد الإلكتروني / رقم الموبايل</span>
+                <div class="input-wrapper"><input type="text" id="authEmail" placeholder="user@clinic.com أو 07700000000" required></div>
             </div>
+
+            <!-- حقل رقم الموبايل الاختياري (يظهر فقط في إنشاء الحساب) -->
+            <div class="field-box" id="registerPhoneBox" style="text-align: left; margin-bottom: 8px; display: none;">
+                <span class="field-label" id="lblRegPhone">رقم الموبايل (اختياري)</span>
+                <div class="input-wrapper"><input type="tel" id="regPhoneInput" placeholder="07XXXXXXXXX"></div>
+            </div>
+
+            <!-- حقل كلمة المرور مع زر إظهارها -->
             <div class="field-box" style="text-align: left; margin-bottom: 4px;">
                 <span class="field-label" id="lblPass">كلمة المرور</span>
-                <div class="input-wrapper"><input type="password" id="authPassword" placeholder="••••••••" required></div>
+                <div class="input-wrapper password-wrapper">
+                    <input type="password" id="authPassword" placeholder="••••••••" required>
+                    <i class="fa-solid fa-eye toggle-password" id="togglePasswordBtn" onclick="togglePasswordVisibility()"></i>
+                </div>
             </div>
+
             <div class="forgot-pass" id="forgotPassBtn" onclick="resetPassword()">هل نسيت كلمة المرور؟</div>
             <button type="submit" class="btn-main" id="authSubmitBtn" style="margin-top: 6px;">تسجيل الدخول</button>
         </form>
@@ -1313,7 +1330,9 @@
             loginSub: "تسجيل الدخول إلى نظام العيادة السحابي",
             registerTitle: "إنشاء حساب جديد",
             registerSub: "أنشئ حساباً جديداً لإدارة عيادتك بكفاءة",
-            emailLabel: "البريد الإلكتروني",
+            emailLabel: "البريد الإلكتروني / رقم الموبايل",
+            regEmailLabel: "البريد الإلكتروني",
+            regPhoneLabel: "رقم الموبايل (اختياري)",
             passLabel: "كلمة المرور",
             forgotPass: "نسيت كلمة المرور؟",
             btnLogin: "تسجيل الدخول",
@@ -1468,7 +1487,9 @@
             loginSub: "Sign in securely to your clinic cloud system",
             registerTitle: "Register New Account",
             registerSub: "Create a new account to manage your clinic efficiently",
-            emailLabel: "Email Address",
+            emailLabel: "Email or Phone Number",
+            regEmailLabel: "Email Address",
+            regPhoneLabel: "Phone Number (Optional)",
             passLabel: "Password",
             forgotPass: "Forgot Password?",
             btnLogin: "Login",
@@ -1655,9 +1676,10 @@
 
         document.getElementById('authTitle').innerText = isRegisterMode ? t.registerTitle : t.loginTitle;
         document.getElementById('authSubText').innerText = isRegisterMode ? t.registerSub : t.loginSub;
-        document.getElementById('lblEmail').innerText = t.emailLabel;
+        document.getElementById('lblEmail').innerText = isRegisterMode ? t.regEmailLabel : t.emailLabel;
+        document.getElementById('lblRegPhone').innerText = t.regPhoneLabel;
         document.getElementById('lblPass').innerText = t.passLabel;
-        document.getElementById('forgotPassBtn').innerText = t.forgotPass;
+        document.getElementById('forgotPassBtn').style.display = isRegisterMode ? 'none' : 'block';
         document.getElementById('authSubmitBtn').innerText = isRegisterMode ? t.btnRegister : t.btnLogin;
         document.getElementById('authSwitchText').innerHTML = isRegisterMode ? t.switchLogin : t.switchRegister;
 
@@ -2411,20 +2433,41 @@
     function toggleAuthMode() {
         isRegisterMode = !isRegisterMode;
         applyLanguage();
-        document.getElementById('forgotPassBtn').style.display = isRegisterMode ? 'none' : 'block';
+        document.getElementById('registerPhoneBox').style.display = isRegisterMode ? 'block' : 'none';
     }
 
-    function handleAuthSubmit(e) {
+    function togglePasswordVisibility() {
+        const passInput = document.getElementById('authPassword');
+        const toggleBtn = document.getElementById('togglePasswordBtn');
+        if (passInput.type === 'password') {
+            passInput.type = 'text';
+            toggleBtn.classList.remove('fa-eye');
+            toggleBtn.classList.add('fa-eye-slash');
+        } else {
+            passInput.type = 'password';
+            toggleBtn.classList.remove('fa-eye-slash');
+            toggleBtn.classList.add('fa-eye');
+        }
+    }
+
+    async function handleAuthSubmit(e) {
         e.preventDefault();
-        const email = document.getElementById('authEmail').value.trim();
+        const identifier = document.getElementById('authEmail').value.trim();
         const pass = document.getElementById('authPassword').value;
 
         if (isRegisterMode) {
-            auth.createUserWithEmailAndPassword(email, pass)
-                .then(res => {
+            const phone = document.getElementById('regPhoneInput').value.trim();
+            auth.createUserWithEmailAndPassword(identifier, pass)
+                .then(async res => {
                     pendingUserPass = pass;
                     currentUserId = res.user.uid;
-                    if (email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
+                    // حفظ رقم الموبايل الاختياري إن وجد في قاعدة البيانات
+                    if (phone) {
+                        await db.collection('network_hierarchy').doc(currentUserId).set({
+                            phone: phone
+                        }, { merge: true });
+                    }
+                    if (identifier.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
                         const expiryDate = new Date();
                         expiryDate.setFullYear(expiryDate.getFullYear() + 10);
                         localStorage.setItem(`sub_expiry_${res.user.uid}`, expiryDate.toISOString());
@@ -2436,14 +2479,28 @@
                 })
                 .catch(err => alert(err.message));
         } else {
-            auth.signInWithEmailAndPassword(email, pass)
+            // دعم تسجيل الدخول إما بالبريد أو برقم الموبايل
+            let loginEmail = identifier;
+            if (!identifier.includes('@')) {
+                // إذا أدخل المستخدم رقم موبايل وليس إيميل، نبحث عنه في قاعدة البيانات
+                try {
+                    const querySnap = await db.collection('network_hierarchy').where('phone', '==', identifier).get();
+                    if (!querySnap.empty) {
+                        loginEmail = querySnap.docs[0].data().email;
+                    }
+                } catch (err) {
+                    console.log("Phone lookup error:", err);
+                }
+            }
+
+            auth.signInWithEmailAndPassword(loginEmail, pass)
                 .then(async res => {
                     currentUserId = res.user.uid;
                     let dataOwnerUid = res.user.uid;
                     let isSec = false;
 
                     try {
-                        const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', email.toLowerCase()).get();
+                        const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', loginEmail.toLowerCase()).get();
                         if (!secQuery.empty) {
                             const doctorDoc = secQuery.docs[0];
                             dataOwnerUid = doctorDoc.id;
@@ -2588,9 +2645,9 @@
     }
 
     function resetPassword() {
-        const email = document.getElementById('authEmail').value;
-        if (!email) { alert('Enter your email first.'); return; }
-        auth.sendPasswordResetEmail(email)
+        const identifier = document.getElementById('authEmail').value;
+        if (!identifier) { alert('Enter your email first.'); return; }
+        auth.sendPasswordResetEmail(identifier)
             .then(() => alert('Password reset link sent to your email successfully!'))
             .catch(err => alert(err.message));
     }
@@ -4242,7 +4299,7 @@
 
         const nameExists = patients.some(p => p.name.toLowerCase().replace(/\s+/g, ' ') === nameNormalized);
         if (nameExists) {
-            alert('⚠️ تنبيه بالرفض: يوجد مريض مسجل بهذا الاسم تماماً في النظام!\n\nلا يمكن حفظ الملف لتجنب تشابه الأسماء.\nالرجاء إدخال اسم الجد الرابع أو إضافة لقب تفصيلي للمريض (مثلاً: أحمد علي حسن محمد) ثم إعادة المحاولة.');
+            alert('⚠️ تنبيه بالرفض: يوجد مريض مسجل بهذا الاسم تماماً في النظام!\n\nلا يمكن الحفظ لتجنب تشابه الأسماء.\nالرجاء إدخال اسم الجد الرابع أو إضافة لقب تفصيلي للمريض (مثلاً: أحمد علي حسن محمد) ثم إعادة المحاولة.');
             return;
         }
 
