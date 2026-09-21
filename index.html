@@ -42,14 +42,15 @@
             .menu-grid { grid-template-columns: repeat(3, 1fr) !important; }
         }
         
-        .auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px 20px; flex: 1; text-align: center; }
-        .activ-icon { font-size: 50px; color: #0d9488; margin-bottom: 15px; }
-        .activ-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
-        .activ-sub { font-size: 0.82rem; color: #64748b; margin-bottom: 20px; line-height: 1.5; }
-        .auth-form { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
-        .auth-switch { margin-top: 15px; font-size: 0.82rem; color: #64748b; }
+        /* شاشة تسجيل دخول مبسطة، أنيقة، وسلسة جداً */
+        .auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px 20px; flex: 1; text-align: center; background: #ffffff; }
+        .activ-icon { font-size: 42px; color: #0d9488; margin-bottom: 10px; }
+        .activ-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
+        .activ-sub { font-size: 0.8rem; color: #64748b; margin-bottom: 20px; line-height: 1.4; }
+        .auth-form { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 10px; }
+        .auth-switch { margin-top: 14px; font-size: 0.8rem; color: #64748b; }
         .auth-switch span { color: #0d9488; font-weight: 700; cursor: pointer; }
-        .forgot-pass { font-size: 0.78rem; color: #0284c7; text-align: right; cursor: pointer; margin-top: -6px; font-weight: 600; }
+        .forgot-pass { font-size: 0.75rem; color: #0284c7; text-align: right; cursor: pointer; margin-top: -4px; font-weight: 600; }
 
         .founder-panel { background: #f0fdfa; border: 2px dashed #0d9488; border-radius: 16px; padding: 14px; margin-bottom: 16px; text-align: center; }
         .founder-code-display { font-size: 1.1rem; font-weight: 900; color: #0f766e; letter-spacing: 1px; margin: 4px 0; background: #fff; padding: 6px; border-radius: 8px; border: 1px solid #ccfbf1; word-break: break-all; }
@@ -112,8 +113,8 @@
         .visit-card { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 20px; padding: 16px; margin-bottom: 20px; position: relative; text-align: left; }
         .visit-header { background: #0f172a; color: #ffffff; padding: 8px 14px; border-radius: 12px; font-size: 0.88rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         
-        .field-box { margin-bottom: 14px; position: relative; text-align: left; }
-        .field-label { font-size: 0.82rem; color: #475569; margin-bottom: 6px; font-weight: 700; display: block; }
+        .field-box { margin-bottom: 12px; position: relative; text-align: left; }
+        .field-label { font-size: 0.8rem; color: #475569; margin-bottom: 5px; font-weight: 700; display: block; }
         .input-wrapper { background-color: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; display: flex; flex-direction: column; padding: 4px 10px; position: relative; }
         .input-wrapper input, .input-wrapper select, .input-wrapper textarea { width: 100%; border: none; outline: none; padding: 8px 0; font-size: 0.92rem; font-weight: 600; color: #0f172a; background: transparent; resize: none; overflow: hidden; }
 
@@ -218,7 +219,8 @@
         .checkbox-item { display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: #334155; cursor: pointer; }
         .checkbox-item input { accent-color: #0d9488; width: 16px; height: 16px; }
 
-        .btn-main { width: 100%; background: #0d9488; color: white; border: none; border-radius: 14px; padding: 14px; font-size: 0.98rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); }
+        .btn-main { width: 100%; background: #0d9488; color: white; border: none; border-radius: 12px; padding: 12px; font-size: 0.95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2); transition: background 0.2s; }
+        .btn-main:hover { background: #0f766e; }
         .btn-secondary { background: #0284c7; margin-bottom: 14px; }
         .btn-danger { background: #ef4444; color: white; border: none; border-radius: 10px; padding: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 10px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
         .btn-restore { background: #16a34a; color: white; border: none; border-radius: 10px; padding: 8px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; }
@@ -323,29 +325,30 @@
 <div class="mobile-container">
     <div id="networkStatusBar" class="network-status-bar">⚠️ Offline Mode - Changes saved locally, will sync when online</div>
 
+    <!-- شاشة تسجيل الدخول المبسطة والسلسة -->
     <div id="authScreen" class="auth-screen">
         <div style="position: absolute; top: 15px; right: 15px;">
             <button onclick="toggleLanguage()" id="authLangBtn" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; color: #0f172a;">عربي / EN</button>
         </div>
-        <div class="activ-icon"><i class="fa-solid fa-user-lock"></i></div>
+        <div class="activ-icon"><i class="fa-solid fa-user-doctor"></i></div>
         <div class="activ-title" id="authTitle">User Login</div>
-        <div class="activ-sub" id="authSubText">Sign in with your email and password securely</div>
+        <div class="activ-sub" id="authSubText">تسجيل الدخول إلى نظام العيادة السحابي</div>
 
         <form id="authForm" class="auth-form" onsubmit="handleAuthSubmit(event)">
-            <div class="field-box" style="text-align: left;">
-                <span class="field-label" id="lblEmail">Email Address</span>
+            <div class="field-box" style="text-align: left; margin-bottom: 8px;">
+                <span class="field-label" id="lblEmail">البريد الإلكتروني</span>
                 <div class="input-wrapper"><input type="email" id="authEmail" placeholder="user@clinic.com" required></div>
             </div>
-            <div class="field-box" style="text-align: left;">
-                <span class="field-label" id="lblPass">Password</span>
+            <div class="field-box" style="text-align: left; margin-bottom: 4px;">
+                <span class="field-label" id="lblPass">كلمة المرور</span>
                 <div class="input-wrapper"><input type="password" id="authPassword" placeholder="••••••••" required></div>
             </div>
-            <div class="forgot-pass" id="forgotPassBtn" onclick="resetPassword()">Forgot Password?</div>
-            <button type="submit" class="btn-main" id="authSubmitBtn">Login</button>
+            <div class="forgot-pass" id="forgotPassBtn" onclick="resetPassword()">هل نسيت كلمة المرور؟</div>
+            <button type="submit" class="btn-main" id="authSubmitBtn" style="margin-top: 6px;">تسجيل الدخول</button>
         </form>
 
         <div class="auth-switch" id="authSwitchText">
-            Don't have an account? <span onclick="toggleAuthMode()">Register Now</span>
+            ليس لديك حساب؟ <span onclick="toggleAuthMode()">سجل الآن</span>
         </div>
     </div>
 
@@ -1307,7 +1310,7 @@
     const translations = {
         ar: {
             loginTitle: "تسجيل الدخول",
-            loginSub: "سجل دخولك باستخدام البريد الإلكتروني وكلمة المرور بأمان",
+            loginSub: "تسجيل الدخول إلى نظام العيادة السحابي",
             registerTitle: "إنشاء حساب جديد",
             registerSub: "أنشئ حساباً جديداً لإدارة عيادتك بكفاءة",
             emailLabel: "البريد الإلكتروني",
@@ -1462,7 +1465,7 @@
         },
         en: {
             loginTitle: "User Login",
-            loginSub: "Sign in with your email and password securely",
+            loginSub: "Sign in securely to your clinic cloud system",
             registerTitle: "Register New Account",
             registerSub: "Create a new account to manage your clinic efficiently",
             emailLabel: "Email Address",
