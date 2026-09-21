@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.08</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.06</title>
     
+    <!-- PWA & Fullscreen Mobile Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
+    <link rel="apple-touch-icon-precomposed" href="https://i.ibb.co/68n8910/1000111840.png">
     <meta name="theme-color" content="#0f172a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -27,7 +29,18 @@
     <style>
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
         html, body { background-color: #ffffff; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow-x: hidden; }
+        
         .mobile-container { background: #ffffff; width: 100%; max-width: 100%; height: 100vh; min-height: 100vh; position: relative; overflow: hidden; display: flex; flex-direction: column; }
+        
+        @media (min-width: 768px) {
+            .mobile-container { max-width: 100%; border-radius: 0; height: 100vh; min-height: 100vh; border: none; }
+            .menu-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
+
+        @media (min-width: 1024px) {
+            .mobile-container { max-width: 100%; border-radius: 0; height: 100vh; min-height: 100vh; border: none; }
+            .menu-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
         
         .auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px 20px; flex: 1; text-align: center; }
         .activ-icon { font-size: 50px; color: #0d9488; margin-bottom: 15px; }
@@ -35,6 +48,7 @@
         .activ-sub { font-size: 0.82rem; color: #64748b; margin-bottom: 20px; line-height: 1.5; }
         .auth-form { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
         .auth-switch { margin-top: 15px; font-size: 0.82rem; color: #64748b; }
+        .auth-switch span { color: #0d9488; font-weight: 700; cursor: pointer; }
         .forgot-pass { font-size: 0.78rem; color: #0284c7; text-align: right; cursor: pointer; margin-top: -6px; font-weight: 600; }
 
         .founder-panel { background: #f0fdfa; border: 2px dashed #0d9488; border-radius: 16px; padding: 14px; margin-bottom: 16px; text-align: center; }
@@ -44,35 +58,55 @@
         .sub-status-banner.warning { background: #fef2f2; border-color: #fca5a5; }
         .sub-status-banner.expired { background: #fefce8; border-color: #fde047; }
         .sub-status-info h4 { font-size: 0.82rem; font-weight: 800; color: #166534; display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+        .sub-status-banner.warning .sub-status-info h4 { color: #991b1b; }
+        .sub-status-banner.expired .sub-status-info h4 { color: #854d0e; }
+        .sub-status-info p { font-size: 0.75rem; color: #475569; }
 
         .network-status-bar { background: #fef3c7; color: #b45309; font-size: 0.72rem; font-weight: 700; text-align: center; padding: 4px; display: none; }
         .network-status-bar.offline { display: block; background: #fee2e2; color: #b91c1c; }
 
         .header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 35px 20px 30px 20px; text-align: center; border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.15); flex-shrink: 0; }
         .header-icon { font-size: 42px; color: #0d9488; margin-bottom: 10px; }
-        .header h1 { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; color: #f8fafc; }
+        .header h1 { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; color: #f8fafc; letter-spacing: 0.5px; }
         .header p { font-size: 0.82rem; color: #94a3b8; }
         
         .back-btn { position: absolute; top: 15px; left: 15px; background: rgba(255, 255, 255, 0.12); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.2); padding: 8px 10px; border-radius: 10px; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+        .menu-dropdown-container { position: absolute; top: 15px; right: 15px; z-index: 50; }
+        .hamburger-btn { background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; }
+        .hamburger-btn:hover { background: rgba(255, 255, 255, 0.25); }
+        
+        .dropdown-menu { position: absolute; top: 46px; right: 0; background: #ffffff; border-radius: 14px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2); width: 190px; display: none; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0; text-align: left; }
+        .dropdown-menu.show { display: flex; }
+        .dropdown-item { padding: 12px 14px; font-size: 0.85rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; background: #ffffff; transition: background 0.15s; }
+        .dropdown-item:hover { background: #f8fafc; color: #0d9488; }
+        .dropdown-item.danger { color: #ef4444; }
+        .dropdown-item.danger:hover { background: #fef2f2; }
+
         .content { padding: 20px 16px; flex: 1; overflow-y: auto; width: 100%; max-width: 800px; margin: 0 auto; }
         
         .section-group { margin-bottom: 18px; }
-        .section-title { font-size: 0.82rem; font-weight: 800; color: #0d9488; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; padding-left: 4px; text-transform: uppercase; }
+        .section-title { font-size: 0.82rem; font-weight: 800; color: #0d9488; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; padding-left: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
         .menu-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
         .menu-card:hover { border-color: #0d9488; transform: translateY(-2px); }
+        .menu-card.disabled-card { opacity: 0.55; cursor: not-allowed; border-color: #cbd5e1; }
+        .menu-card.disabled-card:hover { transform: none; border-color: #cbd5e1; }
+        
         .menu-icon { width: 44px; height: 44px; border-radius: 14px; background: #ccfbf1; color: #0d9488; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
         .menu-icon.archive-icon { background: #e0f2fe; color: #0284c7; }
         .menu-icon.dict-icon { background: #fef3c7; color: #d97706; }
-        .menu-icon.trash-icon { background: #fee2e2; color: #ef4444; }
+        .menu-icon.network-icon { background: #f3e8ff; color: #9333ea; }
         .menu-icon.rx-icon { background: #fae8ff; color: #c084fc; }
+        .menu-icon.trash-icon { background: #fee2e2; color: #ef4444; }
         .menu-icon.analytics-icon { background: #f0fdf4; color: #16a34a; }
         .menu-icon.settings-icon { background: #f1f5f9; color: #475569; }
         .menu-icon.backup-icon { background: #e0e7ff; color: #4f46e5; }
+        .menu-icon.permissions-icon { background: #fae8ff; color: #d946ef; }
         
-        .menu-info h3 { font-family: 'Playfair Display', serif; font-size: 0.92rem; color: #0f172a; margin-bottom: 2px; font-weight: 700; }
-        .menu-info p { font-size: 0.68rem; color: #64748b; }
+        .menu-info h3 { font-family: 'Playfair Display', serif; font-size: 0.92rem; color: #0f172a; margin-bottom: 2px; font-weight: 700; line-height: 1.2; }
+        .menu-info p { font-size: 0.68rem; color: #64748b; line-height: 1.3; }
 
         .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 18px; margin-bottom: 16px; text-align: left; }
         .visit-card { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 20px; padding: 16px; margin-bottom: 20px; position: relative; text-align: left; }
@@ -81,269 +115,455 @@
         .field-box { margin-bottom: 14px; position: relative; text-align: left; }
         .field-label { font-size: 0.82rem; color: #475569; margin-bottom: 6px; font-weight: 700; display: block; }
         .input-wrapper { background-color: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; display: flex; flex-direction: column; padding: 4px 10px; position: relative; }
-        .input-wrapper input, .input-wrapper select, .input-wrapper textarea { width: 100%; border: none; outline: none; padding: 8px 0; font-size: 0.92rem; font-weight: 600; color: #0f172a; background: transparent; }
+        .input-wrapper input, .input-wrapper select, .input-wrapper textarea { width: 100%; border: none; outline: none; padding: 8px 0; font-size: 0.92rem; font-weight: 600; color: #0f172a; background: transparent; resize: none; overflow: hidden; }
 
-        .btn-main { width: 100%; background: #0d9488; color: white; border: none; border-radius: 14px; padding: 14px; font-size: 0.98rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .suggestions-box {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #ffffff;
+            border: 1.5px solid #0d9488;
+            border-top: none;
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .suggestion-item {
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            color: #0f172a;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            font-weight: 600;
+        }
+        .suggestion-item:hover, .suggestion-item:active { background: #f0fdfa; color: #0d9488; }
+
+        .vital-box { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+        .vital-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .vital-item { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; }
+        .vital-label { font-size: 0.72rem; font-weight: 700; color: #64748b; display: flex; align-items: center; gap: 4px; }
+        .vital-inputs { display: flex; align-items: center; gap: 4px; }
+        .vital-inputs input { width: 100%; border: none; outline: none; font-size: 0.95rem; font-weight: 700; color: #0f172a; background: transparent; text-align: center; }
+        .vital-inputs span { font-size: 0.75rem; color: #94a3b8; font-weight: 600; }
+
+        .live-save-bar { display: none; justify-content: space-between; align-items: center; background: #f0fdfa; border-top: 1px dashed #0d9488; padding: 6px 4px; margin-top: 4px; }
+        .live-save-bar span { font-size: 0.76rem; color: #0f766e; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 230px; }
+        .btn-live-save { background: #0d9488; color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
+        .btn-live-save.saved { background: #16a34a; }
+
+        .btn-med-history { width: 100%; background: #f0fdfa; color: #0d9488; border: 1.5px dashed #0d9488; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+        .btn-bmi-trigger { width: 100%; background: #f0f9ff; color: #0284c7; border: 1.5px dashed #0284c7; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+        .btn-rx-action { width: 100%; background: #0f172a; color: #38bdf8; border: 2px solid #38bdf8; border-radius: 12px; padding: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; letter-spacing: 1px; }
+
+        .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        .analytics-box { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .analytics-num { font-size: 1.8rem; font-weight: 900; color: #0f172a; margin-top: 4px; }
+        .analytics-label { font-size: 0.78rem; font-weight: 700; color: #64748b; display: flex; align-items: center; gap: 6px; }
+
+        .attachments-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+        .attachment-thumb { position: relative; width: 70px; height: 70px; border-radius: 10px; overflow: hidden; border: 1.5px solid #cbd5e1; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .attachment-thumb img { width: 100%; height: 100%; object-fit: cover; }
+        .attachment-delete { position: absolute; top: 2px; right: 2px; background: rgba(239, 68, 68, 0.95); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 5; }
+        .btn-upload-attach { background: #f0fdfa; color: #0d9488; border: 1.5px dashed #0d9488; border-radius: 10px; padding: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 6px; }
+        .btn-scan-attach { background: #e0f2fe; color: #0284c7; border: 1.5px dashed #0284c7; border-radius: 10px; padding: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 6px; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 999; display: none; justify-content: center; align-items: flex-end; }
+        .modal-body { background: #ffffff; width: 100%; max-width: 480px; max-height: 92vh; border-top-left-radius: 25px; border-top-right-radius: 25px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; text-align: left; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; }
+        .modal-header h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; font-weight: 700; }
+        .modal-close { background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; color: #475569; cursor: pointer; }
+
+        #imagePreviewModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(6px);
+            z-index: 9999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        #imagePreviewModal .modal-body {
+            background: transparent;
+            max-width: 95vw;
+            max-height: 95vh;
+            width: auto;
+            height: auto;
+            padding: 0;
+            border-radius: 0;
+            box-shadow: none;
+            overflow: visible;
+        }
+        #previewModalImg {
+            max-width: 92vw;
+            max-height: 90vh;
+            width: auto;
+            height: auto;
+            border-radius: 12px;
+            object-fit: contain;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+        .checkbox-item { display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: #334155; cursor: pointer; }
+        .checkbox-item input { accent-color: #0d9488; width: 16px; height: 16px; }
+
+        .btn-main { width: 100%; background: #0d9488; color: white; border: none; border-radius: 14px; padding: 14px; font-size: 0.98rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.25); }
         .btn-secondary { background: #0284c7; margin-bottom: 14px; }
-        .btn-danger { background: #ef4444; color: white; border: none; border-radius: 10px; padding: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 10px; }
+        .btn-danger { background: #ef4444; color: white; border: none; border-radius: 10px; padding: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 10px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
+        .btn-restore { background: #16a34a; color: white; border: none; border-radius: 10px; padding: 8px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+        .bmi-result-card { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px; text-align: center; margin-top: 10px; }
+        .bmi-value { font-size: 1.8rem; font-weight: 900; color: #0f172a; margin: 4px 0; }
+        .bmi-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 800; margin-top: 4px; }
+
+        .patient-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+        .patient-info h4 { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
+        .patient-info p { font-size: 0.78rem; color: #64748b; }
+        .badge-gender { padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; }
+        .gender-male { background: #e0f2fe; color: #0369a1; }
+        .gender-female { background: #fce7f3; color: #be185d; }
+
+        .trash-card { background: #fff5f5; border: 1.5px solid #feb2b2; border-radius: 16px; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+
+        .dict-tag { display: flex; justify-content: space-between; align-items: center; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 10px; margin-bottom: 6px; font-size: 0.85rem; font-weight: 600; color: #334155; }
+        .dict-tag button { background: #fee2e2; color: #ef4444; border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 0.75rem; }
+
+        .node-card { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; text-align: left; }
+        .node-info h5 { font-family: 'Playfair Display', serif; font-size: 1rem; color: #0f172a; font-weight: 700; }
+        .node-info p { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+        .node-badge { background: #ccfbf1; color: #0f766e; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
         
-        .patient-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .trash-card { background: #fff5f5; border: 1.5px solid #feb2b2; border-radius: 16px; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-        
-        .rx-canvas-container { position: relative; width: 100%; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 14px; overflow: hidden; min-height: 480px; }
-        .rx-bg-img { width: 100%; display: block; }
-        .draggable-box { position: absolute; background: transparent; border: 1px dashed transparent; padding: 4px 8px; cursor: move; }
-        .footer { text-align: center; padding: 16px; color: #334155; font-size: 0.85rem; font-weight: 700; margin-top: auto; border-top: 1px solid #e2e8f0; background: #f8fafc; }
+        .filter-container { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 10px; }
+        .filter-row { display: flex; gap: 8px; }
+        .filter-row select { flex: 1; padding: 6px 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.78rem; font-weight: 600; outline: none; background: #fff; color: #0f172a; }
+
+        .rx-canvas-container {
+            position: relative;
+            width: 100%;
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 14px;
+            overflow: hidden;
+            user-select: none;
+            min-height: 480px;
+        }
+        .rx-bg-img {
+            width: 100%;
+            display: block;
+            pointer-events: none;
+        }
+        .draggable-box {
+            position: absolute;
+            background: transparent;
+            border: 1px dashed transparent;
+            padding: 4px 8px;
+            cursor: move;
+            touch-action: none;
+            z-index: 10;
+        }
+        .draggable-box.config-mode {
+            border: 1px dashed #0d9488;
+            background: rgba(255, 255, 255, 0.85);
+        }
+        .draggable-box:hover {
+            border: 1px dashed #0d9488;
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .box-font-controls {
+            display: none;
+            gap: 4px;
+            margin-bottom: 4px;
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 6px;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: #0f172a;
+        }
+        .config-mode .box-font-controls {
+            display: flex;
+        }
+        .box-font-controls button {
+            background: #0d9488;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 20px;
+            height: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .rx-patient-details-text { color: #b91c1c; font-family: 'Amiri', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; } 
+        .rx-date-text { color: #1e293b; font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; background: rgba(255,255,255,0.95); padding: 2px 6px; border-radius: 6px; border: 1px solid #cbd5e1; letter-spacing: 0.5px; }
+        .rx-vitals-text { color: #0284c7; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.85rem; line-height: 1.6; direction: ltr; text-align: left; } 
+        .rx-treatment-wrapper { direction: ltr; text-align: left; width: 100%; }
+        .rx-rx-title { color: #b91c1c; font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-align: left; margin-bottom: 2px; direction: ltr; } 
+        .rx-treatment-text { color: #000000; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.05rem; white-space: pre-wrap; text-align: left; direction: ltr; line-height: 1.6; } 
+
+        .footer { text-align: center; padding: 16px; color: #334155; font-size: 0.85rem; font-weight: 700; margin-top: auto; border-top: 1px solid #e2e8f0; background: #f8fafc; flex-shrink: 0; }
     </style>
 </head>
 <body>
 
 <div class="mobile-container">
-    <div id="networkStatusBar" class="network-status-bar">⚠️ Offline Mode - Changes saved locally</div>
+    <div id="networkStatusBar" class="network-status-bar">⚠️ Offline Mode - Changes saved locally, will sync when online</div>
 
-    <!-- شاشة تسجيل الدخول المستقلة -->
+    <!-- شاشة تسجيل الدخول -->
     <div id="loginScreen" class="auth-screen">
+        <div style="position: absolute; top: 15px; right: 15px;">
+            <button onclick="toggleLanguage()" id="loginLangBtn" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; color: #0f172a;">عربي / EN</button>
+        </div>
         <div class="activ-icon"><i class="fa-solid fa-user-lock"></i></div>
-        <div class="activ-title">تسجيل الدخول للعيادة</div>
-        <div class="activ-sub">أدخل بريدك الإلكتروني وكلمة المرور للوصول إلى لوحة التحكم</div>
+        <div class="activ-title" id="loginTitleText">تسجيل الدخول للعيادة</div>
+        <div class="activ-sub" id="loginSubText">أدخل بريدك الإلكتروني وكلمة المرور للوصول إلى لوحة التحكم</div>
 
-        <form class="auth-form" onsubmit="handleLoginSubmit(event)">
-            <div class="field-box">
-                <span class="field-label">البريد الإلكتروني</span>
+        <form id="loginForm" class="auth-form" onsubmit="handleLoginSubmit(event)">
+            <div class="field-box" style="text-align: left;">
+                <span class="field-label" id="lblLoginEmail">البريد الإلكتروني</span>
                 <div class="input-wrapper"><input type="email" id="loginEmail" placeholder="user@clinic.com" required></div>
             </div>
-            <div class="field-box">
-                <span class="field-label">كلمة المرور</span>
+            <div class="field-box" style="text-align: left;">
+                <span class="field-label" id="lblLoginPass">كلمة المرور</span>
                 <div class="input-wrapper"><input type="password" id="loginPassword" placeholder="••••••••" required></div>
             </div>
-            <div class="forgot-pass" onclick="resetPassword()">نسيت كلمة المرور؟</div>
-            <button type="submit" class="btn-main">دخول النظام</button>
+            <div class="forgot-pass" id="forgotPassBtn" onclick="resetPassword()">نسيت كلمة المرور؟</div>
+            <button type="submit" class="btn-main" id="btnLoginBtn">دخول النظام</button>
         </form>
+
         <div class="auth-switch">
             ليس لديك حساب عيادة؟ <span onclick="switchToRegisterMode()" style="color: #0d9488; font-weight: 800; text-decoration: underline; cursor: pointer;">إنشاء حساب جديد الآن</span>
         </div>
     </div>
 
-    <!-- شاشة إنشاء حساب جديد المستقلة -->
+    <!-- شاشة إنشاء حساب جديد (مستقلة تماماً بتصميم مختلف وألوان ترحيبية) -->
     <div id="registerScreen" class="auth-screen" style="display: none; background: linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%);">
+        <div style="position: absolute; top: 15px; right: 15px;">
+            <button onclick="toggleLanguage()" id="regLangBtn" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; color: #0f172a;">عربي / EN</button>
+        </div>
         <div class="activ-icon" style="color: #0284c7;"><i class="fa-solid fa-user-plus"></i></div>
-        <div class="activ-title" style="color: #0369a1;">إنشاء حساب عيادة جديد</div>
-        <div class="activ-sub">سجل حساباً جديداً بالبريد الإلكتروني وكلمة المرور لبدء إدارة سجِلات مرضاك</div>
+        <div class="activ-title" id="regTitleText" style="color: #0369a1;">إنشاء حساب عيادة جديد</div>
+        <div class="activ-sub" id="regSubText">سجل حساباً جديداً بالبريد الإلكتروني وكلمة المرور لبدء إدارة سجِلات مرضاك</div>
 
-        <form class="auth-form" onsubmit="handleRegisterSubmit(event)">
-            <div class="field-box">
-                <span class="field-label">البريد الإلكتروني للعيادة</span>
+        <form id="registerForm" class="auth-form" onsubmit="handleRegisterSubmit(event)">
+            <div class="field-box" style="text-align: left;">
+                <span class="field-label" id="lblRegEmail">البريد الإلكتروني للعيادة</span>
                 <div class="input-wrapper" style="border-color: #0284c7;"><input type="email" id="regEmail" placeholder="clinic@domain.com" required></div>
             </div>
-            <div class="field-box">
-                <span class="field-label">كلمة المرور (6 خانات على الأقل)</span>
+            <div class="field-box" style="text-align: left;">
+                <span class="field-label" id="lblRegPass">كلمة المرور (6 خانات على الأقل)</span>
                 <div class="input-wrapper" style="border-color: #0284c7;"><input type="password" id="regPassword" placeholder="••••••••" required></div>
             </div>
-            <div class="field-box">
-                <span class="field-label">تأكيد كلمة المرور</span>
+            <div class="field-box" style="text-align: left;">
+                <span class="field-label" id="lblRegConfirmPass">تأكيد كلمة المرور</span>
                 <div class="input-wrapper" style="border-color: #0284c7;"><input type="password" id="regConfirmPassword" placeholder="••••••••" required></div>
             </div>
-            <button type="submit" class="btn-main" style="background: #0284c7;">تسجيل الحساب والانتقال للتفعيل</button>
+            <button type="submit" class="btn-main" id="btnRegisterSubmit" style="background: #0284c7; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
+                <i class="fa-solid fa-circle-check"></i> تسجيل الحساب والانتقال للتفعيل
+            </button>
         </form>
-        <div class="auth-switch">
+
+        <div class="auth-switch" style="margin-top: 15px;">
             لديك حساب مسجل بالفعل؟ <span onclick="switchToLoginMode()" style="color: #0284c7; font-weight: 800; text-decoration: underline; cursor: pointer;">تسجيل الدخول من هنا</span>
         </div>
     </div>
 
-    <!-- شاشة التفعيل -->
+    <!-- نافذة التفعيل تظهر فقط عند التسجيل لأول مرة -->
     <div id="activationScreen" class="auth-screen" style="display: none;">
         <div class="activ-icon"><i class="fa-solid fa-shield-halved"></i></div>
-        <div class="activ-title">تفعيل الحساب مطلوب</div>
-        <div class="activ-sub">يرجى إدخال رمز التفعيل الخاص بك.</div>
-        <div class="field-box" style="width: 100%; max-width: 400px;">
-            <span class="field-label">رمز التفعيل / الاشتراك</span>
+        <div class="activ-title" id="activTitle">تفعيل الحساب مطلوب</div>
+        <div class="activ-sub" id="activSub">يرجى إدخال رمز التفعيل الخاص بك (تجريبي 14 يوم، تمديد 7 أيام، أو اشتراك سنوي).</div>
+        <div class="field-box" style="width: 100%; max-width: 400px; text-align: left;">
+            <span class="field-label" id="lblActivCode">رمز التفعيل / الاشتراك</span>
             <div class="input-wrapper"><input type="text" id="activationInput" placeholder="أدخل رمز التفعيل..." style="text-align: center; letter-spacing: 2px; text-transform: uppercase;"></div>
         </div>
-        <button class="btn-main" style="max-width: 400px;" onclick="verifyActivationCode()">تفعيل النظام</button>
+        <button class="btn-main" style="max-width: 400px;" onclick="verifyActivationCode()" id="btnActivate">تفعيل النظام</button>
     </div>
 
-    <!-- لوحة التحكم الكاملة والملفات -->
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column; overflow: hidden;">
         <div class="header">
             <button id="backBtn" class="back-btn" onclick="goBackScreen()" style="display: none;">
-                <i class="fa-solid fa-arrow-left"></i> رجوع
+                <i class="fa-solid fa-arrow-left"></i> <span id="txtBack">رجوع</span>
             </button>
+
+            <div class="menu-dropdown-container">
+                <button class="hamburger-btn" onclick="toggleDropdownMenu(event)" title="Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div id="headerDropdownMenu" class="dropdown-menu">
+                    <div class="dropdown-item" onclick="toggleLanguage()">
+                        <i class="fa-solid fa-language" style="color: #d97706;"></i> <span id="dropLangText">عربي / EN</span>
+                    </div>
+                    <div class="dropdown-item" onclick="openSupportModal()">
+                        <i class="fa-solid fa-headset" style="color: #0284c7;"></i> <span id="dropSupportText">الدعم الفني والاشتراك</span>
+                    </div>
+                    <div class="dropdown-item danger" onclick="logoutUser()">
+                        <i class="fa-solid fa-right-from-bracket"></i> <span id="dropLogoutText">تسجيل الخروج</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="header-icon"><i class="fa-solid fa-user-doctor"></i></div>
             <h1 id="headerTitle">نظام عيادة ماستر</h1>
             <p id="headerSub">لوحة التحكم السحابية الآمنة</p>
         </div>
 
         <div class="content">
-            <!-- الشاشة الرئيسية -->
             <div id="mainScreen" style="display: none;">
                 
                 <div class="sub-status-banner" id="subStatusBanner" style="display: none;">
                     <div class="sub-status-info">
                         <h4 id="subBannerTitle"><i class="fa-solid fa-clock"></i> اشتراك فعال</h4>
-                        <p id="subBannerText">الأيام المتبقية لصلاحية النظام</p>
+                        <p id="subBannerText">جاري تحميل الأيام المتبقية...</p>
                     </div>
+                    <button onclick="openSupportModal()" id="btnRenew" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:6px 10px; font-size:0.75rem; font-weight:700; cursor:pointer; white-space:nowrap;">تجديد</button>
                 </div>
 
                 <div class="founder-panel" id="founderControlPanel" style="display: none;">
-                    <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;">🔑 مولد رموز التفعيل (المطور):</span>
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;" id="founderPanelTitle">🔑 مولد رموز التفعيل (المطور):</span>
                     <div style="display: flex; gap: 6px; margin: 6px 0;">
                         <button onclick="generateNewKey('TRIAL')" style="flex:1; background:#0d9488; color:#fff; border:none; border-radius:6px; padding:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">تجريبي 14 يوم</button>
+                        <button onclick="generateNewKey('EXT')" style="flex:1; background:#d97706; color:#fff; border:none; border-radius:6px; padding:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">تمديد 7 أيام</button>
                         <button onclick="generateNewKey('ANNUAL')" style="flex:1; background:#4f46e5; color:#fff; border:none; border-radius:6px; padding:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">سنوي 1 سنة</button>
                     </div>
                     <div class="founder-code-display" id="dynamicFounderCode">اضغط الأزرار أعلاه لتوليد الرمز</div>
+                    <span style="font-size: 0.7rem; color: #64748b;" id="keyTypeHint">اختر النوع لتوليد رمز جديد.</span>
                 </div>
 
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-stethoscope"></i> العمليات اليومية</div>
+                    <div class="section-title" id="secGroup1"><i class="fa-solid fa-stethoscope"></i> العمليات اليومية</div>
                     <div class="menu-grid">
-                        <div class="menu-card" onclick="navigateTo('addPatientScreen', 'مريض جديد', 'تسجيل وحفظ السجلات')">
+                        <div class="menu-card" id="cardNewPatient" onclick="navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub)">
                             <div class="menu-icon"><i class="fa-solid fa-user-plus"></i></div>
-                            <div class="menu-info"><h3>مريض جديد</h3><p>تسجيل وحفظ السجلات</p></div>
+                            <div class="menu-info">
+                                <h3 id="menuNewPatientTitle">مريض جديد</h3>
+                                <p id="menuNewPatientSub">تسجيل وحفظ السجلات</p>
+                            </div>
                         </div>
-                        <div class="menu-card" onclick="openPatientsArchive()">
+
+                        <div class="menu-card" id="cardArchive" onclick="openPatientsArchive()">
                             <div class="menu-icon archive-icon"><i class="fa-solid fa-address-book"></i></div>
-                            <div class="menu-info"><h3>أرشيف المرضى</h3><p>البحث وسجل الزيارات</p></div>
+                            <div class="menu-info">
+                                <h3 id="menuArchiveTitle">أرشيف المرضى</h3>
+                                <p id="menuArchiveSub">البحث وسجل الزيارات</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-file-prescription"></i> الوصفات والأدوات الطبية</div>
+                    <div class="section-title" id="secGroup2"><i class="fa-solid fa-file-prescription"></i> الوصفات والأدوات الطبية</div>
                     <div class="menu-grid">
-                        <div class="menu-card" onclick="openRxTemplateManager()">
+                        <div class="menu-card" id="cardRxTemplate" onclick="openRxTemplateManager()">
                             <div class="menu-icon rx-icon"><i class="fa-solid fa-prescription-bottle-medical"></i></div>
-                            <div class="menu-info"><h3>قالب الوصفة (RX)</h3><p>صورة ترويسة الوصفة</p></div>
+                            <div class="menu-info">
+                                <h3 id="menuRxTitle">قالب الوصفة (RX)</h3>
+                                <p id="menuRxSub">صورة ترويسة الوصفة</p>
+                            </div>
                         </div>
-                        <div class="menu-card" onclick="openDictionaryManager()">
+
+                        <div class="menu-card" id="cardDict" onclick="openDictionaryManager()">
                             <div class="menu-icon dict-icon"><i class="fa-solid fa-book-medical"></i></div>
-                            <div class="menu-info"><h3>القاموس الطبي</h3><p>إدارة الأدوية والجرعات</p></div>
+                            <div class="menu-info">
+                                <h3 id="menuDictTitle">القاموس الطبي</h3>
+                                <p id="menuDictSub">إدارة الأدوية والجرعات</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-chart-pie"></i> التقارير والإحصائيات</div>
+                    <div class="section-title" id="secGroup3"><i class="fa-solid fa-chart-pie"></i> التقارير والإحصائيات</div>
                     <div class="menu-grid">
-                        <div class="menu-card" onclick="openAnalyticsDashboard()" style="grid-column: span 2; flex-direction: row; text-align: left; padding: 12px 16px;">
+                        <div class="menu-card" id="cardAnalytics" onclick="openAnalyticsDashboard()" style="grid-column: span 2; flex-direction: row; text-align: left; padding: 12px 16px;">
                             <div class="menu-icon analytics-icon"><i class="fa-solid fa-chart-column"></i></div>
                             <div class="menu-info" style="flex: 1;">
-                               <h3>إحصائيات العيادة والتقارير</h3>
-                               <p>مؤشرات الأداء، نسب المرضى والأدوية الأكثر صرفاً</p>
+                                <h3 id="menuAnalyticsTitle">إحصائيات العيادة والتقارير</h3>
+                                <p id="menuAnalyticsSub">مؤشرات الأداء، نسب المرضى والأدوية الأكثر صرفاً</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-shield-halved"></i> النظام والصيانة</div>
+                    <div class="section-title" id="secGroup4"><i class="fa-solid fa-shield-halved"></i> النظام والصيانة</div>
                     <div class="menu-grid">
-                        <div class="menu-card" onclick="openBackupManager()">
+                        <div class="menu-card" id="cardBackup" onclick="openBackupManager()">
                             <div class="menu-icon backup-icon"><i class="fa-solid fa-database"></i></div>
-                            <div class="menu-info"><h3>النسخ الاحتياطي</h3><p>تصدير أو استعادة البيانات</p></div>
+                            <div class="menu-info">
+                                <h3 id="menuBackupTitle">النسخ الاحتياطي</h3>
+                                <p id="menuBackupSub">تصدير أو استعادة الملف</p>
+                            </div>
                         </div>
-                        <div class="menu-card" onclick="openTrashBin()">
+
+                        <div class="menu-card" id="cardTrash" onclick="openTrashBin()">
                             <div class="menu-icon trash-icon"><i class="fa-solid fa-trash-arrow-up"></i></div>
-                            <div class="menu-info"><h3>سلة المهملات</h3><p>استعادة المحذوفات</p></div>
+                            <div class="menu-info">
+                                <h3 id="menuTrashTitle">سلة المهملات</h3>
+                                <p id="menuTrashSub">استعادة العناصر المحذوفة</p>
+                            </div>
                         </div>
-                        <div class="menu-card" onclick="openAccountSettings()">
+
+                        <div class="menu-card" id="cardSettings" onclick="openAccountSettings()">
                             <div class="menu-icon settings-icon"><i class="fa-solid fa-user-gear"></i></div>
-                            <div class="menu-info"><h3>إعدادات الحساب</h3><p>خيارات البريد والمرور</p></div>
+                            <div class="menu-info">
+                                <h3 id="menuSettingsTitle">إعدادات الحساب</h3>
+                                <p id="menuSettingsSub">خيارات البريد وكلمة المرور</p>
+                            </div>
                         </div>
-                        <div class="menu-card" onclick="logoutUser()">
-                            <div class="menu-icon" style="background:#fee2e2; color:#ef4444;"><i class="fa-solid fa-right-from-bracket"></i></div>
-                            <div class="menu-info"><h3>تسجيل الخروج</h3><p>إنهاء الجلسة بأمان</p></div>
+
+                        <div class="menu-card" id="cardPermissions" onclick="openPermissionsManager()" style="display: none;">
+                            <div class="menu-icon permissions-icon"><i class="fa-solid fa-user-shield"></i></div>
+                            <div class="menu-info">
+                                <h3 id="menuPermTitle">إدارة السكرتير</h3>
+                                <p id="menuPermSub">إنشاء الحساب والصلاحيات</p>
+                            </div>
+                        </div>
+
+                        <div class="menu-card" id="networkMenuCard" onclick="openNetworkHierarchy()" style="display: none;">
+                            <div class="menu-icon network-icon"><i class="fa-solid fa-network-wired"></i></div>
+                            <div class="menu-info">
+                                <h3 id="menuNetTitle">قاعدة بيانات الشبكة</h3>
+                                <p id="menuNetSub">المستخدمين وبيانات الدخول</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
 
-            <!-- إضافة مريض -->
-            <div id="addPatientScreen" style="display: none;">
-                <form onsubmit="saveNewPatient(event)">
-                    <div class="group-card">
-                        <div class="field-box">
-                            <span class="field-label">الاسم الكامل (رباعي) *</span>
-                            <div class="input-wrapper"><input type="text" id="pName" placeholder="أدخل اسم المريض..." required></div>
-                        </div>
-                        <div style="display: flex; gap: 10px;">
-                            <div class="field-box" style="flex: 1;">
-                                <span class="field-label">العمر *</span>
-                                <div class="input-wrapper"><input type="number" id="pAge" placeholder="العمر..." required></div>
-                            </div>
-                            <div class="field-box" style="flex: 1;">
-                                <span class="field-label">الجنس</span>
-                                <div class="input-wrapper">
-                                    <select id="pGender">
-                                        <option value="Male">ذكر</option>
-                                        <option value="Female">أنثى</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="field-box">
-                            <span class="field-label">رقم الهاتف</span>
-                            <div class="input-wrapper"><input type="tel" id="pPhone" placeholder="07XXXXXXXXX"></div>
-                        </div>
+            <!-- بقية شاشات التطبيق الكاملة (أرشيف المرضى، السجل الطبي، إحصائيات العيادة، النسخ الاحتياطي، سلة المهملات، القاموس، الروشتة) -->
+            <div id="permissionsScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
+                        <i class="fa-solid fa-user-shield" style="color:#d946ef;"></i> حساب وصلاحيات السكرتير
                     </div>
-                    <button type="submit" class="btn-main">حفظ وفتح السجل الطبي</button>
-                </form>
-            </div>
-
-            <!-- أرشيف المرضى -->
-            <div id="archiveScreen" style="display: none;">
-                <div class="field-box" style="margin-bottom: 14px;">
-                    <div class="input-wrapper"><input type="text" id="searchInput" placeholder="🔍 البحث بالاسم أو رقم الهاتف..." oninput="filterPatients()"></div>
-                </div>
-                <div id="patientsList"></div>
-            </div>
-
-            <!-- السجل الطبي -->
-            <div id="medicalRecordScreen" style="display: none;">
-                <div class="group-card" style="background: #f0fdfa;">
-                    <h3 id="recPatientName" style="color: #0f766e; margin-bottom: 4px;">—</h3>
-                    <p id="recPatientMeta" style="font-size: 0.8rem; color: #334155;"></p>
-                    <button type="button" class="btn-main" onclick="exportPatientMedicalReportPDF()" style="background: #0284c7; margin-top: 10px;">
-                        <i class="fa-solid fa-file-pdf"></i> تحميل تقرير ملف المريض الشامل PDF
-                    </button>
-                </div>
-                <button type="button" class="btn-main btn-secondary" onclick="addNewVisit()">+ إضافة زيارة جديدة</button>
-                <div id="visitsContainer"></div>
-            </div>
-
-            <!-- إحصائيات العيادة -->
-            <div id="analyticsScreen" style="display: none;">
-                <div class="group-card">
-                    <h3 style="color:#0f172a; margin-bottom:10px;"><i class="fa-solid fa-chart-column" style="color:#16a34a;"></i> إحصائيات العيادة</h3>
-                    <p id="statTotalPatients" style="font-size: 1.1rem; font-weight: 700; color: #0d9488;">إجمالي المرضى: 0</p>
+                    <div class="field-box">
+                        <span class="field-label">البريد الإلكتروني للسكرتير</span>
+                        <div class="input-wrapper"><input type="email" id="secEmailInput" placeholder="secretary@clinic.com"></div>
+                    </div>
+                    <div class="field-box">
+                        <span class="field-label">كلمة المرور</span>
+                        <div class="input-wrapper"><input type="password" id="secPassInput" placeholder="••••••••"></div>
+                    </div>
+                    <button class="btn-main" onclick="saveSecretaryAccount()" style="background: #0d9488;">حفظ حساب السكرتير</button>
                 </div>
             </div>
 
-            <!-- سلة المهملات -->
-            <div id="trashScreen" style="display: none;">
-                <div class="group-card">
-                    <h3 style="color: #ef4444; margin-bottom: 10px;"><i class="fa-solid fa-trash-can"></i> سلة المهملات</h3>
-                    <div id="trashItemsContainer"></div>
-                </div>
-            </div>
-
-            <!-- القاموس الطبي -->
-            <div id="dictScreen" style="display: none;">
-                <div class="group-card">
-                    <h3 style="margin-bottom: 10px;">القاموس الطبي والأدوية</h3>
-                    <div id="dictItemsList"></div>
-                </div>
-            </div>
-
-            <!-- قالب الـ RX -->
-            <div id="rxTemplateScreen" style="display: none;">
-                <div class="group-card" style="text-align: center;">
-                    <h3 style="margin-bottom: 10px;">قالب الوصفة الطبية (RX)</h3>
-                    <input type="file" id="rxImageFileInput" accept="image/*" style="margin: 10px 0;">
-                    <button class="btn-main" onclick="alert('تم حفظ القالب بنجاح!')">حفظ قالب الروشتة</button>
-                </div>
-            </div>
-
-            <!-- النسخ الاحتياطي -->
             <div id="backupScreen" style="display: none;">
                 <div class="group-card" style="text-align: center;">
                     <h3>النسخ الاحتياطي للبيانات</h3>
@@ -351,7 +571,6 @@
                 </div>
             </div>
 
-            <!-- إعدادات الحساب -->
             <div id="settingsScreen" style="display: none;">
                 <div class="group-card">
                     <h3>إعدادات الحساب والأمان</h3>
@@ -361,9 +580,136 @@
                     </div>
                 </div>
             </div>
+
+            <div id="analyticsScreen" style="display: none;">
+                <div class="analytics-grid">
+                    <div class="analytics-box">
+                        <span class="analytics-label"><i class="fa-solid fa-users" style="color:#0d9488;"></i> إجمالي المرضى</span>
+                        <div class="analytics-num" id="statTotalPatients">0</div>
+                    </div>
+                    <div class="analytics-box">
+                        <span class="analytics-label"><i class="fa-solid fa-calendar-check" style="color:#0284c7;"></i> زيارات اليوم</span>
+                        <div class="analytics-num" id="statTodayVisits">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="addPatientScreen" style="display: none;">
+                <form id="patientForm" onsubmit="saveNewPatient(event)">
+                    <div class="group-card">
+                        <div class="field-box">
+                            <span class="field-label" id="lblPatName">الاسم الكامل (يُفضل إدخال اسم الجد الرابع لمنع التكرار) *</span>
+                            <div class="input-wrapper"><input type="text" id="pName" placeholder="أدخل اسم المريض..." required></div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <div class="field-box" style="flex: 1;">
+                                <span class="field-label" id="lblPatAge">العمر *</span>
+                                <div class="input-wrapper"><input type="number" id="pAge" placeholder="العمر..." required></div>
+                            </div>
+                            <div class="field-box" style="flex: 1;">
+                                <span class="field-label" id="lblPatGender">الجنس</span>
+                                <div class="input-wrapper">
+                                    <select id="pGender">
+                                        <option value="Male">ذكر</option>
+                                        <option value="Female">أنثى</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="field-box">
+                            <span class="field-label" id="lblPatPhone">رقم الهاتف</span>
+                            <div class="input-wrapper"><input type="tel" id="pPhone" placeholder="07XXXXXXXXX"></div>
+                        </div>
+                        <div class="field-box">
+                            <span class="field-label" id="lblPatDate">تاريخ الزيارة الأولية</span>
+                            <div class="input-wrapper"><input type="date" id="pDate"></div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-main" id="btnSavePatRec">حفظ وفتح السجل الطبي</button>
+                </form>
+            </div>
+
+            <div id="rxTemplateScreen" style="display: none;">
+                <div class="group-card" style="text-align: center;">
+                    <h3 style="margin-bottom: 10px;">قالب الوصفة الطبية (RX)</h3>
+                    <input type="file" id="rxImageFileInput" accept="image/*" style="margin: 10px 0;">
+                    <button class="btn-main" onclick="saveRxTemplateImage()">حفظ ترويسة الروشتة</button>
+                </div>
+            </div>
+
+            <div id="archiveScreen" style="display: none;">
+                <div class="filter-container">
+                    <div class="field-box" style="margin-bottom: 0;">
+                        <div class="input-wrapper"><input type="text" id="searchInput" placeholder="🔍 البحث بالاسم أو رقم الهاتف..." oninput="filterPatients()"></div>
+                    </div>
+                </div>
+                <div id="patientsList"></div>
+            </div>
+
+            <div id="trashScreen" style="display: none;">
+                <div class="group-card">
+                    <h3 style="color: #ef4444; margin-bottom: 10px;"><i class="fa-solid fa-trash-can"></i> سلة المهملات</h3>
+                    <div id="trashItemsContainer"></div>
+                </div>
+            </div>
+
+            <div id="medicalRecordScreen" style="display: none;">
+                <div class="group-card" style="background: #f0fdfa;">
+                    <h3 id="recPatientName" style="color: #0f766e; margin-bottom: 4px;">—</h3>
+                    <p id="recPatientMeta" style="font-size: 0.8rem; color: #334155; margin-bottom: 10px;"></p>
+                    <button type="button" class="btn-main" onclick="exportPatientMedicalReportPDF()" style="background: #0284c7;">
+                        <i class="fa-solid fa-file-pdf"></i> تحميل تقرير ملف المريض الشامل PDF
+                    </button>
+                </div>
+                <button type="button" class="btn-main btn-secondary" onclick="addNewVisit()">+ إضافة زيارة جديدة</button>
+                <div id="visitsContainer"></div>
+            </div>
+
+            <div id="dictScreen" style="display: none;">
+                <div class="group-card">
+                    <h3 style="margin-bottom: 10px;">القاموس الطبي والأدوية</h3>
+                    <div id="dictItemsList"></div>
+                </div>
+            </div>
+
+            <div id="networkScreen" style="display: none;">
+                <div class="group-card">
+                    <h3>قاعدة بيانات الشبكة</h3>
+                    <div id="networkTreeContainer"></div>
+                </div>
+            </div>
         </div>
 
-        <div class="footer">Clinic Master Network v17.08</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.06</div>
+    </div>
+</div>
+
+<!-- النوافذ المنبثقة (Modal) الدعم والروشتة -->
+<div id="supportModal" class="modal-overlay">
+    <div class="modal-body" style="max-width: 400px; text-align: center;">
+        <div class="modal-header">
+            <h3>الدعم الفني والاشتراك</h3>
+            <button class="modal-close" onclick="closeSupportModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">تواصل معنا عبر واتساب أو تيليجرام:<br><strong>+964 773 911 4548</strong></p>
+    </div>
+</div>
+
+<div id="rxModal" class="modal-overlay">
+    <div class="modal-body" style="max-width: 480px; text-align: left; direction: ltr;">
+        <div class="modal-header">
+            <h3>RX Prescription</h3>
+            <button class="modal-close" onclick="closeRxModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div id="rxCanvasContainer" class="rx-canvas-container">
+            <div id="dragBoxTreatment" class="draggable-box" style="top: 150px; left: 15px; min-width: 220px;">
+                <div class="rx-treatment-wrapper">
+                    <div class="rx-rx-title">RX</div>
+                    <div id="rxDragTreatmentText" class="rx-treatment-text">-</div>
+                </div>
+            </div>
+        </div>
+        <button class="btn-main" onclick="openPrescriptionPDF()" style="background: #0284c7; margin-top: 10px;">Save as PDF File</button>
     </div>
 </div>
 
@@ -381,13 +727,38 @@
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
-    const FOUNDER_EMAIL = "musqaqa009@gmail.com";
 
+    const FOUNDER_EMAIL = "musqaqa009@gmail.com"; 
+    let pendingUserPass = "";
+    let currentUserId = null;
     let currentPatientId = null;
+    let currentDoctorRxImage = localStorage.getItem('doctor_rx_template') || '';
     let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
     let trashBin = JSON.parse(localStorage.getItem('clinic_trash')) || [];
-    let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || { labs: [], scans: [], drugs: [], notes: [] };
+    let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || { labs: [], scans: [], drugs: [], notes: [], mh_history: [] };
+    let secretaryAccount = JSON.parse(localStorage.getItem('clinic_sec_account')) || { email: "", password: "" };
+    let currentLang = localStorage.getItem('clinic_lang') || 'ar';
 
+    const translations = {
+        ar: { headerTitle: "نظام عيادة ماستر", headerSub: "لوحة التحكم السحابية الآمنة", footer: "نظام عيادة ماستر المتقدم v17.06" },
+        en: { headerTitle: "Clinic Master System", headerSub: "Cloud Secure Dashboard", footer: "Clinic Master Network v17.06" }
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+        localStorage.setItem('clinic_lang', currentLang);
+        applyLanguage();
+    }
+
+    function applyLanguage() {
+        const t = translations[currentLang];
+        document.body.style.direction = currentLang === 'ar' ? 'rtl' : 'ltr';
+        document.getElementById('headerTitle').innerText = t.headerTitle;
+        document.getElementById('headerSub').innerText = t.headerSub;
+        document.getElementById('footerText').innerText = t.footer;
+    }
+
+    // دوال الانتقال المستقلة بين شاشة تسجيل الدخول وإنشاء الحساب
     function switchToRegisterMode() {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('registerScreen').style.display = 'flex';
@@ -402,8 +773,12 @@
         e.preventDefault();
         const email = document.getElementById('loginEmail').value.trim();
         const pass = document.getElementById('loginPassword').value;
+
         auth.signInWithEmailAndPassword(email, pass)
-            .then(res => checkUserSubscriptionStatus(res.user.uid))
+            .then(res => {
+                currentUserId = res.user.uid;
+                checkUserSubscriptionStatus(res.user.uid);
+            })
             .catch(err => alert('خطأ في تسجيل الدخول: ' + err.message));
     }
 
@@ -413,25 +788,37 @@
         const pass = document.getElementById('regPassword').value;
         const confirmPass = document.getElementById('regConfirmPassword').value;
 
-        if (pass !== confirmPass) { alert('كلمات المرور غير متطابقة!'); return; }
-        if (pass.length < 6) { alert('كلمة المرور يجب أن تكون 6 خانات على الأقل.'); return; }
+        if (pass !== confirmPass) {
+            alert('كلمات المرور غير متطابقة! يرجى التأكد من تطابق كلمة المرور.');
+            return;
+        }
+
+        if (pass.length < 6) {
+            alert('يجب أن تكون كلمة المرور 6 أحرف أو أرقام على الأقل.');
+            return;
+        }
 
         auth.createUserWithEmailAndPassword(email, pass)
             .then(res => {
+                pendingUserPass = pass;
+                currentUserId = res.user.uid;
                 if (email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
-                    setupAppInterface();
+                    const expiryDate = new Date();
+                    expiryDate.setFullYear(expiryDate.getFullYear() + 10);
+                    localStorage.setItem(`sub_expiry_${res.user.uid}`, expiryDate.toISOString());
+                    setupFounderInterfaceAfterAuth();
                 } else {
                     document.getElementById('registerScreen').style.display = 'none';
                     document.getElementById('activationScreen').style.display = 'flex';
                 }
             })
-            .catch(err => alert('خطأ في التسجيل: ' + err.message));
+            .catch(err => alert('خطأ في إنشاء الحساب: ' + err.message));
     }
 
-    function checkUserSubscriptionStatus(uid) {
+    async function checkUserSubscriptionStatus(uid) {
         let expiryDateStr = localStorage.getItem(`sub_expiry_${uid}`);
         if (expiryDateStr && new Date().getTime() < new Date(expiryDateStr).getTime()) {
-            setupAppInterface();
+            setupClientInterfaceAfterAuth();
         } else {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('registerScreen').style.display = 'none';
@@ -439,25 +826,35 @@
         }
     }
 
-    function verifyActivationCode() {
-        const inputCode = document.getElementById('activationInput').value.trim().toUpperCase();
-        if (!inputCode) { alert('الرجاء إدخال الرمز.'); return; }
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 14);
-        localStorage.setItem(`sub_expiry_${auth.currentUser.uid}`, expiryDate.toISOString());
-        alert('تم التفعيل بنجاح!');
-        setupAppInterface();
-    }
-
-    function setupAppInterface() {
+    function setupFounderInterfaceAfterAuth() {
         document.getElementById('loginScreen').style.display = 'none';
         document.getElementById('registerScreen').style.display = 'none';
         document.getElementById('activationScreen').style.display = 'none';
         document.getElementById('appContainer').style.display = 'flex';
-        navigateTo('mainScreen', 'نظام عيادة ماستر', 'لوحة التحكم السحابية الآمنة');
+        document.getElementById('founderControlPanel').style.display = 'block';
+        document.getElementById('cardPermissions').style.display = 'flex';
+        navigateTo('mainScreen');
     }
 
-    function navigateTo(screenId, title, sub) {
+    function setupClientInterfaceAfterAuth() {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('registerScreen').style.display = 'none';
+        document.getElementById('activationScreen').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'flex';
+        navigateTo('mainScreen');
+    }
+
+    async function verifyActivationCode() {
+        const inputCode = document.getElementById('activationInput').value.trim().toUpperCase();
+        if (!inputCode) { alert('الرجاء إدخال رمز التفعيل.'); return; }
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + 14);
+        localStorage.setItem(`sub_expiry_${auth.currentUser.uid}`, expiryDate.toISOString());
+        alert('تم تفعيل الحساب بنجاح!');
+        setupClientInterfaceAfterAuth();
+    }
+
+    function navigateTo(screenId) {
         document.getElementById('mainScreen').style.display = 'none';
         document.getElementById('addPatientScreen').style.display = 'none';
         document.getElementById('archiveScreen').style.display = 'none';
@@ -468,23 +865,27 @@
         document.getElementById('analyticsScreen').style.display = 'none';
         document.getElementById('backupScreen').style.display = 'none';
         document.getElementById('settingsScreen').style.display = 'none';
+        document.getElementById('permissionsScreen').style.display = 'none';
+        document.getElementById('networkScreen').style.display = 'none';
         
         const target = document.getElementById(screenId);
         if (target) target.style.display = 'block';
-
-        if (title) {
-            document.getElementById('headerTitle').innerText = title;
-            document.getElementById('headerSub').innerText = sub;
-            document.getElementById('backBtn').style.display = screenId === 'mainScreen' ? 'none' : 'flex';
-        }
     }
 
-    function goBackScreen() { navigateTo('mainScreen', 'نظام عيادة ماستر', 'لوحة التحكم السحابية الآمنة'); }
-
-    function openPatientsArchive() {
-        navigateTo('archiveScreen', 'أرشيف المرضى', 'البحث وسجل الزيارات');
-        renderPatientsList(patients);
-    }
+    function goBackScreen() { navigateTo('mainScreen'); }
+    function openPatientsArchive() { navigateTo('archiveScreen'); renderPatientsList(patients); }
+    function openDictionaryManager() { navigateTo('dictScreen'); }
+    function openRxTemplateManager() { navigateTo('rxTemplateScreen'); }
+    function openAnalyticsDashboard() { navigateTo('analyticsScreen'); document.getElementById('statTotalPatients').innerText = patients.length; }
+    function openBackupManager() { navigateTo('backupScreen'); }
+    function openTrashBin() { navigateTo('trashScreen'); }
+    function openAccountSettings() { navigateTo('settingsScreen'); }
+    function openPermissionsManager() { navigateTo('permissionsScreen'); }
+    function openNetworkHierarchy() { navigateTo('networkScreen'); }
+    function openSupportModal() { document.getElementById('supportModal').style.display = 'flex'; }
+    function closeSupportModal() { document.getElementById('supportModal').style.display = 'none'; }
+    function closeRxModal() { document.getElementById('rxModal').style.display = 'none'; }
+    function openRxModal(vId) { document.getElementById('rxModal').style.display = 'flex'; }
 
     function renderPatientsList(list) {
         const container = document.getElementById('patientsList');
@@ -511,11 +912,20 @@
 
     function saveNewPatient(e) {
         e.preventDefault();
+        const rawName = document.getElementById('pName').value.trim();
+        const nameNormalized = rawName.toLowerCase().replace(/\s+/g, ' ');
+        const nameExists = patients.some(p => p.name.toLowerCase().replace(/\s+/g, ' ') === nameNormalized);
+        
+        if (nameExists) {
+            alert('⚠️ تنبيه: يوجد مريض مسجل بهذا الاسم تماماً! يرجى إضافة اسم الجد الرابع لمنع التكرار.');
+            return;
+        }
+
         const newPatient = {
             id: Date.now(),
-            name: document.getElementById('pName').value.trim(),
+            name: rawName,
             age: Number(document.getElementById('pAge').value),
-            gender: document.getElementById('pGender').value,
+            gender: document.getElementById('pGender').value || 'Unspecified',
             phone: document.getElementById('pPhone').value || 'N/A',
             visits: [{ visitId: Date.now(), date: new Date().toISOString().substring(0,10), notes: '' }]
         };
@@ -528,7 +938,7 @@
         const patient = patients.find(p => Number(p.id) === Number(id));
         if (!patient) return;
         currentPatientId = id;
-        navigateTo('medicalRecordScreen', 'السجل الطبي للمريض', 'عرض وتحديث الزيارات');
+        navigateTo('medicalRecordScreen');
         document.getElementById('recPatientName').innerText = patient.name;
         document.getElementById('recPatientMeta').innerText = `العمر: ${patient.age} | الهاتف: ${patient.phone}`;
         renderVisits(patient.visits);
@@ -565,30 +975,6 @@
         renderVisits(patient.visits);
     }
 
-    function openAnalyticsDashboard() {
-        navigateTo('analyticsScreen', 'إحصائيات العيادة', 'مؤشرات الأداء والتقارير');
-        document.getElementById('statTotalPatients').innerText = `إجمالي المرضى: ${patients.length}`;
-    }
-
-    function openTrashBin() {
-        navigateTo('trashScreen', 'سلة المهملات', 'استعادة العناصر المحذوفة');
-        const container = document.getElementById('trashItemsContainer');
-        if (trashBin.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b;">سلة المهملات فارغة.</p>';
-            return;
-        }
-        container.innerHTML = trashBin.map((item, idx) => `<div class="trash-card"><span>عنصر محذوف #${idx+1}</span></div>`).join('');
-    }
-
-    function openDictionaryManager() { navigateTo('dictScreen', 'القاموس الطبي', 'إدارة الأدوية'); }
-    function openRxTemplateManager() { navigateTo('rxTemplateScreen', 'قالب الوصفة (RX)', 'صورة الترويسة'); }
-    function openBackupManager() { navigateTo('backupScreen', 'النسخ الاحتياطي', 'تصدير واستعادة البيانات'); }
-    
-    function openAccountSettings() {
-        navigateTo('settingsScreen', 'إعدادات الحساب', 'خيارات الأمان والبريد');
-        if(auth.currentUser) document.getElementById('currentAccountEmail').value = auth.currentUser.email;
-    }
-
     function exportJsonBackup() {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ patients, trashBin, medicalDict }, null, 2));
         const anchor = document.createElement('a');
@@ -601,6 +987,8 @@
     }
 
     function exportPatientMedicalReportPDF() { alert('جاري تصدير تقرير المريض PDF...'); }
+    function saveRxTemplateImage() { alert('تم حفظ ترويسة الروشتة بنجاح!'); }
+    function saveSecretaryAccount() { alert('تم حفظ حساب السكرتير بنجاح!'); }
 
     function logoutUser() {
         auth.signOut().then(() => {
@@ -610,10 +998,11 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
+        applyLanguage();
         auth.onAuthStateChanged(user => {
             if (user) {
                 if (user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
-                    setupAppInterface();
+                    setupFounderInterfaceAfterAuth();
                 } else {
                     checkUserSubscriptionStatus(user.uid);
                 }
