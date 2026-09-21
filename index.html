@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.07</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.08</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -11,6 +11,7 @@
     <meta name="theme-color" content="#0f172a">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -35,6 +36,17 @@
         .auth-form { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
         .auth-switch { margin-top: 15px; font-size: 0.82rem; color: #64748b; }
         .forgot-pass { font-size: 0.78rem; color: #0284c7; text-align: right; cursor: pointer; margin-top: -6px; font-weight: 600; }
+
+        .founder-panel { background: #f0fdfa; border: 2px dashed #0d9488; border-radius: 16px; padding: 14px; margin-bottom: 16px; text-align: center; }
+        .founder-code-display { font-size: 1.1rem; font-weight: 900; color: #0f766e; letter-spacing: 1px; margin: 4px 0; background: #fff; padding: 6px; border-radius: 8px; border: 1px solid #ccfbf1; word-break: break-all; }
+
+        .sub-status-banner { background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 14px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; text-align: left; }
+        .sub-status-banner.warning { background: #fef2f2; border-color: #fca5a5; }
+        .sub-status-banner.expired { background: #fefce8; border-color: #fde047; }
+        .sub-status-info h4 { font-size: 0.82rem; font-weight: 800; color: #166534; display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
+
+        .network-status-bar { background: #fef3c7; color: #b45309; font-size: 0.72rem; font-weight: 700; text-align: center; padding: 4px; display: none; }
+        .network-status-bar.offline { display: block; background: #fee2e2; color: #b91c1c; }
 
         .header { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: white; padding: 35px 20px 30px 20px; text-align: center; border-bottom-left-radius: 35px; border-bottom-right-radius: 35px; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.15); flex-shrink: 0; }
         .header-icon { font-size: 42px; color: #0d9488; margin-bottom: 10px; }
@@ -63,6 +75,9 @@
         .menu-info p { font-size: 0.68rem; color: #64748b; }
 
         .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 18px; margin-bottom: 16px; text-align: left; }
+        .visit-card { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 20px; padding: 16px; margin-bottom: 20px; position: relative; text-align: left; }
+        .visit-header { background: #0f172a; color: #ffffff; padding: 8px 14px; border-radius: 12px; font-size: 0.88rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        
         .field-box { margin-bottom: 14px; position: relative; text-align: left; }
         .field-label { font-size: 0.82rem; color: #475569; margin-bottom: 6px; font-weight: 700; display: block; }
         .input-wrapper { background-color: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 12px; display: flex; flex-direction: column; padding: 4px 10px; position: relative; }
@@ -70,15 +85,23 @@
 
         .btn-main { width: 100%; background: #0d9488; color: white; border: none; border-radius: 14px; padding: 14px; font-size: 0.98rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-secondary { background: #0284c7; margin-bottom: 14px; }
+        .btn-danger { background: #ef4444; color: white; border: none; border-radius: 10px; padding: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 10px; }
+        
         .patient-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .trash-card { background: #fff5f5; border: 1.5px solid #feb2b2; border-radius: 16px; padding: 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        
+        .rx-canvas-container { position: relative; width: 100%; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 14px; overflow: hidden; min-height: 480px; }
+        .rx-bg-img { width: 100%; display: block; }
+        .draggable-box { position: absolute; background: transparent; border: 1px dashed transparent; padding: 4px 8px; cursor: move; }
         .footer { text-align: center; padding: 16px; color: #334155; font-size: 0.85rem; font-weight: 700; margin-top: auto; border-top: 1px solid #e2e8f0; background: #f8fafc; }
     </style>
 </head>
 <body>
 
 <div class="mobile-container">
-    <!-- شاشة تسجيل الدخول -->
+    <div id="networkStatusBar" class="network-status-bar">⚠️ Offline Mode - Changes saved locally</div>
+
+    <!-- شاشة تسجيل الدخول المستقلة -->
     <div id="loginScreen" class="auth-screen">
         <div class="activ-icon"><i class="fa-solid fa-user-lock"></i></div>
         <div class="activ-title">تسجيل الدخول للعيادة</div>
@@ -93,6 +116,7 @@
                 <span class="field-label">كلمة المرور</span>
                 <div class="input-wrapper"><input type="password" id="loginPassword" placeholder="••••••••" required></div>
             </div>
+            <div class="forgot-pass" onclick="resetPassword()">نسيت كلمة المرور؟</div>
             <button type="submit" class="btn-main">دخول النظام</button>
         </form>
         <div class="auth-switch">
@@ -100,7 +124,7 @@
         </div>
     </div>
 
-    <!-- شاشة إنشاء حساب جديد -->
+    <!-- شاشة إنشاء حساب جديد المستقلة -->
     <div id="registerScreen" class="auth-screen" style="display: none; background: linear-gradient(135deg, #f0fdfa 0%, #e0f2fe 100%);">
         <div class="activ-icon" style="color: #0284c7;"><i class="fa-solid fa-user-plus"></i></div>
         <div class="activ-title" style="color: #0369a1;">إنشاء حساب عيادة جديد</div>
@@ -126,7 +150,7 @@
         </div>
     </div>
 
-    <!-- شاشة تفعيل الحساب -->
+    <!-- شاشة التفعيل -->
     <div id="activationScreen" class="auth-screen" style="display: none;">
         <div class="activ-icon"><i class="fa-solid fa-shield-halved"></i></div>
         <div class="activ-title">تفعيل الحساب مطلوب</div>
@@ -138,7 +162,7 @@
         <button class="btn-main" style="max-width: 400px;" onclick="verifyActivationCode()">تفعيل النظام</button>
     </div>
 
-    <!-- لوحة التحكم الرئيسية وجميع الشاشات -->
+    <!-- لوحة التحكم الكاملة والملفات -->
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column; overflow: hidden;">
         <div class="header">
             <button id="backBtn" class="back-btn" onclick="goBackScreen()" style="display: none;">
@@ -152,6 +176,23 @@
         <div class="content">
             <!-- الشاشة الرئيسية -->
             <div id="mainScreen" style="display: none;">
+                
+                <div class="sub-status-banner" id="subStatusBanner" style="display: none;">
+                    <div class="sub-status-info">
+                        <h4 id="subBannerTitle"><i class="fa-solid fa-clock"></i> اشتراك فعال</h4>
+                        <p id="subBannerText">الأيام المتبقية لصلاحية النظام</p>
+                    </div>
+                </div>
+
+                <div class="founder-panel" id="founderControlPanel" style="display: none;">
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;">🔑 مولد رموز التفعيل (المطور):</span>
+                    <div style="display: flex; gap: 6px; margin: 6px 0;">
+                        <button onclick="generateNewKey('TRIAL')" style="flex:1; background:#0d9488; color:#fff; border:none; border-radius:6px; padding:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">تجريبي 14 يوم</button>
+                        <button onclick="generateNewKey('ANNUAL')" style="flex:1; background:#4f46e5; color:#fff; border:none; border-radius:6px; padding:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">سنوي 1 سنة</button>
+                    </div>
+                    <div class="founder-code-display" id="dynamicFounderCode">اضغط الأزرار أعلاه لتوليد الرمز</div>
+                </div>
+
                 <div class="section-group">
                     <div class="section-title"><i class="fa-solid fa-stethoscope"></i> العمليات اليومية</div>
                     <div class="menu-grid">
@@ -167,13 +208,13 @@
                 </div>
 
                 <div class="section-group">
-                    <div class="section-title"><i class="fa-solid fa-file-prescription"></i> الوصفات والأدوات</div>
+                    <div class="section-title"><i class="fa-solid fa-file-prescription"></i> الوصفات والأدوات الطبية</div>
                     <div class="menu-grid">
-                        <div class="menu-card" onclick="navigateTo('rxTemplateScreen', 'قالب الوصفة (RX)', 'صورة ترويسة الوصفة')">
+                        <div class="menu-card" onclick="openRxTemplateManager()">
                             <div class="menu-icon rx-icon"><i class="fa-solid fa-prescription-bottle-medical"></i></div>
-                            <div class="menu-info"><h3>قالب الوصفة (RX)</h3><p>صورة الترويسة</p></div>
+                            <div class="menu-info"><h3>قالب الوصفة (RX)</h3><p>صورة ترويسة الوصفة</p></div>
                         </div>
-                        <div class="menu-card" onclick="navigateTo('dictScreen', 'القاموس الطبي', 'إدارة الأدوية والجرعات')">
+                        <div class="menu-card" onclick="openDictionaryManager()">
                             <div class="menu-icon dict-icon"><i class="fa-solid fa-book-medical"></i></div>
                             <div class="menu-info"><h3>القاموس الطبي</h3><p>إدارة الأدوية والجرعات</p></div>
                         </div>
@@ -181,21 +222,42 @@
                 </div>
 
                 <div class="section-group">
+                    <div class="section-title"><i class="fa-solid fa-chart-pie"></i> التقارير والإحصائيات</div>
+                    <div class="menu-grid">
+                        <div class="menu-card" onclick="openAnalyticsDashboard()" style="grid-column: span 2; flex-direction: row; text-align: left; padding: 12px 16px;">
+                            <div class="menu-icon analytics-icon"><i class="fa-solid fa-chart-column"></i></div>
+                            <div class="menu-info" style="flex: 1;">
+                               <h3>إحصائيات العيادة والتقارير</h3>
+                               <p>مؤشرات الأداء، نسب المرضى والأدوية الأكثر صرفاً</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-group">
                     <div class="section-title"><i class="fa-solid fa-shield-halved"></i> النظام والصيانة</div>
                     <div class="menu-grid">
+                        <div class="menu-card" onclick="openBackupManager()">
+                            <div class="menu-icon backup-icon"><i class="fa-solid fa-database"></i></div>
+                            <div class="menu-info"><h3>النسخ الاحتياطي</h3><p>تصدير أو استعادة البيانات</p></div>
+                        </div>
                         <div class="menu-card" onclick="openTrashBin()">
                             <div class="menu-icon trash-icon"><i class="fa-solid fa-trash-arrow-up"></i></div>
                             <div class="menu-info"><h3>سلة المهملات</h3><p>استعادة المحذوفات</p></div>
                         </div>
+                        <div class="menu-card" onclick="openAccountSettings()">
+                            <div class="menu-icon settings-icon"><i class="fa-solid fa-user-gear"></i></div>
+                            <div class="menu-info"><h3>إعدادات الحساب</h3><p>خيارات البريد والمرور</p></div>
+                        </div>
                         <div class="menu-card" onclick="logoutUser()">
                             <div class="menu-icon" style="background:#fee2e2; color:#ef4444;"><i class="fa-solid fa-right-from-bracket"></i></div>
-                            <div class="menu-info"><h3>تسجيل الخروج</h3><p>إنهاء الجلسة</p></div>
+                            <div class="menu-info"><h3>تسجيل الخروج</h3><p>إنهاء الجلسة بأمان</p></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- شاشة إضافة مريض جديد -->
+            <!-- إضافة مريض -->
             <div id="addPatientScreen" style="display: none;">
                 <form onsubmit="saveNewPatient(event)">
                     <div class="group-card">
@@ -227,7 +289,7 @@
                 </form>
             </div>
 
-            <!-- شاشة أرشيف المرضى -->
+            <!-- أرشيف المرضى -->
             <div id="archiveScreen" style="display: none;">
                 <div class="field-box" style="margin-bottom: 14px;">
                     <div class="input-wrapper"><input type="text" id="searchInput" placeholder="🔍 البحث بالاسم أو رقم الهاتف..." oninput="filterPatients()"></div>
@@ -235,14 +297,25 @@
                 <div id="patientsList"></div>
             </div>
 
-            <!-- شاشة السجل الطبي للـمريض -->
+            <!-- السجل الطبي -->
             <div id="medicalRecordScreen" style="display: none;">
                 <div class="group-card" style="background: #f0fdfa;">
                     <h3 id="recPatientName" style="color: #0f766e; margin-bottom: 4px;">—</h3>
                     <p id="recPatientMeta" style="font-size: 0.8rem; color: #334155;"></p>
+                    <button type="button" class="btn-main" onclick="exportPatientMedicalReportPDF()" style="background: #0284c7; margin-top: 10px;">
+                        <i class="fa-solid fa-file-pdf"></i> تحميل تقرير ملف المريض الشامل PDF
+                    </button>
                 </div>
                 <button type="button" class="btn-main btn-secondary" onclick="addNewVisit()">+ إضافة زيارة جديدة</button>
                 <div id="visitsContainer"></div>
+            </div>
+
+            <!-- إحصائيات العيادة -->
+            <div id="analyticsScreen" style="display: none;">
+                <div class="group-card">
+                    <h3 style="color:#0f172a; margin-bottom:10px;"><i class="fa-solid fa-chart-column" style="color:#16a34a;"></i> إحصائيات العيادة</h3>
+                    <p id="statTotalPatients" style="font-size: 1.1rem; font-weight: 700; color: #0d9488;">إجمالي المرضى: 0</p>
+                </div>
             </div>
 
             <!-- سلة المهملات -->
@@ -257,7 +330,7 @@
             <div id="dictScreen" style="display: none;">
                 <div class="group-card">
                     <h3 style="margin-bottom: 10px;">القاموس الطبي والأدوية</h3>
-                    <p style="font-size: 0.8rem; color: #64748b;">إدارة الاختصارات والأدوية الخاصة بالعيادة.</p>
+                    <div id="dictItemsList"></div>
                 </div>
             </div>
 
@@ -266,12 +339,31 @@
                 <div class="group-card" style="text-align: center;">
                     <h3 style="margin-bottom: 10px;">قالب الوصفة الطبية (RX)</h3>
                     <input type="file" id="rxImageFileInput" accept="image/*" style="margin: 10px 0;">
-                    <button class="btn-main" onclick="alert('تم الحفظ بنجاح!')">حفظ قالب الروشتة</button>
+                    <button class="btn-main" onclick="alert('تم حفظ القالب بنجاح!')">حفظ قالب الروشتة</button>
+                </div>
+            </div>
+
+            <!-- النسخ الاحتياطي -->
+            <div id="backupScreen" style="display: none;">
+                <div class="group-card" style="text-align: center;">
+                    <h3>النسخ الاحتياطي للبيانات</h3>
+                    <button class="btn-main" onclick="exportJsonBackup()" style="margin-top: 15px; background: #4f46e5;">تصدير ملف النسخة الاحتياطية</button>
+                </div>
+            </div>
+
+            <!-- إعدادات الحساب -->
+            <div id="settingsScreen" style="display: none;">
+                <div class="group-card">
+                    <h3>إعدادات الحساب والأمان</h3>
+                    <div class="field-box" style="margin-top: 10px;">
+                        <span class="field-label">البريد الحالي</span>
+                        <div class="input-wrapper"><input type="email" id="currentAccountEmail" readonly style="color:#64748b;"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="footer">Clinic Master Network v17.07</div>
+        <div class="footer">Clinic Master Network v17.08</div>
     </div>
 </div>
 
@@ -294,6 +386,7 @@
     let currentPatientId = null;
     let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
     let trashBin = JSON.parse(localStorage.getItem('clinic_trash')) || [];
+    let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || { labs: [], scans: [], drugs: [], notes: [] };
 
     function switchToRegisterMode() {
         document.getElementById('loginScreen').style.display = 'none';
@@ -332,7 +425,7 @@
                     document.getElementById('activationScreen').style.display = 'flex';
                 }
             })
-            .catch(err => alert('خطأ: ' + err.message));
+            .catch(err => alert('خطأ في التسجيل: ' + err.message));
     }
 
     function checkUserSubscriptionStatus(uid) {
@@ -341,6 +434,7 @@
             setupAppInterface();
         } else {
             document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('registerScreen').style.display = 'none';
             document.getElementById('activationScreen').style.display = 'flex';
         }
     }
@@ -371,6 +465,9 @@
         document.getElementById('trashScreen').style.display = 'none';
         document.getElementById('dictScreen').style.display = 'none';
         document.getElementById('rxTemplateScreen').style.display = 'none';
+        document.getElementById('analyticsScreen').style.display = 'none';
+        document.getElementById('backupScreen').style.display = 'none';
+        document.getElementById('settingsScreen').style.display = 'none';
         
         const target = document.getElementById(screenId);
         if (target) target.style.display = 'block';
@@ -468,6 +565,11 @@
         renderVisits(patient.visits);
     }
 
+    function openAnalyticsDashboard() {
+        navigateTo('analyticsScreen', 'إحصائيات العيادة', 'مؤشرات الأداء والتقارير');
+        document.getElementById('statTotalPatients').innerText = `إجمالي المرضى: ${patients.length}`;
+    }
+
     function openTrashBin() {
         navigateTo('trashScreen', 'سلة المهملات', 'استعادة العناصر المحذوفة');
         const container = document.getElementById('trashItemsContainer');
@@ -475,12 +577,30 @@
             container.innerHTML = '<p style="text-align:center; color:#64748b;">سلة المهملات فارغة.</p>';
             return;
         }
-        container.innerHTML = trashBin.map((item, idx) => `
-            <div class="trash-card">
-                <span>عنصر محذوف #${idx+1}</span>
-            </div>
-        `).join('');
+        container.innerHTML = trashBin.map((item, idx) => `<div class="trash-card"><span>عنصر محذوف #${idx+1}</span></div>`).join('');
     }
+
+    function openDictionaryManager() { navigateTo('dictScreen', 'القاموس الطبي', 'إدارة الأدوية'); }
+    function openRxTemplateManager() { navigateTo('rxTemplateScreen', 'قالب الوصفة (RX)', 'صورة الترويسة'); }
+    function openBackupManager() { navigateTo('backupScreen', 'النسخ الاحتياطي', 'تصدير واستعادة البيانات'); }
+    
+    function openAccountSettings() {
+        navigateTo('settingsScreen', 'إعدادات الحساب', 'خيارات الأمان والبريد');
+        if(auth.currentUser) document.getElementById('currentAccountEmail').value = auth.currentUser.email;
+    }
+
+    function exportJsonBackup() {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ patients, trashBin, medicalDict }, null, 2));
+        const anchor = document.createElement('a');
+        anchor.setAttribute("href", dataStr);
+        anchor.setAttribute("download", `Clinic_Backup_${new Date().toISOString().substring(0,10)}.json`);
+        document.body.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        alert('تم تصدير ملف النسخة الاحتياطية بنجاح!');
+    }
+
+    function exportPatientMedicalReportPDF() { alert('جاري تصدير تقرير المريض PDF...'); }
 
     function logoutUser() {
         auth.signOut().then(() => {
