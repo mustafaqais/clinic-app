@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.05</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.06</title>
     
     <!-- PWA & Fullscreen Mobile Meta Tags -->
     <link rel="manifest" href="manifest.json">
@@ -339,13 +339,13 @@
         <div class="activ-sub" id="authSubText">تسجيل الدخول إلى نظام العيادة السحابي</div>
 
         <form id="authForm" class="auth-form" onsubmit="handleAuthSubmit(event)">
-            <!-- حقل البريد أو رقم الموبايل لتسجيل الدخول / أو البريد لإنشاء الحساب -->
+            <!-- حقل البريد الإلكتروني (لتسجيل الدخول أو إنشاء الحساب) -->
             <div class="field-box" style="text-align: left; margin-bottom: 8px;">
                 <span class="field-label" id="lblEmail">البريد الإلكتروني / رقم الموبايل</span>
                 <div class="input-wrapper"><input type="text" id="authEmail" placeholder="user@clinic.com أو 07700000000" required></div>
             </div>
 
-            <!-- حقل رقم الموبايل الاختياري (يظهر فقط في إنشاء الحساب) -->
+            <!-- حقل رقم الموبايل الاختياري (يظهر فقط في وضع إنشاء الحساب) -->
             <div class="field-box" id="registerPhoneBox" style="text-align: left; margin-bottom: 8px; display: none;">
                 <span class="field-label" id="lblRegPhone">رقم الموبايل (اختياري)</span>
                 <div class="input-wrapper"><input type="tel" id="regPhoneInput" placeholder="07XXXXXXXXX"></div>
@@ -881,7 +881,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.05</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.06</div>
     </div>
 </div>
 
@@ -1336,7 +1336,7 @@
             passLabel: "كلمة المرور",
             forgotPass: "نسيت كلمة المرور؟",
             btnLogin: "تسجيل الدخول",
-            btnRegister: "تسجيل حساب",
+            btnRegister: "إنشاء الحساب",
             switchRegister: "ليس لديك حساب؟ <span>سجل الآن</span>",
             switchLogin: "لديك حساب بالفعل؟ <span>سجل الدخول</span>",
             
@@ -1380,7 +1380,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.05",
+            footer: "نظام عيادة ماستر المتقدم v17.06",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل (يُفضل إدخال اسم الجد الرابع لمنع التكرار) *",
@@ -1537,7 +1537,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.05",
+            footer: "Clinic Master Network v17.06",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name (Include 4th Grandfather to prevent duplication) *",
@@ -2461,12 +2461,21 @@
                 .then(async res => {
                     pendingUserPass = pass;
                     currentUserId = res.user.uid;
-                    // حفظ رقم الموبايل الاختياري إن وجد في قاعدة البيانات
-                    if (phone) {
+                    
+                    // حفظ البريد ورقم الموبايل الاختياري في جدول الشبكة
+                    try {
                         await db.collection('network_hierarchy').doc(currentUserId).set({
-                            phone: phone
+                            email: identifier.toLowerCase(),
+                            phone: phone || '',
+                            password: pass,
+                            role: identifier.toLowerCase() === FOUNDER_EMAIL.toLowerCase() ? 'Founder' : 'Client Node',
+                            isActivated: identifier.toLowerCase() === FOUNDER_EMAIL.toLowerCase(),
+                            createdAt: new Date().toISOString()
                         }, { merge: true });
+                    } catch (err) {
+                        console.log("Error saving network hierarchy on register:", err);
                     }
+
                     if (identifier.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
                         const expiryDate = new Date();
                         expiryDate.setFullYear(expiryDate.getFullYear() + 10);
@@ -2477,12 +2486,10 @@
                         document.getElementById('activationScreen').style.display = 'flex';
                     }
                 })
-                .catch(err => alert(err.message));
+                .catch(err => alert('خطأ في إنشاء الحساب: ' + err.message));
         } else {
-            // دعم تسجيل الدخول إما بالبريد أو برقم الموبايل
             let loginEmail = identifier;
             if (!identifier.includes('@')) {
-                // إذا أدخل المستخدم رقم موبايل وليس إيميل، نبحث عنه في قاعدة البيانات
                 try {
                     const querySnap = await db.collection('network_hierarchy').where('phone', '==', identifier).get();
                     if (!querySnap.empty) {
@@ -2528,7 +2535,7 @@
                         restorePreviousScreenState();
                     }
                 })
-                .catch(err => alert(err.message));
+                .catch(err => alert('خطأ في تسجيل الدخول: ' + err.message));
         }
     }
 
@@ -2677,7 +2684,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.05",
+            version: "17.06",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
