@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.10</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.11</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -888,7 +888,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.10</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.11</div>
     </div>
 </div>
 
@@ -1387,7 +1387,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.10",
+            footer: "نظام عيادة ماستر المتقدم v17.11",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1545,7 +1545,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.10",
+            footer: "Clinic Master Network v17.11",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -2699,7 +2699,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.10",
+            version: "17.11",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3308,7 +3308,7 @@
         const dias = document.getElementById(`vBpDias-${visitId}`).value.trim();
 
         if (sys || dias) {
-            visit.bp = `${sys || '—'}/${dias || '—'}`;
+            visit.bp = `${sys || '—'}/${dias || '—'} mmHg`;
         } else {
             visit.bp = '';
         }
@@ -3788,7 +3788,7 @@
             if (v.bp && v.bp.includes('/')) {
                 const parts = v.bp.split('/');
                 bpSys = parts[0] !== '—' ? parts[0] : '';
-                bpDias = parts[1] !== '—' ? parts[1] : '';
+                bpDias = parts[1] ? parts[1].replace(' mmHg', '').trim() : '';
             } else if (v.bp) {
                 bpSys = v.bp;
             }
