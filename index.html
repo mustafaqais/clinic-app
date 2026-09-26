@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.14</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.15</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -888,7 +888,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.14</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.15</div>
     </div>
 </div>
 
@@ -1387,7 +1387,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.14",
+            footer: "نظام عيادة ماستر المتقدم v17.15",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1545,7 +1545,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.14",
+            footer: "Clinic Master Network v17.15",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -2699,7 +2699,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.14",
+            version: "17.15",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3316,6 +3316,17 @@
         savePatientToCloudAndLocal(patient);
     }
 
+    function updateVisitDate(visitId, newDate) {
+        if (isSubscriptionExpired) return;
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+        if (!visit) return;
+
+        visit.date = newDate;
+        savePatientToCloudAndLocal(patient);
+    }
+
     function updateBpFields(visitId) {
         if (isSubscriptionExpired) return;
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
@@ -3821,7 +3832,10 @@
             return `
             <div class="visit-card" data-visit-id="${v.visitId}">
                 <div class="visit-header">
-                    <span>Visit Date: ${v.date}</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>Visit Date:</span>
+                        <input type="date" value="${v.date || getTodayFormatted()}" onchange="updateVisitDate(${v.visitId}, this.value)" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.8rem; font-weight: 700; outline: none; cursor: pointer;">
+                    </div>
                     ${visits.length > 1 ? `<button onclick="confirmDeleteVisit(${v.visitId})" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:2px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i> Delete Visit</button>` : ''}
                 </div>
 
