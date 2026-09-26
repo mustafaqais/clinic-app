@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.11</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.12</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -888,7 +888,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.11</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.12</div>
     </div>
 </div>
 
@@ -1387,7 +1387,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.11",
+            footer: "نظام عيادة ماستر المتقدم v17.12",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1545,7 +1545,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.11",
+            footer: "Clinic Master Network v17.12",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -2699,7 +2699,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.11",
+            version: "17.12",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3308,7 +3308,7 @@
         const dias = document.getElementById(`vBpDias-${visitId}`).value.trim();
 
         if (sys || dias) {
-            visit.bp = `${sys || '—'}/${dias || '—'} mmHg`;
+            visit.bp = `${sys || '___'}/${dias || '___'} mmHg`;
         } else {
             visit.bp = '';
         }
@@ -3523,7 +3523,13 @@
 
         document.getElementById('rxDragPatientDetailsText').innerText = `Name: ${patient.name} | Age: ${patient.age} | ${patient.gender || ''}`;
         document.getElementById('rxDragDateText').innerText = visit.date || getTodayFormatted();
-        document.getElementById('rxDragVitalsText').innerText = `BP: ${visit.bp || '—'} | HR: ${visit.hr || '—'} | Temp: ${visit.temp || '—'} | BMI: ${visit.bmiScore || '—'}`;
+        
+        const bpVal = visit.bp ? visit.bp : 'BP: ___/___ mmHg';
+        const hrVal = visit.hr ? `HR: ${visit.hr} bpm` : 'HR: _____';
+        const tempVal = visit.temp ? `Temp: ${visit.temp} °C` : 'Temp: _____';
+        const bmiVal = visit.bmiScore ? `BMI: ${visit.bmiScore}` : 'BMI: _____';
+
+        document.getElementById('rxDragVitalsText').innerText = `${bpVal} | ${hrVal} | ${tempVal} | ${bmiVal}`;
         document.getElementById('rxDragTreatmentText').innerText = visit.drugs || 'No medications prescribed.';
 
         const container = document.getElementById('rxCanvasContainer');
@@ -3787,7 +3793,7 @@
             let bpDias = '';
             if (v.bp && v.bp.includes('/')) {
                 const parts = v.bp.split('/');
-                bpSys = parts[0] !== '—' ? parts[0] : '';
+                bpSys = parts[0] !== '___' ? parts[0] : '';
                 bpDias = parts[1] ? parts[1].replace(' mmHg', '').trim() : '';
             } else if (v.bp) {
                 bpSys = v.bp;
