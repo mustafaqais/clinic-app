@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.13</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.14</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -888,7 +888,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.13</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.14</div>
     </div>
 </div>
 
@@ -968,7 +968,7 @@
             <span style="font-size: 0.78rem; font-weight: 700; color: #64748b;" id="lblBmiScore">Body Mass Index (BMI Score):</span>
             <div class="bmi-value" id="bmiScoreDisplay">—</div>
             <div id="bmiBadgeContainer">
-                <span class="bmi-badge" id="bmiBadgeInitial" style="background:#f1f5f9; color:#64748b;">Enter weight & height to calculate</span>
+                <span class="bmi-badge" id="bmiBadgeInitial" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>
             </div>
         </div>
 
@@ -1387,7 +1387,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.13",
+            footer: "نظام عيادة ماستر المتقدم v17.14",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1545,7 +1545,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.13",
+            footer: "Clinic Master Network v17.14",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -2699,7 +2699,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.13",
+            version: "17.14",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3086,13 +3086,32 @@
 
         if (!w || !h || w <= 0 || h <= 0) {
             scoreDisplay.innerText = '—';
-            badgeContainer.innerHTML = '<span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">Enter weight & height</span>';
+            badgeContainer.innerHTML = '<span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>';
             return;
         }
 
-        const bmi = (w / ((h / 100) * (h / 100))).toFixed(1);
+        const hM = h / 100;
+        const bmi = (w / (hM * hM)).toFixed(1);
         scoreDisplay.innerText = bmi;
-        badgeContainer.innerHTML = `<span class="bmi-badge" style="background:#dcfce7; color:#15803d;">Calculated</span>`;
+
+        let badgeText = '';
+        let badgeStyle = '';
+
+        if (bmi < 18.5) {
+            badgeText = `نحافة (Underweight: ${bmi})`;
+            badgeStyle = 'background:#fef3c7; color:#d97706;';
+        } else if (bmi >= 18.5 && bmi <= 24.9) {
+            badgeText = `وزن طبيعي (Normal: ${bmi})`;
+            badgeStyle = 'background:#dcfce7; color:#15803d;';
+        } else if (bmi >= 25 && bmi <= 29.9) {
+            badgeText = `زيادة وزن (Overweight: ${bmi})`;
+            badgeStyle = 'background:#ffedd5; color:#c2410c;';
+        } else {
+            badgeText = `سمنة (Obese: ${bmi})`;
+            badgeStyle = 'background:#fee2e2; color:#b91c1c;';
+        }
+
+        badgeContainer.innerHTML = `<span class="bmi-badge" style="${badgeStyle}">${badgeText}</span>`;
     }
 
     function autoResizeTextarea(textarea) {
