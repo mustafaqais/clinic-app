@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.08</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.06</title>
     
     <!-- PWA & Fullscreen Mobile Meta Tags -->
     <link rel="manifest" href="manifest.json">
@@ -28,9 +28,7 @@
 
     <style>
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
-        
-        /* الوضع الافتراضي للموبايل */
-        html, body { background-color: #0f172a; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
+        html, body { background-color: #ffffff; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
         
         /* الوضع الداكن الطبي (Medical Dark Mode) */
         body.dark-mode { background-color: #0b0f19; color: #f8fafc; }
@@ -49,34 +47,16 @@
         body.dark-mode .founder-panel { background: #0f292a !important; border-color: #0d9488 !important; }
         body.dark-mode .founder-code-display { background: #1e293b !important; border-color: #0d9488 !important; color: #2dd4bf !important; }
         
-        /* حاوية التطبيق للموبايل */
-        .mobile-container { background: #ffffff; width: 100%; max-width: 440px; height: 100vh; max-height: 920px; position: relative; overflow: hidden; display: flex; flex-direction: column; border-radius: 36px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 8px solid #1e293b; }
+        .mobile-container { background: #ffffff; width: 100%; max-width: 100%; height: 100vh; min-height: 100vh; position: relative; overflow: hidden; display: flex; flex-direction: column; }
         
-        /* ==================================================== */
-        /* تعديلات الحاسوب: إلغاء تام وقاطع لأي شريط تمرير (Scrollbar) */
-        /* ==================================================== */
+        @media (min-width: 768px) {
+            .mobile-container { max-width: 100%; border-radius: 0; height: 100vh; min-height: 100vh; border: none; }
+            .menu-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
+
         @media (min-width: 1024px) {
-            html, body { background-color: #0b0f19; align-items: stretch; justify-content: stretch; overflow: hidden !important; height: 100vh !important; max-height: 100vh !important; }
-            .mobile-container { max-width: 100% !important; width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; }
-            #appContainer { height: 100vh !important; max-height: 100vh !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; }
-            
-            /* ضغط المسافات والعناصر لتلائم الشاشة بالكامل بدون أي Scrollbar عمودي */
-            .header { padding: 12px 30px !important; flex-shrink: 0 !important; }
-            .header h1 { font-size: 1.15rem !important; margin-bottom: 2px !important; }
-            .header p { font-size: 0.7rem !important; }
-            .header-icon { font-size: 26px !important; margin-bottom: 2px !important; }
-            
-            .content { padding: 10px 30px !important; flex: 1 !important; height: calc(100vh - 120px) !important; max-height: calc(100vh - 120px) !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; justify-content: space-evenly !important; }
-            
-            .section-group { margin-bottom: 4px !important; }
-            .section-title { font-size: 0.72rem !important; margin-bottom: 3px !important; }
-            .menu-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 8px !important; }
-            .menu-card { padding: 8px 6px !important; gap: 3px !important; border-radius: 10px !important; }
-            .menu-icon { width: 32px !important; height: 32px !important; font-size: 0.9rem !important; border-radius: 8px !important; }
-            .menu-info h3 { font-size: 0.78rem !important; }
-            .menu-info p { font-size: 0.58rem !important; }
-            
-            .footer { padding: 6px !important; font-size: 0.7rem !important; flex-shrink: 0 !important; }
+            .mobile-container { max-width: 100%; border-radius: 0; height: 100vh; min-height: 100vh; border: none; }
+            .menu-grid { grid-template-columns: repeat(3, 1fr) !important; }
         }
         
         .auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px 20px; flex: 1; text-align: center; background: #ffffff; }
@@ -124,13 +104,13 @@
         .dropdown-item.danger { color: #ef4444; }
         .dropdown-item.danger:hover { background: #fef2f2; }
 
-        .content { padding: 20px 24px; flex: 1; overflow-y: auto; width: 100%; margin: 0 auto; }
+        .content { padding: 20px 16px; flex: 1; overflow-y: auto; width: 100%; max-width: 800px; margin: 0 auto; }
         
         .section-group { margin-bottom: 18px; }
         .section-title { font-size: 0.82rem; font-weight: 800; color: #0d9488; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; padding-left: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         
-        .menu-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px 12px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .menu-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px 10px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
         .menu-card:hover { border-color: #0d9488; transform: translateY(-2px); }
         .menu-card.disabled-card { opacity: 0.55; cursor: not-allowed; border-color: #cbd5e1; }
         .menu-card.disabled-card:hover { transform: none; border-color: #cbd5e1; }
@@ -149,9 +129,9 @@
         .menu-info h3 { font-family: 'Playfair Display', serif; font-size: 0.92rem; color: #0f172a; margin-bottom: 2px; font-weight: 700; line-height: 1.2; }
         .menu-info p { font-size: 0.68rem; color: #64748b; line-height: 1.3; }
 
-        .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 20px; margin-bottom: 16px; text-align: left; }
-        .visit-card { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 20px; padding: 20px; margin-bottom: 20px; position: relative; text-align: left; }
-        .visit-header { background: #0f172a; color: #ffffff; padding: 10px 16px; border-radius: 12px; font-size: 0.88rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+        .group-card { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 20px; padding: 18px; margin-bottom: 16px; text-align: left; }
+        .visit-card { background: #ffffff; border: 2px solid #cbd5e1; border-radius: 20px; padding: 16px; margin-bottom: 20px; position: relative; text-align: left; }
+        .visit-header { background: #0f172a; color: #ffffff; padding: 8px 14px; border-radius: 12px; font-size: 0.88rem; font-weight: 700; display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
         
         .field-box { margin-bottom: 12px; position: relative; text-align: left; }
         .field-label { font-size: 0.8rem; color: #475569; margin-bottom: 5px; font-weight: 700; display: block; }
@@ -184,9 +164,9 @@
         }
         .suggestion-item:hover, .suggestion-item:active { background: #f0fdfa; color: #0d9488; }
 
-        .vital-box { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-        .vital-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-        .vital-item { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; display: flex; flex-direction: column; gap: 4px; }
+        .vital-box { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+        .vital-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .vital-item { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 8px 12px; display: flex; flex-direction: column; gap: 4px; }
         .vital-label { font-size: 0.72rem; font-weight: 700; color: #64748b; display: flex; align-items: center; gap: 4px; }
         .vital-inputs { display: flex; align-items: center; gap: 4px; }
         .vital-inputs input { width: 100%; border: none; outline: none; font-size: 0.95rem; font-weight: 700; color: #0f172a; background: transparent; text-align: center; }
@@ -200,16 +180,13 @@
         .btn-med-history { width: 100%; background: #f0fdfa; color: #0d9488; border: 1.5px dashed #0d9488; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
         .btn-bmi-trigger { width: 100%; background: #f0f9ff; color: #0284c7; border: 1.5px dashed #0284c7; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
 
-        .analytics-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 16px; }
-        @media (min-width: 1024px) {
-            .analytics-grid { grid-template-columns: repeat(4, 1fr); }
-        }
-        .analytics-box { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 20px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+        .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+        .analytics-box { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
         .analytics-num { font-size: 1.8rem; font-weight: 900; color: #0f172a; margin-top: 4px; }
         .analytics-label { font-size: 0.78rem; font-weight: 700; color: #64748b; display: flex; align-items: center; gap: 6px; }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 999; display: none; justify-content: center; align-items: center; }
-        .modal-body { background: #ffffff; width: 100%; max-width: 520px; max-height: 92vh; border-radius: 20px; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; text-align: left; box-shadow: 0 15px 35px rgba(0,0,0,0.2); }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 999; display: none; justify-content: center; align-items: flex-end; }
+        .modal-body { background: #ffffff; width: 100%; max-width: 480px; max-height: 92vh; border-top-left-radius: 25px; border-top-right-radius: 25px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; text-align: left; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; }
         .modal-header h3 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: #0f172a; font-weight: 700; }
         .modal-close { background: #f1f5f9; border: none; border-radius: 50%; width: 32px; height: 32px; font-size: 1rem; color: #475569; cursor: pointer; }
@@ -250,10 +227,7 @@
             border: 2px solid rgba(255,255,255,0.2);
         }
 
-        .checkbox-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 8px; margin-top: 6px; }
-        @media (min-width: 768px) {
-            .checkbox-grid { grid-template-columns: repeat(3, 1fr); }
-        }
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
         .checkbox-item { display: flex; align-items: center; gap: 8px; background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: #334155; cursor: pointer; }
         .checkbox-item input { accent-color: #0d9488; width: 16px; height: 16px; }
 
@@ -267,7 +241,7 @@
         .bmi-value { font-size: 1.8rem; font-weight: 900; color: #0f172a; margin: 4px 0; }
         .bmi-badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.82rem; font-weight: 800; margin-top: 4px; }
 
-        .patient-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+        .patient-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; text-align: left; }
         .patient-info h4 { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
         .patient-info p { font-size: 0.78rem; color: #64748b; }
         .badge-gender { padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; }
@@ -284,9 +258,9 @@
         .node-info p { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
         .node-badge { background: #ccfbf1; color: #0f766e; padding: 4px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; }
         
-        .filter-container { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 10px; }
-        .filter-row { display: flex; gap: 12px; }
-        .filter-row select { flex: 1; padding: 8px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.82rem; font-weight: 600; outline: none; background: #fff; color: #0f172a; }
+        .filter-container { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 10px; }
+        .filter-row { display: flex; gap: 8px; }
+        .filter-row select { flex: 1; padding: 6px 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.78rem; font-weight: 600; outline: none; background: #fff; color: #0f172a; }
 
         .rx-canvas-container {
             position: relative;
@@ -597,7 +571,7 @@
                     <hr style="border:0; border-top:1px solid #cbd5e1; margin:14px 0;">
 
                     <span style="font-size: 0.85rem; font-weight: 800; color: #0f172a; display: block; margin-bottom: 8px;" id="lblFeatPerm">Feature Permissions:</span>
-                    <div class="checkbox-grid" style="margin-bottom: 16px;">
+                    <div class="checkbox-grid" style="grid-template-columns: 1fr; gap: 8px; margin-bottom: 16px;">
                         <label class="checkbox-item"><input type="checkbox" id="perm_newPatient" checked> <span id="pNewPat">🟢 Register New Patient & Personal Info</span></label>
                         <label class="checkbox-item"><input type="checkbox" id="perm_archive" checked> <span id="pArch">🟢 Patients Archive, Search & Attachments</span></label>
                         <label class="checkbox-item"><input type="checkbox" id="perm_vitals" checked> <span id="pVitals">🟢 Vital Signs & BMI Calculator</span></label>
@@ -735,7 +709,7 @@
                             <div class="input-wrapper"><input type="text" id="pName" placeholder="Enter patient full name..." required></div>
                         </div>
 
-                        <div style="display: flex; gap: 12px;">
+                        <div style="display: flex; gap: 10px;">
                             <div class="field-box" style="flex: 1;">
                                 <span class="field-label" id="lblPatAge">Age *</span>
                                 <div class="input-wrapper"><input type="number" id="pAge" placeholder="Age..." required></div>
@@ -864,18 +838,18 @@
 
             <div id="medicalRecordScreen" style="display: none;">
                 <div class="group-card" style="background: #f0fdfa; border-color: #99f6e4; position: relative;">
-                    <div style="position: absolute; top: 16px; right: 16px; display: flex; gap: 6px; z-index: 5;" id="patientRecordHeaderActions">
-                        <button type="button" id="editPatientBtnMain" onclick="openEditPatientModal()" style="background: #0d9488; color: white; border: none; border-radius: 8px; padding: 6px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                    <div style="position: absolute; top: 14px; right: 14px; display: flex; gap: 6px; z-index: 5;" id="patientRecordHeaderActions">
+                        <button type="button" id="editPatientBtnMain" onclick="openEditPatientModal()" style="background: #0d9488; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
                             <i class="fa-solid fa-pen-to-square"></i> <span id="txtEdit">Edit</span>
                         </button>
-                        <button type="button" onclick="confirmDeletePatientRecord()" id="btnDeletePatientMain" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                        <button type="button" onclick="confirmDeletePatientRecord()" id="btnDeletePatientMain" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
                             <i class="fa-solid fa-trash"></i> <span id="txtDelete">Delete</span>
                         </button>
                     </div>
-                    <div class="field-box" style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color: #0f766e; margin-bottom:4px; padding-right: 135px;">
+                    <div class="field-box" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color: #0f766e; margin-bottom:4px; padding-right: 125px;">
                         <i class="fa-solid fa-user-check"></i> <span id="recPatientName">—</span>
                     </div>
-                    <p style="font-size: 0.82rem; color: #334155; line-height: 1.5; margin-bottom: 12px;" id="recPatientMeta"></p>
+                    <p style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin-bottom: 10px;" id="recPatientMeta"></p>
                     
                     <button type="button" class="btn-main" onclick="exportPatientMedicalReportPDF()" id="btnDownloadPDF" style="background: #0284c7; padding: 12px; font-size: 0.9rem;">
                         <i class="fa-solid fa-file-pdf"></i> Download Comprehensive PDF Report
@@ -915,13 +889,13 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.08</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.06</div>
     </div>
 </div>
 
 <!-- نافذة النسخ الاحتياطي الإجباري الشهري -->
 <div id="mandatoryBackupModal" class="modal-overlay" style="z-index: 99999;">
-    <div class="modal-body" style="max-width: 440px; text-align: center;">
+    <div class="modal-body" style="max-width: 420px; text-align: center;">
         <div style="font-size: 45px; color: #4f46e5; margin-bottom: 4px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
         <h3 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #0f172a; margin-bottom: 6px;" id="mandBackupTitle">النسخ الاحتياطي الشهري الإجباري</h3>
         <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 14px; line-height: 1.5;" id="mandBackupSub">
@@ -934,7 +908,7 @@
 </div>
 
 <div id="supportModal" class="modal-overlay">
-    <div class="modal-body" style="max-width: 420px; text-align: center;">
+    <div class="modal-body" style="max-width: 400px; text-align: center;">
         <div class="modal-header">
             <h3 id="suppHeaderTitle"><i class="fa-solid fa-headset" style="color:#0d9488;"></i> Technical Support & Renewal</h3>
             <button class="modal-close" onclick="closeSupportModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -956,7 +930,7 @@
 </div>
 
 <div id="founderDeleteModal" class="modal-overlay">
-    <div class="modal-body" style="max-width: 420px; text-align: center;">
+    <div class="modal-body" style="max-width: 400px; text-align: center;">
         <div class="modal-header">
             <h3><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> Confirm Account Deletion</h3>
             <button class="modal-close" onclick="closeFounderDeleteModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -975,13 +949,13 @@
 </div>
 
 <div id="bmiCalculatorModal" class="modal-overlay">
-    <div class="modal-body" style="max-width: 440px;">
+    <div class="modal-body">
         <div class="modal-header">
             <h3 id="bmiTitleText"><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> BMI Calculator</h3>
             <button class="modal-close" onclick="closeBmiModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
 
-        <div style="display: flex; gap: 12px;">
+        <div style="display: flex; gap: 10px;">
             <div class="field-box" style="flex: 1;">
                 <span class="field-label" id="lblBmiWeight">Weight (kg)</span>
                 <div class="input-wrapper"><input type="number" id="bmiWeight" placeholder="e.g. 70" oninput="calculateBmiLive()"></div>
@@ -1007,7 +981,7 @@
 </div>
 
 <div id="editPatientModal" class="modal-overlay">
-    <div class="modal-body" style="max-width: 500px;">
+    <div class="modal-body">
         <div class="modal-header">
             <h3 id="editPatHeader"><i class="fa-solid fa-user-pen" style="color:#0d9488;"></i> Edit Patient Information</h3>
             <button class="modal-close" onclick="closeEditPatientModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -1018,7 +992,7 @@
             <div class="input-wrapper"><input type="text" id="editPName" placeholder="Enter patient full name..." required></div>
         </div>
 
-        <div style="display: flex; gap: 12px;">
+        <div style="display: flex; gap: 10px;">
             <div class="field-box" style="flex: 1;">
                 <span class="field-label" id="editLblAge">Age *</span>
                 <div class="input-wrapper"><input type="number" id="editPAge" placeholder="Age..." required></div>
@@ -1075,7 +1049,7 @@
 </div>
 
 <div id="medHistoryModal" class="modal-overlay">
-    <div class="modal-body" style="max-width: 550px;">
+    <div class="modal-body">
         <div class="modal-header">
             <h3 id="mhHeaderTitle"><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History Details</h3>
             <button class="modal-close" onclick="closeMedHistoryModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -1093,7 +1067,7 @@
                 <label class="checkbox-item"><input type="checkbox" value="Hepatitis" class="mh-cd"> <span class="mh-cond-text" data-cond="Hepatitis">Hepatitis</span></label>
                 <label class="checkbox-item"><input type="checkbox" value="Chronic kidney dis" class="mh-cd"> <span class="mh-cond-text" data-cond="Chronic kidney dis">Chronic kidney dis</span></label>
                 <label class="checkbox-item"><input type="checkbox" value="IHD" class="mh-cd"> <span class="mh-cond-text" data-cond="IHD">IHD</span></label>
-                <label class="checkbox-item" style="grid-column: span 3;">
+                <label class="checkbox-item" style="grid-column: span 2;">
                     <input type="checkbox" id="mh-other-check" onchange="toggleOtherInput()"> <span id="mhOtherText">Other</span>
                 </label>
             </div>
@@ -1167,7 +1141,7 @@
             </div>
         </div>
 
-        <div style="display:flex; gap:12px;">
+        <div style="display:flex; gap:10px;">
             <div class="field-box" style="flex:1;">
                 <span class="field-label" id="mhLblSmoking">Smoking status</span>
                 <div class="input-wrapper"><select id="mh-smoking"><option value="Non-smoker" id="optSmok1">Non-smoker</option><option value="Smoker" id="optSmok2">Smoker</option><option value="Passive smoker" id="optSmok3">Passive smoker</option></select></div>
@@ -1204,7 +1178,7 @@
 </div>
 
 <div id="rxModal" class="modal-overlay">
-    <div class="modal-body" style="max-width: 520px; text-align: left; direction: ltr;">
+    <div class="modal-body" style="max-width: 480px; text-align: left; direction: ltr;">
         <div class="modal-header" style="direction: ltr;">
             <h3 style="font-family: 'Playfair Display', serif;"><i class="fa-solid fa-file-prescription" style="color:#0d9488;"></i> RX Prescription</h3>
             <button class="modal-close" onclick="closeRxModal()"><i class="fa-solid fa-xmark"></i></button>
@@ -1218,7 +1192,6 @@
         </div>
 
         <div id="rxCanvasContainer" class="rx-canvas-container">
-            <!-- سيتم حقن صورة قالب الروشتة الخلفية ديناميكياً هنا -->
             <div id="dragBoxPatientDetails" class="draggable-box" style="top: 20px; left: 15px;">
                 <div class="box-font-controls">
                     <span>Name Font:</span>
@@ -1230,7 +1203,7 @@
                 <div id="rxDragPatientDetailsText" class="rx-patient-details-text">-</div>
             </div>
 
-            <div id="dragBoxDate" class="draggable-box" style="top: 20px; left: 350px;">
+            <div id="dragBoxDate" class="draggable-box" style="top: 20px; left: 250px;">
                 <div class="box-font-controls">
                     <span>Date Font:</span>
                     <div style="display:flex; gap:3px;">
@@ -1417,7 +1390,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.08",
+            footer: "نظام عيادة ماستر المتقدم v17.06",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1575,7 +1548,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.08",
+            footer: "Clinic Master Network v17.06",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -2730,7 +2703,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.08",
+            version: "17.06",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -2895,7 +2868,6 @@
                     ctx.drawImage(img, 0, 0, width, height);
 
                     currentDoctorRxImage = canvas.toDataURL('image/jpeg', 0.70);
-                    localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
                     saveSettingsToCloudAndLocal();
                     alert('Prescription header saved!');
                     openRxTemplateManager();
@@ -3149,19 +3121,10 @@
 
     function handleLiveInput(textarea, category, visitId) {
         autoResizeTextarea(textarea);
-        if (isUserSecretary || isSubscriptionExpired) return;
-        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-        if (patient) {
-            const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-            if (visit) {
-                visit[category] = textarea.value;
-                savePatientToCloudAndLocal(patient);
-            }
-        }
     }
 
-    function showSuggestions(category, visitId) {}
     function hideSuggestions(category, visitId) {}
+
     function saveLineToDict(event, category, visitId) {}
 
     function handleMhLiveInput(inputEl, inputKey) {
@@ -3169,6 +3132,7 @@
     }
 
     function hideMhSuggestions(inputKey) {}
+
     function saveMhLineToDict(event, inputKey) {}
 
     function toggleOtherInput() {
@@ -3176,43 +3140,9 @@
         document.getElementById('mh-other-box').style.display = isChecked ? 'block' : 'none';
     }
 
-    function handleFileUpload(input, visitId) {
-        if (isUserSecretary || isSubscriptionExpired) return;
-        if (input.files && input.files[0]) {
-            const file = input.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-                if (patient) {
-                    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-                    if (visit) {
-                        if (!visit.attachments) visit.attachments = [];
-                        visit.attachments.push(e.target.result);
-                        savePatientToCloudAndLocal(patient);
-                        renderVisits(patient.visits, false);
-                    }
-                }
-            };
-            reader.readAsDataURL(file);
-        }
-    }
+    function handleFileUpload(input, visitId) {}
 
-    function removeAttachment(visitId, attIdx) {
-        if (isUserSecretary || isSubscriptionExpired) return;
-        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-        if (patient) {
-            const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-            if (visit && visit.attachments) {
-                visit.attachments.splice(attIdx, 1);
-                savePatientToCloudAndLocal(patient);
-                renderVisits(patient.visits, false);
-            }
-        }
-    }
-
-    function handleScannerScan(visitId) {
-        alert('Scanner feature ready.');
-    }
+    function handleScannerScan(visitId) {}
 
     function previewAttachmentImage(imgSrc) {
         document.getElementById('previewModalImg').src = imgSrc;
@@ -3333,41 +3263,7 @@
         document.getElementById('medHistoryModal').style.display = 'none';
     }
 
-    /* ==================================================== */
-    /* إصلاح جذر مشكلة عرض صورة قالب الروشتة (RX) داخل ملف المريض */
-    /* ==================================================== */
     function openRxModal(visitId) {
-        currentVisitIdForModal = visitId;
-        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-        if (!patient) return;
-        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-        if (!visit) return;
-
-        // تحديث النصوص داخل الروشتة
-        document.getElementById('rxDragPatientDetailsText').innerText = `Name: ${patient.name} | Age: ${patient.age} | Gender: ${patient.gender || 'N/A'}`;
-        document.getElementById('rxDragDateText').innerText = `Date: ${visit.date || getTodayFormatted()}`;
-        document.getElementById('rxDragVitalsText').innerText = `BP: ${visit.bp || '—'} | Pulse: ${visit.pulse || '—'} | Temp: ${visit.temp || '—'} | SpO2: ${visit.spo2 || '—'} | BMI: ${visit.bmiScore || '—'}`;
-        document.getElementById('rxDragTreatmentText').innerText = visit.drugs || 'No medications prescribed.';
-
-        // جلب خلفية الروشتة المخزنة وعرضها فوراً في النافذة
-        const rxContainer = document.getElementById('rxCanvasContainer');
-        let bgImgEl = document.getElementById('dynamicRxBgImage');
-        
-        currentDoctorRxImage = localStorage.getItem('doctor_rx_template') || currentDoctorRxImage;
-
-        if (currentDoctorRxImage) {
-            if (!bgImgEl) {
-                bgImgEl = document.createElement('img');
-                bgImgEl.id = 'dynamicRxBgImage';
-                bgImgEl.className = 'rx-bg-img';
-                rxContainer.insertBefore(bgImgEl, rxContainer.firstChild);
-            }
-            bgImgEl.src = currentDoctorRxImage;
-            bgImgEl.style.display = 'block';
-        } else {
-            if (bgImgEl) bgImgEl.style.display = 'none';
-        }
-
         document.getElementById('rxModal').style.display = 'flex';
     }
 
@@ -3383,30 +3279,16 @@
     function updateConfigModeUI() {
         const hint = document.getElementById('rxModeHint');
         const saveBtn = document.getElementById('rxSaveLayoutBtn');
-        const boxes = document.querySelectorAll('.draggable-box');
         if (isConfigMode) {
             hint.innerText = 'Config mode active';
             saveBtn.style.display = 'block';
-            boxes.forEach(b => b.classList.add('config-mode'));
         } else {
             hint.innerText = 'RX ready';
             saveBtn.style.display = 'none';
-            boxes.forEach(b => b.classList.remove('config-mode'));
         }
     }
 
-    function changeBoxFontSize(boxType, delta) {
-        let el;
-        if (boxType === 'patientDetails') el = document.getElementById('rxDragPatientDetailsText');
-        else if (boxType === 'date') el = document.getElementById('rxDragDateText');
-        else if (boxType === 'vitals') el = document.getElementById('rxDragVitalsText');
-        else if (boxType === 'treatment') el = document.getElementById('rxDragTreatmentText');
-        
-        if (el) {
-            const currentSize = parseFloat(window.getComputedStyle(el).fontSize);
-            el.style.fontSize = (currentSize + delta) + 'px';
-        }
-    }
+    function changeBoxFontSize(boxType, delta) {}
 
     function saveRxLayoutPositions() {
         isConfigMode = false;
@@ -3440,6 +3322,7 @@
     }
 
     function renderDictTerms() {}
+
     function removeDictTerm(category, index) {}
 
     function saveNewPatient(e) {
@@ -3498,122 +3381,15 @@
 
     function renderVisits(visits, forceFullRender = true) {
         const container = document.getElementById('visitsContainer');
-        container.innerHTML = visits.map((v, index) => {
-            const visitId = v.visitId || (Date.now() + index);
-            
-            let attachmentsHtml = '';
-            if (v.attachments && v.attachments.length > 0) {
-                attachmentsHtml = v.attachments.map((att, attIdx) => `
-                    <div style="position: relative; display: inline-block; margin: 4px;">
-                        <img src="${att}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #cbd5e1; cursor: pointer;" onclick="previewAttachmentImage('${att}')">
-                        <button type="button" onclick="removeAttachment(${visitId}, ${attIdx})" style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer;">×</button>
-                    </div>
-                `).join('');
-            }
-
-            return `
-            <div class="visit-card" data-visit-id="${visitId}">
-                <div class="visit-header">
-                    <span><i class="fa-solid fa-calendar-day"></i> Visit #${visits.length - index} — Date: ${v.date || getTodayFormatted()}</span>
-                    ${visits.length > 1 ? `<button type="button" onclick="confirmDeleteVisit(${visitId})" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.75rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-trash"></i> Delete Visit</button>` : ''}
-                </div>
-
-                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                    <button type="button" class="btn-med-history" onclick="openMedHistoryModal(${visitId})">
-                        <span><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History & Notes</span>
-                        <i class="fa-solid fa-chevron-right" style="font-size: 0.75rem;"></i>
-                    </button>
-                    <button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(${visitId})">
-                        <span><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> BMI: ${v.bmiScore || '—'}</span>
-                        <i class="fa-solid fa-chevron-right" style="font-size: 0.75rem;"></i>
-                    </button>
-                </div>
-
-                <div class="vital-box" style="margin-bottom: 12px;">
-                    <div class="vital-row">
-                        <div class="vital-item">
-                            <span class="vital-label"><i class="fa-solid fa-heart-pulse" style="color:#ef4444;"></i> BP (mmHg)</span>
-                            <div class="vital-inputs"><input type="text" class="v-bp" value="${v.bp || ''}" placeholder="120/80" oninput="handleLiveInput(this, 'bp', ${visitId})"></div>
-                        </div>
-                        <div class="vital-item">
-                            <span class="vital-label"><i class="fa-solid fa-stethoscope" style="color:#0284c7;"></i> Pulse (/min)</span>
-                            <div class="vital-inputs"><input type="number" class="v-pulse" value="${v.pulse || ''}" placeholder="75" oninput="handleLiveInput(this, 'pulse', ${visitId})"></div>
-                        </div>
-                        <div class="vital-item">
-                            <span class="vital-label"><i class="fa-solid fa-temperature-half" style="color:#d97706;"></i> Temp (°C)</span>
-                            <div class="vital-inputs"><input type="number" step="0.1" class="v-temp" value="${v.temp || ''}" placeholder="37" oninput="handleLiveInput(this, 'temp', ${visitId})"></div>
-                        </div>
-                        <div class="vital-item">
-                            <span class="vital-label"><i class="fa-solid fa-wind" style="color:#10b981;"></i> SpO2 (%)</span>
-                            <div class="vital-inputs"><input type="number" class="v-spo2" value="${v.spo2 || ''}" placeholder="98" oninput="handleLiveInput(this, 'spo2', ${visitId})"></div>
-                        </div>
-                    </div>
-                </div>
-
+        container.innerHTML = visits.map((v, index) => `
+            <div class="visit-card" data-visit-id="${v.visitId}">
+                <div class="visit-header"><span>Visit Date: ${v.date}</span></div>
                 <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-flask" style="color:#0284c7;"></i> Lab Tests</span>
-                    <div class="input-wrapper" style="position: relative;">
-                        <textarea class="v-labs" rows="1" placeholder="Type or select lab tests..." oninput="handleLiveInput(this, 'labs', ${visitId})" onfocus="showSuggestions('labs', ${visitId})" onblur="hideSuggestions('labs', ${visitId})">${v.labs || ''}</textarea>
-                        <div class="suggestions-box" id="suggestions-labs-${visitId}"></div>
-                        <div class="live-save-bar" id="save-bar-labs-${visitId}">
-                            <span>Save: "<strong id="line-text-labs-${visitId}"></strong>"</span>
-                            <button type="button" class="btn-live-save" onmousedown="saveLineToDict(event, 'labs', ${visitId})">Save</button>
-                        </div>
-                    </div>
+                    <span class="field-label">Diagnosis & Notes</span>
+                    <div class="input-wrapper"><textarea class="v-notes" rows="2">${v.notes || ''}</textarea></div>
                 </div>
-
-                <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-x-ray" style="color:#9333ea;"></i> Radiology & Scans</span>
-                    <div class="input-wrapper" style="position: relative;">
-                        <textarea class="v-scans" rows="1" placeholder="Type or select radiology..." oninput="handleLiveInput(this, 'scans', ${visitId})" onfocus="showSuggestions('scans', ${visitId})" onblur="hideSuggestions('scans', ${visitId})">${v.scans || ''}</textarea>
-                        <div class="suggestions-box" id="suggestions-scans-${visitId}"></div>
-                        <div class="live-save-bar" id="save-bar-scans-${visitId}">
-                            <span>Save: "<strong id="line-text-scans-${visitId}"></strong>"</span>
-                            <button type="button" class="btn-live-save" onmousedown="saveLineToDict(event, 'scans', ${visitId})">Save</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-prescription" style="color:#ef4444;"></i> Medications & Doses (RX)</span>
-                    <div class="input-wrapper" style="position: relative;">
-                        <textarea class="v-drugs" rows="2" placeholder="Type medications..." oninput="handleDrugsInput(this, ${visitId})" onkeydown="handleDrugsKeyDown(event, this, ${visitId})" onfocus="showSuggestions('drugs', ${visitId})" onblur="hideSuggestions('drugs', ${visitId})">${v.drugs || ''}</textarea>
-                        <div class="suggestions-box" id="suggestions-drugs-${visitId}"></div>
-                        <div class="live-save-bar" id="save-bar-drugs-${visitId}">
-                            <span>Save: "<strong id="line-text-drugs-${visitId}"></strong>"</span>
-                            <button type="button" class="btn-live-save" onmousedown="saveLineToDict(event, 'drugs', ${visitId})">Save</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="field-box">
-                    <span class="field-label"><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Diagnosis & Clinical Notes</span>
-                    <div class="input-wrapper" style="position: relative;">
-                        <textarea class="v-notes" rows="2" placeholder="Diagnosis..." oninput="handleLiveInput(this, 'notes', ${visitId})" onfocus="showSuggestions('notes', ${visitId})" onblur="hideSuggestions('notes', ${visitId})">${v.notes || ''}</textarea>
-                        <div class="suggestions-box" id="suggestions-notes-${visitId}"></div>
-                        <div class="live-save-bar" id="save-bar-notes-${visitId}">
-                            <span>Save: "<strong id="line-text-notes-${visitId}"></strong>"</span>
-                            <button type="button" class="btn-live-save" onmousedown="saveLineToDict(event, 'notes', ${visitId})">Save</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div style="display: flex; gap: 8px; margin-top: 10px;">
-                    <div class="input-wrapper" style="flex: 1; padding: 6px; border: 1.5px dashed #0d9488; background: #f0fdfa; text-align: center;">
-                        <input type="file" accept="image/*" style="font-size: 0.75rem; cursor: pointer;" onchange="handleFileUpload(this, ${visitId})">
-                    </div>
-                    <button type="button" onclick="handleScannerScan(${visitId})" style="background: #0f172a; color: white; border: none; border-radius: 10px; padding: 6px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer; white-space: nowrap;">
-                        <i class="fa-solid fa-camera"></i> Scan
-                    </button>
-                </div>
-                <div style="margin-top: 8px;">${attachmentsHtml}</div>
-
-                <button type="button" class="btn-main" onclick="openRxModal(${visitId})" style="margin-top: 12px; background: #0d9488;">
-                    <i class="fa-solid fa-file-prescription"></i> Preview & Print Prescription (RX)
-                </button>
             </div>
-            `;
-        }).join('');
+        `).join('');
     }
 </script>
 </body>
