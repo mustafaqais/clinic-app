@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.08</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.09</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -177,6 +177,9 @@
 
         .btn-med-history { width: 100%; background: #f0fdfa; color: #0d9488; border: 1.5px dashed #0d9488; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
         .btn-bmi-trigger { width: 100%; background: #f0f9ff; color: #0284c7; border: 1.5px dashed #0284c7; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+
+        .medical-history-preview-card { background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 12px; padding: 12px; margin-bottom: 12px; font-size: 0.82rem; color: #0f766e; line-height: 1.5; }
+        .medical-history-preview-card strong { color: #0f172a; }
 
         .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
         .analytics-box { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
@@ -885,7 +888,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.08</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.09</div>
     </div>
 </div>
 
@@ -1384,7 +1387,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.08",
+            footer: "نظام عيادة ماستر المتقدم v17.09",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1542,7 +1545,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.08",
+            footer: "Clinic Master Network v17.09",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -2696,7 +2699,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.08",
+            version: "17.09",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3500,9 +3503,9 @@
         const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
         if (!visit) return;
 
-        // إضافة كلمة Name بجانب الاسم كما طلبت
         document.getElementById('rxDragPatientDetailsText').innerText = `Name: ${patient.name} | Age: ${patient.age} | ${patient.gender || ''}`;
         document.getElementById('rxDragDateText').innerText = visit.date || getTodayFormatted();
+        // تم إضافة الضغط (BP) ليظهر ضمن الفعاليات الحيوية بالروشتة
         document.getElementById('rxDragVitalsText').innerText = `BP: ${visit.bp || '—'} | HR: ${visit.hr || '—'} | Temp: ${visit.temp || '—'} | BMI: ${visit.bmiScore || '—'}`;
         document.getElementById('rxDragTreatmentText').innerText = visit.drugs || 'No medications prescribed.';
 
@@ -3742,7 +3745,28 @@
 
     function renderVisits(visits, forceFullRender = true) {
         const container = document.getElementById('visitsContainer');
-        container.innerHTML = visits.map((v, index) => `
+        container.innerHTML = visits.map((v, index) => {
+            const mh = v.medHistory || {};
+            const t = translations[currentLang];
+            let mhSummaryParts = [];
+            
+            if (mh.conditions && mh.conditions.length > 0) {
+                const translatedConds = mh.conditions.map(c => (t.chronicNames && t.chronicNames[c]) ? t.chronicNames[c] : c);
+                mhSummaryParts.push(`<b>الأمراض المزمنة:</b> ${translatedConds.join(', ')}`);
+            }
+            if (mh.otherCondition) mhSummaryParts.push(`<b>أخرى:</b> ${mh.otherCondition}`);
+            if (mh.admission) mhSummaryParts.push(`<b>دخول المستشفى:</b> ${mh.admission}`);
+            if (mh.surgery) mhSummaryParts.push(`<b>العمليات:</b> ${mh.surgery}`);
+            if (mh.family) mhSummaryParts.push(`<b>التاريخ العائلي:</b> ${mh.family}`);
+            if (mh.allergy) mhSummaryParts.push(`<b>حساسية الأدوية:</b> ${mh.allergy}`);
+            if (mh.chronicDrugs) mhSummaryParts.push(`<b>أدوية مزمنة:</b> ${mh.chronicDrugs}`);
+            if (mh.smoking) mhSummaryParts.push(`<b>التدخين:</b> ${mh.smoking}`);
+            if (mh.alcohol) mhSummaryParts.push(`<b>الكحول:</b> ${mh.alcohol}`);
+            if (mh.notes) mhSummaryParts.push(`<b>ملاحظات:</b> ${mh.notes}`);
+
+            const mhSummaryText = mhSummaryParts.length > 0 ? mhSummaryParts.join(' | ') : 'لم يتم تسجيل تفاصيل التاريخ المرضي بعد.';
+
+            return `
             <div class="visit-card" data-visit-id="${v.visitId}">
                 <div class="visit-header">
                     <span>Visit Date: ${v.date}</span>
@@ -3753,6 +3777,10 @@
                     <span><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History & Chronic Diseases</span>
                     <i class="fa-solid fa-chevron-right"></i>
                 </button>
+
+                <div class="medical-history-preview-card">
+                    ${mhSummaryText}
+                </div>
 
                 <button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(${v.visitId})">
                     <span><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> Vital Signs & BMI Calculator</span>
@@ -3855,7 +3883,8 @@
                     </div>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
 
         visits.forEach(v => {
             const noteEl = document.getElementById(`vNotes-${v.visitId}`);
