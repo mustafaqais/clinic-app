@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.06</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.07</title>
     
-    <!-- PWA & Fullscreen Mobile Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
     <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -30,7 +29,6 @@
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
         html, body { background-color: #ffffff; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
         
-        /* الوضع الداكن الطبي (Medical Dark Mode) */
         body.dark-mode { background-color: #0b0f19; color: #f8fafc; }
         body.dark-mode .mobile-container { background: #0b0f19; }
         body.dark-mode .auth-screen { background: #0b0f19; color: #f8fafc; }
@@ -177,8 +175,8 @@
         .btn-live-save { background: #0d9488; color: white; border: none; border-radius: 6px; padding: 4px 10px; font-size: 0.72rem; font-weight: 700; cursor: pointer; }
         .btn-live-save.saved { background: #16a34a; }
 
-        .btn-med-history { width: 100%; background: #f0fdfa; color: #0d9488; border: 1.5px dashed #0d9488; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
-        .btn-bmi-trigger { width: 100%; background: #f0f9ff; color: #0284c7; border: 1.5px dashed #0284c7; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+        .btn-med-history { width: 100%; background: #f0fdfa; color: #0d9488; border: 1.5px dashed #0d9488; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .btn-bmi-trigger { width: 100%; background: #f0f9ff; color: #0284c7; border: 1.5px dashed #0284c7; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 
         .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
         .analytics-box { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
@@ -337,7 +335,6 @@
 <div class="mobile-container">
     <div id="networkStatusBar" class="network-status-bar">⚠️ Offline Mode - Changes saved locally, will sync when online</div>
 
-    <!-- شاشة تسجيل الدخول وإنشاء الحساب المبسطة -->
     <div id="authScreen" class="auth-screen">
         <div style="position: absolute; top: 15px; right: 15px;">
             <button onclick="toggleLanguage()" id="authLangBtn" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; color: #0f172a;">عربي / EN</button>
@@ -374,7 +371,6 @@
         </div>
     </div>
 
-    <!-- نافذة التفعيل -->
     <div id="activationScreen" class="auth-screen" style="display: none;">
         <div class="activ-icon"><i class="fa-solid fa-shield-halved"></i></div>
         <div class="activ-title" id="activTitle">Account Activation Required</div>
@@ -889,11 +885,10 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.06</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.07</div>
     </div>
 </div>
 
-<!-- نافذة النسخ الاحتياطي الإجباري الشهري -->
 <div id="mandatoryBackupModal" class="modal-overlay" style="z-index: 99999;">
     <div class="modal-body" style="max-width: 420px; text-align: center;">
         <div style="font-size: 45px; color: #4f46e5; margin-bottom: 4px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
@@ -1390,7 +1385,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.06",
+            footer: "نظام عيادة ماستر المتقدم v17.07",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1548,7 +1543,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.06",
+            footer: "Clinic Master Network v17.07",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -1891,7 +1886,6 @@
 
     function syncLocalDataToCloud() {
         if (!currentUserId || !navigator.onLine) return;
-        
         const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
 
         patients.forEach(patient => {
@@ -2703,7 +2697,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.06",
+            version: "17.07",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3031,6 +3025,7 @@
                         <span>Visit #${visits.length - idx}</span><span>Date: ${v.date || 'N/A'}</span>
                     </div>
                     <div style="font-size: 0.8rem; margin-top: 6px;"><strong>Diagnosis & Notes:</strong> ${v.notes || 'None'}</div>
+                    ${v.drugs ? `<div style="font-size: 0.8rem; margin-top: 4px;"><strong>Medications:</strong> ${v.drugs}</div>` : ''}
                 </div>
             `).join('');
 
@@ -3074,6 +3069,7 @@
                         visit.bmiScore = '';
                     }
                     savePatientToCloudAndLocal(patient);
+                    renderVisits(patient.visits, false);
                 }
             }
         }
@@ -3116,33 +3112,217 @@
             textarea.value = textarea.value.substring(0, start) + '\n\n' + textarea.value.substring(end);
             textarea.selectionStart = textarea.selectionEnd = start + 2;
             autoResizeTextarea(textarea);
+            handleLiveInput(textarea, 'drugs', visitId);
         }
     }
 
     function handleLiveInput(textarea, category, visitId) {
+        if (isUserSecretary || isSubscriptionExpired) return;
         autoResizeTextarea(textarea);
+        const val = textarea.value.trim();
+        const box = document.getElementById(`suggestions-${category}-${visitId}`);
+        const saveBar = document.getElementById(`save-bar-${category}-${visitId}`);
+        
+        if (!val || val.length < 1) {
+            if (box) box.style.display = 'none';
+            if (saveBar) saveBar.style.display = 'none';
+            updateVisitFieldData(visitId, category, textarea.value);
+            return;
+        }
+
+        const lines = textarea.value.split('\n');
+        const currentLine = lines[lines.length - 1].trim();
+
+        if (currentLine.length > 0) {
+            if (saveBar) {
+                saveBar.style.display = 'flex';
+                document.getElementById(`line-text-${category}-${visitId}`).innerText = currentLine;
+            }
+            const terms = medicalDict[category] || [];
+            const matches = terms.filter(t => t.toLowerCase().includes(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
+
+            if (matches.length > 0 && box) {
+                box.innerHTML = matches.map(m => `<div class="suggestion-item" onmousedown="selectSuggestion('${category}', ${visitId}, '${m.replace(/'/g, "\\'")}')">${m}</div>`).join('');
+                box.style.display = 'block';
+            } else if (box) {
+                box.style.display = 'none';
+            }
+        } else {
+            if (saveBar) saveBar.style.display = 'none';
+            if (box) box.style.display = 'none';
+        }
+
+        updateVisitFieldData(visitId, category, textarea.value);
     }
 
-    function hideSuggestions(category, visitId) {}
+    function selectSuggestion(category, visitId, term) {
+        const textarea = document.getElementById(`${category === 'drugs' ? 'vDrugs' : category === 'labs' ? 'vLabs' : category === 'scans' ? 'vScans' : 'vNotes'}-${visitId}`);
+        if (!textarea) return;
 
-    function saveLineToDict(event, category, visitId) {}
+        const lines = textarea.value.split('\n');
+        lines[lines.length - 1] = term;
+        textarea.value = lines.join('\n') + '\n';
+        autoResizeTextarea(textarea);
+
+        document.getElementById(`suggestions-${category}-${visitId}`).style.display = 'none';
+        document.getElementById(`save-bar-${category}-${visitId}`).style.display = 'none';
+        updateVisitFieldData(visitId, category, textarea.value);
+        textarea.focus();
+    }
+
+    function hideSuggestions(category, visitId) {
+        setTimeout(() => {
+            const box = document.getElementById(`suggestions-${category}-${visitId}`);
+            const bar = document.getElementById(`save-bar-${category}-${visitId}`);
+            if (box) box.style.display = 'none';
+            if (bar) bar.style.display = 'none';
+        }, 200);
+    }
+
+    function saveLineToDict(event, category, visitId) {
+        event.preventDefault();
+        const textSpan = document.getElementById(`line-text-${category}-${visitId}`);
+        if (!textSpan) return;
+        const lineText = textSpan.innerText.trim();
+        if (lineText && medicalDict[category] && !medicalDict[category].includes(lineText)) {
+            medicalDict[category].push(lineText);
+            saveSettingsToCloudAndLocal();
+            const btn = document.getElementById(`btn-save-${category}-${visitId}`);
+            if (btn) {
+                btn.innerText = 'Saved!';
+                btn.classList.add('saved');
+                setTimeout(() => {
+                    btn.innerText = 'Save';
+                    btn.classList.remove('saved');
+                    document.getElementById(`save-bar-${category}-${visitId}`).style.display = 'none';
+                }, 1000);
+            }
+        }
+    }
 
     function handleMhLiveInput(inputEl, inputKey) {
         autoResizeTextarea(inputEl);
+        const val = inputEl.value.trim();
+        const box = document.getElementById(`suggestions-${inputKey}`);
+        const saveBar = document.getElementById(`save-bar-${inputKey}`);
+
+        if (!val || val.length < 1) {
+            if (box) box.style.display = 'none';
+            if (saveBar) saveBar.style.display = 'none';
+            return;
+        }
+
+        const lines = inputEl.value.split('\n');
+        const currentLine = lines[lines.length - 1].trim();
+
+        if (currentLine.length > 0) {
+            if (saveBar) {
+                saveBar.style.display = 'flex';
+                document.getElementById(`line-text-${inputKey}`).innerText = currentLine;
+            }
+            const terms = medicalDict.mh_history || [];
+            const matches = terms.filter(t => t.toLowerCase().includes(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
+
+            if (matches.length > 0 && box) {
+                box.innerHTML = matches.map(m => `<div class="suggestion-item" onmousedown="selectMhSuggestion('${inputKey}', '${m.replace(/'/g, "\\'")}')">${m}</div>`).join('');
+                box.style.display = 'block';
+            } else if (box) {
+                box.style.display = 'none';
+            }
+        } else {
+            if (saveBar) saveBar.style.display = 'none';
+            if (box) box.style.display = 'none';
+        }
     }
 
-    function hideMhSuggestions(inputKey) {}
+    function selectMhSuggestion(inputKey, term) {
+        const el = inputKey === 'mh_other' ? document.getElementById('mh-cd-other') : document.getElementById(`mh-${inputKey.replace('mh_', '')}`);
+        if (!el) return;
 
-    function saveMhLineToDict(event, inputKey) {}
+        const lines = el.value.split('\n');
+        lines[lines.length - 1] = term;
+        el.value = lines.join('\n') + '\n';
+        autoResizeTextarea(el);
+
+        document.getElementById(`suggestions-${inputKey}`).style.display = 'none';
+        document.getElementById(`save-bar-${inputKey}`).style.display = 'none';
+        el.focus();
+    }
+
+    function hideMhSuggestions(inputKey) {
+        setTimeout(() => {
+            const box = document.getElementById(`suggestions-${inputKey}`);
+            const bar = document.getElementById(`save-bar-${inputKey}`);
+            if (box) box.style.display = 'none';
+            if (bar) bar.style.display = 'none';
+        }, 200);
+    }
+
+    function saveMhLineToDict(event, inputKey) {
+        event.preventDefault();
+        const textSpan = document.getElementById(`line-text-${inputKey}`);
+        if (!textSpan) return;
+        const lineText = textSpan.innerText.trim();
+        if (lineText && !medicalDict.mh_history.includes(lineText)) {
+            medicalDict.mh_history.push(lineText);
+            saveSettingsToCloudAndLocal();
+            const btn = document.getElementById(`btn-save-${inputKey}`);
+            if (btn) {
+                btn.innerText = 'Saved!';
+                btn.classList.add('saved');
+                setTimeout(() => {
+                    btn.innerText = 'Save';
+                    btn.classList.remove('saved');
+                    document.getElementById(`save-bar-${inputKey}`).style.display = 'none';
+                }, 1000);
+            }
+        }
+    }
 
     function toggleOtherInput() {
         const isChecked = document.getElementById('mh-other-check').checked;
         document.getElementById('mh-other-box').style.display = isChecked ? 'block' : 'none';
     }
 
-    function handleFileUpload(input, visitId) {}
+    function updateVisitFieldData(visitId, category, value) {
+        if (isSubscriptionExpired) return;
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+        if (!visit) return;
 
-    function handleScannerScan(visitId) {}
+        visit[category] = value;
+        savePatientToCloudAndLocal(patient);
+    }
+
+    function handleFileUpload(input, visitId) {
+        if (isSubscriptionExpired) return;
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+                if (!patient) return;
+                const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+                if (!visit) return;
+
+                if (!visit.attachments) visit.attachments = [];
+                visit.attachments.push({ name: file.name, dataUrl: e.target.result });
+                savePatientToCloudAndLocal(patient);
+                renderVisits(patient.visits, false);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function handleScannerScan(visitId) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.capture = 'environment';
+        input.onchange = e => handleFileUpload(e.target, visitId);
+        input.click();
+    }
 
     function previewAttachmentImage(imgSrc) {
         document.getElementById('previewModalImg').src = imgSrc;
@@ -3187,6 +3367,7 @@
         savePatientToCloudAndLocal(patient);
         closeEditPatientModal();
         document.getElementById('recPatientName').innerText = patient.name;
+        document.getElementById('recPatientMeta').innerHTML = `Age: ${patient.age} | Gender: ${patient.gender} | Marital: ${patient.marital} | Job: ${patient.job} | Phone: ${patient.phone}`;
     }
 
     function confirmDeletePatientRecord() {
@@ -3256,14 +3437,86 @@
 
     function openMedHistoryModal(visitId) {
         currentVisitIdForModal = visitId;
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+        if (!visit) return;
+
+        const mh = visit.medHistory || {};
+        const checkboxes = document.querySelectorAll('.mh-cd');
+        checkboxes.forEach(cb => {
+            cb.checked = mh.conditions && mh.conditions.includes(cb.value);
+        });
+
+        document.getElementById('mh-other-check').checked = !!mh.otherCondition;
+        document.getElementById('mh-cd-other').value = mh.otherCondition || '';
+        document.getElementById('mh-other-box').style.display = mh.otherCondition ? 'block' : 'none';
+
+        document.getElementById('mh-prev-admission').value = mh.admission || '';
+        document.getElementById('mh-past-surgery').value = mh.surgery || '';
+        document.getElementById('mh-family-history').value = mh.family || '';
+        document.getElementById('mh-drug-allergy').value = mh.allergy || '';
+        document.getElementById('mh-chronic-drugs').value = mh.chronicDrugs || '';
+        document.getElementById('mh-smoking').value = mh.smoking || 'Non-smoker';
+        document.getElementById('mh-alcohol').value = mh.alcohol || 'Non-drinker';
+        document.getElementById('mh-notes').value = mh.notes || '';
+
         document.getElementById('medHistoryModal').style.display = 'flex';
     }
 
     function closeMedHistoryModal() {
+        if (!isSubscriptionExpired && currentVisitIdForModal && currentPatientId) {
+            const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+            if (patient) {
+                const visit = patient.visits.find(v => Number(v.visitId) === Number(currentVisitIdForModal));
+                if (visit) {
+                    const conditions = [];
+                    document.querySelectorAll('.mh-cd:checked').forEach(cb => conditions.push(cb.value));
+
+                    visit.medHistory = {
+                        conditions: conditions,
+                        otherCondition: document.getElementById('mh-other-check').checked ? document.getElementById('mh-cd-other').value : '',
+                        admission: document.getElementById('mh-prev-admission').value,
+                        surgery: document.getElementById('mh-past-surgery').value,
+                        family: document.getElementById('mh-family-history').value,
+                        allergy: document.getElementById('mh-drug-allergy').value,
+                        chronicDrugs: document.getElementById('mh-chronic-drugs').value,
+                        smoking: document.getElementById('mh-smoking').value,
+                        alcohol: document.getElementById('mh-alcohol').value,
+                        notes: document.getElementById('mh-notes').value
+                    };
+
+                    savePatientToCloudAndLocal(patient);
+                    renderVisits(patient.visits, false);
+                }
+            }
+        }
         document.getElementById('medHistoryModal').style.display = 'none';
     }
 
     function openRxModal(visitId) {
+        currentVisitIdForModal = visitId;
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+        if (!visit) return;
+
+        document.getElementById('rxDragPatientDetailsText').innerText = `${patient.name} | Age: ${patient.age} | ${patient.gender || ''}`;
+        document.getElementById('rxDragDateText').innerText = visit.date || getTodayFormatted();
+        document.getElementById('rxDragVitalsText').innerText = `BP: ${visit.bp || '—'} | HR: ${visit.hr || '—'} | Temp: ${visit.temp || '—'} | BMI: ${visit.bmiScore || '—'}`;
+        document.getElementById('rxDragTreatmentText').innerText = visit.drugs || 'No medications prescribed.';
+
+        const container = document.getElementById('rxCanvasContainer');
+        const oldImg = container.querySelector('.rx-bg-img');
+        if (oldImg) oldImg.remove();
+
+        if (currentDoctorRxImage) {
+            const img = document.createElement('img');
+            img.src = currentDoctorRxImage;
+            img.className = 'rx-bg-img';
+            container.insertBefore(img, container.firstChild);
+        }
+
         document.getElementById('rxModal').style.display = 'flex';
     }
 
@@ -3273,6 +3526,10 @@
 
     function toggleRxConfigMode() {
         isConfigMode = !isConfigMode;
+        document.querySelectorAll('.draggable-box').forEach(box => {
+            if (isConfigMode) box.classList.add('config-mode');
+            else box.classList.remove('config-mode');
+        });
         updateConfigModeUI();
     }
 
@@ -3288,11 +3545,24 @@
         }
     }
 
-    function changeBoxFontSize(boxType, delta) {}
+    function changeBoxFontSize(boxType, delta) {
+        const map = {
+            patientDetails: 'rxDragPatientDetailsText',
+            date: 'rxDragDateText',
+            vitals: 'rxDragVitalsText',
+            treatment: 'rxDragTreatmentText'
+        };
+        const el = document.getElementById(map[boxType]);
+        if (!el) return;
+        const currentSize = parseFloat(window.getComputedStyle(el).fontSize);
+        el.style.fontSize = `${currentSize + delta}px`;
+    }
 
     function saveRxLayoutPositions() {
         isConfigMode = false;
+        document.querySelectorAll('.draggable-box').forEach(b => b.classList.remove('config-mode'));
         updateConfigModeUI();
+        alert('RX Layout saved!');
     }
 
     function loadSavedRxLayout() {}
@@ -3301,9 +3571,50 @@
         window.print();
     }
 
-    function openPrescriptionPDF() {}
+    function openPrescriptionPDF() {
+        const container = document.getElementById('rxModal').querySelector('.modal-body');
+        html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('portrait', 'mm', 'a4');
+            const imgWidth = 210;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+            pdf.save(`Prescription_${Date.now()}.pdf`);
+        });
+    }
 
-    function initDraggableElements() {}
+    function initDraggableElements() {
+        let activeBox = null;
+        let startX = 0, startY = 0, initialX = 0, initialY = 0;
+
+        document.querySelectorAll('.draggable-box').forEach(box => {
+            box.addEventListener('pointerdown', e => {
+                if (!isConfigMode || e.target.tagName === 'BUTTON') return;
+                activeBox = box;
+                startX = e.clientX;
+                startY = e.clientY;
+                initialX = box.offsetLeft;
+                initialY = box.offsetTop;
+                box.setPointerCapture(e.pointerId);
+                e.stopPropagation();
+            });
+
+            box.addEventListener('pointermove', e => {
+                if (!activeBox || activeBox !== box) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                box.style.left = `${initialX + dx}px`;
+                box.style.top = `${initialY + dy}px`;
+            });
+
+            box.addEventListener('pointerup', e => {
+                if (activeBox === box) {
+                    activeBox = null;
+                    box.releasePointerCapture(e.pointerId);
+                }
+            });
+        });
+    }
 
     function autoSaveMedicalRecord() {}
 
@@ -3321,9 +3632,43 @@
         renderDictTerms();
     }
 
-    function renderDictTerms() {}
+    function renderDictTerms() {
+        const cat = document.getElementById('dictCategorySelect').value;
+        const terms = medicalDict[cat] || [];
+        const container = document.getElementById('dictItemsList');
 
-    function removeDictTerm(category, index) {}
+        container.innerHTML = terms.length === 0 
+            ? '<p style="text-align:center; color:#64748b;">No terms in this category.</p>'
+            : terms.map((term, index) => `
+                <div class="dict-tag">
+                    <span>${term}</span>
+                    <button onclick="removeDictTerm('${cat}', ${index})">Delete</button>
+                </div>
+            `).join('') + `
+                <div style="display:flex; gap:8px; margin-top:12px;">
+                    <div class="input-wrapper" style="flex:1;"><input type="text" id="newDictTermInput" placeholder="Add new term..."></div>
+                    <button class="btn-main" onclick="addNewDictTerm('${cat}')" style="width:auto; padding:0 16px;">Add</button>
+                </div>
+            `;
+    }
+
+    function addNewDictTerm(cat) {
+        const input = document.getElementById('newDictTermInput');
+        const val = input.value.trim();
+        if (val && medicalDict[cat] && !medicalDict[cat].includes(val)) {
+            medicalDict[cat].push(val);
+            saveSettingsToCloudAndLocal();
+            renderDictTerms();
+        }
+    }
+
+    function removeDictTerm(category, index) {
+        if (medicalDict[category]) {
+            medicalDict[category].splice(index, 1);
+            saveSettingsToCloudAndLocal();
+            renderDictTerms();
+        }
+    }
 
     function saveNewPatient(e) {
         e.preventDefault();
@@ -3351,14 +3696,29 @@
                 <div class="patient-card" onclick="openMedicalRecord(${p.id})">
                     <div class="patient-info">
                         <h4>${p.name}</h4>
-                        <p><i class="fa-solid fa-phone"></i> ${p.phone}</p>
+                        <p><i class="fa-solid fa-phone"></i> ${p.phone} | Age: ${p.age}</p>
                     </div>
+                    <span class="badge-gender ${p.gender === 'Female' ? 'gender-female' : 'gender-male'}">${p.gender || 'N/A'}</span>
                 </div>
             `).join('');
     }
 
     function filterPatients() {
-        renderPatientsList(patients);
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const gender = document.getElementById('filterGender').value;
+        const ageGroup = document.getElementById('filterAgeGroup').value;
+
+        const filtered = patients.filter(p => {
+            const matchQuery = p.name.toLowerCase().includes(query) || (p.phone && p.phone.includes(query));
+            const matchGender = !gender || p.gender === gender;
+            let matchAge = true;
+            if (ageGroup === 'child') matchAge = p.age < 18;
+            else if (ageGroup === 'adult') matchAge = p.age >= 18 && p.age <= 50;
+            else if (ageGroup === 'senior') matchAge = p.age > 50;
+
+            return matchQuery && matchGender && matchAge;
+        });
+        renderPatientsList(filtered);
     }
 
     function openMedicalRecord(id, saveState = true) {
@@ -3367,6 +3727,7 @@
         const patient = patients.find(p => Number(p.id) === Number(id));
         if (patient) {
             document.getElementById('recPatientName').innerText = patient.name;
+            document.getElementById('recPatientMeta').innerHTML = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
             renderVisits(patient.visits || [], true);
         }
     }
@@ -3383,13 +3744,129 @@
         const container = document.getElementById('visitsContainer');
         container.innerHTML = visits.map((v, index) => `
             <div class="visit-card" data-visit-id="${v.visitId}">
-                <div class="visit-header"><span>Visit Date: ${v.date}</span></div>
+                <div class="visit-header">
+                    <span>Visit Date: ${v.date}</span>
+                    ${visits.length > 1 ? `<button onclick="confirmDeleteVisit(${v.visitId})" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:2px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i> Delete Visit</button>` : ''}
+                </div>
+
+                <button type="button" class="btn-med-history" onclick="openMedHistoryModal(${v.visitId})">
+                    <span><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History & Chronic Diseases</span>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+
+                <button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(${v.visitId})">
+                    <span><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> Vital Signs & BMI Calculator</span>
+                    <span style="font-size:0.75rem; background:#e0f2fe; padding:2px 8px; border-radius:6px;">Score: ${v.bmiScore || '—'}</span>
+                </button>
+
+                <div class="vital-box" style="margin-bottom: 12px;">
+                    <div class="vital-row">
+                        <div class="vital-item">
+                            <span class="vital-label"><i class="fa-solid fa-heart-pulse"></i> Blood Pressure (BP)</span>
+                            <div class="vital-inputs"><input type="text" value="${v.bp || ''}" placeholder="120/80" oninput="updateVisitFieldData(${v.visitId}, 'bp', this.value)"><span>mmHg</span></div>
+                        </div>
+                        <div class="vital-item">
+                            <span class="vital-label"><i class="fa-solid fa-heart"></i> Heart Rate (HR)</span>
+                            <div class="vital-inputs"><input type="number" value="${v.hr || ''}" placeholder="75" oninput="updateVisitFieldData(${v.visitId}, 'hr', this.value)"><span>bpm</span></div>
+                        </div>
+                    </div>
+                    <div class="vital-row">
+                        <div class="vital-item">
+                            <span class="vital-label"><i class="fa-solid fa-temperature-high"></i> Temperature</span>
+                            <div class="vital-inputs"><input type="number" step="0.1" value="${v.temp || ''}" placeholder="37.0" oninput="updateVisitFieldData(${v.visitId}, 'temp', this.value)"><span>°C</span></div>
+                        </div>
+                        <div class="vital-item">
+                            <span class="vital-label"><i class="fa-solid fa-weight-scale"></i> Weight</span>
+                            <div class="vital-inputs"><input type="number" value="${v.bmiWeight || ''}" placeholder="70" oninput="updateVisitFieldData(${v.visitId}, 'bmiWeight', this.value)"><span>kg</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-box">
+                    <span class="field-label">Lab Tests</span>
+                    <div class="input-wrapper" style="position: relative;">
+                        <textarea id="vLabs-${v.visitId}" rows="1" placeholder="Request lab tests..." oninput="handleLiveInput(this, 'labs', ${v.visitId})" onblur="hideSuggestions('labs', ${v.visitId})">${v.labs || ''}</textarea>
+                        <div class="suggestions-box" id="suggestions-labs-${v.visitId}"></div>
+                        <div class="live-save-bar" id="save-bar-labs-${v.visitId}">
+                            <span>Save: "<strong id="line-text-labs-${v.visitId}"></strong>"</span>
+                            <button type="button" class="btn-live-save" id="btn-save-labs-${v.visitId}" onmousedown="saveLineToDict(event, 'labs', ${v.visitId})">Save</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-box">
+                    <span class="field-label">Radiology & Scans</span>
+                    <div class="input-wrapper" style="position: relative;">
+                        <textarea id="vScans-${v.visitId}" rows="1" placeholder="Request radiology..." oninput="handleLiveInput(this, 'scans', ${v.visitId})" onblur="hideSuggestions('scans', ${v.visitId})">${v.scans || ''}</textarea>
+                        <div class="suggestions-box" id="suggestions-scans-${v.visitId}"></div>
+                        <div class="live-save-bar" id="save-bar-scans-${v.visitId}">
+                            <span>Save: "<strong id="line-text-scans-${v.visitId}"></strong>"</span>
+                            <button type="button" class="btn-live-save" id="btn-save-scans-${v.visitId}" onmousedown="saveLineToDict(event, 'scans', ${v.visitId})">Save</button>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="field-box">
                     <span class="field-label">Diagnosis & Notes</span>
-                    <div class="input-wrapper"><textarea class="v-notes" rows="2">${v.notes || ''}</textarea></div>
+                    <div class="input-wrapper" style="position: relative;">
+                        <textarea id="vNotes-${v.visitId}" rows="2" placeholder="Clinical notes & diagnosis..." oninput="handleLiveInput(this, 'notes', ${v.visitId})" onblur="hideSuggestions('notes', ${v.visitId})">${v.notes || ''}</textarea>
+                        <div class="suggestions-box" id="suggestions-notes-${v.visitId}"></div>
+                        <div class="live-save-bar" id="save-bar-notes-${v.visitId}">
+                            <span>Save: "<strong id="line-text-notes-${v.visitId}"></strong>"</span>
+                            <button type="button" class="btn-live-save" id="btn-save-notes-${v.visitId}" onmousedown="saveLineToDict(event, 'notes', ${v.visitId})">Save</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-box">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                        <span class="field-label" style="margin-bottom:0;">Prescribed Medications (RX)</span>
+                        <button type="button" onclick="openRxModal(${v.visitId})" style="background:#fae8ff; color:#c084fc; border:none; border-radius:8px; padding:4px 10px; font-size:0.75rem; font-weight:700; cursor:pointer;">
+                            <i class="fa-solid fa-file-prescription"></i> Print RX Prescription
+                        </button>
+                    </div>
+                    <div class="input-wrapper" style="position: relative;">
+                        <textarea id="vDrugs-${v.visitId}" rows="3" placeholder="Write prescription drugs here..." oninput="handleDrugsInput(this, ${v.visitId})" onkeydown="handleDrugsKeyDown(event, this, ${v.visitId})" onblur="hideSuggestions('drugs', ${v.visitId})">${v.drugs || ''}</textarea>
+                        <div class="suggestions-box" id="suggestions-drugs-${v.visitId}"></div>
+                        <div class="live-save-bar" id="save-bar-drugs-${v.visitId}">
+                            <span>Save: "<strong id="line-text-drugs-${v.visitId}"></strong>"</span>
+                            <button type="button" class="btn-live-save" id="btn-save-drugs-${v.visitId}" onmousedown="saveLineToDict(event, 'drugs', ${v.visitId})">Save</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="field-box">
+                    <span class="field-label">Attachments & Medical Reports</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <label style="flex:1; background:#f1f5f9; border:1px dashed #cbd5e1; border-radius:10px; padding:10px; text-align:center; font-size:0.8rem; font-weight:700; color:#475569; cursor:pointer;">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Upload Image / File
+                            <input type="file" accept="image/*" style="display:none;" onchange="handleFileUpload(this, ${v.visitId})">
+                        </label>
+                        <button type="button" onclick="handleScannerScan(${v.visitId})" style="flex:1; background:#f0fdfa; border:1px dashed #0d9488; border-radius:10px; padding:10px; font-size:0.8rem; font-weight:700; color:#0d9488; cursor:pointer;">
+                            <i class="fa-solid fa-camera"></i> Camera Scanner
+                        </button>
+                    </div>
+                    <div style="display:flex; flex-wrap:wrap; gap:8px;" id="attachments-container-${v.visitId}">
+                        ${(v.attachments || []).map((att, aIdx) => `
+                            <div style="position:relative; width:65px; height:65px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; cursor:pointer;" onclick="previewAttachmentImage('${att.dataUrl}')">
+                                <img src="${att.dataUrl}" style="width:100%; height:100%; object-fit:cover;">
+                            </div>
+                        `).join('')}
+                    </div>
                 </div>
             </div>
         `).join('');
+
+        visits.forEach(v => {
+            const noteEl = document.getElementById(`vNotes-${v.visitId}`);
+            const drugEl = document.getElementById(`vDrugs-${v.visitId}`);
+            const labsEl = document.getElementById(`vLabs-${v.visitId}`);
+            const scansEl = document.getElementById(`vScans-${v.visitId}`);
+            if (noteEl) autoResizeTextarea(noteEl);
+            if (drugEl) autoResizeTextarea(drugEl);
+            if (labsEl) autoResizeTextarea(labsEl);
+            if (scansEl) autoResizeTextarea(scansEl);
+        });
     }
 </script>
 </body>
