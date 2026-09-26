@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.12</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.13</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -888,7 +888,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.12</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.13</div>
     </div>
 </div>
 
@@ -1387,7 +1387,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.12",
+            footer: "نظام عيادة ماستر المتقدم v17.13",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1545,7 +1545,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.12",
+            footer: "Clinic Master Network v17.13",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -2699,7 +2699,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.12",
+            version: "17.13",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3524,9 +3524,9 @@
         document.getElementById('rxDragPatientDetailsText').innerText = `Name: ${patient.name} | Age: ${patient.age} | ${patient.gender || ''}`;
         document.getElementById('rxDragDateText').innerText = visit.date || getTodayFormatted();
         
-        const bpVal = visit.bp ? visit.bp : 'BP: ___/___ mmHg';
-        const hrVal = visit.hr ? `HR: ${visit.hr} bpm` : 'HR: _____';
-        const tempVal = visit.temp ? `Temp: ${visit.temp} °C` : 'Temp: _____';
+        const bpVal = visit.bp ? `BP: ${visit.bp}` : 'BP: _____ / _____ mmHg';
+        const hrVal = visit.hr ? `HR: ${visit.hr} bpm` : 'HR: _____ bpm';
+        const tempVal = visit.temp ? `Temp: ${visit.temp} °C` : 'Temp: _____ °C';
         const bmiVal = visit.bmiScore ? `BMI: ${visit.bmiScore}` : 'BMI: _____';
 
         document.getElementById('rxDragVitalsText').innerText = `${bpVal} | ${hrVal} | ${tempVal} | ${bmiVal}`;
