@@ -29,7 +29,7 @@
     <style>
         * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
         
-        /* ضبط الصفحة الافتراضية للموبايل لتكون في المنتصف ومقيدة بعرض الموبايل المريح */
+        /* الوضع الافتراضي للموبايل */
         html, body { background-color: #0f172a; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
         
         /* الوضع الداكن الطبي (Medical Dark Mode) */
@@ -49,15 +49,34 @@
         body.dark-mode .founder-panel { background: #0f292a !important; border-color: #0d9488 !important; }
         body.dark-mode .founder-code-display { background: #1e293b !important; border-color: #0d9488 !important; color: #2dd4bf !important; }
         
-        /* حاوية التطبيق الافتراضية للموبايل */
+        /* حاوية التطبيق للموبايل */
         .mobile-container { background: #ffffff; width: 100%; max-width: 440px; height: 100vh; max-height: 920px; position: relative; overflow: hidden; display: flex; flex-direction: column; border-radius: 36px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 8px solid #1e293b; }
         
-        /* تعديلات شاشات الحاسوب (Desktop) لملء الشاشة 100% تماماً وبدون أي قيود */
+        /* ==================================================== */
+        /* تعديلات الحاسوب: إلغاء شريط التمرير والنزول والصعود نهائياً */
+        /* ==================================================== */
         @media (min-width: 1024px) {
-            html, body { background-color: #0b0f19; align-items: stretch; justify-content: stretch; }
-            .mobile-container { max-width: 100% !important; width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; }
-            .menu-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 16px !important; }
-            .content { max-width: 100% !important; padding: 30px 50px !important; }
+            html, body { background-color: #0b0f19; align-items: stretch; justify-content: stretch; overflow: hidden !important; height: 100vh !important; }
+            .mobile-container { max-width: 100% !important; width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; }
+            #appContainer { height: 100vh !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; }
+            
+            /* ضغط المسافات والعناصر لتلائم الشاشة بالكامل بدون أي Scrollbar */
+            .header { padding: 15px 30px !important; flex-shrink: 0 !important; }
+            .header h1 { font-size: 1.25rem !important; margin-bottom: 2px !important; }
+            .header p { font-size: 0.75rem !important; }
+            .header-icon { font-size: 30px !important; margin-bottom: 4px !important; }
+            
+            .content { padding: 12px 40px !important; flex: 1 !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; justify-content: space-evenly !important; }
+            
+            .section-group { margin-bottom: 6px !important; }
+            .section-title { font-size: 0.75rem !important; margin-bottom: 4px !important; }
+            .menu-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 10px !important; }
+            .menu-card { padding: 10px 8px !important; gap: 4px !important; border-radius: 12px !important; }
+            .menu-icon { width: 36px !important; height: 36px !important; font-size: 1rem !important; border-radius: 10px !important; }
+            .menu-info h3 { font-size: 0.82rem !important; }
+            .menu-info p { font-size: 0.62rem !important; }
+            
+            .footer { padding: 8px !important; font-size: 0.75rem !important; flex-shrink: 0 !important; }
         }
         
         .auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px 20px; flex: 1; text-align: center; background: #ffffff; }
@@ -3356,7 +3375,7 @@
         if (boxType === 'patientDetails') el = document.getElementById('rxDragPatientDetailsText');
         else if (boxType === 'date') el = document.getElementById('rxDragDateText');
         else if (boxType === 'vitals') el = document.getElementById('rxDragVitalsText');
-        else if (boxType === 'treatment') el = document.getElementById('rxDragTreatmentTest');
+        else if (boxType === 'treatment') el = document.getElementById('rxDragTreatmentText');
         
         if (el) {
             const currentSize = parseFloat(window.getComputedStyle(el).fontSize);
