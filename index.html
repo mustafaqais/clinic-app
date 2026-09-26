@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.07</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.08</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -885,7 +885,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.07</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.08</div>
     </div>
 </div>
 
@@ -1318,7 +1318,6 @@
     let currentVisitIdForModal = null;
     let currentDoctorRxImage = localStorage.getItem('doctor_rx_template') || '';
     let isConfigMode = false;
-    let activeMhInputKey = null;
     let isUserSecretary = false;
     let isSubscriptionExpired = false;
     let patientsListenerUnsubscribe = null;
@@ -1385,7 +1384,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.07",
+            footer: "نظام عيادة ماستر المتقدم v17.08",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1543,7 +1542,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.07",
+            footer: "Clinic Master Network v17.08",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -2129,7 +2128,7 @@
                             } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
                                 const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
                                 if (pat) {
-                                    if (document.activeElement && document.activeElement.tagName === 'TEXTAREA') return;
+                                    if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) return;
                                     renderVisits(pat.visits || [], false);
                                 } else {
                                     showMainMenu();
@@ -2697,7 +2696,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.07",
+            version: "17.08",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3501,7 +3500,8 @@
         const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
         if (!visit) return;
 
-        document.getElementById('rxDragPatientDetailsText').innerText = `${patient.name} | Age: ${patient.age} | ${patient.gender || ''}`;
+        // إضافة كلمة Name بجانب الاسم كما طلبت
+        document.getElementById('rxDragPatientDetailsText').innerText = `Name: ${patient.name} | Age: ${patient.age} | ${patient.gender || ''}`;
         document.getElementById('rxDragDateText').innerText = visit.date || getTodayFormatted();
         document.getElementById('rxDragVitalsText').innerText = `BP: ${visit.bp || '—'} | HR: ${visit.hr || '—'} | Temp: ${visit.temp || '—'} | BMI: ${visit.bmiScore || '—'}`;
         document.getElementById('rxDragTreatmentText').innerText = visit.drugs || 'No medications prescribed.';
