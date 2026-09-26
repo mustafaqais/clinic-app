@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.15</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.16</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -888,7 +888,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.15</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.16</div>
     </div>
 </div>
 
@@ -1387,7 +1387,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.15",
+            footer: "نظام عيادة ماستر المتقدم v17.16",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1545,7 +1545,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.15",
+            footer: "Clinic Master Network v17.16",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -2100,6 +2100,9 @@
                                 currentDoctorRxImage = data.rxImage;
                                 localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
                             }
+                            if (data.rxLayout) {
+                                localStorage.setItem('doctor_rx_layout', JSON.stringify(data.rxLayout));
+                            }
                             if (data.dictionary) {
                                 medicalDict = data.dictionary;
                                 if (!medicalDict.mh_history) medicalDict.mh_history = ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"];
@@ -2439,9 +2442,20 @@
         localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
         localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
 
+        const rxLayoutData = {};
+        document.querySelectorAll('.draggable-box').forEach(box => {
+            rxLayoutData[box.id] = {
+                top: box.style.top,
+                left: box.style.left,
+                fontSize: box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text') ? window.getComputedStyle(box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text')).fontSize : '1rem'
+            };
+        });
+        localStorage.setItem('doctor_rx_layout', JSON.stringify(rxLayoutData));
+
         if (navigator.onLine) {
             db.collection('users_data').doc(ownerUid).set({
                 rxImage: currentDoctorRxImage,
+                rxLayout: rxLayoutData,
                 dictionary: medicalDict,
                 secretaryAccount: secretaryAccount,
                 updatedAt: new Date().toISOString()
@@ -2699,11 +2713,12 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.15",
+            version: "17.16",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
             rxImage: currentDoctorRxImage,
+            rxLayout: JSON.parse(localStorage.getItem('doctor_rx_layout') || '{}'),
             secretaryAccount: secretaryAccount
         };
 
@@ -2739,6 +2754,7 @@
                         trashBin = parsed.trashBin || [];
                         medicalDict = parsed.medicalDict || medicalDict;
                         if (parsed.rxImage) currentDoctorRxImage = parsed.rxImage;
+                        if (parsed.rxLayout) localStorage.setItem('doctor_rx_layout', JSON.stringify(parsed.rxLayout));
                         if (parsed.secretaryAccount) secretaryAccount = parsed.secretaryAccount;
 
                         const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
@@ -3573,6 +3589,7 @@
             container.insertBefore(img, container.firstChild);
         }
 
+        loadSavedRxLayout();
         document.getElementById('rxModal').style.display = 'flex';
     }
 
@@ -3618,10 +3635,24 @@
         isConfigMode = false;
         document.querySelectorAll('.draggable-box').forEach(b => b.classList.remove('config-mode'));
         updateConfigModeUI();
-        alert('RX Layout saved!');
+        saveSettingsToCloudAndLocal();
+        alert('RX Layout saved successfully!');
     }
 
-    function loadSavedRxLayout() {}
+    function loadSavedRxLayout() {
+        const savedLayout = JSON.parse(localStorage.getItem('doctor_rx_layout') || '{}');
+        for (const [boxId, data] of Object.entries(savedLayout)) {
+            const box = document.getElementById(boxId);
+            if (box && data) {
+                if (data.top) box.style.top = data.top;
+                if (data.left) box.style.left = data.left;
+                if (data.fontSize) {
+                    const textEl = box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text');
+                    if (textEl) textEl.style.fontSize = data.fontSize;
+                }
+            }
+        }
+    }
 
     function printPrescriptionDirectly() {
         window.print();
