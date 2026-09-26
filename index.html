@@ -81,7 +81,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 ​.menu-dropdown-container { position: absolute; top: 15px; right: 15px; z-index: 50; }
 .hamburger-btn { background: rgba(255, 255, 255, 0.15); color: #ffffff; border: 1px solid rgba(255, 255, 255, 0.25); width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer; transition: background 0.2s; }
 .hamburger-btn:hover { background: rgba(255, 255, 255, 0.25); }
-​.dropdown-menu { position: absolute; top: 46px; right: 0; background: #ffffff; border-radius: 14px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2); width: 210px; display: none; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0; text-align: left; }
+​.dropdown-menu { position: absolute; top: 46px; right: 0; background: #ffffff; border-radius: 14px; box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2); width: 220px; display: none; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0; text-align: left; }
 .dropdown-menu.show { display: flex; }
 .dropdown-item { padding: 12px 14px; font-size: 0.85rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 10px; cursor: pointer; border-bottom: 1px solid #f1f5f9; background: #ffffff; transition: background 0.15s; }
 .dropdown-item:hover { background: #f8fafc; color: #0d9488; }
@@ -152,17 +152,10 @@ font-weight: 600;
 .btn-live-save.saved { background: #16a34a; }
 ​.btn-med-history { width: 100%; background: #f0fdfa; color: #0d9488; border: 1.5px dashed #0d9488; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
 .btn-bmi-trigger { width: 100%; background: #f0f9ff; color: #0284c7; border: 1.5px dashed #0284c7; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
-.btn-rx-action { width: 100%; background: #0f172a; color: #38bdf8; border: 2px solid #38bdf8; border-radius: 12px; padding: 12px; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; letter-spacing: 1px; }
 ​.analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
 .analytics-box { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 16px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
 .analytics-num { font-size: 1.8rem; font-weight: 900; color: #0f172a; margin-top: 4px; }
 .analytics-label { font-size: 0.78rem; font-weight: 700; color: #64748b; display: flex; align-items: center; gap: 6px; }
-​.attachments-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-.attachment-thumb { position: relative; width: 70px; height: 70px; border-radius: 10px; overflow: hidden; border: 1.5px solid #cbd5e1; background: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-.attachment-thumb img { width: 100%; height: 100%; object-fit: cover; }
-.attachment-delete { position: absolute; top: 2px; right: 2px; background: rgba(239, 68, 68, 0.95); color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 0.65rem; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 5; }
-.btn-upload-attach { background: #f0fdfa; color: #0d9488; border: 1.5px dashed #0d9488; border-radius: 10px; padding: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 6px; }
-.btn-scan-attach { background: #e0f2fe; color: #0284c7; border: 1.5px dashed #0284c7; border-radius: 10px; padding: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 6px; }
 ​.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 999; display: none; justify-content: center; align-items: flex-end; }
 .modal-body { background: #ffffff; width: 100%; max-width: 480px; max-height: 92vh; border-top-left-radius: 25px; border-top-right-radius: 25px; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; text-align: left; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; }
@@ -350,7 +343,8 @@ font-size: 0.75rem;
 <button id="backBtn" class="back-btn" onclick="goBackScreen()" style="display: none;">
 <i class="fa-solid fa-arrow-left"></i> <span id="txtBack">Back</span>
 </button>
-​<div class="menu-dropdown-container">
+​<!-- القائمة المنسدلة (ثلاث خطوط) أسفل خيار اللغة والاشتراك -->
+<div class="menu-dropdown-container">
 <button class="hamburger-btn" onclick="toggleDropdownMenu(event)" title="Menu">
 <i class="fa-solid fa-bars"></i>
 </button>
@@ -3814,6 +3808,36 @@ document.getElementById('btnAddVisitMain').style.display = 'flex';
 }
 ​renderVisits(patient.visits || [], true);
 }
+​function addNewVisit() {
+if (isSubscriptionExpired) {
+alert('التطبيق في وضع القراءة فقط. يرجى تجديد الاشتراك لإضافة زيارة جديدة.');
+return;
+}
+const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+if (!patient) return;
+​const newVisitObj = {
+visitId: Date.now(),
+date: getTodayFormatted(),
+medHistory: {},
+bpSystolic: '',
+bpDiastolic: '',
+spo2: '',
+hr: '',
+rr: '',
+labs: '',
+scans: '',
+drugs: '',
+notes: '',
+attachments: [],
+bmiWeight: '',
+bmiHeight: '',
+bmiScore: ''
+};
+​if (!patient.visits) patient.visits = [];
+patient.visits.unshift(newVisitObj);
+savePatientToCloudAndLocal(patient);
+renderVisits(patient.visits, true);
+}
 ​function renderVisits(visits, forceFullRender = true) {
 if (!forceFullRender && document.activeElement && document.activeElement.tagName === 'TEXTAREA') {
 return;
@@ -3836,11 +3860,10 @@ const attachments = v.attachments || [];
 const visitDateVal = v.date || getTodayFormatted();
 ​const bmiText = v.bmiScore ? BMI: ${v.bmiScore} (${v.bmiWeight}kg / ${v.bmiHeight}cm) : 'Open BMI Calculator';
 ​const readOnlyOrDisabled = (isUserSecretary || isSubscriptionExpired) ? 'disabled readonly style="background:#f1f5f9; cursor:not-allowed;"' : '';
-​return `
-<div class="visit-card" id="visit-${vId}" data-visit-id="${vId}">
-<div class="visit-header">
-<span><i class="fa-solid fa-clock-rotate-left"></i> Visit Date:</span>
-<input type="date" value="${visitDateVal}" class="visit-date-input" ${(isUserSecretary || isSubscriptionExpired) ? 'disabled' : 'onchange="autoSaveMedicalRecord()"' } style="background:transparent; border:none; color:white; font-weight:700; outline:none; text-align:right;">
+​let attachmentsHtml = attachments.map((imgSrc, imgIdx) => <div class="attachment-thumb" onclick="previewAttachmentImage('${imgSrc}')"> <img src="${imgSrc}" alt="Attachment"> ${(isUserSecretary || isSubscriptionExpired) ? '' :<button type="button" class="attachment-delete" onclick="event.stopPropagation(); confirmDeleteAttachment(${vId}, ${imgIdx})"><i class="fa-solid fa-xmark"></i></button>} </div> ).join('');
+​const uploadActionHtml = (isUserSecretary || isSubscriptionExpired) ? '' : <div style="display:flex; gap:6px; margin-top:6px;"> <button type="button" class="btn-upload-attach" onclick="document.getElementById('fileInput-${vId}').click()"><i class="fa-solid fa-cloud-arrow-up"></i> Upload Images</button> <input type="file" id="fileInput-${vId}" accept="image/*" multiple style="display:none;" onchange="handleFileUpload(this, ${vId})"> <button type="button" class="btn-scan-attach" onclick="handleScannerScan(${vId})"><i class="fa-solid fa-camera"></i> Scan Camera</button> </div>;
+​return <div class="visit-card" id="visit-${vId}" data-visit-id="${vId}"> <div class="visit-header"> <span><i class="fa-solid fa-clock-rotate-left"></i> Visit Date:</span> <div style="display:flex; align-items:center; gap:10px;"> <input type="date" value="${visitDateVal}" class="visit-date-input" ${(isUserSecretary || isSubscriptionExpired) ? 'disabled' : 'onchange="autoSaveMedicalRecord()"' } style="background:transparent; border:none; color:white; font-weight:700; outline:none; text-align:right;"> ${(!isUserSecretary && !isSubscriptionExpired && visits.length > 1) ?<button type="button" onclick="confirmDeleteVisit(${vId})" style="background:rgba(239,68,68,0.8); color:white; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer;" title="Delete Visit"><i class="fa-solid fa-trash"></i></button>` : ''}
+</div>
 </div>
 ​<div class="field-box">
 <span class="field-label"><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History</span>
@@ -3926,15 +3949,5 @@ const visitDateVal = v.date || getTodayFormatted();
 ​<div class="field-box">
 <span class="field-label"><i class="fa-solid fa-pills" style="color:#0d9488;"></i> Medications & Treatment</span>
 <div class="input-wrapper">
-<textarea class="v-drugs" rows="2" placeholder="Type medications..." ${readOnlyOrDisabled} oninput="handleDrugsInput(this, ${vId})" onkeydown="handleDrugsKeyDown(event, this, ${vId})" onblur="hideSuggestions('drugs', {vId})">{v.drugs || ''}</textarea>
-<div class="suggestions-box" id="suggestions-drugs-${vId}"></div>
-<div class="live-save-bar" id="save-bar-drugs-${vId}">
-<span>Save: "<strong id="line-text-drugs-${vId}"></strong>"</span>
-<button type="button" class="btn-live-save" id="btn-save-drugs-${vId}" onmousedown="saveLineToDict(event, 'drugs', ${vId})">Save</button>
-</div>
-</div>
-</div>
-​<div class="field-box">
-<span class="field-label"><i class="fa-solid fa-clipboard-user" style="color:#0d9488;"></i> Diagnosis & Notes</span>
-<div class="input-wrapper">
-<textarea class="v-notes" rows="1" placeholder="Notes..." ${readOnlyOrDisabled} oninput="handleLiveInput(this
+<textarea class="v-drugs" rows="2" placeholder="Type medications..." ${readOnlyOrDisabled} oninput="handleDrugsInput(this, ${vId})" onkeydown="handleDrugsKeyDown(event, this, {vId})" onblur="hideSuggestions('drugs', ${vId})">${v.drugs || ''}</textarea>
+<div class="suggestions-box" id="suggestions-drugs-{
