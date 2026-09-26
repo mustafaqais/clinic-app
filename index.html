@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.17</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.18</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -708,6 +708,11 @@
                             <div class="input-wrapper"><input type="text" id="pName" placeholder="Enter patient full name..." required></div>
                         </div>
 
+                        <div class="field-box">
+                            <span class="field-label" id="lblPatSubName">Grandfather Name / Tribe / Note (Optional)</span>
+                            <div class="input-wrapper"><input type="text" id="pSubName" placeholder="e.g. محمد / العشيرة لتمييز الاسم التشابه"></div>
+                        </div>
+
                         <div style="display: flex; gap: 10px;">
                             <div class="field-box" style="flex: 1;">
                                 <span class="field-label" id="lblPatAge">Age *</span>
@@ -888,7 +893,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.17</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.18</div>
     </div>
 </div>
 
@@ -988,6 +993,11 @@
         <div class="field-box">
             <span class="field-label" id="editLblName">Full Name *</span>
             <div class="input-wrapper"><input type="text" id="editPName" placeholder="Enter patient full name..." required></div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label" id="editLblSubName">Grandfather Name / Tribe / Note (Optional)</span>
+            <div class="input-wrapper"><input type="text" id="editPSubName" placeholder="e.g. محمد / العشيرة"></div>
         </div>
 
         <div style="display: flex; gap: 10px;">
@@ -1387,10 +1397,11 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.17",
+            footer: "نظام عيادة ماستر المتقدم v17.18",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
+            lblPatSubName: "اسم الجد الرابع / العشيرة / ملاحظة (اختياري)",
             lblPatAge: "العمر *",
             lblPatGender: "الجنس",
             optSelGender: "اختر الجنس",
@@ -1473,6 +1484,7 @@
             btnBmiAgree: "موافق وحفظ",
             editPatHeader: "تعديل معلومات المريض",
             editLblName: "الاسم الكامل *",
+            editLblSubName: "اسم الجد الرابع / العشيرة / ملاحظة (اختياري)",
             editLblAge: "العمر *",
             editLblGender: "الجنس",
             editOptGender: "اختر الجنس",
@@ -1545,10 +1557,11 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.17",
+            footer: "Clinic Master Network v17.18",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
+            lblPatSubName: "Grandfather Name / Tribe / Note (Optional)",
             lblPatAge: "Age *",
             lblPatGender: "Gender",
             optSelGender: "Select Gender",
@@ -1631,6 +1644,7 @@
             btnBmiAgree: "Agree & Save",
             editPatHeader: "Edit Patient Information",
             editLblName: "Full Name *",
+            editLblSubName: "Grandfather Name / Tribe / Note (Optional)",
             editLblAge: "Age *",
             editLblGender: "Gender",
             editOptGender: "Select Gender",
@@ -1758,6 +1772,7 @@
 
         document.getElementById('patInfoTitle').innerHTML = `<i class="fa-solid fa-id-card"></i> ${t.patInfoTitle}`;
         document.getElementById('lblPatName').innerText = t.lblPatName;
+        document.getElementById('lblPatSubName').innerText = t.lblPatSubName;
         document.getElementById('lblPatAge').innerText = t.lblPatAge;
         document.getElementById('lblPatGender').innerText = t.lblPatGender;
         document.getElementById('optSelGender').innerText = t.optSelGender;
@@ -1833,6 +1848,7 @@
 
         document.getElementById('editPatHeader').innerHTML = `<i class="fa-solid fa-user-pen" style="color:#0d9488;"></i> ${t.editPatHeader}`;
         document.getElementById('editLblName').innerText = t.editLblName;
+        document.getElementById('editLblSubName').innerText = t.editLblSubName;
         document.getElementById('editLblAge').innerText = t.editLblAge;
         document.getElementById('editLblGender').innerText = t.editLblGender;
         document.getElementById('editOptGender').innerText = t.editOptGender;
@@ -2713,7 +2729,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.17",
+            version: "17.18",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -3024,7 +3040,7 @@
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
 
-        document.getElementById('pdfRepName').innerText = patient.name;
+        document.getElementById('pdfRepName').innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
         document.getElementById('pdfRepAge').innerText = patient.age;
         document.getElementById('pdfRepGender').innerText = patient.gender || 'N/A';
         document.getElementById('pdfRepMarital').innerText = patient.marital || 'N/A';
@@ -3426,6 +3442,7 @@
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
         document.getElementById('editPName').value = patient.name || '';
+        document.getElementById('editPSubName').value = patient.subName || '';
         document.getElementById('editPAge').value = patient.age || '';
         document.getElementById('editPGender').value = patient.gender || '';
         document.getElementById('editPMarital').value = patient.marital || '';
@@ -3440,6 +3457,7 @@
 
     function saveEditedPatient() {
         const name = document.getElementById('editPName').value.trim();
+        const subName = document.getElementById('editPSubName').value.trim();
         const age = Number(document.getElementById('editPAge').value);
         if (!name || !age) return;
 
@@ -3447,6 +3465,7 @@
         if (!patient) return;
 
         patient.name = name;
+        patient.subName = subName;
         patient.age = age;
         patient.gender = document.getElementById('editPGender').value || 'Unspecified';
         patient.marital = document.getElementById('editPMarital').value || 'Single';
@@ -3455,7 +3474,7 @@
 
         savePatientToCloudAndLocal(patient);
         closeEditPatientModal();
-        document.getElementById('recPatientName').innerText = patient.name;
+        document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
         document.getElementById('recPatientMeta').innerHTML = `Age: ${patient.age} | Gender: ${patient.gender} | Marital: ${patient.marital} | Job: ${patient.job} | Phone: ${patient.phone}`;
     }
 
@@ -3590,7 +3609,7 @@
         const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
         if (!visit) return;
 
-        document.getElementById('rxDragPatientDetailsText').innerText = `Name: ${patient.name} | Age: ${patient.age} | ${patient.gender || ''}`;
+        document.getElementById('rxDragPatientDetailsText').innerText = `Name: ${patient.name + (patient.subName ? ` (${patient.subName})` : '')} | Age: ${patient.age} | ${patient.gender || ''}`;
         document.getElementById('rxDragDateText').innerText = visit.date || getTodayFormatted();
         
         const bpVal = visit.bp ? `BP: ${visit.bp}` : 'BP: _____ / _____ mmHg';
@@ -3783,9 +3802,20 @@
     function saveNewPatient(e) {
         e.preventDefault();
         const rawName = document.getElementById('pName').value.trim();
+        const rawSubName = document.getElementById('pSubName').value.trim();
+
+        // Check for duplicate patient name (case insensitive)
+        const nameExists = patients.some(p => p.name.toLowerCase() === rawName.toLowerCase());
+        if (nameExists && !rawSubName) {
+            alert('⚠️ تنبيه: يوجد مريض بنفس الاسم مسجل مسبقاً! يرجى إدخال اسم الجد الرابع أو العشيرة أو ملاحظة تمييز في حقل "اسم الجد الرابع/العشيرة" للمتابعة.');
+            document.getElementById('pSubName').focus();
+            return;
+        }
+
         const newPatient = {
             id: Date.now(),
             name: rawName,
+            subName: rawSubName,
             age: Number(document.getElementById('pAge').value),
             gender: document.getElementById('pGender').value || 'Unspecified',
             marital: document.getElementById('pMarital').value || 'Single',
@@ -3805,7 +3835,7 @@
             : list.map(p => `
                 <div class="patient-card" onclick="openMedicalRecord(${p.id})">
                     <div class="patient-info">
-                        <h4>${p.name}</h4>
+                        <h4>${p.name} ${p.subName ? `<span style="font-size:0.75rem; color:#0d9488; font-weight:normal;">(${p.subName})</span>` : ''}</h4>
                         <p><i class="fa-solid fa-phone"></i> ${p.phone} | Age: ${p.age}</p>
                     </div>
                     <span class="badge-gender ${p.gender === 'Female' ? 'gender-female' : 'gender-male'}">${p.gender || 'N/A'}</span>
@@ -3819,7 +3849,8 @@
         const ageGroup = document.getElementById('filterAgeGroup').value;
 
         const filtered = patients.filter(p => {
-            const matchQuery = p.name.toLowerCase().includes(query) || (p.phone && p.phone.includes(query));
+            const fullNameFull = (p.name + " " + (p.subName || "")).toLowerCase();
+            const matchQuery = fullNameFull.includes(query) || (p.phone && p.phone.includes(query));
             const matchGender = !gender || p.gender === gender;
             let matchAge = true;
             if (ageGroup === 'child') matchAge = p.age < 18;
@@ -3836,7 +3867,7 @@
         navigateTo('medicalRecordScreen', 'Patient Medical Record', 'View details', saveState);
         const patient = patients.find(p => Number(p.id) === Number(id));
         if (patient) {
-            document.getElementById('recPatientName').innerText = patient.name;
+            document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
             document.getElementById('recPatientMeta').innerHTML = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
             renderVisits(patient.visits || [], true);
         }
@@ -4001,11 +4032,16 @@
                         </button>
                     </div>
                     <div style="display:flex; flex-wrap:wrap; gap:8px;" id="attachments-container-${v.visitId}">
-                        ${(v.attachments || []).map((att, aIdx) => `
+                        ${(v.attachments || []).map((att, aIdx) => {
+                            if (!att || !att.dataUrl || att.dataUrl.length < 50) {
+                                return `<div style="padding:6px 10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; font-size:0.7rem; color:#b91c1c;">⚠️ صورة تالفة أو قديمة</div>`;
+                            }
+                            return `
                             <div style="position:relative; width:65px; height:65px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; cursor:pointer;" onclick="previewAttachmentImage('${att.dataUrl}')">
                                 <img src="${att.dataUrl}" style="width:100%; height:100%; object-fit:cover;">
                             </div>
-                        `).join('')}
+                        `;
+                        }).join('')}
                     </div>
                 </div>
             </div>
