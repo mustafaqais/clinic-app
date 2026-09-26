@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.07</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.08</title>
     
     <!-- PWA & Fullscreen Mobile Meta Tags -->
     <link rel="manifest" href="manifest.json">
@@ -53,30 +53,30 @@
         .mobile-container { background: #ffffff; width: 100%; max-width: 440px; height: 100vh; max-height: 920px; position: relative; overflow: hidden; display: flex; flex-direction: column; border-radius: 36px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); border: 8px solid #1e293b; }
         
         /* ==================================================== */
-        /* تعديلات الحاسوب: إلغاء شريط التمرير والنزول والصعود نهائياً */
+        /* تعديلات الحاسوب: إلغاء تام وقاطع لأي شريط تمرير (Scrollbar) */
         /* ==================================================== */
         @media (min-width: 1024px) {
-            html, body { background-color: #0b0f19; align-items: stretch; justify-content: stretch; overflow: hidden !important; height: 100vh !important; }
+            html, body { background-color: #0b0f19; align-items: stretch; justify-content: stretch; overflow: hidden !important; height: 100vh !important; max-height: 100vh !important; }
             .mobile-container { max-width: 100% !important; width: 100vw !important; height: 100vh !important; max-height: 100vh !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; }
-            #appContainer { height: 100vh !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; }
+            #appContainer { height: 100vh !important; max-height: 100vh !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; }
             
-            /* ضغط المسافات والعناصر لتلائم الشاشة بالكامل بدون أي Scrollbar */
-            .header { padding: 15px 30px !important; flex-shrink: 0 !important; }
-            .header h1 { font-size: 1.25rem !important; margin-bottom: 2px !important; }
-            .header p { font-size: 0.75rem !important; }
-            .header-icon { font-size: 30px !important; margin-bottom: 4px !important; }
+            /* ضغط المسافات والعناصر لتلائم الشاشة بالكامل بدون أي Scrollbar عمودي */
+            .header { padding: 12px 30px !important; flex-shrink: 0 !important; }
+            .header h1 { font-size: 1.15rem !important; margin-bottom: 2px !important; }
+            .header p { font-size: 0.7rem !important; }
+            .header-icon { font-size: 26px !important; margin-bottom: 2px !important; }
             
-            .content { padding: 12px 40px !important; flex: 1 !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; justify-content: space-evenly !important; }
+            .content { padding: 10px 30px !important; flex: 1 !important; height: calc(100vh - 120px) !important; max-height: calc(100vh - 120px) !important; overflow: hidden !important; display: flex !important; flex-direction: column !important; justify-content: space-evenly !important; }
             
-            .section-group { margin-bottom: 6px !important; }
-            .section-title { font-size: 0.75rem !important; margin-bottom: 4px !important; }
-            .menu-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 10px !important; }
-            .menu-card { padding: 10px 8px !important; gap: 4px !important; border-radius: 12px !important; }
-            .menu-icon { width: 36px !important; height: 36px !important; font-size: 1rem !important; border-radius: 10px !important; }
-            .menu-info h3 { font-size: 0.82rem !important; }
-            .menu-info p { font-size: 0.62rem !important; }
+            .section-group { margin-bottom: 4px !important; }
+            .section-title { font-size: 0.72rem !important; margin-bottom: 3px !important; }
+            .menu-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 8px !important; }
+            .menu-card { padding: 8px 6px !important; gap: 3px !important; border-radius: 10px !important; }
+            .menu-icon { width: 32px !important; height: 32px !important; font-size: 0.9rem !important; border-radius: 8px !important; }
+            .menu-info h3 { font-size: 0.78rem !important; }
+            .menu-info p { font-size: 0.58rem !important; }
             
-            .footer { padding: 8px !important; font-size: 0.75rem !important; flex-shrink: 0 !important; }
+            .footer { padding: 6px !important; font-size: 0.7rem !important; flex-shrink: 0 !important; }
         }
         
         .auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px 20px; flex: 1; text-align: center; background: #ffffff; }
@@ -915,7 +915,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.07</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.08</div>
     </div>
 </div>
 
@@ -1218,6 +1218,7 @@
         </div>
 
         <div id="rxCanvasContainer" class="rx-canvas-container">
+            <!-- سيتم حقن صورة قالب الروشتة الخلفية ديناميكياً هنا -->
             <div id="dragBoxPatientDetails" class="draggable-box" style="top: 20px; left: 15px;">
                 <div class="box-font-controls">
                     <span>Name Font:</span>
@@ -1416,7 +1417,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.07",
+            footer: "نظام عيادة ماستر المتقدم v17.08",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1574,7 +1575,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.07",
+            footer: "Clinic Master Network v17.08",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -2729,7 +2730,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.07",
+            version: "17.08",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -2894,6 +2895,7 @@
                     ctx.drawImage(img, 0, 0, width, height);
 
                     currentDoctorRxImage = canvas.toDataURL('image/jpeg', 0.70);
+                    localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
                     saveSettingsToCloudAndLocal();
                     alert('Prescription header saved!');
                     openRxTemplateManager();
@@ -3331,6 +3333,9 @@
         document.getElementById('medHistoryModal').style.display = 'none';
     }
 
+    /* ==================================================== */
+    /* إصلاح جذر مشكلة عرض صورة قالب الروشتة (RX) داخل ملف المريض */
+    /* ==================================================== */
     function openRxModal(visitId) {
         currentVisitIdForModal = visitId;
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
@@ -3338,10 +3343,30 @@
         const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
         if (!visit) return;
 
+        // تحديث النصوص داخل الروشتة
         document.getElementById('rxDragPatientDetailsText').innerText = `Name: ${patient.name} | Age: ${patient.age} | Gender: ${patient.gender || 'N/A'}`;
         document.getElementById('rxDragDateText').innerText = `Date: ${visit.date || getTodayFormatted()}`;
         document.getElementById('rxDragVitalsText').innerText = `BP: ${visit.bp || '—'} | Pulse: ${visit.pulse || '—'} | Temp: ${visit.temp || '—'} | SpO2: ${visit.spo2 || '—'} | BMI: ${visit.bmiScore || '—'}`;
         document.getElementById('rxDragTreatmentText').innerText = visit.drugs || 'No medications prescribed.';
+
+        // جلب خلفية الروشتة المخزنة وعرضها فوراً في النافذة
+        const rxContainer = document.getElementById('rxCanvasContainer');
+        let bgImgEl = document.getElementById('dynamicRxBgImage');
+        
+        currentDoctorRxImage = localStorage.getItem('doctor_rx_template') || currentDoctorRxImage;
+
+        if (currentDoctorRxImage) {
+            if (!bgImgEl) {
+                bgImgEl = document.createElement('img');
+                bgImgEl.id = 'dynamicRxBgImage';
+                bgImgEl.className = 'rx-bg-img';
+                rxContainer.insertBefore(bgImgEl, rxContainer.firstChild);
+            }
+            bgImgEl.src = currentDoctorRxImage;
+            bgImgEl.style.display = 'block';
+        } else {
+            if (bgImgEl) bgImgEl.style.display = 'none';
+        }
 
         document.getElementById('rxModal').style.display = 'flex';
     }
