@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.18</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.19</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -118,6 +118,7 @@
         .menu-icon.dict-icon { background: #fef3c7; color: #d97706; }
         .menu-icon.network-icon { background: #f3e8ff; color: #9333ea; }
         .menu-icon.rx-icon { background: #fae8ff; color: #c084fc; }
+        .menu-icon.spec-icon { background: #e0e7ff; color: #6366f1; }
         .menu-icon.trash-icon { background: #fee2e2; color: #ef4444; }
         .menu-icon.analytics-icon { background: #f0fdf4; color: #16a34a; }
         .menu-icon.settings-icon { background: #f1f5f9; color: #475569; }
@@ -470,6 +471,14 @@
                             </div>
                         </div>
 
+                        <div class="menu-card" id="cardSpecialtiesDashboard" onclick="openSpecialtiesDashboard()">
+                            <div class="menu-icon spec-icon"><i class="fa-solid fa-sliders"></i></div>
+                            <div class="menu-info">
+                                <h3 id="menuSpecTitle">لوحة تحكم الاختصاصات</h3>
+                                <p id="menuSpecSub">تخصيص وتفعيل الحقول الطبية</p>
+                            </div>
+                        </div>
+
                         <div class="menu-card" id="cardDict" onclick="openDictionaryManager()">
                             <div class="menu-icon dict-icon"><i class="fa-solid fa-book-medical"></i></div>
                             <div class="menu-info">
@@ -538,6 +547,44 @@
                     </div>
                 </div>
 
+            </div>
+
+            <div id="specialtiesDashboardScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
+                        <i class="fa-solid fa-sliders" style="color:#6366f1;"></i> لوحة تحكم الاختصاصات والحقول الطبية
+                    </div>
+                    <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+                        قم بتفعيل المربعات والأقسام التي تحتاجها في عيادتك لكي تظهر تلقائياً داخل سجل المريض لكل زيارة. يمكنك تفعيل الحقول الخاصة باختصاصك أو دمج عدة اختصاصات معاً بحرية تامة!
+                    </p>
+
+                    <div style="margin-bottom: 14px; font-weight: 800; font-size: 0.85rem; color: #0f766e;"><i class="fa-solid fa-check-double"></i> الحقول الأساسية المشتركة:</div>
+                    <div class="checkbox-grid" style="grid-template-columns: 1fr; gap: 8px; margin-bottom: 16px;">
+                        <label class="checkbox-item"><input type="checkbox" id="mod_medHistory" checked> <span>التاريخ المرضي والأمراض المزمنة (Medical History)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_vitals" checked> <span>العلامات الحيوية وضغط الدم ومؤشر كتلة الجسم (Vitals & BMI)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_labs" checked> <span>تحاليل المختبر (Lab Tests)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_scans" checked> <span>الأشعة والرنين (Radiology & Scans)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_notes" checked> <span>التشخيص والملاحظات السريرية (Diagnosis & Notes)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_rx" checked> <span>الوصفة الطبية والعلاجية والروشتة (RX Medications)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_attachments" checked> <span>مرفقات الصور والتقارير والكاميرا (Attachments & Scanner)</span></label>
+                    </div>
+
+                    <div style="margin-bottom: 14px; font-weight: 800; font-size: 0.85rem; color: #0284c7;"><i class="fa-solid fa-stethoscope"></i> الحقول التخصصية المتقدمة:</div>
+                    <div class="checkbox-grid" style="grid-template-columns: 1fr; gap: 8px; margin-bottom: 16px;">
+                        <label class="checkbox-item"><input type="checkbox" id="mod_obsGyn"> <span><b>النسائية والتوليد:</b> (LMP, EDD, Gravidity/Parity, أسابيع الحمل)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_ortho"> <span><b>العظام والمفاصل والكسور:</b> (فحص مدى الحركة, درجة الخشونة, الفحص الفيزيائي)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_neuro"> <span><b>الجملة العصبية:</b> (فحص الأعصاب القحفية, مقياس غلاسكو للوعي, الفحص الحسي)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_peds"> <span><b>الأطفال:</b> (مخطط نمو الطفل, جدول اللقاحات والمطعوم, تفاصيل الولادة)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_derm"> <span><b>الجلدية والتناسلية:</b> (وصف الآفات الجلدية, خريطة توزيع الطفح, مصابيح وود)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_ent"> <span><b>الأنف والأذن والحنجرة (ENT):</b> (فحص الأذن بالمنظار, اللوزتين, الجيوب الأنفية)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_ophthal"> <span><b>العيون (Ophthalmology):</b> (حدة البصر Visual Acuity, ضغط العين IOP, قاع العين)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_cardio"> <span><b>القلبية والتداخلية (Cardiology):</b> (تخطيط القلب ECG, أصوات القلب, فحص الإجهاد)</span></label>
+                    </div>
+
+                    <button class="btn-main" onclick="saveSpecialtiesDashboardConfig()" style="background: #6366f1;">
+                        <i class="fa-solid fa-floppy-disk"></i> حفظ إعدادات الاختصاصات والحقول
+                    </button>
+                </div>
             </div>
 
             <div id="permissionsScreen" style="display: none;">
@@ -893,7 +940,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.18</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.19</div>
     </div>
 </div>
 
@@ -1337,6 +1384,24 @@
     let targetNodeUidToDelete = null;
     let targetNodeEmailToDelete = null;
 
+    let specialtyConfig = JSON.parse(localStorage.getItem('clinic_specialty_config')) || {
+        medHistory: true,
+        vitals: true,
+        labs: true,
+        scans: true,
+        notes: true,
+        rx: true,
+        attachments: true,
+        obsGyn: false,
+        ortho: false,
+        neuro: false,
+        peds: false,
+        derm: false,
+        ent: false,
+        ophthal: false,
+        cardio: false
+    };
+
     let currentLang = localStorage.getItem('clinic_lang') || 'ar';
     let isDarkMode = localStorage.getItem('clinic_dark_mode') === 'true';
 
@@ -1378,6 +1443,8 @@
             group2: "الوصفات والأدوات الطبية",
             rxTemplate: "قالب الوصفة (RX)",
             rxTemplateSub: "صورة ترويسة الوصفة",
+            specialtiesDash: "لوحة تحكم الاختصاصات",
+            specialtiesDashSub: "تخصيص وتفعيل الحقول الطبية",
             dict: "القاموس الطبي",
             dictSub: "إدارة الأدوية والجرعات",
 
@@ -1397,7 +1464,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.18",
+            footer: "نظام عيادة ماستر المتقدم v17.19",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -1538,6 +1605,8 @@
             group2: "RX & Medical Tools",
             rxTemplate: "RX Template",
             rxTemplateSub: "Prescription header image",
+            specialtiesDash: "Specialties Dashboard",
+            specialtiesDashSub: "Customize and enable clinical fields",
             dict: "Medical Dictionary",
             dictSub: "Manage drugs & doses",
 
@@ -1557,7 +1626,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.18",
+            footer: "Clinic Master Network v17.19",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -1751,6 +1820,8 @@
         document.getElementById('secGroup2').innerHTML = `<i class="fa-solid fa-file-prescription"></i> ${t.group2}`;
         document.getElementById('menuRxTitle').innerText = t.rxTemplate;
         document.getElementById('menuRxSub').innerText = t.rxTemplateSub;
+        document.getElementById('menuSpecTitle').innerText = t.specialtiesDash;
+        document.getElementById('menuSpecSub').innerText = t.specialtiesDashSub;
         document.getElementById('menuDictTitle').innerText = t.dict;
         document.getElementById('menuDictSub').innerText = t.dictSub;
 
@@ -1916,6 +1987,7 @@
             dictionary: medicalDict,
             trashBin: trashBin,
             secretaryAccount: secretaryAccount,
+            specialtyConfig: specialtyConfig,
             updatedAt: new Date().toISOString()
         }, { merge: true }).catch(err => console.log("Settings sync error:", err));
     }
@@ -2054,6 +2126,7 @@
         document.getElementById('mainScreen').style.display = 'none';
         document.getElementById('addPatientScreen').style.display = 'none';
         document.getElementById('rxTemplateScreen').style.display = 'none';
+        document.getElementById('specialtiesDashboardScreen').style.display = 'none';
         document.getElementById('archiveScreen').style.display = 'none';
         document.getElementById('trashScreen').style.display = 'none';
         document.getElementById('medicalRecordScreen').style.display = 'none';
@@ -2131,6 +2204,10 @@
                             if (data.secretaryAccount) {
                                 secretaryAccount = data.secretaryAccount;
                                 localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
+                            }
+                            if (data.specialtyConfig) {
+                                specialtyConfig = data.specialtyConfig;
+                                localStorage.setItem('clinic_specialty_config', JSON.stringify(specialtyConfig));
                             }
                         }
                     }).catch(err => console.log(err));
@@ -2278,6 +2355,7 @@
             isUserSecretary = true;
             document.getElementById('cardPermissions').style.display = 'none';
             document.getElementById('cardRxTemplate').style.display = 'none';
+            document.getElementById('cardSpecialtiesDashboard').style.display = 'none';
             document.getElementById('cardDict').style.display = 'none';
             document.getElementById('cardAnalytics').style.display = 'none';
             document.getElementById('cardBackup').style.display = 'none';
@@ -2344,7 +2422,7 @@
         const savedPatientId = sessionStorage.getItem('current_patient_id');
 
         if (savedScreen && savedScreen !== 'mainScreen' && document.getElementById(savedScreen)) {
-            if (isUserSecretary && ['rxTemplateScreen', 'dictScreen', 'analyticsScreen', 'backupScreen', 'trashScreen', 'settingsScreen', 'permissionsScreen'].includes(savedScreen)) {
+            if (isUserSecretary && ['rxTemplateScreen', 'specialtiesDashboardScreen', 'dictScreen', 'analyticsScreen', 'backupScreen', 'trashScreen', 'settingsScreen', 'permissionsScreen'].includes(savedScreen)) {
                 navigateTo('mainScreen', translations[currentLang].headerTitle, translations[currentLang].headerSub, false);
                 return;
             }
@@ -2457,6 +2535,7 @@
         localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
         localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
         localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
+        localStorage.setItem('clinic_specialty_config', JSON.stringify(specialtyConfig));
 
         const rxLayoutData = {};
         document.querySelectorAll('.draggable-box').forEach(box => {
@@ -2474,6 +2553,7 @@
                 rxLayout: rxLayoutData,
                 dictionary: medicalDict,
                 secretaryAccount: secretaryAccount,
+                specialtyConfig: specialtyConfig,
                 updatedAt: new Date().toISOString()
             }, { merge: true }).catch(err => console.log("Settings save error:", err));
         }
@@ -2596,6 +2676,7 @@
         document.getElementById('cardNewPatient').style.display = 'flex';
         document.getElementById('cardArchive').style.display = 'flex';
         document.getElementById('cardRxTemplate').style.display = 'flex';
+        document.getElementById('cardSpecialtiesDashboard').style.display = 'flex';
         document.getElementById('cardDict').style.display = 'flex';
         document.getElementById('cardAnalytics').style.display = 'flex';
         document.getElementById('cardBackup').style.display = 'flex';
@@ -2608,12 +2689,63 @@
         document.getElementById('cardNewPatient').style.display = 'flex';
         document.getElementById('cardArchive').style.display = 'flex';
         document.getElementById('cardRxTemplate').style.display = 'none';
+        document.getElementById('cardSpecialtiesDashboard').style.display = 'none';
         document.getElementById('cardDict').style.display = 'none';
         document.getElementById('cardAnalytics').style.display = 'none';
         document.getElementById('cardBackup').style.display = 'none';
         document.getElementById('cardTrash').style.display = 'none';
         document.getElementById('cardSettings').style.display = 'none';
         document.getElementById('cardPermissions').style.display = 'none';
+    }
+
+    function openSpecialtiesDashboard() {
+        navigateTo('specialtiesDashboardScreen', translations[currentLang].specialtiesDash, translations[currentLang].specialtiesDashSub);
+        
+        // Load checkboxes state
+        document.getElementById('mod_medHistory').checked = !!specialtyConfig.medHistory;
+        document.getElementById('mod_vitals').checked = !!specialtyConfig.vitals;
+        document.getElementById('mod_labs').checked = !!specialtyConfig.labs;
+        document.getElementById('mod_scans').checked = !!specialtyConfig.scans;
+        document.getElementById('mod_notes').checked = !!specialtyConfig.notes;
+        document.getElementById('mod_rx').checked = !!specialtyConfig.rx;
+        document.getElementById('mod_attachments').checked = !!specialtyConfig.attachments;
+
+        document.getElementById('mod_obsGyn').checked = !!specialtyConfig.obsGyn;
+        document.getElementById('mod_ortho').checked = !!specialtyConfig.ortho;
+        document.getElementById('mod_neuro').checked = !!specialtyConfig.neuro;
+        document.getElementById('mod_peds').checked = !!specialtyConfig.peds;
+        document.getElementById('mod_derm').checked = !!specialtyConfig.derm;
+        document.getElementById('mod_ent').checked = !!specialtyConfig.ent;
+        document.getElementById('mod_ophthal').checked = !!specialtyConfig.ophthal;
+        document.getElementById('mod_cardio').checked = !!specialtyConfig.cardio;
+    }
+
+    function saveSpecialtiesDashboardConfig() {
+        if (isSubscriptionExpired) {
+            alert('التطبيق في وضع القراءة فقط.');
+            return;
+        }
+        specialtyConfig = {
+            medHistory: document.getElementById('mod_medHistory').checked,
+            vitals: document.getElementById('mod_vitals').checked,
+            labs: document.getElementById('mod_labs').checked,
+            scans: document.getElementById('mod_scans').checked,
+            notes: document.getElementById('mod_notes').checked,
+            rx: document.getElementById('mod_rx').checked,
+            attachments: document.getElementById('mod_attachments').checked,
+            obsGyn: document.getElementById('mod_obsGyn').checked,
+            ortho: document.getElementById('mod_ortho').checked,
+            neuro: document.getElementById('mod_neuro').checked,
+            peds: document.getElementById('mod_peds').checked,
+            derm: document.getElementById('mod_derm').checked,
+            ent: document.getElementById('mod_ent').checked,
+            ophthal: document.getElementById('mod_ophthal').checked,
+            cardio: document.getElementById('mod_cardio').checked
+        };
+
+        saveSettingsToCloudAndLocal();
+        alert('تم حفظ إعدادات لوحة تحكم الاختصاصات بنجاح!');
+        showMainMenu();
     }
 
     function openPermissionsManager() {
@@ -2729,13 +2861,14 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.18",
+            version: "17.19",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
             rxImage: currentDoctorRxImage,
             rxLayout: JSON.parse(localStorage.getItem('doctor_rx_layout') || '{}'),
-            secretaryAccount: secretaryAccount
+            secretaryAccount: secretaryAccount,
+            specialtyConfig: specialtyConfig
         };
 
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
@@ -2772,6 +2905,7 @@
                         if (parsed.rxImage) currentDoctorRxImage = parsed.rxImage;
                         if (parsed.rxLayout) localStorage.setItem('doctor_rx_layout', JSON.stringify(parsed.rxLayout));
                         if (parsed.secretaryAccount) secretaryAccount = parsed.secretaryAccount;
+                        if (parsed.specialtyConfig) specialtyConfig = parsed.specialtyConfig;
 
                         const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
                         if (ownerUid) {
@@ -3804,7 +3938,6 @@
         const rawName = document.getElementById('pName').value.trim();
         const rawSubName = document.getElementById('pSubName').value.trim();
 
-        // Check for duplicate patient name (case insensitive)
         const nameExists = patients.some(p => p.name.toLowerCase() === rawName.toLowerCase());
         if (nameExists && !rawSubName) {
             alert('⚠️ تنبيه: يوجد مريض بنفس الاسم مسجل مسبقاً! يرجى إدخال اسم الجد الرابع أو العشيرة أو ملاحظة تمييز في حقل "اسم الجد الرابع/العشيرة" للمتابعة.');
@@ -3914,6 +4047,9 @@
                 bpSys = v.bp;
             }
 
+            // Check enabled specialty modules to render conditionally
+            const cfg = specialtyConfig;
+
             return `
             <div class="visit-card" data-visit-id="${v.visitId}">
                 <div class="visit-header">
@@ -3924,15 +4060,17 @@
                     ${visits.length > 1 ? `<button onclick="confirmDeleteVisit(${v.visitId})" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:2px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i> Delete Visit</button>` : ''}
                 </div>
 
+                ${cfg.medHistory ? `
                 <button type="button" class="btn-med-history" onclick="openMedHistoryModal(${v.visitId})">
                     <span><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History & Chronic Diseases</span>
                     <i class="fa-solid fa-chevron-right"></i>
                 </button>
-
                 <div class="medical-history-preview-card">
                     ${mhSummaryText}
                 </div>
+                ` : ''}
 
+                ${cfg.vitals ? `
                 <button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(${v.visitId})">
                     <span><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> Vital Signs & BMI Calculator</span>
                     <span style="font-size:0.75rem; background:#e0f2fe; padding:2px 8px; border-radius:6px;">Score: ${v.bmiScore || '—'}</span>
@@ -3966,7 +4104,69 @@
                         </div>
                     </div>
                 </div>
+                ` : ''}
 
+                ${cfg.obsGyn ? `
+                <div class="group-card" style="background:#fce7f3; border-color:#f472b6; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.82rem; color:#be185d; display:block; margin-bottom:8px;"><i class="fa-solid fa-person-pregnant"></i> تفاصيل النسائية والتوليد (Obstetrics & Gynecology)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">LMP (آخر دورة)</span><div class="input-wrapper"><input type="date" value="${v.obsLmp || ''}" oninput="updateVisitFieldData(${v.visitId}, 'obsLmp', this.value)" style="font-size:0.8rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">EDD (موعد الولادة)</span><div class="input-wrapper"><input type="date" value="${v.obsEdd || ''}" oninput="updateVisitFieldData(${v.visitId}, 'obsEdd', this.value)" style="font-size:0.8rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">Gravidity & Parity / ملاحظات الحمل</span><div class="input-wrapper"><input type="text" value="${v.obsNotes || ''}" placeholder="G3 P2 A1..." oninput="updateVisitFieldData(${v.visitId}, 'obsNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.ortho ? `
+                <div class="group-card" style="background:#fef3c7; border-color:#f59e0b; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.82rem; color:#b45309; display:block; margin-bottom:8px;"><i class="fa-solid fa-bone"></i> تقييم العظام والمفاصل (Orthopedics)</span>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">مدى الحركة / درجة الخشونة / الفحص السريري</span><div class="input-wrapper"><input type="text" value="${v.orthoNotes || ''}" placeholder="خشونة مفصل الركبة اليمنى Grade II..." oninput="updateVisitFieldData(${v.visitId}, 'orthoNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.neuro ? `
+                <div class="group-card" style="background:#f3e8ff; border-color:#c084fc; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.82rem; color:#7e22ce; display:block; margin-bottom:8px;"><i class="fa-solid fa-brain"></i> فحص الجملة العصبية (Neurology)</span>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">مقياس غلاسكو للوعي (GCS) / الفحص العصبي</span><div class="input-wrapper"><input type="text" value="${v.neuroNotes || ''}" placeholder="GCS 15/15, Cranial nerves intact..." oninput="updateVisitFieldData(${v.visitId}, 'neuroNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.peds ? `
+                <div class="group-card" style="background:#e0f2fe; border-color:#38bdf8; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.82rem; color:#0369a1; display:block; margin-bottom:8px;"><i class="fa-solid fa-child"></i> فحص الأطفال والنمو (Pediatrics)</span>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">مخطط النمو / جدول اللقاحات والملاحظات</span><div class="input-wrapper"><input type="text" value="${v.pedsNotes || ''}" placeholder="الوزن ضمن المعدل الطبيعي، لقاحات منجزة..." oninput="updateVisitFieldData(${v.visitId}, 'pedsNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.derm ? `
+                <div class="group-card" style="background:#ffedd5; border-color:#fb923c; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.82rem; color:#c2410c; display:block; margin-bottom:8px;"><i class="fa-solid fa-hand-dots"></i> فحص الجلدية والتناسلية (Dermatology)</span>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">وصف الآفات الجلدية / التوزيع / الفحص</span><div class="input-wrapper"><input type="text" value="${v.dermNotes || ''}" placeholder="Plaque psoriasis on elbows..." oninput="updateVisitFieldData(${v.visitId}, 'dermNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.ent ? `
+                <div class="group-card" style="background:#ecfdf5; border-color:#34d399; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.82rem; color:#047857; display:block; margin-bottom:8px;"><i class="fa-solid fa-ear-deaf"></i> فحص الأذن والأنف والحنجرة (ENT)</span>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">فحص الأذن / اللوزتين / الجيوب الأنفية</span><div class="input-wrapper"><input type="text" value="${v.entNotes || ''}" placeholder="Acute tonsillitis, TM congested..." oninput="updateVisitFieldData(${v.visitId}, 'entNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.ophthal ? `
+                <div class="group-card" style="background:#e0e7ff; border-color:#818cf8; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.82rem; color:#4338ca; display:block; margin-bottom:8px;"><i class="fa-solid fa-eye"></i> فحص العيون (Ophthalmology)</span>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">حدة البصر (Visual Acuity) / ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalNotes || ''}" placeholder="VA RE: 6/6, LE: 6/12, IOP: 15 mmHg..." oninput="updateVisitFieldData(${v.visitId}, 'ophthalNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.cardio ? `
+                <div class="group-card" style="background:#fee2e2; border-color:#f87171; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.82rem; color:#b91c1c; display:block; margin-bottom:8px;"><i class="fa-solid fa-heart-pulse"></i> فحص القلب والشرايين (Cardiology)</span>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">تخطيط القلب (ECG) / أصوات القلب / الفحص</span><div class="input-wrapper"><input type="text" value="${v.cardioNotes || ''}" placeholder="ECG: Normal sinus rhythm, S1 S2+" oninput="updateVisitFieldData(${v.visitId}, 'cardioNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.labs ? `
                 <div class="field-box">
                     <span class="field-label">Lab Tests</span>
                     <div class="input-wrapper" style="position: relative;">
@@ -3978,7 +4178,9 @@
                         </div>
                     </div>
                 </div>
+                ` : ''}
 
+                ${cfg.scans ? `
                 <div class="field-box">
                     <span class="field-label">Radiology & Scans</span>
                     <div class="input-wrapper" style="position: relative;">
@@ -3990,7 +4192,9 @@
                         </div>
                     </div>
                 </div>
+                ` : ''}
 
+                ${cfg.notes ? `
                 <div class="field-box">
                     <span class="field-label">Diagnosis & Notes</span>
                     <div class="input-wrapper" style="position: relative;">
@@ -4002,7 +4206,9 @@
                         </div>
                     </div>
                 </div>
+                ` : ''}
 
+                ${cfg.rx ? `
                 <div class="field-box">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
                         <span class="field-label" style="margin-bottom:0;">Prescribed Medications (RX)</span>
@@ -4019,7 +4225,9 @@
                         </div>
                     </div>
                 </div>
+                ` : ''}
 
+                ${cfg.attachments ? `
                 <div class="field-box">
                     <span class="field-label">Attachments & Medical Reports</span>
                     <div style="display:flex; gap:8px; margin-bottom:8px;">
@@ -4044,6 +4252,7 @@
                         }).join('')}
                     </div>
                 </div>
+                ` : ''}
             </div>
         `;
         }).join('');
