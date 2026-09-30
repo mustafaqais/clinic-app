@@ -46,6 +46,10 @@
         
         .mobile-container { background: #ffffff; width: 100%; max-width: 100%; height: 100vh; min-height: 100vh; position: relative; overflow: hidden; display: flex; flex-direction: column; }
         
+        @media (min-width: 768px) {
+            .menu-grid { grid-template-columns: repeat(3, 1fr) !important; }
+        }
+        
         .auth-screen { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px 20px; flex: 1; text-align: center; background: #ffffff; }
         .activ-icon { font-size: 42px; color: #0d9488; margin-bottom: 10px; }
         .activ-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: #0f172a; margin-bottom: 4px; }
@@ -63,11 +67,8 @@
         .founder-code-display { font-size: 1.1rem; font-weight: 900; color: #0f766e; letter-spacing: 1px; margin: 4px 0; background: #fff; padding: 6px; border-radius: 8px; border: 1px solid #ccfbf1; word-break: break-all; }
 
         .sub-status-banner { background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 14px; padding: 10px 14px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; text-align: left; }
-        .sub-status-banner.warning { background: #fef2f2; border-color: #fca5a5; }
         .sub-status-banner.expired { background: #fefce8; border-color: #fde047; }
         .sub-status-info h4 { font-size: 0.82rem; font-weight: 800; color: #166534; display: flex; align-items: center; gap: 6px; margin-bottom: 2px; }
-        .sub-status-banner.warning .sub-status-info h4 { color: #991b1b; }
-        .sub-status-banner.expired .sub-status-info h4 { color: #854d0e; }
         .sub-status-info p { font-size: 0.75rem; color: #475569; }
 
         .network-status-bar { background: #fef3c7; color: #b45309; font-size: 0.72rem; font-weight: 700; text-align: center; padding: 4px; display: none; }
@@ -142,12 +143,12 @@
         .analytics-num { font-size: 1.8rem; font-weight: 900; color: #0f172a; margin-top: 4px; }
         .analytics-label { font-size: 0.78rem; font-weight: 700; color: #64748b; display: flex; align-items: center; gap: 6px; }
 
-        .rx-canvas-container { position: relative; width: 100%; background: #ffffff; border: 2px solid #cbd5e1; border-radius: 14px; overflow: hidden; user-select: none; min-height: 480px; }
-        .draggable-box { position: absolute; background: transparent; border: 1px dashed transparent; padding: 4px 8px; cursor: move; touch-action: none; z-index: 10; }
-        .rx-patient-details-text { color: #b91c1c; font-family: 'Amiri', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; }
-        .rx-treatment-wrapper { direction: ltr; text-align: left; width: 100%; }
-        .rx-rx-title { color: #b91c1c; font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-align: left; margin-bottom: 2px; }
-        .rx-treatment-text { color: #000000; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.05rem; white-space: pre-wrap; text-align: left; line-height: 1.6; }
+        .patient-card { background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 14px; margin-bottom: 10px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; text-align: left; }
+        .patient-info h4 { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #0f172a; margin-bottom: 4px; font-weight: 700; }
+        .patient-info p { font-size: 0.78rem; color: #64748b; }
+        .badge-gender { padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; }
+        .gender-male { background: #e0f2fe; color: #0369a1; }
+        .gender-female { background: #fce7f3; color: #be185d; }
 
         .footer { text-align: center; padding: 16px; color: #334155; font-size: 0.85rem; font-weight: 700; margin-top: auto; border-top: 1px solid #e2e8f0; background: #f8fafc; flex-shrink: 0; }
     </style>
@@ -803,7 +804,7 @@
 
                 ${cfg.ophthal ? `
                 <div class="group-card" style="background:#e0e7ff; border-color:#818cf8; margin-bottom:12px; padding:12px;">
-                    <span style="font-weight:800; font-size:0.82rem; color:#4338ca; display:block; margin-bottom:8px;"><i class="fa-solid fa-eye"></i> فحص العيون (Ophthalmology)</span>
+                    <span style="font-weight:800; font-size:0.82rem; color:#4338ca; display:block; margin-bottom:8px;"><i class="fa-solid fa-eye"></i> فخص العيون (Ophthalmology)</span>
                     <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">حدة البصر (Visual Acuity) / ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalNotes || ''}" placeholder="VA RE: 6/6, IOP: 15 mmHg..." oninput="updateVisitFieldData(${v.visitId}, 'ophthalNotes', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
                 ` : ''}
@@ -835,6 +836,90 @@
             document.getElementById('recPatientMeta').innerHTML = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'}`;
             renderVisits(patient.visits || [], true);
         }
+    }
+
+    function saveNewPatient(e) {
+        e.preventDefault();
+        const rawName = document.getElementById('pName').value.trim();
+        const rawSubName = document.getElementById('pSubName').value.trim();
+
+        const newPatient = {
+            id: Date.now(),
+            name: rawName,
+            subName: rawSubName,
+            age: Number(document.getElementById('pAge').value),
+            gender: document.getElementById('pGender').value || 'Unspecified',
+            phone: document.getElementById('pPhone').value || 'N/A',
+            visits: [{ visitId: Date.now(), date: new Date().toISOString().split('T')[0], notes: '', attachments: [] }]
+        };
+        patients.unshift(newPatient);
+        localStorage.setItem('clinic_patients', JSON.stringify(patients));
+        openMedicalRecord(newPatient.id);
+    }
+
+    function addNewVisit() {
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+        patient.visits.unshift({ visitId: Date.now(), date: new Date().toISOString().split('T')[0], notes: '', attachments: [] });
+        localStorage.setItem('clinic_patients', JSON.stringify(patients));
+        renderVisits(patient.visits, true);
+    }
+
+    function renderPatientsList(list) {
+        const container = document.getElementById('patientsList');
+        container.innerHTML = list.length === 0 
+            ? '<p style="text-align:center; color:#64748b;">No matching patients found.</p>'
+            : list.map(p => `
+                <div class="patient-card" onclick="openMedicalRecord(${p.id})">
+                    <div class="patient-info">
+                        <h4>${p.name} ${p.subName ? `(${p.subName})` : ''}</h4>
+                        <p>Phone: ${p.phone} | Age: ${p.age}</p>
+                    </div>
+                    <span class="badge-gender ${p.gender === 'Female' ? 'gender-female' : 'gender-male'}">${p.gender || 'N/A'}</span>
+                </div>
+            `).join('');
+    }
+
+    function filterPatients() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = patients.filter(p => (p.name + " " + (p.subName || "")).toLowerCase().includes(query));
+        renderPatientsList(filtered);
+    }
+
+    function openPatientsArchive() {
+        navigateTo('archiveScreen', 'Patients Archive', 'Search & records');
+        renderPatientsList(patients);
+    }
+
+    function openDictionaryManager() { navigateTo('dictScreen', 'Medical Dictionary', 'Manage terms'); }
+    function openBackupManager() { navigateTo('backupScreen', 'Backup Manager', 'Export data'); }
+    function openTrashBin() { navigateTo('trashScreen', 'Trash Bin', 'Recover items'); }
+    function openAccountSettings() { navigateTo('settingsScreen', 'Account Settings', 'Security'); }
+    function openPermissionsManager() { navigateTo('permissionsScreen', 'Secretary Management', 'Permissions'); }
+    function openNetworkHierarchy() { navigateTo('networkScreen', 'Network Database', 'Users'); }
+    function openRxTemplateManager() { navigateTo('rxTemplateScreen', 'RX Template', 'Header'); }
+    function openAnalyticsDashboard() { navigateTo('analyticsScreen', 'Clinic Analytics', 'Stats'); }
+    function openSupportModal() { document.getElementById('supportModal').style.display = 'flex'; }
+    function closeSupportModal() { document.getElementById('supportModal').style.display = 'none'; }
+    function executeMandatoryBackup() { document.getElementById('mandatoryBackupModal').style.display = 'none'; }
+    function toggleDropdownMenu(e) { e.stopPropagation(); document.getElementById('headerDropdownMenu').classList.toggle('show'); }
+    function togglePasswordVisibility() {
+        const pass = document.getElementById('authPassword');
+        pass.type = pass.type === 'password' ? 'text' : 'password';
+    }
+    function toggleAuthMode() {
+        isRegisterMode = !isRegisterMode;
+        document.getElementById('registerPhoneBox').style.display = isRegisterMode ? 'block' : 'none';
+    }
+    function handleAuthSubmit(e) {
+        e.preventDefault();
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'flex';
+        navigateTo('mainScreen');
+    }
+    function logoutUser() {
+        document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('authScreen').style.display = 'flex';
     }
 </script>
 </body>
