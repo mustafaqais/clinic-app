@@ -29,16 +29,21 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <!-- الحل الجذري النهائي لثبات خط المسيري في كل عناصر التطبيق ومنع خط الجلاكسي -->
+    <!-- التعديل النهائي الجذري: ثبات خط المسيري وحماية أيقونات Font Awesome لكي لا تظهر كعلامة X -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700;800;900&display=swap');
 
-        *, *::before, *::after {
+        /* فرض خط المسيري على النصوص والعناصر العامة */
+        body, input, select, textarea, button, h1, h2, h3, h4, h5, h6, span, p, a, label, div, .menu-card, .auth-form {
             font-family: 'El Messiri', sans-serif !important;
         }
 
+        /* حماية أيقونات فونت أوسم لكي تعمل بشكل صحيح ولا تظهر كعلامة X */
+        .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands, [class*="fa-"] {
+            font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands", sans-serif !important;
+        }
+
         body {
-            font-family: 'El Messiri', sans-serif !important;
             background-color: #0f172a;
         }
 
