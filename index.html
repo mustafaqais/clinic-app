@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.27</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.28</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -21,7 +21,7 @@
     <!-- استدعاء خط المسيري عبر Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -29,12 +29,26 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <!-- ضمان تطبيق خط المسيري بقوة على كافة العناصر بدون استثناء -->
+    <!-- ضمان تطبيق خط المسيري والتنسيق البارز لاسم العيادة -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700;800&display=swap');
 
-        body, input, select, textarea, button, .menu-card, .auth-form, .group-card, .visit-card, h1, h2, h3, h4, h5, h6, span, p, a, label {
+        body, input, select, textarea, button, .menu-card, .auth-form, .group-card, .visit-card, span, p, a, label {
             font-family: 'El Messiri', sans-serif !important;
+        }
+
+        /* تنسيق اسم العيادة أو الطبيب البارز والفاخر في الهيدر */
+        #headerTitle {
+            font-family: 'El Messiri', sans-serif !important;
+            font-size: 1.35rem !important;
+            font-weight: 800 !important;
+            color: #ffffff !important;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.5px;
+            background: linear-gradient(135deg, #ffffff 0%, #99f6e4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 4px 0;
         }
     </style>
 </head>
@@ -118,8 +132,8 @@
             </div>
 
             <div class="header-icon"><i class="fa-solid fa-user-doctor"></i></div>
-            <h1 id="headerTitle">Clinic Master System</h1>
-            <p id="headerSub">Cloud Secure Dashboard</p>
+            <h1 id="headerTitle">نظام عيادة ماستر</h1>
+            <p id="headerSub">لوحة التحكم السحابية الآمنة</p>
         </div>
 
         <div class="content">
@@ -645,7 +659,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.27</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.28</div>
     </div>
 </div>
 
@@ -699,6 +713,25 @@
         </div>
         <button class="btn-main" onclick="executeFounderDeleteAccount()" style="background: #ef4444; margin-top: 5px;">
             <i class="fa-solid fa-trash"></i> Confirm & Delete Account
+        </button>
+    </div>
+</div>
+
+<div id="founderEditNameModal" class="modal-overlay">
+    <div class="modal-body" style="max-width: 400px; text-align: center;">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-pen-to-square" style="color:#0d9488;"></i> تعديل اسم الطبيب أو العيادة</h3>
+            <button class="modal-close" onclick="closeFounderEditNameModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 10px;">
+            أدخل الاسم المخصص الذي سيظهر في واجهة الطبيب (<strong id="editNameTargetEmail" style="color:#0f172a;"></strong>):
+        </p>
+        <div class="field-box" style="text-align: left;">
+            <span class="field-label">اسم العيادة / الطبيب البارز *</span>
+            <div class="input-wrapper"><input type="text" id="founderInputDoctorName" placeholder="مثال: د. قيس قاسم - عيادة ميسان"></div>
+        </div>
+        <button class="btn-main" onclick="executeFounderUpdateDoctorName()" style="background: #0d9488; margin-top: 5px;">
+            <i class="fa-solid fa-floppy-disk"></i> حفظ التعديل وتحديث الواجهة
         </button>
     </div>
 </div>
@@ -1060,6 +1093,6 @@
     </div>
 </div>
 
-<script src="script.js?v=17.27"></script>
+<script src="script.js?v=17.28"></script>
 </body>
 </html>
