@@ -21,7 +21,7 @@
     <!-- استدعاء خط المسيري عبر Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -29,26 +29,31 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <!-- ضمان تطبيق خط المسيري والتنسيق البارز لاسم العيادة -->
+    <!-- الحل الجذري النهائي لثبات خط المسيري في كل عناصر التطبيق ومنع خط الجلاكسي -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700;800;900&display=swap');
 
-        body, input, select, textarea, button, .menu-card, .auth-form, .group-card, .visit-card, span, p, a, label {
+        *, *::before, *::after {
             font-family: 'El Messiri', sans-serif !important;
+        }
+
+        body {
+            font-family: 'El Messiri', sans-serif !important;
+            background-color: #0f172a;
         }
 
         /* تنسيق اسم العيادة أو الطبيب البارز والفاخر في الهيدر */
         #headerTitle {
             font-family: 'El Messiri', sans-serif !important;
             font-size: 1.35rem !important;
-            font-weight: 800 !important;
-            color: #ffffff !important;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            letter-spacing: 0.5px;
-            background: linear-gradient(135deg, #ffffff 0%, #99f6e4 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 4px 0;
+            font-weight: 900 !important;
+            letter-spacing: 0.5px !important;
+            background: linear-gradient(135deg, #ffffff 0%, #99f6e4 100%) !important;
+            -webkit-background-clip: text !important;
+            -webkit-text-fill-color: transparent !important;
+            display: inline-block !important;
+            margin: 4px 0 !important;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
         }
     </style>
 </head>
