@@ -173,6 +173,15 @@
                             </div>
                         </div>
 
+                        <!-- تم إضافة بطاقة نمو الأطفال هنا لتجنب خطأ null -->
+                        <div class="menu-card" id="cardGrowth" onclick="openPediatricGrowthScreen()">
+                            <div class="menu-icon growth-icon" style="background:#e0f2fe; color:#0284c7;"><i class="fa-solid fa-child"></i></div>
+                            <div class="menu-info">
+                                <h3 id="menuGrowthTitle">منحنيات نمو الأطفال</h3>
+                                <p id="menuGrowthSub">تقييم الوزن والطول مع منظمة الصحة العالمية</p>
+                            </div>
+                        </div>
+
                         <div class="menu-card" id="cardDict" onclick="openDictionaryManager()">
                             <div class="menu-icon dict-icon"><i class="fa-solid fa-book-medical"></i></div>
                             <div class="menu-info">
@@ -241,6 +250,53 @@
                     </div>
                 </div>
 
+            </div>
+
+            <!-- شاشة حاسبة نمو الأطفال المضافة لمنع خطأ null -->
+            <div id="pediatricGrowthScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
+                        <i class="fa-solid fa-child" style="color:#0284c7;"></i> منحنيات نمو الأطفال البيومترية (WHO)
+                    </div>
+                    <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+                        أدخل بيانات الطفل لتقييم الوزن والطول مقارنة بمعدلات منظمة الصحة العالمية القياسية.
+                    </p>
+
+                    <div class="field-box">
+                        <span class="field-label">الجنس (Gender)</span>
+                        <div class="input-wrapper">
+                            <select id="growthGender">
+                                <option value="male">ذكر (Male)</option>
+                                <option value="female">أنثى (Female)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="field-box">
+                        <span class="field-label">العمر بالأشهر (Age in Months)</span>
+                        <div class="input-wrapper"><input type="number" id="growthAgeMonths" placeholder="مثال: 12 شهر"></div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px;">
+                        <div class="field-box" style="flex: 1;">
+                            <span class="field-label">الوزن الحالي (كغ)</span>
+                            <div class="input-wrapper"><input type="number" step="0.1" id="growthWeightKg" placeholder="مثال: 9.5"></div>
+                        </div>
+                        <div class="field-box" style="flex: 1;">
+                            <span class="field-label">الطول الحالي (سم)</span>
+                            <div class="input-wrapper"><input type="number" step="0.1" id="growthHeightCm" placeholder="مثال: 75"></div>
+                        </div>
+                    </div>
+
+                    <button class="btn-main" onclick="calculateChildGrowthPercentiles()" style="background: #0284c7; margin-top: 10px;">
+                        <i class="fa-solid fa-calculator"></i> حساب وتقييم نمو الطفل
+                    </button>
+
+                    <div id="growthResultContainer" style="display: none; margin-top: 16px; background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 12px; padding: 14px;">
+                        <h4 style="font-size: 0.95rem; font-weight: 800; color: #166534; margin-bottom: 6px;"><i class="fa-solid fa-circle-check"></i> نتيجة تقييم النمو:</h4>
+                        <p id="growthResultDetails" style="font-size: 0.82rem; color: #14532d; line-height: 1.5;"></p>
+                    </div>
+                </div>
             </div>
 
             <div id="specialtiesDashboardScreen" style="display: none;">
