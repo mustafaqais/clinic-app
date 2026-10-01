@@ -25,6 +25,7 @@ let isSubscriptionExpired = false;
 let patientsListenerUnsubscribe = null;
 let targetNodeUidToDelete = null;
 let targetNodeEmailToDelete = null;
+let targetNodeUidForNameEdit = null;
 
 let specialtyConfig = JSON.parse(localStorage.getItem('clinic_specialty_config')) || {
     medHistory: true,
@@ -106,7 +107,7 @@ const translations = {
         networkDb: "قاعدة بيانات الشبكة",
         networkDbSub: "المستخدمين وبيانات الدخول",
 
-        footer: "نظام عيادة ماستر المتقدم v17.26",
+        footer: "نظام عيادة ماستر المتقدم v17.28",
 
         patInfoTitle: "المعلومات الشخصية",
         lblPatName: "الاسم الكامل *",
@@ -268,7 +269,7 @@ const translations = {
         networkDb: "Network Database",
         networkDbSub: "Users & credentials",
 
-        footer: "Clinic Master Network v17.26",
+        footer: "Clinic Master Network v17.28",
 
         patInfoTitle: "Personal Information",
         lblPatName: "Full Name *",
@@ -444,7 +445,8 @@ function applyLanguage() {
     document.getElementById('lblActivCode').innerText = t.lblActivCode;
     document.getElementById('btnActivate').innerText = t.btnActivate;
 
-    document.getElementById('headerTitle').innerText = t.headerTitle;
+    const savedCustomName = localStorage.getItem('clinic_custom_brand_name');
+    document.getElementById('headerTitle').innerText = savedCustomName || "نظام عيادة ماستر";
     document.getElementById('headerSub').innerText = t.headerSub;
     document.getElementById('txtBack').innerText = t.txtBack;
     
@@ -669,7 +671,7 @@ async function generateNewKey(type) {
 
 let screenHistory = ['mainScreen'];
 
-function navigateTo(screenId, title = 'Clinic Master System', sub = 'Cloud Secure Dashboard', saveState = true) {
+function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', saveState = true) {
     if (!isSubscriptionExpired) {
         autoSaveMedicalRecord();
     }
@@ -678,12 +680,15 @@ function navigateTo(screenId, title = 'Clinic Master System', sub = 'Cloud Secur
     const target = document.getElementById(screenId);
     if (target) target.style.display = 'block';
 
-    document.getElementById('headerTitle').innerText = title;
+    const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
+    const headerTitleText = (screenId === 'mainScreen') ? customBrandName : (title || customBrandName);
+
+    document.getElementById('headerTitle').innerText = headerTitleText;
     document.getElementById('headerSub').innerText = sub;
 
     if (saveState) {
         sessionStorage.setItem('current_screen', screenId);
-        sessionStorage.setItem('header_title', title);
+        sessionStorage.setItem('header_title', headerTitleText);
         sessionStorage.setItem('header_sub', sub);
         if (screenId !== 'medicalRecordScreen') {
             sessionStorage.removeItem('current_patient_id');
@@ -714,11 +719,13 @@ function goBackScreen() {
         document.getElementById(prevScreen).style.display = 'block';
         sessionStorage.setItem('current_screen', prevScreen);
 
+        const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
+
         if (prevScreen === 'mainScreen') {
             document.getElementById('backBtn').style.display = 'none';
-            document.getElementById('headerTitle').innerText = translations[currentLang].headerTitle;
+            document.getElementById('headerTitle').innerText = customBrandName;
             document.getElementById('headerSub').innerText = translations[currentLang].headerSub;
-            sessionStorage.setItem('header_title', translations[currentLang].headerTitle);
+            sessionStorage.setItem('header_title', customBrandName);
             sessionStorage.setItem('header_sub', translations[currentLang].headerSub);
             sessionStorage.removeItem('current_patient_id');
             currentPatientId = null;
@@ -819,6 +826,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.log("Secretary query error:", e);
             }
 
+            await loadDoctorBranding(dataOwnerUid);
+
             patients = JSON.parse(localStorage.getItem(`clinic_patients_${dataOwnerUid}`)) || patients;
             trashBin = JSON.parse(localStorage.getItem(`clinic_trash_${dataOwnerUid}`)) || trashBin;
 
@@ -904,6 +913,23 @@ document.addEventListener("DOMContentLoaded", () => {
     initDraggableElements();
     loadSavedRxLayout();
 });
+
+async function loadDoctorBranding(ownerUid) {
+    try {
+        const docRef = await db.collection('network_hierarchy').doc(ownerUid).get();
+        if (docRef.exists) {
+            const data = docRef.data();
+            const customName = data.doctorName || "نظام عيادة ماستر";
+            localStorage.setItem('clinic_custom_brand_name', customName);
+            const titleEl = document.getElementById('headerTitle');
+            if (titleEl && sessionStorage.getItem('current_screen') === 'mainScreen') {
+                titleEl.innerText = customName;
+            }
+        }
+    } catch (e) {
+        console.log("Branding load error:", e);
+    }
+}
 
 async function checkUserSubscriptionStatus(uid, isSecretary = false) {
     let expiryDateStr = localStorage.getItem(`sub_expiry_${uid}`);
@@ -1077,13 +1103,14 @@ function cancelRenewal() {
 
 function restorePreviousScreenState() {
     const savedScreen = sessionStorage.getItem('current_screen');
-    const savedTitle = sessionStorage.getItem('header_title') || translations[currentLang].headerTitle;
+    const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
+    const savedTitle = sessionStorage.getItem('header_title') || customBrandName;
     const savedSub = sessionStorage.getItem('header_sub') || translations[currentLang].headerSub;
     const savedPatientId = sessionStorage.getItem('current_patient_id');
 
     if (savedScreen && savedScreen !== 'mainScreen' && document.getElementById(savedScreen)) {
         if (isUserSecretary && ['rxTemplateScreen', 'specialtiesDashboardScreen', 'dictScreen', 'analyticsScreen', 'backupScreen', 'trashScreen', 'settingsScreen', 'permissionsScreen'].includes(savedScreen)) {
-            navigateTo('mainScreen', translations[currentLang].headerTitle, translations[currentLang].headerSub, false);
+            navigateTo('mainScreen', customBrandName, translations[currentLang].headerSub, false);
             return;
         }
         if (savedScreen === 'medicalRecordScreen' && savedPatientId) {
@@ -1092,7 +1119,7 @@ function restorePreviousScreenState() {
             navigateTo(savedScreen, savedTitle, savedSub, false);
         }
     } else {
-        navigateTo('mainScreen', translations[currentLang].headerTitle, translations[currentLang].headerSub, false);
+        navigateTo('mainScreen', customBrandName, translations[currentLang].headerSub, false);
     }
 }
 
@@ -1263,6 +1290,7 @@ async function handleAuthSubmit(e) {
                         password: pass,
                         role: identifier.toLowerCase() === FOUNDER_EMAIL.toLowerCase() ? 'Founder' : 'Client Node',
                         isActivated: identifier.toLowerCase() === FOUNDER_EMAIL.toLowerCase(),
+                        doctorName: "نظام عيادة ماستر",
                         createdAt: new Date().toISOString()
                     }, { merge: true });
                 } catch (err) {
@@ -1317,6 +1345,8 @@ async function handleAuthSubmit(e) {
                 } catch (e) {
                     console.log(e);
                 }
+
+                await loadDoctorBranding(dataOwnerUid);
 
                 document.getElementById('authScreen').style.display = 'none';
                 if (isSec) {
@@ -1416,7 +1446,7 @@ function calculateVisitChildGrowth(visitId) {
 }
 
 function openSpecialtiesDashboard() {
-    navigateTo('specialtiesDashboardScreen', translations[currentLang].specialtiesDash, translations[currentLang].specialtiesDashSub);
+    navigateTo('specialtiesDashboardScreen', 'لوحة تحكم الاختصاصات', 'تخصيص وتفعيل الحقول الطبية');
     
     document.getElementById('mod_medHistory').checked = !!specialtyConfig.medHistory;
     document.getElementById('mod_vitals').checked = !!specialtyConfig.vitals;
@@ -1577,7 +1607,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.26",
+        version: "17.28",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1758,7 +1788,7 @@ function saveRxTemplateImage() {
 }
 
 function openNetworkHierarchy() {
-    navigateTo('networkScreen', 'Network Database', 'Users Control');
+    navigateTo('networkScreen', 'قاعدة بيانات الشبكة', 'إدارة المستخدمين والأسماء البارزة');
     const container = document.getElementById('networkTreeContainer');
     container.innerHTML = '<p style="text-align:center; color:#64748b;">Loading...</p>';
 
@@ -1777,23 +1807,57 @@ function openNetworkHierarchy() {
             const data = doc.data();
             const nodeUid = doc.id;
             const userEmail = data.email || data.secretaryEmail || 'User';
+            const currentDocName = data.doctorName || 'غير مسجل';
             const isFounder = userEmail.toLowerCase() === FOUNDER_EMAIL.toLowerCase();
 
             html += `
-                <div class="node-card">
+                <div class="node-card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;">
                     <div class="node-info">
-                        <h5><i class="fa-solid fa-envelope" style="color:#0d9488;"></i> ${userEmail}</h5>
-                        <p><b>Password:</b> ${data.password || 'N/A'}</p>
+                        <h5 style="margin:0; font-size:0.85rem; color:#0f172a;"><i class="fa-solid fa-envelope" style="color:#0d9488;"></i> ${userEmail}</h5>
+                        <p style="margin:2px 0; font-size:0.75rem; color:#64748b;"><b>الاسم البارز:</b> <span style="color:#0d9488; font-weight:700;">${currentDocName}</span></p>
+                        <p style="margin:0; font-size:0.75rem; color:#64748b;"><b>Password:</b> ${data.password || 'N/A'}</p>
                     </div>
                     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
-                        <span class="node-badge">${data.role || 'Client'}</span>
-                        ${!isFounder ? `<button onclick="promptFounderDeleteNode('${nodeUid}', '${userEmail.replace(/'/g, "\\'")}')" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer;">Delete</button>` : ''}
+                        <span class="node-badge" style="font-size:0.68rem; padding:2px 6px; background:#e0f2fe; color:#0369a1; border-radius:4px;">${data.role || 'Client'}</span>
+                        <div style="display:flex; gap:4px;">
+                            <button onclick="promptFounderEditName('${nodeUid}', '${(data.doctorName || '').replace(/'/g, "\\'")}', '${userEmail}')" style="background:#ccfbf1; color:#0f766e; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-pen"></i> اسم</button>
+                            ${!isFounder ? `<button onclick="promptFounderDeleteNode('${nodeUid}', '${userEmail.replace(/'/g, "\\'")}')" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>` : ''}
+                        </div>
                     </div>
                 </div>
             `;
         });
         container.innerHTML = html;
     });
+}
+
+function promptFounderEditName(nodeUid, currentName, userEmail) {
+    targetNodeUidForNameEdit = nodeUid;
+    document.getElementById('editNameTargetEmail').innerText = userEmail;
+    document.getElementById('founderInputDoctorName').value = currentName !== 'غير مسجل' ? currentName : '';
+    document.getElementById('founderEditNameModal').style.display = 'flex';
+}
+
+function closeFounderEditNameModal() {
+    document.getElementById('founderEditNameModal').style.display = 'none';
+    targetNodeUidForNameEdit = null;
+}
+
+async function executeFounderUpdateDoctorName() {
+    const newName = document.getElementById('founderInputDoctorName').value.trim();
+    if (!targetNodeUidForNameEdit) return;
+
+    try {
+        await db.collection('network_hierarchy').doc(targetNodeUidForNameEdit).set({
+            doctorName: newName || "نظام عيادة ماستر"
+        }, { merge: true });
+
+        closeFounderEditNameModal();
+        alert('تم تحديث اسم الطبيب/العيادة بنجاح!');
+        openNetworkHierarchy();
+    } catch (e) {
+        alert('خطأ أثناء التحديث: ' + e.message);
+    }
 }
 
 function promptFounderDeleteNode(nodeUid, nodeEmail) {
@@ -2632,7 +2696,8 @@ function initDraggableElements() {
 function autoSaveMedicalRecord() {}
 
 function showMainMenu() {
-    navigateTo('mainScreen');
+    const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
+    navigateTo('mainScreen', customBrandName, translations[currentLang].headerSub);
 }
 
 function openPatientsArchive() {
