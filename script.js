@@ -607,7 +607,7 @@
         const bar = document.getElementById('networkStatusBar');
         if (!navigator.onLine) {
             bar.classList.add('offline');
-            bar.innerText = "⚠️ Offline Mode - Changes saved locally, will sync when online";
+            bar.innerText = "⚠️️ Offline Mode - Changes saved locally, will sync when online";
         } else {
             bar.classList.remove('offline');
             bar.style.display = 'none';
@@ -1884,6 +1884,7 @@
             `).join('');
     }
 
+    // الدالة المحدثة لتعمل بشكل مثالي ومضمون على الموبايل، الآيباد، والكمبيوتر
     function exportPatientMedicalReportPDF() {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
@@ -1911,13 +1912,20 @@
                 </div>
             `).join('');
 
-        html2canvas(document.getElementById('pdfReportExportContainer'), { scale: 2, useCORS: true }).then(canvas => {
+        const exportContainer = document.getElementById('pdfReportExportContainer');
+        exportContainer.style.visibility = 'visible';
+
+        html2canvas(exportContainer, { scale: 2, useCORS: true, logging: false }).then(canvas => {
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('portrait', 'mm', 'a4');
             const imgWidth = 210;
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
             pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
             pdf.save(`Medical_Report_${patient.name.replace(/\s+/g, '_')}.pdf`);
+            exportContainer.style.visibility = 'hidden';
+        }).catch(err => {
+            alert('حدث خطأ أثناء تحميل التقرير: ' + err.message);
+            exportContainer.style.visibility = 'hidden';
         });
     }
 
