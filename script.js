@@ -453,36 +453,6 @@ function applyLanguage() {
     document.getElementById('dropSupportText').innerText = t.dropSupport;
     document.getElementById('dropLogoutText').innerText = t.dropLogout;
 
-    document.getElementById('secGroup1').innerHTML = `<i class="fa-solid fa-stethoscope"></i> ${t.group1}`;
-    document.getElementById('menuNewPatientTitle').innerText = t.newPatient;
-    document.getElementById('menuNewPatientSub').innerText = t.newPatientSub;
-    document.getElementById('menuArchiveTitle').innerText = t.archive;
-    document.getElementById('menuArchiveSub').innerText = t.archiveSub;
-
-    document.getElementById('secGroup2').innerHTML = `<i class="fa-solid fa-file-prescription"></i> ${t.group2}`;
-    document.getElementById('menuRxTitle').innerText = t.rxTemplate;
-    document.getElementById('menuRxSub').innerText = t.rxTemplateSub;
-    document.getElementById('menuSpecTitle').innerText = t.specialtiesDash;
-    document.getElementById('menuSpecSub').innerText = t.specialtiesDashSub;
-    document.getElementById('menuDictTitle').innerText = t.dict;
-    document.getElementById('menuDictSub').innerText = t.dictSub;
-
-    document.getElementById('secGroup3').innerHTML = `<i class="fa-solid fa-chart-pie"></i> ${t.group3}`;
-    document.getElementById('menuAnalyticsTitle').innerText = t.analytics;
-    document.getElementById('menuAnalyticsSub').innerText = t.analyticsSub;
-
-    document.getElementById('secGroup4').innerHTML = `<i class="fa-solid fa-shield-halved"></i> ${t.group4}`;
-    document.getElementById('menuBackupTitle').innerText = t.backup;
-    document.getElementById('menuBackupSub').innerText = t.backupSub;
-    document.getElementById('menuTrashTitle').innerText = t.trash;
-    document.getElementById('menuTrashSub').innerText = t.trashSub;
-    document.getElementById('menuSettingsTitle').innerText = t.settings;
-    document.getElementById('menuSettingsSub').innerText = t.settingsSub;
-    document.getElementById('menuPermTitle').innerText = t.permissions;
-    document.getElementById('menuPermSub').innerText = t.permissionsSub;
-    document.getElementById('menuNetTitle').innerText = t.networkDb;
-    document.getElementById('menuNetSub').innerText = t.networkDbSub;
-
     document.getElementById('patInfoTitle').innerHTML = `<i class="fa-solid fa-id-card"></i> ${t.patInfoTitle}`;
     document.getElementById('lblPatName').innerText = t.lblPatName;
     document.getElementById('lblPatSubName').innerText = t.lblPatSubName;
@@ -1932,7 +1902,7 @@ function exportPatientMedicalReportPDF() {
         if (v.neuroGcs) specialtyHtml += `<div style="margin-top:6px; background:#f3e8ff; padding:6px; border-radius:6px; font-size:0.75rem;"><strong>الأعصاب:</strong> GCS: ${v.neuroGcs} | الأعصاب: ${v.neuroNerves || '-'}${v.neuroNotes ? ' - ' + v.neuroNotes : ''}</div>`;
         if (v.pedsGrowthAge) specialtyHtml += `<div style="margin-top:6px; background:#e0f2fe; padding:6px; border-radius:6px; font-size:0.75rem;"><strong>الأطفال:</strong> العمر: ${v.pedsGrowthAge} شهر | اللقاحات: ${v.pedsVaccine || '-'}${v.pedsNotes ? ' - ' + v.pedsNotes : ''}</div>`;
         if (v.dermType) specialtyHtml += `<div style="margin-top:6px; background:#ffedd5; padding:6px; border-radius:6px; font-size:0.75rem;"><strong>الجلدية:</strong> ${v.dermType} (${v.dermSite || '-'})${v.dermNotes ? ' - ' + v.dermNotes : ''}</div>`;
-        if (v.entEar) specialtyHtml += `<div style="margin-top:6px; background:#ecfdf5; padding:6px; border-radius:6px; font-size:0.75rem;"><strong>أذن وأنف وحنجرة:</strong> ${v.entEar} | الحلق: ${v.entThroat || '-'}</div>`;
+        if (v.entEar) specialtyHtml += `<div style="margin-top:6px; background:#ecfdf5; padding:6px; border-radius:6px; font-size:0.75rem;"><strong>أذن وأنف والحنجرة:</strong> ${v.entEar} | الحلق: ${v.entThroat || '-'}</div>`;
         if (v.ophthalVa) specialtyHtml += `<div style="margin-top:6px; background:#e0e7ff; padding:6px; border-radius:6px; font-size:0.75rem;"><strong>العيون:</strong> VA: ${v.ophthalVa} | IOP: ${v.ophthalIop || '-'}</div>`;
         if (v.cardioEcg) specialtyHtml += `<div style="margin-top:6px; background:#fee2e2; padding:6px; border-radius:6px; font-size:0.75rem;"><strong>القلب:</strong> ECG: ${v.cardioEcg} | الأصوات: ${v.cardioSounds || '-'}</div>`;
 
