@@ -2748,61 +2748,94 @@
 
                 ${cfg.obsGyn ? `
                 <div class="group-card" style="background:#fce7f3; border-color:#f472b6; margin-bottom:12px; padding:12px;">
-                    <span style="font-weight:800; font-size:0.82rem; color:#be185d; display:block; margin-bottom:8px;"><i class="fa-solid fa-person-pregnant"></i> تفاصيل النسائية والتوليد (Obstetrics & Gynecology)</span>
+                    <span style="font-weight:800; font-size:0.85rem; color:#be185d; display:block; margin-bottom:10px;"><i class="fa-solid fa-person-pregnant"></i> تفاصيل النسائية والتوليد (Obstetrics & Gynecology)</span>
                     <div style="display:flex; gap:8px; margin-bottom:8px;">
-                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">LMP (آخر دورة)</span><div class="input-wrapper"><input type="date" value="${v.obsLmp || ''}" oninput="updateVisitFieldData(${v.visitId}, 'obsLmp', this.value)" style="font-size:0.8rem;"></div></div>
-                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">EDD (موعد الولادة)</span><div class="input-wrapper"><input type="date" value="${v.obsEdd || ''}" oninput="updateVisitFieldData(${v.visitId}, 'obsEdd', this.value)" style="font-size:0.8rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">LMP (آخر دورة)</span><div class="input-wrapper"><input type="date" value="${v.obsLmp || ''}" oninput="updateVisitFieldData(${v.visitId}, 'obsLmp', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">EDD (موعد الولادة)</span><div class="input-wrapper"><input type="date" value="${v.obsEdd || ''}" oninput="updateVisitFieldData(${v.visitId}, 'obsEdd', this.value)" style="font-size:0.85rem;"></div></div>
                     </div>
-                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">Gravidity & Parity / ملاحظات الحمل</span><div class="input-wrapper"><input type="text" value="${v.obsNotes || ''}" placeholder="G3 P2 A1..." oninput="updateVisitFieldData(${v.visitId}, 'obsNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Gravidity (عدد مرات الحمل - G)</span><div class="input-wrapper"><input type="text" value="${v.obsG || ''}" placeholder="مثال: G3" oninput="updateVisitFieldData(${v.visitId}, 'obsG', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Parity (الولادات - P)</span><div class="input-wrapper"><input type="text" value="${v.obsP || ''}" placeholder="مثال: P2" oninput="updateVisitFieldData(${v.visitId}, 'obsP', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Abortions (الإسقاطات - A)</span><div class="input-wrapper"><input type="text" value="${v.obsA || ''}" placeholder="مثال: A1" oninput="updateVisitFieldData(${v.visitId}, 'obsA', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات السونار والفحص السريري للنسائية</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل السونار أو الفحص النسائي..." oninput="updateVisitFieldData(${v.visitId}, 'obsNotes', this.value)" style="font-size:0.85rem;">${v.obsNotes || ''}</textarea></div></div>
                 </div>
                 ` : ''}
 
                 ${cfg.ortho ? `
                 <div class="group-card" style="background:#fef3c7; border-color:#f59e0b; margin-bottom:12px; padding:12px;">
-                    <span style="font-weight:800; font-size:0.82rem; color:#b45309; display:block; margin-bottom:8px;"><i class="fa-solid fa-bone"></i> تقييم العظام والمفاصل (Orthopedics)</span>
-                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">مدى الحركة / درجة الخشونة / الفحص السريري</span><div class="input-wrapper"><input type="text" value="${v.orthoNotes || ''}" placeholder="خشونة مفصل الركبة اليمنى Grade II..." oninput="updateVisitFieldData(${v.visitId}, 'orthoNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                    <span style="font-weight:800; font-size:0.85rem; color:#b45309; display:block; margin-bottom:10px;"><i class="fa-solid fa-bone"></i> تقييم العظام والمفاصل والكسور (Orthopedics)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">المفصل / الإصابة المتأثرة</span><div class="input-wrapper"><input type="text" value="${v.orthoJoint || ''}" placeholder="مثال: مفصل الركبة اليمنى" oninput="updateVisitFieldData(${v.visitId}, 'orthoJoint', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">درجة الخشونة / الإصابة</span><div class="input-wrapper"><input type="text" value="${v.orthoGrade || ''}" placeholder="مثال: Grade II / خشونة متوسطة" oninput="updateVisitFieldData(${v.visitId}, 'orthoGrade', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مدى الحركة والفحص الفيزيائي (Range of Motion)</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب نتائج الفحص الحركي والفيزيائي..." oninput="updateVisitFieldData(${v.visitId}, 'orthoNotes', this.value)" style="font-size:0.85rem;">${v.orthoNotes || ''}</textarea></div></div>
                 </div>
                 ` : ''}
 
                 ${cfg.neuro ? `
                 <div class="group-card" style="background:#f3e8ff; border-color:#c084fc; margin-bottom:12px; padding:12px;">
-                    <span style="font-weight:800; font-size:0.82rem; color:#7e22ce; display:block; margin-bottom:8px;"><i class="fa-solid fa-brain"></i> فحص الجملة العصبية (Neurology)</span>
-                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">مقياس غلاسكو للوعي (GCS) / الفحص العصبي</span><div class="input-wrapper"><input type="text" value="${v.neuroNotes || ''}" placeholder="GCS 15/15, Cranial nerves intact..." oninput="updateVisitFieldData(${v.visitId}, 'neuroNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                    <span style="font-weight:800; font-size:0.85rem; color:#7e22ce; display:block; margin-bottom:10px;"><i class="fa-solid fa-brain"></i> فحص الجملة العصبية (Neurology)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مقياس غلاسكو للوعي (GCS)</span><div class="input-wrapper"><input type="text" value="${v.neuroGcs || ''}" placeholder="مثال: 15/15" oninput="updateVisitFieldData(${v.visitId}, 'neuroGcs', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الأعصاب القحفية (Cranial Nerves)</span><div class="input-wrapper"><input type="text" value="${v.neuroNerves || ''}" placeholder="مثال: Intact / سليمة" oninput="updateVisitFieldData(${v.visitId}, 'neuroNerves', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الفحص الحسي والحركي وملاحظات الأعصاب</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل الفحص العصبي..." oninput="updateVisitFieldData(${v.visitId}, 'neuroNotes', this.value)" style="font-size:0.85rem;">${v.neuroNotes || ''}</textarea></div></div>
                 </div>
                 ` : ''}
 
                 ${cfg.peds ? `
                 <div class="group-card" style="background:#e0f2fe; border-color:#38bdf8; margin-bottom:12px; padding:12px;">
-                    <span style="font-weight:800; font-size:0.82rem; color:#0369a1; display:block; margin-bottom:8px;"><i class="fa-solid fa-child"></i> فحص الأطفال والنمو (Pediatrics)</span>
-                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">مخطط النمو / جدول اللقاحات والملاحظات</span><div class="input-wrapper"><input type="text" value="${v.pedsNotes || ''}" placeholder="الوزن ضمن المعدل الطبيعي، لقاحات منجزة..." oninput="updateVisitFieldData(${v.visitId}, 'pedsNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                    <span style="font-weight:800; font-size:0.85rem; color:#0369a1; display:block; margin-bottom:10px;"><i class="fa-solid fa-child"></i> فحص الأطفال والنمو (Pediatrics)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حالة اللقاحات والمطعوم</span><div class="input-wrapper"><input type="text" value="${v.pedsVaccine || ''}" placeholder="مثال: مكتملة حسب العمر" oninput="updateVisitFieldData(${v.visitId}, 'pedsVaccine', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع التغذية</span><div class="input-wrapper"><input type="text" value="${v.pedsFeeding || ''}" placeholder="مثال: رضاعة طبيعية / صناعية" oninput="updateVisitFieldData(${v.visitId}, 'pedsFeeding', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مخطط النمو وملاحظات طب الأطفال</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل نمو الطفل والفحص..." oninput="updateVisitFieldData(${v.visitId}, 'pedsNotes', this.value)" style="font-size:0.85rem;">${v.pedsNotes || ''}</textarea></div></div>
                 </div>
                 ` : ''}
 
                 ${cfg.derm ? `
                 <div class="group-card" style="background:#ffedd5; border-color:#fb923c; margin-bottom:12px; padding:12px;">
-                    <span style="font-weight:800; font-size:0.82rem; color:#c2410c; display:block; margin-bottom:8px;"><i class="fa-solid fa-hand-dots"></i> فحص الجلدية والتناسلية (Dermatology)</span>
-                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">وصف الآفات الجلدية / التوزيع / الفحص</span><div class="input-wrapper"><input type="text" value="${v.dermNotes || ''}" placeholder="Plaque psoriasis on elbows..." oninput="updateVisitFieldData(${v.visitId}, 'dermNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                    <span style="font-weight:800; font-size:0.85rem; color:#c2410c; display:block; margin-bottom:10px;"><i class="fa-solid fa-hand-dots"></i> فحص الجلدية والتناسلية (Dermatology)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع الآفة الجلدية</span><div class="input-wrapper"><input type="text" value="${v.dermType || ''}" placeholder="مثال: Plaque / Papules" oninput="updateVisitFieldData(${v.visitId}, 'dermType', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مكان التوزيع في الجسم</span><div class="input-wrapper"><input type="text" value="${v.dermSite || ''}" placeholder="مثال: الوجه والذراعين" oninput="updateVisitFieldData(${v.visitId}, 'dermSite', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الفحص الجلدي ومصباح وود</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب وصف الطفح والتشخيص..." oninput="updateVisitFieldData(${v.visitId}, 'dermNotes', this.value)" style="font-size:0.85rem;">${v.dermNotes || ''}</textarea></div></div>
                 </div>
                 ` : ''}
 
                 ${cfg.ent ? `
                 <div class="group-card" style="background:#ecfdf5; border-color:#34d399; margin-bottom:12px; padding:12px;">
-                    <span style="font-weight:800; font-size:0.82rem; color:#047857; display:block; margin-bottom:8px;"><i class="fa-solid fa-ear-deaf"></i> فحص الأذن والأنف والحنجرة (ENT)</span>
-                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">فحص الأذن / اللوزتين / الجيوب الأنفية</span><div class="input-wrapper"><input type="text" value="${v.entNotes || ''}" placeholder="Acute tonsillitis, TM congested..." oninput="updateVisitFieldData(${v.visitId}, 'entNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                    <span style="font-weight:800; font-size:0.85rem; color:#047857; display:block; margin-bottom:10px;"><i class="fa-solid fa-ear-deaf"></i> فحص الأذن والأنف والحنجرة (ENT)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأذن (TM)</span><div class="input-wrapper"><input type="text" value="${v.entEar || ''}" placeholder="مثال: غشاء الطبل طبيعي / احمرار" oninput="updateVisitFieldData(${v.visitId}, 'entEar', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الحلق واللوزتين</span><div class="input-wrapper"><input type="text" value="${v.entThroat || ''}" placeholder="مثال: احمرار اللوزتين Acute Tonsillitis" oninput="updateVisitFieldData(${v.visitId}, 'entThroat', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأنف والجيوب وملاحظات ENT</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل فحص الأذن والأنف والحنجرة..." oninput="updateVisitFieldData(${v.visitId}, 'entNotes', this.value)" style="font-size:0.85rem;">${v.entNotes || ''}</textarea></div></div>
                 </div>
                 ` : ''}
 
                 ${cfg.ophthal ? `
                 <div class="group-card" style="background:#e0e7ff; border-color:#818cf8; margin-bottom:12px; padding:12px;">
-                    <span style="font-weight:800; font-size:0.82rem; color:#4338ca; display:block; margin-bottom:8px;"><i class="fa-solid fa-eye"></i> فحص العيون (Ophthalmology)</span>
-                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">حدة البصر (Visual Acuity) / ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalNotes || ''}" placeholder="VA RE: 6/6, LE: 6/12, IOP: 15 mmHg..." oninput="updateVisitFieldData(${v.visitId}, 'ophthalNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                    <span style="font-weight:800; font-size:0.85rem; color:#4338ca; display:block; margin-bottom:10px;"><i class="fa-solid fa-eye"></i> فحص العيون (Ophthalmology)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (Visual Acuity)</span><div class="input-wrapper"><input type="text" value="${v.ophthalVa || ''}" placeholder="RE: 6/6, LE: 6/9" oninput="updateVisitFieldData(${v.visitId}, 'ophthalVa', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalIop || ''}" placeholder="مثال: 15 mmHg" oninput="updateVisitFieldData(${v.visitId}, 'ophthalIop', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص قاع العين وملاحظات العيون</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل قاع العين والفحص..." oninput="updateVisitFieldData(${v.visitId}, 'ophthalNotes', this.value)" style="font-size:0.85rem;">${v.ophthalNotes || ''}</textarea></div></div>
                 </div>
                 ` : ''}
 
                 ${cfg.cardio ? `
                 <div class="group-card" style="background:#fee2e2; border-color:#f87171; margin-bottom:12px; padding:12px;">
-                    <span style="font-weight:800; font-size:0.82rem; color:#b91c1c; display:block; margin-bottom:8px;"><i class="fa-solid fa-heart-pulse"></i> فحص القلب والشرايين (Cardiology)</span>
-                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.72rem;">تخطيط القلب (ECG) / أصوات القلب / الفحص</span><div class="input-wrapper"><input type="text" value="${v.cardioNotes || ''}" placeholder="ECG: Normal sinus rhythm, S1 S2+" oninput="updateVisitFieldData(${v.visitId}, 'cardioNotes', this.value)" style="font-size:0.85rem;"></div></div>
+                    <span style="font-weight:800; font-size:0.85rem; color:#b91c1c; display:block; margin-bottom:10px;"><i class="fa-solid fa-heart-pulse"></i> فحص القلب والشرايين (Cardiology)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">تخطيط القلب (ECG)</span><div class="input-wrapper"><input type="text" value="${v.cardioEcg || ''}" placeholder="مثال: Normal Sinus Rhythm" oninput="updateVisitFieldData(${v.visitId}, 'cardioEcg', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">أصوات القلب (Heart Sounds)</span><div class="input-wrapper"><input type="text" value="${v.cardioSounds || ''}" placeholder="مثال: S1 S2 normal, no murmur" oninput="updateVisitFieldData(${v.visitId}, 'cardioSounds', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الفحص القلبي الإضافية</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب نتائج الفحص القلبي..." oninput="updateVisitFieldData(${v.visitId}, 'cardioNotes', this.value)" style="font-size:0.85rem;">${v.cardioNotes || ''}</textarea></div></div>
                 </div>
                 ` : ''}
 
