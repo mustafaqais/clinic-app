@@ -2254,44 +2254,53 @@ function updateBpFields(visitId) {
 
 function handleFileUpload(input, visitId) {
     if (isSubscriptionExpired) return;
-    if (input.files && input.files[0]) {
-        const file = input.files[0];
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const img = new Image();
-            img.src = e.target.result;
-            img.onload = function() {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                let width = img.width;
-                let height = img.height;
-                const maxDim = 800;
+    if (input.files && input.files.length > 0) {
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+        if (!visit) return;
 
-                if (width > height && width > maxDim) {
-                    height = Math.round((height * maxDim) / width);
-                    width = maxDim;
-                } else if (height > maxDim) {
-                    width = Math.round((width * maxDim) / height);
-                    height = maxDim;
-                }
+        if (!visit.attachments) visit.attachments = [];
 
-                canvas.width = width;
-                canvas.height = height;
-                ctx.drawImage(img, 0, 0, width, height);
-                const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+        const filesArray = Array.from(input.files);
+        let processedCount = 0;
 
-                const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-                if (!patient) return;
-                const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-                if (!visit) return;
+        filesArray.forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    let width = img.width;
+                    let height = img.height;
+                    const maxDim = 800;
 
-                if (!visit.attachments) visit.attachments = [];
-                visit.attachments.push({ name: file.name, dataUrl: compressedDataUrl });
-                savePatientToCloudAndLocal(patient);
-                renderVisits(patient.visits, false);
+                    if (width > height && width > maxDim) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    } else if (height > maxDim) {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+
+                    visit.attachments.push({ name: file.name, dataUrl: compressedDataUrl });
+                    processedCount++;
+
+                    if (processedCount === filesArray.length) {
+                        savePatientToCloudAndLocal(patient);
+                        renderVisits(patient.visits, false);
+                    }
+                };
             };
-        };
-        reader.readAsDataURL(file);
+            reader.readAsDataURL(file);
+        });
     }
 }
 
@@ -3021,8 +3030,8 @@ function renderVisits(visits, forceFullRender = true) {
                 <span class="field-label">Attachments & Medical Reports</span>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
                     <label style="flex:1; background:#f1f5f9; border:1px dashed #cbd5e1; border-radius:10px; padding:10px; text-align:center; font-size:0.8rem; font-weight:700; color:#475569; cursor:pointer;">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload Image / File
-                        <input type="file" accept="image/*" style="display:none;" onchange="handleFileUpload(this, ${v.visitId})">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> رفع صور متعددة / ملف
+                        <input type="file" accept="image/*" multiple style="display:none;" onchange="handleFileUpload(this, ${v.visitId})">
                     </label>
                     <button type="button" onclick="handleScannerScan(${v.visitId})" style="flex:1; background:#f0fdfa; border:1px dashed #0d9488; border-radius:10px; padding:10px; font-size:0.8rem; font-weight:700; color:#0d9488; cursor:pointer;">
                         <i class="fa-solid fa-camera"></i> Camera Scanner
