@@ -106,7 +106,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.27",
+            footer: "نظام عيادة ماستر المتقدم v17.28",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -268,7 +268,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.27",
+            footer: "Clinic Master Network v17.28",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -607,7 +607,7 @@
         const bar = document.getElementById('networkStatusBar');
         if (!navigator.onLine) {
             bar.classList.add('offline');
-            bar.innerText = "⚠️️ Offline Mode - Changes saved locally, will sync when online";
+            bar.innerText = "⚠ Offline Mode - Changes saved locally, will sync when online";
         } else {
             bar.classList.remove('offline');
             bar.style.display = 'none';
@@ -1393,10 +1393,10 @@
 
         if (h) {
             if (h < expH * 0.88) {
-                hStatus = 'قصر قامة / تقزم محتمل (Stunting - < P3)';
-                hColor = '#b91c1c';
+                wStatus = 'قصر قامة / تقزم محتمل (Stunting - < P3)';
+                wColor = '#b91c1c';
             } else if (h > expH * 1.12) {
-                hStatus = 'طول أعلى من المعدل (Above average)';
+                wStatus = 'طول أعلى من المعدل (Above average)';
                 wColor = '#0284c7';
             }
         }
@@ -1575,7 +1575,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.27",
+            version: "17.28",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -1884,35 +1884,131 @@
             `).join('');
     }
 
-    // الدالة المحدثة لتعمل بشكل مثالي ومضمون على الموبايل، الآيباد، والكمبيوتر
-    function exportPatientMedicalReportPDF() {
+    // نافذة التحميل المخصصة لتطبيق فايرفوكس PWA
+    function showPdfDownloadModal(dataUri, filename) {
+        let modal = document.getElementById('customPdfModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'customPdfModal';
+            modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; z-index:99999;';
+            modal.innerHTML = `
+                <div style="background:#ffffff; padding:22px; border-radius:16px; width:90%; max-width:340px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.3);">
+                    <i class="fa-solid fa-file-pdf" style="font-size:3rem; color:#0d9488; margin-bottom:10px;"></i>
+                    <h3 style="margin-bottom:8px; color:#0f172a; font-size:1.1rem; font-weight:800;">تم تجهيز تقرير الزيارة بنجاح</h3>
+                    <p style="color:#64748b; font-size:0.82rem; margin-bottom:16px; line-height:1.4;">اضغط على الزر أدناه لتحميل الملف مباشرة على جهازك:</p>
+                    <a id="customPdfDownloadLink" href="" download="" class="btn-main" style="display:block; background:#0d9488; color:#fff; padding:12px; border-radius:10px; text-decoration:none; font-weight:700; font-size:0.9rem; margin-bottom:10px;">تحميل الملف الآن</a>
+                    <button type="button" onclick="document.getElementById('customPdfModal').style.display='none'" style="background:#f1f5f9; color:#475569; border:none; padding:8px 16px; border-radius:8px; font-size:0.8rem; cursor:pointer; width:100%;">إلغاء</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        const link = document.getElementById('customPdfDownloadLink');
+        link.href = dataUri;
+        link.download = filename;
+        modal.style.display = 'flex';
+    }
+
+    // دالة تصدير تقرير الزيارة المحددة فقط عند الضغط على زر الـ PDF داخل بطاقة الزيارة
+    function exportSingleVisitPDF(visitId) {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
-
-        document.getElementById('pdfRepName').innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
-        document.getElementById('pdfRepAge').innerText = patient.age;
-        document.getElementById('pdfRepGender').innerText = patient.gender || 'N/A';
-        document.getElementById('pdfRepMarital').innerText = patient.marital || 'N/A';
-        document.getElementById('pdfRepJob').innerText = patient.job || 'N/A';
-        document.getElementById('pdfRepPhone').innerText = patient.phone || 'N/A';
-        document.getElementById('pdfRepDateLabel').innerText = `Generated on: ${new Date().toLocaleString()}`;
-
-        const visitsContainer = document.getElementById('pdfRepVisitsContainer');
-        const visits = patient.visits || [];
-
-        visitsContainer.innerHTML = visits.length === 0 
-            ? '<p style="font-size:0.85rem; color:#64748b;">No visits.</p>'
-            : visits.map((v, idx) => `
-                <div style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
-                    <div style="background: #0f172a; color: #ffffff; padding: 6px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; display: flex; justify-content: space-between;">
-                        <span>Visit #${visits.length - idx}</span><span>Date: ${v.date || 'N/A'}</span>
-                    </div>
-                    <div style="font-size: 0.8rem; margin-top: 6px;"><strong>Diagnosis & Notes:</strong> ${v.notes || 'None'}</div>
-                    ${v.drugs ? `<div style="font-size: 0.8rem; margin-top: 4px;"><strong>Medications:</strong> ${v.drugs}</div>` : ''}
-                </div>
-            `).join('');
+        const visit = (patient.visits || []).find(v => Number(v.visitId) === Number(visitId));
+        if (!visit) return;
 
         const exportContainer = document.getElementById('pdfReportExportContainer');
+        if (!exportContainer) {
+            alert('عنصر التصدير غير موجود في الصفحة.');
+            return;
+        }
+
+        let mh = visit.medHistory || {};
+        let conditionsText = mh.conditions && mh.conditions.length > 0 ? `<b>الأمراض المزمنة:</b> ${mh.conditions.join(', ')}` : '';
+        let mhFullText = '';
+        if (conditionsText || mh.otherCondition || mh.admission || mh.surgery || mh.family || mh.allergy || mh.chronicDrugs || mh.smoking || mh.notes) {
+            mhFullText = `
+                <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; margin-bottom: 12px; font-size: 0.8rem; line-height: 1.5;">
+                    <strong style="color: #0f172a; display: block; margin-bottom: 4px;">التاريخ المرضي والأمراض المزمنة:</strong>
+                    ${conditionsText ? conditionsText + '<br>' : ''}
+                    ${mh.otherCondition ? `<b>أخرى:</b> ${mh.otherCondition}<br>` : ''}
+                    ${mh.admission ? `<b>دخول المستشفى:</b> ${mh.admission}<br>` : ''}
+                    ${mh.surgery ? `<b>العمليات:</b> ${mh.surgery}<br>` : ''}
+                    ${mh.family ? `<b>التاريخ العائلي:</b> ${mh.family}<br>` : ''}
+                    ${mh.allergy ? `<b>حساسية الأدوية:</b> ${mh.allergy}<br>` : ''}
+                    ${mh.chronicDrugs ? `<b>أدوية مزمنة:</b> ${mh.chronicDrugs}<br>` : ''}
+                    ${mh.smoking ? `<b>التدخين:</b> ${mh.smoking} | الكحول: ${mh.alcohol || 'N/A'}<br>` : ''}
+                    ${mh.notes ? `<b>ملاحظات:</b> ${mh.notes}` : ''}
+                </div>
+            `;
+        }
+
+        let vitalsSummary = `
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; margin-bottom: 12px; font-size: 0.8rem; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                <div><strong>ضغط الدم (BP):</strong> ${v.bp || 'غير مسجل'}</div>
+                <div><strong>نبض القلب (HR):</strong> ${v.hr ? v.hr + ' bpm' : 'غير مسجل'}</div>
+                <div><strong>درجة الحرارة:</strong> ${v.temp ? v.temp + ' °C' : 'غير مسجل'}</div>
+                <div><strong>الوزن & BMI:</strong> ${v.bmiWeight ? v.bmiWeight + ' kg' : 'غير مسجل'} (BMI: ${v.bmiScore || '—'})</div>
+            </div>
+        `;
+
+        let specialtyHtml = '';
+        if (v.obsLmp || v.obsEdd || v.obsG) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#fce7f3; border:1px solid #f472b6; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>النسائية والتوليد:</strong> LMP: ${v.obsLmp || '-'} | EDD: ${v.obsEdd || '-'} | G: ${v.obsG || '-'} P: ${v.obsP || '-'} A: ${v.obsA || '-'}<br>${v.obsNotes || ''}</div>`;
+        }
+        if (v.orthoJoint || v.orthoGrade) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#fef3c7; border:1px solid #f59e0b; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>العظام والمفاصل:</strong> المفصل: ${v.orthoJoint || '-'} | الدرجة: ${v.orthoGrade || '-'}<br>${v.orthoNotes || ''}</div>`;
+        }
+        if (v.neuroGcs || v.neuroNerves) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#f3e8ff; border:1px solid #c084fc; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>الجملة العصبية:</strong> GCS: ${v.neuroGcs || '-'} | الأعصاب القحفية: ${v.neuroNerves || '-'}<br>${v.neuroNotes || ''}</div>`;
+        }
+        if (v.pedsGrowthAge || v.pedsVaccine) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#e0f2fe; border:1px solid #38bdf8; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>الأطفال والنمو:</strong> العمر: ${v.pedsGrowthAge || '-'} شهر | اللقاحات: ${v.pedsVaccine || '-'} | التغذية: ${v.pedsFeeding || '-'}<br>${v.pedsNotes || ''}</div>`;
+        }
+        if (v.dermType || v.dermSite) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#ffedd5; border:1px solid #fb923c; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>الجلدية:</strong> النوع: ${v.dermType || '-'} | المكان: ${v.dermSite || '-'}<br>${v.dermNotes || ''}</div>`;
+        }
+        if (v.entEar || v.entThroat) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#ecfdf5; border:1px solid #34d399; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>الأذن والأنف والحنجرة:</strong> الأذن: ${v.entEar || '-'} | الحلق: ${v.entThroat || '-'}<br>${v.entNotes || ''}</div>`;
+        }
+        if (v.ophthalVa || v.ophthalIop) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#e0e7ff; border:1px solid #818cf8; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>العيون:</strong> حدة البصر: ${v.ophthalVa || '-'} | ضغط العين: ${v.ophthalIop || '-'}<br>${v.ophthalNotes || ''}</div>`;
+        }
+        if (v.cardioEcg || v.cardioSounds) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#fee2e2; border:1px solid #f87171; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>القلب والشرايين:</strong> تخطيط القلب: ${v.cardioEcg || '-'} | أصوات القلب: ${v.cardioSounds || '-'}<br>${v.cardioNotes || ''}</div>`;
+        }
+
+        exportContainer.innerHTML = `
+            <div style="padding: 20px; font-family: 'Cairo', Arial, sans-serif; direction: rtl; text-align: right; background: #ffffff; color: #0f172a; width: 210mm; box-sizing: border-box;">
+                <div style="border-bottom: 3px solid #0d9488; padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 style="margin: 0; font-size: 1.3rem; color: #0f172a; font-weight: 850;">تقرير زيارة المراجعة الطبية</h2>
+                        <p style="margin: 3px 0 0 0; font-size: 0.75rem; color: #64748b;">نظام عيادة ماستر المتقدم - Visit Medical Report</p>
+                    </div>
+                    <div style="text-align: left; font-size: 0.7rem; color: #64748b;">
+                        تاريخ الإصدار: ${new Date().toLocaleString()}
+                    </div>
+                </div>
+
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-bottom: 14px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 0.8rem;">
+                    <div><strong>اسم المريض:</strong> ${patient.name + (patient.subName ? ` (${patient.subName})` : '')}</div>
+                    <div><strong>العمر:</strong> ${patient.age} سنة</div>
+                    <div><strong>الجنس:</strong> ${patient.gender || 'غير محدد'}</div>
+                    <div><strong>الحالة الزوجية:</strong> ${patient.marital || 'غير محدد'}</div>
+                    <div><strong>رقم الهاتف:</strong> ${patient.phone || 'غير محدد'}</div>
+                    <div><strong>تاريخ الزيارة:</strong> <span style="color:#0d9488; font-weight:700;">${v.date || 'غير محدد'}</span></div>
+                </div>
+
+                ${mhFullText}
+                ${vitalsSummary}
+                ${specialtyHtml}
+
+                ${v.labs ? `<div style="margin-bottom:10px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; font-size:0.8rem;"><strong>التحاليل المختبرية:</strong><br>${v.labs.replace(/\n/g, '<br>')}</div>` : ''}
+                ${v.scans ? `<div style="margin-bottom:10px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; font-size:0.8rem;"><strong>الأشعة والفحوصات:</strong><br>${v.scans.replace(/\n/g, '<br>')}</div>` : ''}
+                ${v.notes ? `<div style="margin-bottom:10px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; font-size:0.8rem;"><strong>التشخيص والملاحظات:</strong><br>${v.notes.replace(/\n/g, '<br>')}</div>` : ''}
+                ${v.drugs ? `<div style="margin-bottom:10px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px; font-size:0.8rem;"><strong>الأدوية والعلاجات الموصوفة (RX):</strong><br>${v.drugs.replace(/\n/g, '<br>')}</div>` : ''}
+            </div>
+        `;
+
         exportContainer.style.visibility = 'visible';
 
         html2canvas(exportContainer, { scale: 2, useCORS: true, logging: false }).then(canvas => {
@@ -1920,13 +2016,36 @@
             const pdf = new jsPDF('portrait', 'mm', 'a4');
             const imgWidth = 210;
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
-            pdf.save(`Medical_Report_${patient.name.replace(/\s+/g, '_')}.pdf`);
+            
+            let heightLeft = imgHeight;
+            let position = 0;
+            let pageHeight = 295;
+
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            const dataUri = pdf.output('datauristring');
             exportContainer.style.visibility = 'hidden';
+
+            showPdfDownloadModal(dataUri, `Visit_Report_${patient.name.replace(/\s+/g, '_')}_${v.date || 'date'}.pdf`);
         }).catch(err => {
-            alert('حدث خطأ أثناء تحميل التقرير: ' + err.message);
+            alert('حدث خطأ أثناء تحميل تقرير الزيارة: ' + err.message);
             exportContainer.style.visibility = 'hidden';
         });
+    }
+
+    // دالة وهمية متوافقة للاستدعاء القديم إذا تطلب الأمر
+    function exportPatientMedicalReportPDF() {
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient || !patient.visits || patient.visits.length === 0) return;
+        exportSingleVisitPDF(patient.visits[0].visitId);
     }
 
     function openBmiCalculator(visitId) {
@@ -1954,222 +2073,3 @@
                     visit.bmiHeight = h;
                     if (w && h && Number(h) > 0) {
                         const hM = Number(h) / 100;
-                        visit.bmiScore = (Number(w) / (hM * hM)).toFixed(1);
-                    } else {
-                        visit.bmiScore = '';
-                    }
-                    savePatientToCloudAndLocal(patient);
-                    renderVisits(patient.visits, false);
-                }
-            }
-        }
-        document.getElementById('bmiCalculatorModal').style.display = 'none';
-    }
-
-    function calculateBmiLive() {
-        const w = parseFloat(document.getElementById('bmiWeight').value);
-        const h = parseFloat(document.getElementById('bmiHeight').value);
-        const scoreDisplay = document.getElementById('bmiScoreDisplay');
-        const badgeContainer = document.getElementById('bmiBadgeContainer');
-
-        if (!w || !h || w <= 0 || h <= 0) {
-            scoreDisplay.innerText = '—';
-            badgeContainer.innerHTML = '<span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>';
-            return;
-        }
-
-        const hM = h / 100;
-        const bmi = (w / (hM * hM)).toFixed(1);
-        scoreDisplay.innerText = bmi;
-
-        let badgeText = '';
-        let badgeStyle = '';
-
-        if (bmi < 18.5) {
-            badgeText = `نحافة (Underweight: ${bmi})`;
-            badgeStyle = 'background:#fef3c7; color:#d97706;';
-        } else if (bmi >= 18.5 && bmi <= 24.9) {
-            badgeText = `وزن طبيعي (Normal: ${bmi})`;
-            badgeStyle = 'background:#dcfce7; color:#15803d;';
-        } else if (bmi >= 25 && bmi <= 29.9) {
-            badgeText = `زيادة وزن (Overweight: ${bmi})`;
-            badgeStyle = 'background:#ffedd5; color:#c2410c;';
-        } else {
-            badgeText = `سمنة (Obese: ${bmi})`;
-            badgeStyle = 'background:#fee2e2; color:#b91c1c;';
-        }
-
-        badgeContainer.innerHTML = `<span class="bmi-badge" style="${badgeStyle}">${badgeText}</span>`;
-    }
-
-    function autoResizeTextarea(textarea) {
-        textarea.style.height = 'auto';
-        textarea.style.height = (textarea.scrollHeight) + 'px';
-    }
-
-    function handleDrugsInput(textarea, visitId) {
-        if (isUserSecretary || isSubscriptionExpired) return;
-        autoResizeTextarea(textarea);
-        handleLiveInput(textarea, 'drugs', visitId);
-    }
-
-    function handleDrugsKeyDown(event, textarea, visitId) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            const start = textarea.selectionStart;
-            const end = textarea.selectionEnd;
-            textarea.value = textarea.value.substring(0, start) + '\n\n' + textarea.value.substring(end);
-            textarea.selectionStart = textarea.selectionEnd = start + 2;
-            autoResizeTextarea(textarea);
-            handleLiveInput(textarea, 'drugs', visitId);
-        }
-    }
-
-    function handleLiveInput(textarea, category, visitId) {
-        if (isUserSecretary || isSubscriptionExpired) return;
-        autoResizeTextarea(textarea);
-        const val = textarea.value.trim();
-        const box = document.getElementById(`suggestions-${category}-${visitId}`);
-        const saveBar = document.getElementById(`save-bar-${category}-${visitId}`);
-        
-        if (!val || val.length < 1) {
-            if (box) box.style.display = 'none';
-            if (saveBar) saveBar.style.display = 'none';
-            updateVisitFieldData(visitId, category, textarea.value);
-            return;
-        }
-
-        const lines = textarea.value.split('\n');
-        const currentLine = lines[lines.length - 1].trim();
-
-        if (currentLine.length > 0) {
-            if (saveBar) {
-                saveBar.style.display = 'flex';
-                document.getElementById(`line-text-${category}-${visitId}`).innerText = currentLine;
-            }
-            const terms = medicalDict[category] || [];
-            const matches = terms.filter(t => t.toLowerCase().includes(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
-
-            if (matches.length > 0 && box) {
-                box.innerHTML = matches.map(m => `<div class="suggestion-item" onmousedown="selectSuggestion('${category}', ${visitId}, '${m.replace(/'/g, "\\'")}')">${m}</div>`).join('');
-                box.style.display = 'block';
-            } else if (box) {
-                box.style.display = 'none';
-            }
-        } else {
-            if (saveBar) saveBar.style.display = 'none';
-            if (box) box.style.display = 'none';
-        }
-
-        updateVisitFieldData(visitId, category, textarea.value);
-    }
-
-    function selectSuggestion(category, visitId, term) {
-        const textarea = document.getElementById(`${category === 'drugs' ? 'vDrugs' : category === 'labs' ? 'vLabs' : category === 'scans' ? 'vScans' : 'vNotes'}-${visitId}`);
-        if (!textarea) return;
-
-        const lines = textarea.value.split('\n');
-        lines[lines.length - 1] = term;
-        textarea.value = lines.join('\n') + '\n';
-        autoResizeTextarea(textarea);
-
-        document.getElementById(`suggestions-${category}-${visitId}`).style.display = 'none';
-        document.getElementById(`save-bar-${category}-${visitId}`).style.display = 'none';
-        updateVisitFieldData(visitId, category, textarea.value);
-        textarea.focus();
-    }
-
-    function hideSuggestions(category, visitId) {
-        setTimeout(() => {
-            const box = document.getElementById(`suggestions-${category}-${visitId}`);
-            const bar = document.getElementById(`save-bar-${category}-${visitId}`);
-            if (box) box.style.display = 'none';
-            if (bar) bar.style.display = 'none';
-        }, 200);
-    }
-
-    function saveLineToDict(event, category, visitId) {
-        event.preventDefault();
-        const textSpan = document.getElementById(`line-text-${category}-${visitId}`);
-        if (!textSpan) return;
-        const lineText = textSpan.innerText.trim();
-        if (lineText && medicalDict[category] && !medicalDict[category].includes(lineText)) {
-            medicalDict[category].push(lineText);
-            saveSettingsToCloudAndLocal();
-            const btn = document.getElementById(`btn-save-${category}-${visitId}`);
-            if (btn) {
-                btn.innerText = 'Saved!';
-                btn.classList.add('saved');
-                setTimeout(() => {
-                    btn.innerText = 'Save';
-                    btn.classList.remove('saved');
-                    document.getElementById(`save-bar-${category}-${visitId}`).style.display = 'none';
-                }, 1000);
-            }
-        }
-    }
-
-    function handleMhLiveInput(inputEl, inputKey) {
-        autoResizeTextarea(inputEl);
-        const val = inputEl.value.trim();
-        const box = document.getElementById(`suggestions-${inputKey}`);
-        const saveBar = document.getElementById(`save-bar-${inputKey}`);
-
-        if (!val || val.length < 1) {
-            if (box) box.style.display = 'none';
-            if (saveBar) saveBar.style.display = 'none';
-            return;
-        }
-
-        const lines = inputEl.value.split('\n');
-        const currentLine = lines[lines.length - 1].trim();
-
-        if (currentLine.length > 0) {
-            if (saveBar) {
-                saveBar.style.display = 'flex';
-                document.getElementById(`line-text-${inputKey}`).innerText = currentLine;
-            }
-            const terms = medicalDict.mh_history || [];
-            const matches = terms.filter(t => t.toLowerCase().includes(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
-
-            if (matches.length > 0 && box) {
-                box.innerHTML = matches.map(m => `<div class="suggestion-item" onmousedown="selectMhSuggestion('${inputKey}', '${m.replace(/'/g, "\\'")}')">${m}</div>`).join('');
-                box.style.display = 'block';
-            } else if (box) {
-                box.style.display = 'none';
-            }
-        } else {
-            if (saveBar) saveBar.style.display = 'none';
-            if (box) box.style.display = 'none';
-        }
-    }
-
-    function selectMhSuggestion(inputKey, term) {
-        const el = inputKey === 'mh_other' ? document.getElementById('mh-cd-other') : document.getElementById(`mh-${inputKey.replace('mh_', '')}`);
-        if (!el) return;
-
-        const lines = el.value.split('\n');
-        lines[lines.length - 1] = term;
-        el.value = lines.join('\n') + '\n';
-        autoResizeTextarea(el);
-
-        document.getElementById(`suggestions-${inputKey}`).style.display = 'none';
-        document.getElementById(`save-bar-${inputKey}`).style.display = 'none';
-        el.focus();
-    }
-
-    function hideMhSuggestions(inputKey) {
-        setTimeout(() => {
-            const box = document.getElementById(`suggestions-${inputKey}`);
-            const bar = document.getElementById(`save-bar-${inputKey}`);
-            if (box) box.style.display = 'none';
-            if (bar) bar.style.display = 'none';
-        }, 200);
-    }
-
-    function saveMhLineToDict(event, inputKey) {
-        event.preventDefault();
-        const textSpan = document.getElementById(`line-text-${inputKey}`);
-        if (!textSpan) return;
-        const lineText = textSpan.innerText.trim();
-        if (lineText && !medicalDict.mh_history.includes(lineText)
