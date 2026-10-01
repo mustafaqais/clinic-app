@@ -607,7 +607,7 @@
         const bar = document.getElementById('networkStatusBar');
         if (!navigator.onLine) {
             bar.classList.add('offline');
-            bar.innerText = "⚠️️ Offline Mode - Changes saved locally, will sync when online";
+            bar.innerText = "⚠ Offline Mode - Changes saved locally, will sync when online";
         } else {
             bar.classList.remove('offline');
             bar.style.display = 'none';
@@ -1884,7 +1884,7 @@
             `).join('');
     }
 
-    // الدالة المحدثة لتعمل بشكل مثالي ومضمون على الموبايل، الآيباد، والكمبيوتر
+    // دالة تصدير تقرير المريض الشامل متوافقة مع فايرفوكس والموبايل والكمبيوتر (باستخدام Blob لتجنب about:blank)
     function exportPatientMedicalReportPDF() {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
@@ -1921,7 +1921,17 @@
             const imgWidth = 210;
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
             pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
-            pdf.save(`Medical_Report_${patient.name.replace(/\s+/g, '_')}.pdf`);
+            
+            const pdfBlob = pdf.output('blob');
+            const blobUrl = URL.createObjectURL(pdfBlob);
+            const downloadLink = document.createElement('a');
+            downloadLink.href = blobUrl;
+            downloadLink.download = `Medical_Report_${patient.name.replace(/\s+/g, '_')}.pdf`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+
             exportContainer.style.visibility = 'hidden';
         }).catch(err => {
             alert('حدث خطأ أثناء تحميل التقرير: ' + err.message);
@@ -2581,6 +2591,7 @@
         window.print();
     }
 
+    // دالة تصدير الروشتة PDF متوافقة مع فايرفوكس والموبايل (باستخدام Blob لتجنب about:blank)
     function openPrescriptionPDF() {
         const container = document.getElementById('rxModal').querySelector('.modal-body');
         html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
@@ -2589,7 +2600,18 @@
             const imgWidth = 210;
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
             pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
-            pdf.save(`Prescription_${Date.now()}.pdf`);
+            
+            const pdfBlob = pdf.output('blob');
+            const blobUrl = URL.createObjectURL(pdfBlob);
+            const downloadLink = document.createElement('a');
+            downloadLink.href = blobUrl;
+            downloadLink.download = `Prescription_${Date.now()}.pdf`;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        }).catch(err => {
+            alert('حدث خطأ: ' + err.message);
         });
     }
 
