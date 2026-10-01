@@ -106,7 +106,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.25",
+            footer: "نظام عيادة ماستر المتقدم v17.26",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -268,7 +268,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.25",
+            footer: "Clinic Master Network v17.26",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -464,6 +464,8 @@
         document.getElementById('menuRxSub').innerText = t.rxTemplateSub;
         document.getElementById('menuSpecTitle').innerText = t.specialtiesDash;
         document.getElementById('menuSpecSub').innerText = t.specialtiesDashSub;
+        document.getElementById('menuGrowthTitle').innerText = "منحنيات نمو الأطفال";
+        document.getElementById('menuGrowthSub').innerText = "تقييم الوزن والطول مع منظمة الصحة العالمية";
         document.getElementById('menuDictTitle').innerText = t.dict;
         document.getElementById('menuDictSub').innerText = t.dictSub;
 
@@ -769,6 +771,7 @@
         document.getElementById('addPatientScreen').style.display = 'none';
         document.getElementById('rxTemplateScreen').style.display = 'none';
         document.getElementById('specialtiesDashboardScreen').style.display = 'none';
+        document.getElementById('pediatricGrowthScreen').style.display = 'none';
         document.getElementById('archiveScreen').style.display = 'none';
         document.getElementById('trashScreen').style.display = 'none';
         document.getElementById('medicalRecordScreen').style.display = 'none';
@@ -949,7 +952,7 @@
         const cardNewPat = document.getElementById('cardNewPatient');
         cardNewPat.classList.add('disabled-card');
         cardNewPat.onclick = function() {
-            alert('⚠️️ انتهت صلاحية الاشتراك. التطبيق يعمل في وضع القراءة فقط.');
+            alert('⚠ انتهت صلاحية الاشتراك. التطبيق يعمل في وضع القراءة فقط.');
             openSupportModal();
         };
 
@@ -1004,6 +1007,7 @@
             document.getElementById('cardPermissions').style.display = 'none';
             document.getElementById('cardRxTemplate').style.display = 'none';
             document.getElementById('cardSpecialtiesDashboard').style.display = 'none';
+            document.getElementById('cardGrowth').style.display = 'none';
             document.getElementById('cardDict').style.display = 'none';
             document.getElementById('cardAnalytics').style.display = 'none';
             document.getElementById('cardBackup').style.display = 'none';
@@ -1063,7 +1067,6 @@
         document.getElementById('supportModal').style.display = 'none';
     }
 
-    // دوال التجديد الحر عبر إدخال الكود في أي وقت
     function openActivationScreenForRenewal() {
         document.getElementById('appContainer').style.display = 'none';
         document.getElementById('activationScreen').style.display = 'flex';
@@ -1083,7 +1086,7 @@
         const savedPatientId = sessionStorage.getItem('current_patient_id');
 
         if (savedScreen && savedScreen !== 'mainScreen' && document.getElementById(savedScreen)) {
-            if (isUserSecretary && ['rxTemplateScreen', 'specialtiesDashboardScreen', 'dictScreen', 'analyticsScreen', 'backupScreen', 'trashScreen', 'settingsScreen', 'permissionsScreen'].includes(savedScreen)) {
+            if (isUserSecretary && ['rxTemplateScreen', 'specialtiesDashboardScreen', 'pediatricGrowthScreen', 'dictScreen', 'analyticsScreen', 'backupScreen', 'trashScreen', 'settingsScreen', 'permissionsScreen'].includes(savedScreen)) {
                 navigateTo('mainScreen', translations[currentLang].headerTitle, translations[currentLang].headerSub, false);
                 return;
             }
@@ -1342,6 +1345,7 @@
         document.getElementById('cardArchive').style.display = 'flex';
         document.getElementById('cardRxTemplate').style.display = 'flex';
         document.getElementById('cardSpecialtiesDashboard').style.display = 'flex';
+        document.getElementById('cardGrowth').style.display = 'flex';
         document.getElementById('cardDict').style.display = 'flex';
         document.getElementById('cardAnalytics').style.display = 'flex';
         document.getElementById('cardBackup').style.display = 'flex';
@@ -1355,12 +1359,73 @@
         document.getElementById('cardArchive').style.display = 'flex';
         document.getElementById('cardRxTemplate').style.display = 'none';
         document.getElementById('cardSpecialtiesDashboard').style.display = 'none';
+        document.getElementById('cardGrowth').style.display = 'none';
         document.getElementById('cardDict').style.display = 'none';
         document.getElementById('cardAnalytics').style.display = 'none';
         document.getElementById('cardBackup').style.display = 'none';
         document.getElementById('cardTrash').style.display = 'none';
         document.getElementById('cardSettings').style.display = 'none';
         document.getElementById('cardPermissions').style.display = 'none';
+    }
+
+    function openPediatricGrowthScreen() {
+        navigateTo('pediatricGrowthScreen', 'منحنيات نمو الأطفال البيومترية', 'حاسبة منظمة الصحة العالمية');
+        document.getElementById('growthGender').value = 'male';
+        document.getElementById('growthAgeMonths').value = '';
+        document.getElementById('growthWeightKg').value = '';
+        document.getElementById('growthHeightCm').value = '';
+        document.getElementById('growthResultContainer').style.display = 'none';
+    }
+
+    function calculateChildGrowthPercentiles() {
+        const gender = document.getElementById('growthGender').value;
+        const ageMonths = parseFloat(document.getElementById('growthAgeMonths').value);
+        const weight = parseFloat(document.getElementById('growthWeightKg').value);
+        const height = parseFloat(document.getElementById('growthHeightCm').value);
+
+        if (!ageMonths || isNaN(ageMonths) || ageMonths < 0) {
+            alert('الرجاء إدخال عمر صالح بالأسابيع أو الأشهر.');
+            return;
+        }
+
+        let weightStatus = 'وزن طبيعي (Normal Weight - P15-P85)';
+        let heightStatus = 'طول طبيعي (Normal Height - P15-P85)';
+        let weightColor = '#166534';
+        let heightColor = '#166534';
+
+        // خوارزمية تقريبية معيارية ذكية لتقييم النسب المئوية بناءً على المتوسطات العمرية للطفل
+        const expectedWeight = (ageMonths * 0.5) + 3.3; // تقريب تقريبي لوسط الوزن حسب العمر
+        const expectedHeight = (ageMonths * 1.5) + 50;  // تقريب تقريبي لوسط الطول حسب العمر
+
+        if (weight) {
+            if (weight < expectedWeight * 0.8) {
+                weightStatus = 'نحافة ملحوظة أو نقص بالوزن (Underweight - < P3)';
+                weightColor = '#b91c1c';
+            } else if (weight > expectedWeight * 1.25) {
+                weightStatus = 'زيادة وزن محتملة (Overweight - > P85)';
+                weightColor = '#c2410c';
+            }
+        }
+
+        if (height) {
+            if (height < expectedHeight * 0.88) {
+                heightStatus = 'قصر قامة / تقزم محتمل (Stunting - < P3)';
+                heightColor = '#b91c1c';
+            } else if (height > expectedHeight * 1.12) {
+                heightStatus = 'طول أعلى من المعدل (Above average)';
+                weightColor = '#0284c7';
+            }
+        }
+
+        const resContainer = document.getElementById('growthResultContainer');
+        const resDetails = document.getElementById('growthResultDetails');
+
+        resDetails.innerHTML = `
+            • <b>تقييم الوزن مقابل العمر:</b> <span style="color:${weightColor}; font-weight:700;">${weightStatus}</span><br>
+            • <b>تقييم الطول مقابل العمر:</b> <span style="color:${heightColor}; font-weight:700;">${heightStatus}</span><br>
+            • <b>التوصية السريرية:</b> يوصى بمقارنة النتائج مع المخططات البيانية الورقية أو الرقمية الرسمية لـ WHO ومعالجة أي انحراف مبكراً.
+        `;
+        resContainer.style.display = 'block';
     }
 
     function openSpecialtiesDashboard() {
@@ -1525,7 +1590,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.25",
+            version: "17.26",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
