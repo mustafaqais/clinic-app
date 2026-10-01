@@ -106,7 +106,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.19",
+            footer: "نظام عيادة ماستر المتقدم v17.23",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -268,7 +268,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.19",
+            footer: "Clinic Master Network v17.23",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -781,14 +781,17 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById('pDate').value = getTodayFormatted();
+        const pDateEl = document.getElementById('pDate');
+        if (pDateEl) pDateEl.value = getTodayFormatted();
         applyLanguage();
         applyDarkModeState();
 
         if (!navigator.onLine) {
             const bar = document.getElementById('networkStatusBar');
-            bar.classList.add('offline');
-            bar.style.display = 'block';
+            if (bar) {
+                bar.classList.add('offline');
+                bar.style.display = 'block';
+            }
         }
 
         auth.onAuthStateChanged(async user => {
@@ -889,9 +892,12 @@
                 isUserSecretary = false;
                 isSubscriptionExpired = false;
                 sessionStorage.removeItem('target_doctor_uid');
-                document.getElementById('activationScreen').style.display = 'none';
-                document.getElementById('appContainer').style.display = 'none';
-                document.getElementById('authScreen').style.display = 'flex';
+                const activScreen = document.getElementById('activationScreen');
+                const appCont = document.getElementById('appContainer');
+                const authScreen = document.getElementById('authScreen');
+                if (activScreen) activScreen.style.display = 'none';
+                if (appCont) appCont.style.display = 'none';
+                if (authScreen) authScreen.style.display = 'flex';
             }
         });
 
@@ -1502,7 +1508,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.19",
+            version: "17.23",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
