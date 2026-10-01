@@ -106,7 +106,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.26",
+            footer: "نظام عيادة ماستر المتقدم v17.27",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -268,7 +268,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.26",
+            footer: "Clinic Master Network v17.27",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -464,8 +464,6 @@
         document.getElementById('menuRxSub').innerText = t.rxTemplateSub;
         document.getElementById('menuSpecTitle').innerText = t.specialtiesDash;
         document.getElementById('menuSpecSub').innerText = t.specialtiesDashSub;
-        document.getElementById('menuGrowthTitle').innerText = "منحنيات نمو الأطفال";
-        document.getElementById('menuGrowthSub').innerText = "تقييم الوزن والطول مع منظمة الصحة العالمية";
         document.getElementById('menuDictTitle').innerText = t.dict;
         document.getElementById('menuDictSub').innerText = t.dictSub;
 
@@ -771,7 +769,6 @@
         document.getElementById('addPatientScreen').style.display = 'none';
         document.getElementById('rxTemplateScreen').style.display = 'none';
         document.getElementById('specialtiesDashboardScreen').style.display = 'none';
-        document.getElementById('pediatricGrowthScreen').style.display = 'none';
         document.getElementById('archiveScreen').style.display = 'none';
         document.getElementById('trashScreen').style.display = 'none';
         document.getElementById('medicalRecordScreen').style.display = 'none';
@@ -1007,7 +1004,6 @@
             document.getElementById('cardPermissions').style.display = 'none';
             document.getElementById('cardRxTemplate').style.display = 'none';
             document.getElementById('cardSpecialtiesDashboard').style.display = 'none';
-            document.getElementById('cardGrowth').style.display = 'none';
             document.getElementById('cardDict').style.display = 'none';
             document.getElementById('cardAnalytics').style.display = 'none';
             document.getElementById('cardBackup').style.display = 'none';
@@ -1086,7 +1082,7 @@
         const savedPatientId = sessionStorage.getItem('current_patient_id');
 
         if (savedScreen && savedScreen !== 'mainScreen' && document.getElementById(savedScreen)) {
-            if (isUserSecretary && ['rxTemplateScreen', 'specialtiesDashboardScreen', 'pediatricGrowthScreen', 'dictScreen', 'analyticsScreen', 'backupScreen', 'trashScreen', 'settingsScreen', 'permissionsScreen'].includes(savedScreen)) {
+            if (isUserSecretary && ['rxTemplateScreen', 'specialtiesDashboardScreen', 'dictScreen', 'analyticsScreen', 'backupScreen', 'trashScreen', 'settingsScreen', 'permissionsScreen'].includes(savedScreen)) {
                 navigateTo('mainScreen', translations[currentLang].headerTitle, translations[currentLang].headerSub, false);
                 return;
             }
@@ -1345,7 +1341,6 @@
         document.getElementById('cardArchive').style.display = 'flex';
         document.getElementById('cardRxTemplate').style.display = 'flex';
         document.getElementById('cardSpecialtiesDashboard').style.display = 'flex';
-        document.getElementById('cardGrowth').style.display = 'flex';
         document.getElementById('cardDict').style.display = 'flex';
         document.getElementById('cardAnalytics').style.display = 'flex';
         document.getElementById('cardBackup').style.display = 'flex';
@@ -1359,7 +1354,6 @@
         document.getElementById('cardArchive').style.display = 'flex';
         document.getElementById('cardRxTemplate').style.display = 'none';
         document.getElementById('cardSpecialtiesDashboard').style.display = 'none';
-        document.getElementById('cardGrowth').style.display = 'none';
         document.getElementById('cardDict').style.display = 'none';
         document.getElementById('cardAnalytics').style.display = 'none';
         document.getElementById('cardBackup').style.display = 'none';
@@ -1368,64 +1362,55 @@
         document.getElementById('cardPermissions').style.display = 'none';
     }
 
-    function openPediatricGrowthScreen() {
-        navigateTo('pediatricGrowthScreen', 'منحنيات نمو الأطفال البيومترية', 'حاسبة منظمة الصحة العالمية');
-        document.getElementById('growthGender').value = 'male';
-        document.getElementById('growthAgeMonths').value = '';
-        document.getElementById('growthWeightKg').value = '';
-        document.getElementById('growthHeightCm').value = '';
-        document.getElementById('growthResultContainer').style.display = 'none';
-    }
+    function calculateVisitGrowthPercentiles(visitId) {
+        const ageM = parseFloat(document.getElementById(`growthAgeM-${visitId}`).value);
+        const w = parseFloat(document.getElementById(`growthW-${visitId}`).value);
+        const h = parseFloat(document.getElementById(`growthH-${visitId}`).value);
+        const resEl = document.getElementById(`growthRes-${visitId}`);
 
-    function calculateChildGrowthPercentiles() {
-        const gender = document.getElementById('growthGender').value;
-        const ageMonths = parseFloat(document.getElementById('growthAgeMonths').value);
-        const weight = parseFloat(document.getElementById('growthWeightKg').value);
-        const height = parseFloat(document.getElementById('growthHeightCm').value);
-
-        if (!ageMonths || isNaN(ageMonths) || ageMonths < 0) {
-            alert('الرجاء إدخال عمر صالح بالأسابيع أو الأشهر.');
+        if (!ageM || isNaN(ageM) || ageM < 0) {
+            alert('الرجاء إدخال عمر الطفل بالأشهر صالحاً.');
             return;
         }
 
-        let weightStatus = 'وزن طبيعي (Normal Weight - P15-P85)';
-        let heightStatus = 'طول طبيعي (Normal Height - P15-P85)';
-        let weightColor = '#166534';
-        let heightColor = '#166534';
+        let wStatus = 'وزن طبيعي (Normal Weight - P15-P85)';
+        let hStatus = 'طول طبيعي (Normal Height - P15-P85)';
+        let wColor = '#166534';
+        let hColor = '#166534';
 
-        // خوارزمية تقريبية معيارية ذكية لتقييم النسب المئوية بناءً على المتوسطات العمرية للطفل
-        const expectedWeight = (ageMonths * 0.5) + 3.3; // تقريب تقريبي لوسط الوزن حسب العمر
-        const expectedHeight = (ageMonths * 1.5) + 50;  // تقريب تقريبي لوسط الطول حسب العمر
+        const expW = (ageM * 0.5) + 3.3;
+        const expH = (ageM * 1.5) + 50;
 
-        if (weight) {
-            if (weight < expectedWeight * 0.8) {
-                weightStatus = 'نحافة ملحوظة أو نقص بالوزن (Underweight - < P3)';
-                weightColor = '#b91c1c';
-            } else if (weight > expectedWeight * 1.25) {
-                weightStatus = 'زيادة وزن محتملة (Overweight - > P85)';
-                weightColor = '#c2410c';
+        if (w) {
+            if (w < expW * 0.8) {
+                wStatus = 'نحافة ملحوظة أو نقص بالوزن (Underweight - < P3)';
+                wColor = '#b91c1c';
+            } else if (w > expW * 1.25) {
+                wStatus = 'زيادة وزن محتملة (Overweight - > P85)';
+                wColor = '#c2410c';
             }
         }
 
-        if (height) {
-            if (height < expectedHeight * 0.88) {
-                heightStatus = 'قصر قامة / تقزم محتمل (Stunting - < P3)';
-                heightColor = '#b91c1c';
-            } else if (height > expectedHeight * 1.12) {
-                heightStatus = 'طول أعلى من المعدل (Above average)';
-                weightColor = '#0284c7';
+        if (h) {
+            if (h < expH * 0.88) {
+                hStatus = 'قصر قامة / تقزم محتمل (Stunting - < P3)';
+                hColor = '#b91c1c';
+            } else if (h > expH * 1.12) {
+                hStatus = 'طول أعلى من المعدل (Above average)';
+                wColor = '#0284c7';
             }
         }
 
-        const resContainer = document.getElementById('growthResultContainer');
-        const resDetails = document.getElementById('growthResultDetails');
-
-        resDetails.innerHTML = `
-            • <b>تقييم الوزن مقابل العمر:</b> <span style="color:${weightColor}; font-weight:700;">${weightStatus}</span><br>
-            • <b>تقييم الطول مقابل العمر:</b> <span style="color:${heightColor}; font-weight:700;">${heightStatus}</span><br>
-            • <b>التوصية السريرية:</b> يوصى بمقارنة النتائج مع المخططات البيانية الورقية أو الرقمية الرسمية لـ WHO ومعالجة أي انحراف مبكراً.
+        resEl.innerHTML = `
+            • <b>الوزن مقابل العمر:</b> <span style="color:${wColor};">${wStatus}</span><br>
+            • <b>الطول مقابل العمر:</b> <span style="color:${hColor};">${hStatus}</span><br>
+            • <b>توصية WHO:</b> متابعة المخطط البياني بانتظام.
         `;
-        resContainer.style.display = 'block';
+        resEl.style.display = 'block';
+
+        updateVisitFieldData(visitId, 'pedsGrowthAge', ageM);
+        updateVisitFieldData(visitId, 'pedsGrowthW', w);
+        updateVisitFieldData(visitId, 'pedsGrowthH', h);
     }
 
     function openSpecialtiesDashboard() {
@@ -1590,7 +1575,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.26",
+            version: "17.27",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -2899,12 +2884,27 @@
 
                 ${cfg.peds ? `
                 <div class="group-card" style="background:#e0f2fe; border-color:#38bdf8; margin-bottom:12px; padding:12px;">
-                    <span style="font-weight:800; font-size:0.85rem; color:#0369a1; display:block; margin-bottom:10px;"><i class="fa-solid fa-child"></i> فحص الأطفال والنمو (Pediatrics)</span>
+                    <span style="font-weight:800; font-size:0.88rem; color:#0369a1; display:block; margin-bottom:10px;"><i class="fa-solid fa-child-reaching"></i> فحص الأطفال ومنحنيات النمو (WHO Pediatrics & Growth Percentiles)</span>
+                    
+                    <div style="background:#ffffff; border:1px solid #bae6fd; border-radius:10px; padding:10px; margin-bottom:10px;">
+                        <span style="font-weight:700; font-size:0.78rem; color:#0284c7; display:block; margin-bottom:6px;"><i class="fa-solid fa-calculator"></i> حاسبة نمو الطفل السريعة (WHO Standards)</span>
+                        <div style="display:flex; gap:6px; margin-bottom:6px;">
+                            <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.7rem;">عمر الطفل (بالأشهر)</span><div class="input-wrapper"><input type="number" id="growthAgeM-${v.visitId}" value="${v.pedsGrowthAge || ''}" placeholder="مثال: 12" style="font-size:0.8rem;"></div></div>
+                            <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.7rem;">الوزن الحالي (كغ)</span><div class="input-wrapper"><input type="number" step="0.1" id="growthW-${v.visitId}" value="${v.pedsGrowthW || ''}" placeholder="10.5" style="font-size:0.8rem;"></div></div>
+                            <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.7rem;">الطول الحالي (سم)</span><div class="input-wrapper"><input type="number" step="0.1" id="growthH-${v.visitId}" value="${v.pedsGrowthH || ''}" placeholder="75.0" style="font-size:0.8rem;"></div></div>
+                        </div>
+                        <button type="button" class="btn-main" onclick="calculateVisitGrowthPercentiles(${v.visitId})" style="background:#0284c7; padding:6px; font-size:0.75rem; margin-top:4px;">حساب تقييم النمو الفوري</button>
+                        
+                        <div id="growthRes-${v.visitId}" style="display:${v.pedsGrowthAge ? 'block' : 'none'}; background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:8px; margin-top:8px; font-size:0.75rem; color:#14532d; line-height:1.5;">
+                            ${v.pedsGrowthAge ? `• تم حساب التقييم البيومتري للزيارة بنجاح.` : ''}
+                        </div>
+                    </div>
+
                     <div style="display:flex; gap:8px; margin-bottom:8px;">
                         <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حالة اللقاحات والمطعوم</span><div class="input-wrapper"><input type="text" value="${v.pedsVaccine || ''}" placeholder="مثال: مكتملة حسب العمر" oninput="updateVisitFieldData(${v.visitId}, 'pedsVaccine', this.value)" style="font-size:0.85rem;"></div></div>
                         <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع التغذية</span><div class="input-wrapper"><input type="text" value="${v.pedsFeeding || ''}" placeholder="مثال: رضاعة طبيعية / صناعية" oninput="updateVisitFieldData(${v.visitId}, 'pedsFeeding', this.value)" style="font-size:0.85rem;"></div></div>
                     </div>
-                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مخطط النمو وملاحظات طب الأطفال</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل نمو الطفل والفحص..." oninput="updateVisitFieldData(${v.visitId}, 'pedsNotes', this.value)" style="font-size:0.85rem;">${v.pedsNotes || ''}</textarea></div></div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات طب الأطفال والفحص السريري</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب ملاحظات الفحص..." oninput="updateVisitFieldData(${v.visitId}, 'pedsNotes', this.value)" style="font-size:0.85rem;">${v.pedsNotes || ''}</textarea></div></div>
                 </div>
                 ` : ''}
 
