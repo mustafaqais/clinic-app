@@ -1,724 +1,1055 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام عيادة ماستر المتقدم</title>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts Cairo -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <!-- Custom Stylesheet -->
-    <link rel="stylesheet" href="style.css">
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-    <!-- html2canvas & jsPDF for Reports -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Clinic Master System - Cloud Ultimate Edition v17.19</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
+    <link rel="apple-touch-icon" href="https://i.ibb.co/68n8910/1000111840.png">
+    <link rel="apple-touch-icon-precomposed" href="https://i.ibb.co/68n8910/1000111840.png">
+    <meta name="theme-color" content="#0f172a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Amiri:wght@400;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
+    <!-- ربط ملف التصميم الخارجي -->
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <!-- Network Status Bar -->
-    <div id="networkStatusBar" class="network-status-bar" style="display:none;"></div>
+<div class="mobile-container">
+    <div id="networkStatusBar" class="network-status-bar">⚠️ Offline Mode - Changes saved locally, will sync when online</div>
 
-    <!-- 1. Authentication Screen -->
-    <div id="authScreen" class="screen-container auth-screen" style="display:flex;">
-        <div class="auth-card">
-            <div class="auth-logo"><i class="fa-solid fa-user-doctor"></i></div>
-            <h2 id="authTitle">تسجيل الدخول</h2>
-            <p id="authSubText" class="auth-sub">تسجيل الدخول إلى نظام العيادة السحابي</p>
-            <form onsubmit="handleAuthSubmit(event)">
-                <div class="field-box">
-                    <span id="lblEmail" class="field-label">البريد الإلكتروني / رقم الموبايل</span>
-                    <div class="input-wrapper"><input type="text" id="authEmail" required placeholder="example@domain.com"></div>
+    <div id="authScreen" class="auth-screen">
+        <div style="position: absolute; top: 15px; right: 15px;">
+            <button onclick="toggleLanguage()" id="authLangBtn" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; color: #0f172a;">عربي / EN</button>
+        </div>
+        <div class="activ-icon"><i class="fa-solid fa-user-doctor"></i></div>
+        <div class="activ-title" id="authTitle">User Login</div>
+        <div class="activ-sub" id="authSubText">تسجيل الدخول إلى نظام العيادة السحابي</div>
+
+        <form id="authForm" class="auth-form" onsubmit="handleAuthSubmit(event)">
+            <div class="field-box" style="text-align: left; margin-bottom: 8px;">
+                <span class="field-label" id="lblEmail">البريد الإلكتروني / رقم الموبايل</span>
+                <div class="input-wrapper"><input type="text" id="authEmail" placeholder="user@clinic.com أو 07700000000" required></div>
+            </div>
+
+            <div class="field-box" id="registerPhoneBox" style="text-align: left; margin-bottom: 8px; display: none;">
+                <span class="field-label" id="lblRegPhone">رقم الموبايل (اختياري)</span>
+                <div class="input-wrapper"><input type="tel" id="regPhoneInput" placeholder="07XXXXXXXXX"></div>
+            </div>
+
+            <div class="field-box" style="text-align: left; margin-bottom: 4px;">
+                <span class="field-label" id="lblPass">كلمة المرور</span>
+                <div class="input-wrapper password-wrapper">
+                    <input type="password" id="authPassword" placeholder="••••••••" required>
+                    <i class="fa-solid fa-eye toggle-password" id="togglePasswordBtn" onclick="togglePasswordVisibility()"></i>
                 </div>
-                <div class="field-box" id="registerPhoneBox" style="display:none;">
-                    <span id="lblRegPhone" class="field-label">رقم الموبايل (اختياري)</span>
-                    <div class="input-wrapper"><input type="tel" id="regPhoneInput" placeholder="07700000000"></div>
-                </div>
-                <div class="field-box">
-                    <span id="lblPass" class="field-label">كلمة المرور</span>
-                    <div class="input-wrapper" style="position:relative;">
-                        <input type="password" id="authPassword" required placeholder="••••••••" style="padding-left: 40px;">
-                        <i class="fa-solid fa-eye" id="togglePasswordBtn" onclick="togglePasswordVisibility()" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); cursor:pointer; color:#64748b;"></i>
+            </div>
+
+            <div class="forgot-pass" id="forgotPassBtn" onclick="resetPassword()">هل نسيت كلمة المرور؟</div>
+            <button type="submit" class="btn-main" id="authSubmitBtn" style="margin-top: 6px;">تسجيل الدخول</button>
+        </form>
+
+        <div class="auth-switch" id="authSwitchText">
+            ليس لديك حساب؟ <span onclick="toggleAuthMode()">سجل الآن</span>
+        </div>
+    </div>
+
+    <div id="activationScreen" class="auth-screen" style="display: none;">
+        <div class="activ-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="activ-title" id="activTitle">Account Activation Required</div>
+        <div class="activ-sub" id="activSub">Please enter your 14-Day Trial, 7-Day Extension, or Annual Subscription code.</div>
+        <div class="field-box" style="width: 100%; max-width: 400px; text-align: left;">
+            <span class="field-label" id="lblActivCode">Activation / Subscription Code</span>
+            <div class="input-wrapper"><input type="text" id="activationInput" placeholder="Enter code..." style="text-align: center; letter-spacing: 2px; text-transform: uppercase;"></div>
+        </div>
+        <button class="btn-main" style="max-width: 400px;" onclick="verifyActivationCode()" id="btnActivate">Activate System</button>
+    </div>
+
+    <div id="appContainer" style="display: none; flex: 1; flex-direction: column; overflow: hidden;">
+        <div class="header">
+            <button id="backBtn" class="back-btn" onclick="goBackScreen()" style="display: none;">
+                <i class="fa-solid fa-arrow-left"></i> <span id="txtBack">Back</span>
+            </button>
+
+            <div class="menu-dropdown-container">
+                <button class="hamburger-btn" onclick="toggleDropdownMenu(event)" title="Menu">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div id="headerDropdownMenu" class="dropdown-menu">
+                    <div class="dropdown-item" onclick="toggleLanguage()">
+                        <i class="fa-solid fa-language" style="color: #d97706;"></i> <span id="dropLangText">عربي / EN</span>
+                    </div>
+                    <div class="dropdown-item" onclick="toggleDarkMode()">
+                        <i class="fa-solid fa-moon" style="color: #6366f1;" id="darkModeIcon"></i> <span id="dropDarkModeText">وضع الظلام الطبي</span>
+                    </div>
+                    <div class="dropdown-item" onclick="openSupportModal()">
+                        <i class="fa-solid fa-headset" style="color: #0284c7;"></i> <span id="dropSupportText">Technical Support</span>
+                    </div>
+                    <div class="dropdown-item danger" onclick="logoutUser()">
+                        <i class="fa-solid fa-right-from-bracket"></i> <span id="dropLogoutText">Logout</span>
                     </div>
                 </div>
-                <button type="submit" id="authSubmitBtn" class="btn-main">تسجيل الدخول</button>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px;">
-                    <span id="authSwitchText" class="auth-switch" onclick="toggleAuthMode()">ليس لديك حساب؟ <span>سجل الآن</span></span>
-                    <span id="forgotPassBtn" onclick="resetPassword()" style="font-size:0.8rem; color:#0d9488; cursor:pointer; font-weight:700;">نسيت كلمة المرور؟</span>
-                </div>
-            </form>
-        </div>
-    </div>
+            </div>
 
-    <!-- 2. Activation Screen -->
-    <div id="activationScreen" class="screen-container auth-screen" style="display:none;">
-        <div class="auth-card">
-            <div class="auth-logo" style="background:#e0f2fe; color:#0284c7;"><i class="fa-solid fa-key"></i></div>
-            <h2 id="activTitle">تفعيل الحساب مطلوب</h2>
-            <p id="activSub" class="auth-sub">يرجى إدخال رمز التفعيل الخاص بك للمتابعة.</p>
-            <div class="field-box">
-                <span id="lblActivCode" class="field-label">رمز التفعيل / الاشتراك</span>
-                <div class="input-wrapper"><input type="text" id="activationInput" placeholder="TRL-XXXXXXXX" style="text-transform:uppercase; text-align:center; font-weight:800; letter-spacing:1px;"></div>
-            </div>
-            <button type="button" id="btnActivate" onclick="verifyActivationCode()" class="btn-main">تفعيل النظام</button>
-        </div>
-    </div>
-
-    <!-- 3. Main App Container -->
-    <div id="appContainer" class="app-layout" style="display:none;">
-        
-        <!-- Header -->
-        <header class="app-header">
-            <div style="display:flex; align-items:center; gap:12px;">
-                <button id="backBtn" class="header-icon-btn" onclick="goBackScreen()" style="display:none;"><i class="fa-solid fa-arrow-right"></i> <span id="txtBack">رجوع</span></button>
-                <div>
-                    <h2 id="headerTitle">نظام عيادة ماستر</h2>
-                    <p id="headerSub">لوحة التحكم السحابية الآمنة</p>
-                </div>
-            </div>
-            <div style="display:flex; align-items:center; gap:8px;">
-                <button class="header-icon-btn" onclick="toggleDropdownMenu(event)"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-                <div id="headerDropdownMenu" class="header-dropdown-menu">
-                    <div onclick="toggleLanguage()"><i class="fa-solid fa-globe"></i> <span id="dropLangText">تغيير اللغة (عربي / English)</span></div>
-                    <div onclick="toggleDarkMode()"><i class="fa-solid fa-moon" id="darkModeIcon"></i> <span id="dropDarkModeText">وضع الظلام الطبي</span></div>
-                    <div onclick="openSupportModal()"><i class="fa-solid fa-headset"></i> <span id="dropSupportText">الدعم الفني والاشتراك</span></div>
-                    <div onclick="logoutUser()" style="color:#ef4444;"><i class="fa-solid fa-right-from-bracket"></i> <span id="dropLogoutText">تسجيل الخروج</span></div>
-                </div>
-            </div>
-        </header>
-
-        <!-- Subscription Status Banner -->
-        <div id="subStatusBanner" class="sub-status-banner" style="display:none;">
-            <div>
-                <h4 id="subBannerTitle">Active Subscription</h4>
-                <p id="subBannerText">Your subscription is active.</p>
-            </div>
+            <div class="header-icon"><i class="fa-solid fa-user-doctor"></i></div>
+            <h1 id="headerTitle">Clinic Master System</h1>
+            <p id="headerSub">Cloud Secure Dashboard</p>
         </div>
 
-        <!-- Founder Control Panel Section -->
-        <div id="founderControlPanel" class="founder-panel" style="display:none;">
-            <h3><i class="fa-solid fa-crown" style="color:#fbbf24;"></i> لوحة تحكم المؤسس (Founder Control)</h3>
-            <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-                <button onclick="generateNewKey('TRIAL')" class="btn-founder">توليد مفتاح تجريبي (14 يوم)</button>
-                <button onclick="generateNewKey('EXT')" class="btn-founder">توليد مفتاح تمديد (7 أيام)</button>
-                <button onclick="generateNewKey('ANNUAL')" class="btn-founder">توليد مفتاح سنوي (سنة كاملة)</button>
-            </div>
-            <div style="margin-top:10px; font-size:0.85rem; background:rgba(255,255,255,0.1); padding:8px 12px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
-                <span>Key: <strong id="dynamicFounderCode" style="letter-spacing:1px; color:#fbbf24;">---</strong></span>
-                <span id="keyTypeHint" style="font-size:0.75rem; color:#cbd5e1;">اختر نوع المفتاح بالأعلى</span>
-            </div>
-        </div>
-
-        <!-- Content Area / Screens -->
-        <main class="app-content">
-
-            <!-- A. Main Menu Screen -->
-            <div id="mainScreen" class="screen-view">
+        <div class="content">
+            <div id="mainScreen" style="display: none;">
                 
-                <div class="menu-section-title" id="secGroup1"><i class="fa-solid fa-stethoscope"></i> العمليات اليومية</div>
-                <div class="menu-grid">
-                    <div class="menu-card" id="cardNewPatient" onclick="navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub)">
-                        <div class="menu-card-icon" style="background:#ccfbf1; color:#0f766e;"><i class="fa-solid fa-user-plus"></i></div>
-                        <h4 id="menuNewPatientTitle">مريض جديد</h4>
-                        <p id="menuNewPatientSub">تسجيل وحفظ السجلات</p>
+                <div class="sub-status-banner" id="subStatusBanner" style="display: none;">
+                    <div class="sub-status-info">
+                        <h4 id="subBannerTitle"><i class="fa-solid fa-clock"></i> Active Subscription</h4>
+                        <p id="subBannerText">Loading remaining days...</p>
                     </div>
-                    <div class="menu-card" id="cardArchive" onclick="openPatientsArchive()">
-                        <div class="menu-card-icon" style="background:#e0f2fe; color:#0369a1;"><i class="fa-solid fa-folder-open"></i></div>
-                        <h4 id="menuArchiveTitle">أرشيف المرضى</h4>
-                        <p id="menuArchiveSub">البحث وسجل الزيارات</p>
+                    <button onclick="openSupportModal()" id="btnRenew" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:6px 10px; font-size:0.75rem; font-weight:700; cursor:pointer; white-space:nowrap;">Renew</button>
+                </div>
+
+                <div class="founder-panel" id="founderControlPanel" style="display: none;">
+                    <span style="font-size: 0.8rem; font-weight: 700; color: #0d9488;" id="founderPanelTitle">🔑 Code Generator (Founder):</span>
+                    <div style="display: flex; gap: 6px; margin: 6px 0;">
+                        <button onclick="generateNewKey('TRIAL')" style="flex:1; background:#0d9488; color:#fff; border:none; border-radius:6px; padding:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">14d Trial</button>
+                        <button onclick="generateNewKey('EXT')" style="flex:1; background:#d97706; color:#fff; border:none; border-radius:6px; padding:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">7d Extension</button>
+                        <button onclick="generateNewKey('ANNUAL')" style="flex:1; background:#4f46e5; color:#fff; border:none; border-radius:6px; padding:6px; font-size:0.72rem; font-weight:700; cursor:pointer;">1y Annual</button>
+                    </div>
+                    <div class="founder-code-display" id="dynamicFounderCode">Click buttons above to generate key</div>
+                    <span style="font-size: 0.7rem; color: #64748b;" id="keyTypeHint">Select type to create valid code.</span>
+                </div>
+
+                <div class="section-group">
+                    <div class="section-title" id="secGroup1"><i class="fa-solid fa-stethoscope"></i> Daily Operations</div>
+                    <div class="menu-grid">
+                        <div class="menu-card" id="cardNewPatient" onclick="navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub)">
+                            <div class="menu-icon"><i class="fa-solid fa-user-plus"></i></div>
+                            <div class="menu-info">
+                                <h3 id="menuNewPatientTitle">New Patient</h3>
+                                <p id="menuNewPatientSub">Register & save records</p>
+                            </div>
+                        </div>
+
+                        <div class="menu-card" id="cardArchive" onclick="openPatientsArchive()">
+                            <div class="menu-icon archive-icon"><i class="fa-solid fa-address-book"></i></div>
+                            <div class="menu-info">
+                                <h3 id="menuArchiveTitle">Patients Archive</h3>
+                                <p id="menuArchiveSub">Search & visit history</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="menu-section-title" id="secGroup2"><i class="fa-solid fa-file-prescription"></i> الوصفات والأدوات الطبية</div>
-                <div class="menu-grid">
-                    <div class="menu-card" id="cardRxTemplate" onclick="openRxTemplateManager()">
-                        <div class="menu-card-icon" style="background:#fae8ff; color:#a855f7;"><i class="fa-solid fa-file-image"></i></div>
-                        <h4 id="menuRxTitle">قالب الوصفة (RX)</h4>
-                        <p id="menuRxSub">صورة ترويسة الوصفة</p>
-                    </div>
-                    <div class="menu-card" id="cardSpecialtiesDashboard" onclick="openSpecialtiesDashboard()">
-                        <div class="menu-card-icon" style="background:#fef3c7; color:#d97706;"><i class="fa-solid fa-sliders"></i></div>
-                        <h4 id="menuSpecTitle">لوحة تحكم الاختصاصات</h4>
-                        <p id="menuSpecSub">تخصيص وتفعيل الحقول الطبية</p>
-                    </div>
-                    <div class="menu-card" id="cardDict" onclick="openDictionaryManager()">
-                        <div class="menu-card-icon" style="background:#f3e8ff; color:#7e22ce;"><i class="fa-solid fa-book-medical"></i></div>
-                        <h4 id="menuDictTitle">القاموس الطبي</h4>
-                        <p id="menuDictSub">إدارة الأدوية والجرعات</p>
+                <div class="section-group">
+                    <div class="section-title" id="secGroup2"><i class="fa-solid fa-file-prescription"></i> RX & Medical Tools</div>
+                    <div class="menu-grid">
+                        <div class="menu-card" id="cardRxTemplate" onclick="openRxTemplateManager()">
+                            <div class="menu-icon rx-icon"><i class="fa-solid fa-prescription-bottle-medical"></i></div>
+                            <div class="menu-info">
+                                <h3 id="menuRxTitle">RX Template</h3>
+                                <p id="menuRxSub">Prescription header image</p>
+                            </div>
+                        </div>
+
+                        <div class="menu-card" id="cardSpecialtiesDashboard" onclick="openSpecialtiesDashboard()">
+                            <div class="menu-icon spec-icon"><i class="fa-solid fa-sliders"></i></div>
+                            <div class="menu-info">
+                                <h3 id="menuSpecTitle">لوحة تحكم الاختصاصات</h3>
+                                <p id="menuSpecSub">تخصيص وتفعيل الحقول الطبية</p>
+                            </div>
+                        </div>
+
+                        <div class="menu-card" id="cardDict" onclick="openDictionaryManager()">
+                            <div class="menu-icon dict-icon"><i class="fa-solid fa-book-medical"></i></div>
+                            <div class="menu-info">
+                                <h3 id="menuDictTitle">Medical Dictionary</h3>
+                                <p id="menuDictSub">Manage drugs & doses</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="menu-section-title" id="secGroup3"><i class="fa-solid fa-chart-pie"></i> التقارير والإحصائيات</div>
-                <div class="menu-grid">
-                    <div class="menu-card" id="cardAnalytics" onclick="openAnalyticsDashboard()">
-                        <div class="menu-card-icon" style="background:#ffedd5; color:#c2410c;"><i class="fa-solid fa-chart-line"></i></div>
-                        <h4 id="menuAnalyticsTitle">إحصائيات العيادة والتقارير</h4>
-                        <p id="menuAnalyticsSub">مؤشرات الأداء ونسب المرضى</p>
+                <div class="section-group">
+                    <div class="section-title" id="secGroup3"><i class="fa-solid fa-chart-pie"></i> Reports & Stats</div>
+                    <div class="menu-grid">
+                        <div class="menu-card" id="cardAnalytics" onclick="openAnalyticsDashboard()" style="grid-column: span 2; flex-direction: row; text-align: left; padding: 12px 16px;">
+                            <div class="menu-icon analytics-icon"><i class="fa-solid fa-chart-column"></i></div>
+                            <div class="menu-info" style="flex: 1;">
+                                <h3 id="menuAnalyticsTitle">Clinic Analytics & Stats</h3>
+                                <p id="menuAnalyticsSub">Performance metrics, patient ratios & top prescribed medications</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="menu-section-title" id="secGroup4"><i class="fa-solid fa-shield-halved"></i> النظام والصيانة</div>
-                <div class="menu-grid">
-                    <div class="menu-card" id="cardBackup" onclick="openBackupManager()">
-                        <div class="menu-card-icon" style="background:#e0f2fe; color:#0284c7;"><i class="fa-solid fa-database"></i></div>
-                        <h4 id="menuBackupTitle">النسخ الاحتياطي والاستعادة</h4>
-                        <p id="menuBackupSub">تصدير أو رفع ملف البيانات</p>
-                    </div>
-                    <div class="menu-card" id="cardTrash" onclick="openTrashBin()">
-                        <div class="menu-card-icon" style="background:#fee2e2; color:#b91c1c;"><i class="fa-solid fa-trash-can"></i></div>
-                        <h4 id="menuTrashTitle">سلة المهملات</h4>
-                        <p id="menuTrashSub">استعادة العناصر المحذوفة</p>
-                    </div>
-                    <div class="menu-card" id="cardSettings" onclick="openAccountSettings()">
-                        <div class="menu-card-icon" style="background:#f1f5f9; color:#475569;"><i class="fa-solid fa-user-gear"></i></div>
-                        <h4 id="menuSettingsTitle">إعدادات الحساب</h4>
-                        <p id="menuSettingsSub">خيارات البريد وكلمة المرور</p>
-                    </div>
-                    <div class="menu-card" id="cardPermissions" onclick="openPermissionsManager()">
-                        <div class="menu-card-icon" style="background:#ccfbf1; color:#0f766e;"><i class="fa-solid fa-user-shield"></i></div>
-                        <h4 id="menuPermTitle">إدارة السكرتير</h4>
-                        <p id="menuPermSub">إنشاء الحساب والصلاحيات</p>
-                    </div>
-                    <div class="menu-card" id="networkMenuCard" onclick="openNetworkHierarchy()" style="display:none;">
-                        <div class="menu-card-icon" style="background:#fef3c7; color:#b45309;"><i class="fa-solid fa-network-wired"></i></div>
-                        <h4 id="menuNetTitle">قاعدة بيانات الشبكة</h4>
-                        <p id="menuNetSub">المستخدمين وبيانات الدخول</p>
+                <div class="section-group">
+                    <div class="section-title" id="secGroup4"><i class="fa-solid fa-shield-halved"></i> System & Maintenance</div>
+                    <div class="menu-grid">
+                        <div class="menu-card" id="cardBackup" onclick="openBackupManager()">
+                            <div class="menu-icon backup-icon"><i class="fa-solid fa-database"></i></div>
+                            <div class="menu-info">
+                                <h3 id="menuBackupTitle">Backup & Restore</h3>
+                                <p id="menuBackupSub">Export or upload data file</p>
+                            </div>
+                        </div>
+
+                        <div class="menu-card" id="cardTrash" onclick="openTrashBin()">
+                            <div class="menu-icon trash-icon"><i class="fa-solid fa-trash-arrow-up"></i></div>
+                            <div class="menu-info">
+                                <h3 id="menuTrashTitle">Trash Bin</h3>
+                                <p id="menuTrashSub">Recover deleted items</p>
+                            </div>
+                        </div>
+
+                        <div class="menu-card" id="cardSettings" onclick="openAccountSettings()">
+                            <div class="menu-icon settings-icon"><i class="fa-solid fa-user-gear"></i></div>
+                            <div class="menu-info">
+                                <h3 id="menuSettingsTitle">Account Settings</h3>
+                                <p id="menuSettingsSub">Email & password options</p>
+                            </div>
+                        </div>
+
+                        <div class="menu-card" id="cardPermissions" onclick="openPermissionsManager()" style="display: none;">
+                            <div class="menu-icon permissions-icon"><i class="fa-solid fa-user-shield"></i></div>
+                            <div class="menu-info">
+                                <h3 id="menuPermTitle">Secretary Management</h3>
+                                <p id="menuPermSub">Create account & permissions</p>
+                            </div>
+                        </div>
+
+                        <div class="menu-card" id="networkMenuCard" onclick="openNetworkHierarchy()" style="display: none;">
+                            <div class="menu-icon network-icon"><i class="fa-solid fa-network-wired"></i></div>
+                            <div class="menu-info">
+                                <h3 id="menuNetTitle">Network Database</h3>
+                                <p id="menuNetSub">Users & credentials</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
             </div>
 
-            <!-- B. Add Patient Screen -->
-            <div id="addPatientScreen" class="screen-view" style="display:none;">
-                <div class="form-container">
-                    <h3 id="patInfoTitle"><i class="fa-solid fa-id-card"></i> المعلومات الشخصية</h3>
-                    <form onsubmit="saveNewPatient(event)">
-                        <div class="field-box">
-                            <span id="lblPatName" class="field-label">الاسم الكامل *</span>
-                            <div class="input-wrapper"><input type="text" id="pName" required placeholder="أدخل اسم المريض الثلاثي..."></div>
+            <div id="specialtiesDashboardScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
+                        <i class="fa-solid fa-sliders" style="color:#6366f1;"></i> لوحة تحكم الاختصاصات والحقول الطبية
+                    </div>
+                    <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+                        قم بتفعيل المربعات والأقسام التي تحتاجها في عيادتك لكي تظهر تلقائياً داخل سجل المريض لكل زيارة. يمكنك تفعيل الحقول الخاصة باختصاصك أو دمج عدة اختصاصات معاً بحرية تامة!
+                    </p>
+
+                    <div style="margin-bottom: 14px; font-weight: 800; font-size: 0.85rem; color: #0f766e;"><i class="fa-solid fa-check-double"></i> الحقول الأساسية المشتركة:</div>
+                    <div class="checkbox-grid" style="grid-template-columns: 1fr; gap: 8px; margin-bottom: 16px;">
+                        <label class="checkbox-item"><input type="checkbox" id="mod_medHistory" checked> <span>التاريخ المرضي والأمراض المزمنة (Medical History)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_vitals" checked> <span>العلامات الحيوية وضغط الدم ومؤشر كتلة الجسم (Vitals & BMI)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_labs" checked> <span>تحاليل المختبر (Lab Tests)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_scans" checked> <span>الأشعة والرنين (Radiology & Scans)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_notes" checked> <span>التشخيص والملاحظات السريرية (Diagnosis & Notes)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_rx" checked> <span>الوصفة الطبية والعلاجية والروشتة (RX Medications)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_attachments" checked> <span>مرفقات الصور والتقارير والكاميرا (Attachments & Scanner)</span></label>
+                    </div>
+
+                    <div style="margin-bottom: 14px; font-weight: 800; font-size: 0.85rem; color: #0284c7;"><i class="fa-solid fa-stethoscope"></i> الحقول التخصصية المتقدمة:</div>
+                    <div class="checkbox-grid" style="grid-template-columns: 1fr; gap: 8px; margin-bottom: 16px;">
+                        <label class="checkbox-item"><input type="checkbox" id="mod_obsGyn"> <span><b>النسائية والتوليد:</b> (LMP, EDD, Gravidity/Parity, أسابيع الحمل)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_ortho"> <span><b>العظام والمفاصل والكسور:</b> (فحص مدى الحركة, درجة الخشونة, الفحص الفيزيائي)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_neuro"> <span><b>الجملة العصبية:</b> (فحص الأعصاب القحفية, مقياس غلاسكو للوعي, الفحص الحسي)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_peds"> <span><b>الأطفال:</b> (مخطط نمو الطفل, جدول اللقاحات والمطعوم, تفاصيل الولادة)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_derm"> <span><b>الجلدية والتناسلية:</b> (وصف الآفات الجلدية, خريطة توزيع الطفح, مصابيح وود)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_ent"> <span><b>الأنف والأذن والحنجرة (ENT):</b> (فحص الأذن بالمنظار, اللوزتين, الجيوب الأنفية)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_ophthal"> <span><b>العيون (Ophthalmology):</b> (حدة البصر Visual Acuity, ضغط العين IOP, قاع العين)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_cardio"> <span><b>القلبية والتداخلية (Cardiology):</b> (تخطيط القلب ECG, أصوات القلب, فحص الإجهاد)</span></label>
+                    </div>
+
+                    <button class="btn-main" onclick="saveSpecialtiesDashboardConfig()" style="background: #6366f1;">
+                        <i class="fa-solid fa-floppy-disk"></i> حفظ إعدادات الاختصاصات والحقول
+                    </button>
+                </div>
+            </div>
+
+            <div id="permissionsScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="permHeadTitle">
+                        <i class="fa-solid fa-user-shield" style="color:#d946ef;"></i> Secretary Account & Permissions
+                    </div>
+                    <p style="font-size: 0.80rem; color: #64748b; margin-bottom: 14px; line-height: 1.5;" id="permHeadSub">
+                        Create or update the secretary login credentials, and select the specific features you wish to grant them.
+                    </p>
+
+                    <div class="field-box">
+                        <span class="field-label" id="lblSecEmail">Secretary Email Address</span>
+                        <div class="input-wrapper"><input type="email" id="secEmailInput" placeholder="secretary@clinic.com"></div>
+                    </div>
+                    <div class="field-box">
+                        <span class="field-label" id="lblSecPass">Secretary Password</span>
+                        <div class="input-wrapper"><input type="password" id="secPassInput" placeholder="••••••••"></div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+                        <button class="btn-main" onclick="saveSecretaryAccount()" id="btnSaveSec" style="flex: 1; background: #0d9488; padding: 10px; font-size: 0.85rem;">
+                            <i class="fa-solid fa-user-plus"></i> Save Secretary Account
+                        </button>
+                        <button class="btn-danger" onclick="deleteSecretaryAccount()" id="btnDelSec" style="flex: 1; margin-top: 0; padding: 10px; font-size: 0.85rem;">
+                            <i class="fa-solid fa-trash"></i> Delete Account
+                        </button>
+                    </div>
+
+                    <hr style="border:0; border-top:1px solid #cbd5e1; margin:14px 0;">
+
+                    <span style="font-size: 0.85rem; font-weight: 800; color: #0f172a; display: block; margin-bottom: 8px;" id="lblFeatPerm">Feature Permissions:</span>
+                    <div class="checkbox-grid" style="grid-template-columns: 1fr; gap: 8px; margin-bottom: 16px;">
+                        <label class="checkbox-item"><input type="checkbox" id="perm_newPatient" checked> <span id="pNewPat">🟢 Register New Patient & Personal Info</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_archive" checked> <span id="pArch">🟢 Patients Archive, Search & Attachments</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_vitals" checked> <span id="pVitals">🟢 Vital Signs & BMI Calculator</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_rxTemplate" disabled> <span id="pRx">🔴 RX Template Header (Doctor Only)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_dict" disabled> <span id="pDict">🔴 Medical Dictionary (Doctor Only)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_analytics" disabled> <span id="pAnalytics">🔴 Clinic Analytics (Doctor Only)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_backup" disabled> <span id="pBackup">🔴 Backup & Restore (Doctor Only)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_trash" disabled> <span id="pTrash">🔴 Trash Bin (Doctor Only)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_settings" disabled> <span id="pSettings">🔴 Account Settings (Doctor Only)</span></label>
+                    </div>
+
+                    <button class="btn-main" onclick="saveSecretaryPermissions()" id="btnSavePerms" style="background: #d946ef;">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Permissions
+                    </button>
+                </div>
+            </div>
+
+            <div id="backupScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="backupHeadTitle">
+                        <i class="fa-solid fa-database" style="color:#4f46e5;"></i> Direct Backup Manager
+                    </div>
+                    <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;" id="backupHeadSub">
+                        Export your full database backup or upload a backup file (`.json` or `.txt`) directly to restore all data instantly!
+                    </p>
+
+                    <button class="btn-main" onclick="exportJsonBackup()" id="btnExport" style="background: #4f46e5; margin-bottom: 16px;">
+                        <i class="fa-solid fa-download"></i> Export Backup File
+                    </button>
+
+                    <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
+
+                    <div class="field-box" style="text-align: left;">
+                        <span class="field-label" id="lblUploadBackup" style="color:#16a34a; font-weight:800;"><i class="fa-solid fa-file-arrow-up"></i> Upload Backup File Directly (Recommended)</span>
+                        <div class="input-wrapper" style="padding: 10px; border: 2px dashed #16a34a; background: #f0fdf4; text-align: center;">
+                            <input type="file" id="backupFileInput" accept=".json,.txt" style="font-size: 0.85rem; cursor: pointer;" onchange="restoreFromUploadedFile(this)">
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settingsScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:14px;" id="settingsHeadTitle">
+                        <i class="fa-solid fa-user-shield" style="color:#0d9488;"></i> Security & Account Settings
+                    </div>
+
+                    <div class="field-box">
+                        <span class="field-label" id="lblCurrEmail">Current Email Address</span>
+                        <div class="input-wrapper"><input type="email" id="currentAccountEmail" readonly style="color:#64748b; background:#f1f5f9;"></div>
+                    </div>
+
+                    <div class="field-box">
+                        <span class="field-label" id="lblNewEmail">New Email Address</span>
+                        <div class="input-wrapper"><input type="email" id="newAccountEmail" placeholder="Enter new email..."></div>
+                    </div>
+                    <div class="field-box">
+                        <span class="field-label" id="lblConfirmPass">Current Password (To Confirm Email Change)</span>
+                        <div class="input-wrapper"><input type="password" id="confirmEmailPass" placeholder="••••••••"></div>
+                    </div>
+                    <button class="btn-main" onclick="updateAccountEmail()" id="btnUpdateEmail" style="margin-bottom: 16px; background:#0284c7;">
+                        <i class="fa-solid fa-envelope"></i> Update Email Address
+                    </button>
+
+                    <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
+
+                    <div class="field-box">
+                        <span class="field-label" id="lblNewPass">New Password</span>
+                        <div class="input-wrapper"><input type="password" id="newAccountPassword" placeholder="••••••••"></div>
+                    </div>
+                    <button class="btn-main" onclick="updateAccountPassword()" id="btnUpdatePass" style="margin-bottom: 16px;">
+                        <i class="fa-solid fa-key"></i> Change Password
+                    </button>
+
+                    <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
+
+                    <div style="text-align: center;">
+                        <p style="font-size:0.8rem; color:#64748b; margin-bottom:10px;" id="txtForgotReset">Forgot password and want to reset via email?</p>
+                        <button class="btn-main" onclick="sendPasswordResetEmailFromSettings()" id="btnSendReset" style="background: #d97706;">
+                            <i class="fa-solid fa-paper-plane"></i> Send Password Reset Link
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="analyticsScreen" style="display: none;">
+                <div class="analytics-grid">
+                    <div class="analytics-box">
+                        <span class="analytics-label" id="statTotLabel"><i class="fa-solid fa-users" style="color:#0d9488;"></i> Total Patients</span>
+                        <div class="analytics-num" id="statTotalPatients">0</div>
+                    </div>
+                    <div class="analytics-box">
+                        <span class="analytics-label" id="statTodayLabel"><i class="fa-solid fa-calendar-check" style="color:#0284c7;"></i> Today's Visits</span>
+                        <div class="analytics-num" id="statTodayVisits">0</div>
+                    </div>
+                    <div class="analytics-box">
+                        <span class="analytics-label" id="statMaleLabel"><i class="fa-solid fa-mars" style="color:#0369a1;"></i> Male Patients</span>
+                        <div class="analytics-num" id="statMaleCount">0</div>
+                    </div>
+                    <div class="analytics-box">
+                        <span class="analytics-label" id="statFemaleLabel"><i class="fa-solid fa-venus" style="color:#be185d;"></i> Female Patients</span>
+                        <div class="analytics-num" id="statFemaleCount">0</div>
+                    </div>
+                </div>
+
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="statRatioTitle">
+                        <i class="fa-solid fa-chart-bar" style="color:#0d9488;"></i> Gender Distribution Ratio
+                    </div>
+                    <div style="background:#e2e8f0; height:12px; border-radius:6px; overflow:hidden; display:flex; margin-bottom:8px;">
+                        <div id="ratioMaleBar" style="background:#0284c7; width:50%; height:100%; transition:width 0.5s;"></div>
+                        <div id="ratioFemaleBar" style="background:#ec4899; width:50%; height:100%; transition:width 0.5s;"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#64748b; font-weight:700;">
+                        <span id="ratioMaleText">Male: 0%</span>
+                        <span id="ratioFemaleText">Female: 0%</span>
+                    </div>
+                </div>
+
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="statTopDrugsTitle">
+                        <i class="fa-solid fa-pills" style="color:#0d9488;"></i> Top Prescribed Medications
+                    </div>
+                    <div id="topDrugsList" style="display:flex; flex-direction:column; gap:6px;"></div>
+                </div>
+            </div>
+
+            <div id="addPatientScreen" style="display: none;">
+                <form id="patientForm" onsubmit="saveNewPatient(event)">
+                    <div class="group-card">
+                        <div class="group-title" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:12px; color:#0f172a;" id="patInfoTitle"><i class="fa-solid fa-id-card"></i> Personal Information</div>
+                        
                         <div class="field-box">
-                            <span id="lblPatSubName" class="field-label">اسم الجد الرابع / العشيرة / ملاحظة (اختياري)</span>
-                            <div class="input-wrapper"><input type="text" id="pSubName" placeholder="مثال: البو محمد / ملاحظة تمييز..."></div>
+                            <span class="field-label" id="lblPatName">Full Name *</span>
+                            <div class="input-wrapper"><input type="text" id="pName" placeholder="Enter patient full name..." required></div>
                         </div>
-                        <div style="display:flex; gap:12px;">
-                            <div class="field-box" style="flex:1;">
-                                <span id="lblPatAge" class="field-label">العمر *</span>
-                                <div class="input-wrapper"><input type="number" id="pAge" required placeholder="30"></div>
+
+                        <div class="field-box">
+                            <span class="field-label" id="lblPatSubName">Grandfather Name / Tribe / Note (Optional)</span>
+                            <div class="input-wrapper"><input type="text" id="pSubName" placeholder="e.g. محمد / العشيرة لتمييز الاسم التشابه"></div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px;">
+                            <div class="field-box" style="flex: 1;">
+                                <span class="field-label" id="lblPatAge">Age *</span>
+                                <div class="input-wrapper"><input type="number" id="pAge" placeholder="Age..." required></div>
                             </div>
-                            <div class="field-box" style="flex:1;">
-                                <span id="lblPatGender" class="field-label">الجنس</span>
+
+                            <div class="field-box" style="flex: 1;">
+                                <span class="field-label" id="lblPatGender">Gender</span>
                                 <div class="input-wrapper">
                                     <select id="pGender">
-                                        <option value="" id="optSelGender">اختر الجنس</option>
-                                        <option value="Male" id="optMale">ذكر</option>
-                                        <option value="Female" id="optFemale">أنثى</option>
+                                        <option value="" id="optSelGender">Select Gender</option>
+                                        <option value="Male" id="optMale">Male</option>
+                                        <option value="Female" id="optFemale">Female</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
-                        <div style="display:flex; gap:12px;">
-                            <div class="field-box" style="flex:1;">
-                                <span id="lblPatMarital" class="field-label">الحالة الزوجية</span>
-                                <div class="input-wrapper">
-                                    <select id="pMarital">
-                                        <option value="" id="optSelMarital">اختر الحالة</option>
-                                        <option value="Single" id="optSingle">أعزب / عزباء</option>
-                                        <option value="Married" id="optMarried">متزوج / متزوجة</option>
-                                        <option value="Divorced" id="optDivorced">مطلق / مطلقة</option>
-                                        <option value="Widow" id="optWidow">أرمل / أرملة</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="field-box" style="flex:1;">
-                                <span id="lblPatJob" class="field-label">المهنة</span>
-                                <div class="input-wrapper">
-                                    <select id="pJob">
-                                        <option value="" id="optSelJob">اختر المهنة</option>
-                                        <option value="Employee" id="optJobEmp">موظف</option>
-                                        <option value="Free Business" id="optJobFree">عمل حر</option>
-                                        <option value="Housewife" id="optJobHouse">ربة منزل</option>
-                                        <option value="Student" id="optJobStud">طالب</option>
-                                        <option value="Other" id="optJobOther">أخرى</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+
                         <div class="field-box">
-                            <span id="lblPatPhone" class="field-label">رقم الهاتف</span>
-                            <div class="input-wrapper"><input type="tel" id="pPhone" placeholder="07700000000"></div>
+                            <span class="field-label" id="lblPatMarital">Marital Status</span>
+                            <div class="input-wrapper">
+                                <select id="pMarital">
+                                    <option value="" id="optSelMarital">Select Status</option>
+                                    <option value="Single" id="optSingle">Single</option>
+                                    <option value="Married" id="optMarried">Married</option>
+                                    <option value="Divorced" id="optDivorced">Divorced</option>
+                                    <option value="Widow" id="optWidow">Widow</option>
+                                </select>
+                            </div>
                         </div>
+
                         <div class="field-box">
-                            <span id="lblPatDate" class="field-label">تاريخ الزيارة الأولية</span>
+                            <span class="field-label" id="lblPatJob">Occupation</span>
+                            <div class="input-wrapper">
+                                <select id="pJob">
+                                    <option value="" id="optSelJob">Select Occupation</option>
+                                    <option value="Employee" id="optJobEmp">Employee</option>
+                                    <option value="Free Business" id="optJobFree">Free Business</option>
+                                    <option value="Housewife" id="optJobHouse">Housewife</option>
+                                    <option value="Student" id="optJobStud">Student</option>
+                                    <option value="Other" id="optJobOther">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="field-box">
+                            <span class="field-label" id="lblPatPhone">Phone Number</span>
+                            <div class="input-wrapper"><input type="tel" id="pPhone" placeholder="07XXXXXXXXX"></div>
+                        </div>
+
+                        <div class="field-box">
+                            <span class="field-label" id="lblPatDate">Initial Visit Date</span>
                             <div class="input-wrapper"><input type="date" id="pDate"></div>
                         </div>
-                        <button type="submit" id="btnSavePatRec" class="btn-main"><i class="fa-solid fa-floppy-disk"></i> حفظ وفتح السجل الطبي</button>
-                    </form>
+                    </div>
+
+                    <button type="submit" class="btn-main" id="btnSavePatRec">
+                        <i class="fa-solid fa-floppy-disk"></i> Save & Open Medical Record
+                    </button>
+                </form>
+            </div>
+
+            <div id="rxTemplateScreen" style="display: none;">
+                <div class="group-card" style="text-align: center;">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:8px;" id="rxTemplHead">
+                        <i class="fa-solid fa-prescription-bottle-medical" style="color:#0d9488;"></i> Clinic Prescription Template
+                    </div>
+                    <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;" id="rxTemplSub">
+                        Upload or change your official prescription image header.
+                    </p>
+
+                    <div id="currentRxPreviewContainer" style="margin-bottom: 16px; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 10px; background: #fff; min-height: 150px; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 0.82rem; color: #94a3b8;" id="noRxText">No custom RX header uploaded yet.</span>
+                        <img id="rxPreviewImg" src="" alt="RX Template" style="max-width: 100%; border-radius: 12px; display: none;">
+                    </div>
+
+                    <div class="field-box" style="text-align: left;">
+                        <span class="field-label" id="lblSelectRxImg">Select Prescription Image</span>
+                        <div class="input-wrapper" style="padding: 10px;">
+                            <input type="file" id="rxImageFileInput" accept="image/*" style="font-size: 0.85rem;">
+                        </div>
+                    </div>
+
+                    <button class="btn-main" onclick="saveRxTemplateImage()" id="btnSaveRxImg" style="margin-top: 10px;">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Save Compressed RX Image
+                    </button>
                 </div>
             </div>
 
-            <!-- C. Patients Archive Screen -->
-            <div id="archiveScreen" class="screen-view" style="display:none;">
-                <div class="search-box-container">
-                    <div class="input-wrapper"><input type="text" id="searchInput" placeholder="🔍 البحث بالاسم أو رقم الهاتف..." oninput="filterPatients()"></div>
-                    <div style="display:flex; gap:8px; margin-top:8px;">
-                        <select id="filterGender" onchange="filterPatients()" style="flex:1; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.85rem;">
-                            <option value="" id="optAllGenders">جميع الأجناس</option>
-                            <option value="Male" id="optFilterMale">ذكور</option>
-                            <option value="Female" id="optFilterFemale">إناث</option>
+            <div id="archiveScreen" style="display: none;">
+                <div class="filter-container">
+                    <div class="field-box" style="margin-bottom: 0;">
+                        <div class="input-wrapper">
+                            <input type="text" id="searchInput" placeholder="🔍 Search by Name or Phone Number..." oninput="filterPatients()">
+                        </div>
+                    </div>
+                    <div class="filter-row">
+                        <select id="filterGender" onchange="filterPatients()">
+                            <option value="" id="optAllGenders">All Genders</option>
+                            <option value="Male" id="optFilterMale">Male</option>
+                            <option value="Female" id="optFilterFemale">Female</option>
                         </select>
-                        <select id="filterAgeGroup" onchange="filterPatients()" style="flex:1; padding:8px; border-radius:8px; border:1px solid #cbd5e1; font-size:0.85rem;">
-                            <option value="" id="optAllAges">جميع الأعمار</option>
-                            <option value="child" id="optChild">أطفال (< 18)</option>
-                            <option value="adult" id="optAdult">بالغين (18 - 50)</option>
-                            <option value="senior" id="optSenior">كبار السن (> 50)</option>
+                        <select id="filterAgeGroup" onchange="filterPatients()">
+                            <option value="" id="optAllAges">All Age Groups</option>
+                            <option value="child" id="optChild">Children (&lt; 18)</option>
+                            <option value="adult" id="optAdult">Adults (18 - 50)</option>
+                            <option value="senior" id="optSenior">Seniors (&gt; 50)</option>
                         </select>
                     </div>
                 </div>
-                <div id="patientsList" class="patients-list-container"></div>
+
+                <div id="patientsList"></div>
             </div>
 
-            <!-- D. Medical Record Screen -->
-            <div id="medicalRecordScreen" class="screen-view" style="display:none;">
-                <div class="patient-record-header">
-                    <div>
-                        <h3 id="recPatientName">اسم المريض</h3>
-                        <p id="recPatientMeta">العمر: 30 | الجنس: ذكر</p>
+            <div id="trashScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; margin-bottom:10px; color:#ef4444; display: flex; justify-content: space-between; align-items: center;">
+                        <span id="trashTitleText"><i class="fa-solid fa-trash-can"></i> Trash Bin</span>
+                        <button type="button" id="emptyTrashBtn" onclick="confirmEmptyTrash()" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: none; align-items: center; gap: 4px;">
+                            <i class="fa-solid fa-trash-can-arrow-up"></i> <span id="txtEmptyTrash">Empty Trash</span>
+                        </button>
                     </div>
-                    <div style="display:flex; gap:6px;">
-                        <button onclick="openEditPatientModal()" style="background:#e0f2fe; color:#0369a1; border:none; border-radius:8px; padding:6px 10px; font-size:0.75rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-user-pen"></i> <span id="txtEdit">تعديل</span></button>
-                        <button onclick="confirmDeletePatientRecord()" style="background:#fee2e2; color:#b91c1c; border:none; border-radius:8px; padding:6px 10px; font-size:0.75rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-trash"></i> <span id="txtDelete">حذف</span></button>
+                    <p style="font-size:0.78rem; color:#64748b; margin-bottom:14px;" id="trashSubText">You can restore deleted patients or specific visits back to their original locations instantly, or empty the trash completely.</p>
+                    <div id="trashItemsContainer"></div>
+                </div>
+            </div>
+
+            <div id="medicalRecordScreen" style="display: none;">
+                <div class="group-card" style="background: #f0fdfa; border-color: #99f6e4; position: relative;">
+                    <div style="position: absolute; top: 14px; right: 14px; display: flex; gap: 6px; z-index: 5;" id="patientRecordHeaderActions">
+                        <button type="button" id="editPatientBtnMain" onclick="openEditPatientModal()" style="background: #0d9488; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                            <i class="fa-solid fa-pen-to-square"></i> <span id="txtEdit">Edit</span>
+                        </button>
+                        <button type="button" onclick="confirmDeletePatientRecord()" id="btnDeletePatientMain" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                            <i class="fa-solid fa-trash"></i> <span id="txtDelete">Delete</span>
+                        </button>
                     </div>
+                    <div class="field-box" style="font-family:'Playfair Display',serif; font-size:1.1rem; font-weight:700; color: #0f766e; margin-bottom:4px; padding-right: 125px;">
+                        <i class="fa-solid fa-user-check"></i> <span id="recPatientName">—</span>
+                    </div>
+                    <p style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin-bottom: 10px;" id="recPatientMeta"></p>
+                    
+                    <button type="button" class="btn-main" onclick="exportPatientMedicalReportPDF()" id="btnDownloadPDF" style="background: #0284c7; padding: 12px; font-size: 0.9rem;">
+                        <i class="fa-solid fa-file-pdf"></i> Download Comprehensive PDF Report
+                    </button>
                 </div>
 
-                <button type="button" id="btnDownloadPDF" onclick="exportPatientMedicalReportPDF()" style="width:100%; background:#0f172a; color:#fff; border:none; border-radius:12px; padding:10px; font-weight:700; font-size:0.85rem; margin-bottom:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-                    <i class="fa-solid fa-file-pdf"></i> تحميل تقرير ملف المريض الشامل PDF
+                <button type="button" id="btnAddVisitMain" class="btn-main btn-secondary" onclick="addNewVisit()">
+                    <i class="fa-solid fa-calendar-plus"></i> + Add New Visit
                 </button>
 
                 <div id="visitsContainer"></div>
-
-                <button type="button" id="btnAddVisitMain" onclick="addNewVisit()" style="width:100%; background:#0d9488; color:#fff; border:none; border-radius:12px; padding:12px; font-weight:700; font-size:0.9rem; margin-top:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px;">
-                    <i class="fa-solid fa-calendar-plus"></i> + إضافة زيارة جديدة
-                </button>
             </div>
 
-            <!-- E. RX Template Screen -->
-            <div id="rxTemplateScreen" class="screen-view" style="display:none;">
-                <div class="form-container">
-                    <h3><i class="fa-solid fa-file-image"></i> قالب ترويسة الوصفة الطبية (RX)</h3>
-                    <p style="font-size:0.8rem; color:#64748b; margin-bottom:12px;">قم برفع صورة ترويسة عيادتك (شعار، اسم الطبيب، العنوان) لتظهر في أعلى الوصفة المطبوعة.</p>
-                    <div style="text-align:center; margin-bottom:12px;">
-                        <img id="rxPreviewImg" src="" style="max-width:100%; max-height:180px; border-radius:8px; border:1px solid #cbd5e1; display:none;">
-                        <p id="noRxText" style="font-size:0.85rem; color:#94a3b8; font-style:italic;">لا توجد ترويسة محفوظة حالياً</p>
-                    </div>
+            <div id="dictScreen" style="display: none;">
+                <div class="group-card">
                     <div class="field-box">
-                        <span class="field-label">اختر صورة الترويسة الجديدة</span>
-                        <div class="input-wrapper"><input type="file" id="rxImageFileInput" accept="image/*"></div>
-                    </div>
-                    <button type="button" onclick="saveRxTemplateImage()" class="btn-main"><i class="fa-solid fa-floppy-disk"></i> حفظ ترويسة الوصفة</button>
-                </div>
-            </div>
-
-            <!-- F. Specialties Dashboard Screen -->
-            <div id="specialtiesDashboardScreen" class="screen-view" style="display:none;">
-                <div class="form-container">
-                    <h3><i class="fa-solid fa-sliders"></i> لوحة تحكم الاختصاصات والحقول</h3>
-                    <p style="font-size:0.8rem; color:#64748b; margin-bottom:14px;">قم بتفعيل أو تعطيل الحقول والأقسام الطبية لتظهر في سجلات المرضى بحسب اختصاصك.</p>
-                    
-                    <h4 style="font-size:0.9rem; color:#0f172a; margin-bottom:8px; border-bottom:1px solid #e2e8f0; padding-bottom:4px;">الحقول الأساسية العامة</h4>
-                    <div class="spec-toggle-row"><label>التاريخ المرضي (Medical History)</label><input type="checkbox" id="mod_medHistory"></div>
-                    <div class="spec-toggle-row"><label>العلامات الحيوية والضغط (Vitals & BP)</label><input type="checkbox" id="mod_vitals"></div>
-                    <div class="spec-toggle-row"><label>تحاليل المختبر (Lab Tests)</label><input type="checkbox" id="mod_labs"></div>
-                    <div class="spec-toggle-row"><label>الأشعة والرنين (Radiology & Scans)</label><input type="checkbox" id="mod_scans"></div>
-                    <div class="spec-toggle-row"><label>التشخيص والملاحظات (Diagnosis & Notes)</label><input type="checkbox" id="mod_notes"></div>
-                    <div class="spec-toggle-row"><label>الوصفة الطبية (RX Medications)</label><input type="checkbox" id="mod_rx"></div>
-                    <div class="spec-toggle-row"><label>المرفقات والتقارير (Attachments)</label><input type="checkbox" id="mod_attachments"></div>
-
-                    <h4 style="font-size:0.9rem; color:#0f172a; margin:16px 0 8px; border-bottom:1px solid #e2e8f0; padding-bottom:4px;">الاختصاصات الطبية التخصصية</h4>
-                    <div class="spec-toggle-row"><label>النسائية والتوليد (Obstetrics & Gynecology)</label><input type="checkbox" id="mod_obsGyn"></div>
-                    <div class="spec-toggle-row"><label>العظام والمفاصل (Orthopedics)</label><input type="checkbox" id="mod_ortho"></div>
-                    <div class="spec-toggle-row"><label>الجملة العصبية (Neurology)</label><input type="checkbox" id="mod_neuro"></div>
-                    <div class="spec-toggle-row"><label>الأطفال والنمو (Pediatrics)</label><input type="checkbox" id="mod_peds"></div>
-                    <div class="spec-toggle-row"><label>الجلدية والتناسلية (Dermatology)</label><input type="checkbox" id="mod_derm"></div>
-                    <div class="spec-toggle-row"><label>الأذن والأنف والحنجرة (ENT)</label><input type="checkbox" id="mod_ent"></div>
-                    <div class="spec-toggle-row"><label>العيون (Ophthalmology)</label><input type="checkbox" id="mod_ophthal"></div>
-                    <div class="spec-toggle-row"><label>القلب والشرايين (Cardiology)</label><input type="checkbox" id="mod_cardio"></div>
-
-                    <button type="button" onclick="saveSpecialtiesDashboardConfig()" class="btn-main" style="margin-top:16px;"><i class="fa-solid fa-check"></i> حفظ إعدادات الاختصاصات</button>
-                </div>
-            </div>
-
-            <!-- G. Dictionary Manager Screen -->
-            <div id="dictScreen" class="screen-view" style="display:none;">
-                <div class="form-container">
-                    <h3><i class="fa-solid fa-book-medical"></i> إدارة القاموس الطبي</h3>
-                    <div class="field-box">
-                        <span class="field-label">اختر القسم</span>
+                        <span class="field-label" id="lblDictCat">Category</span>
                         <div class="input-wrapper">
                             <select id="dictCategorySelect" onchange="renderDictTerms()">
-                                <option value="labs" id="optCatLabs">تحاليل المختبر</option>
-                                <option value="scans" id="optCatScans">الأشعة والرنين</option>
-                                <option value="drugs" id="optCatDrugs">الأدوية والجرعات</option>
-                                <option value="notes" id="optCatNotes">التشخيص والملاحظات</option>
-                                <option value="mh_history" id="optCatMh">مصطلحات التاريخ المرضي</option>
+                                <option value="drugs" id="optCatDrugs">Medications & Doses</option>
+                                <option value="labs" id="optCatLabs">Lab Tests</option>
+                                <option value="scans" id="optCatScans">Radiology & Scans</option>
+                                <option value="notes" id="optCatNotes">Diagnosis & Notes</option>
+                                <option value="mh_history" id="optCatMh">Medical History Terms</option>
                             </select>
                         </div>
                     </div>
-                    <div id="dictItemsList" style="margin-top:12px;"></div>
+                    <div id="dictItemsList" style="margin-top: 15px;"></div>
                 </div>
             </div>
 
-            <!-- H. Trash Screen -->
-            <div id="trashScreen" class="screen-view" style="display:none;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                    <h3 id="trashTitleText" style="font-size:1rem; font-weight:800; color:#b91c1c;"><i class="fa-solid fa-trash-can"></i> سلة المهملات</h3>
-                    <button onclick="confirmEmptyTrash()" style="background:#fee2e2; color:#b91c1c; border:none; border-radius:8px; padding:6px 12px; font-size:0.75rem; font-weight:700; cursor:pointer;" id="txtEmptyTrash">إفراغ سلة المهملات</button>
-                </div>
-                <p id="trashSubText" style="font-size:0.8rem; color:#64748b; margin-bottom:12px;">يمكنك استعادة المرضى أو الزيارات المحذوفة.</p>
-                <div id="trashItemsContainer"></div>
-            </div>
-
-            <!-- I. Network Database Screen -->
-            <div id="networkScreen" class="screen-view" style="display:none;">
-                <h3 style="font-size:1rem; font-weight:800; margin-bottom:12px;"><i class="fa-solid fa-network-wired" style="color:#0d9488;"></i> قاعدة بيانات الشبكة</h3>
-                <div id="networkTreeContainer"></div>
-            </div>
-
-            <!-- J. Analytics Screen -->
-            <div id="analyticsScreen" class="screen-view" style="display:none;">
-                <h3 style="font-size:1rem; font-weight:800; margin-bottom:12px;"><i class="fa-solid fa-chart-pie" style="color:#0d9488;"></i> إحصائيات العيادة</h3>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;">
-                    <div class="analytics-card"><h4 id="statTotalPatients">0</h4><p>إجمالي المرضى</p></div>
-                    <div class="analytics-card"><h4 id="statTodayVisits">0</h4><p>زيارات اليوم</p></div>
-                    <div class="analytics-card"><h4 id="statMaleCount">0</h4><p>الذكور</p></div>
-                    <div class="analytics-card"><h4 id="statFemaleCount">0</h4><p>الإناث</p></div>
-                </div>
-                <div class="form-container" style="margin-bottom:14px;">
-                    <h4 style="font-size:0.85rem; font-weight:700; margin-bottom:8px;">نسبة الجنسين</h4>
-                    <div style="display:flex; height:16px; border-radius:8px; overflow:hidden; background:#e2e8f0; margin-bottom:8px;">
-                        <div id="ratioMaleBar" style="background:#3b82f6; width:50%; transition:width 0.5s;"></div>
-                        <div id="ratioFemaleBar" style="background:#ec4899; width:50%; transition:width 0.5s;"></div>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#64748b; font-weight:700;">
-                        <span id="ratioMaleText">Male: 50%</span><span id="ratioFemaleText">Female: 50%</span>
-                    </div>
-                </div>
-                <div class="form-container">
-                    <h4 style="font-size:0.85rem; font-weight:700; margin-bottom:10px;">الأدوية الأكثر صرفاً</h4>
-                    <div id="topDrugsList" style="display:flex; flex-direction:column; gap:8px;"></div>
-                </div>
-            </div>
-
-            <!-- K. Settings Screen -->
-            <div id="settingsScreen" class="screen-view" style="display:none;">
-                <div class="form-container" style="margin-bottom:14px;">
-                    <h3><i class="fa-solid fa-envelope"></i> تغيير البريد الإلكتروني</h3>
-                    <div class="field-box"><span class="field-label">البريد الحالي</span><div class="input-wrapper"><input type="text" id="currentAccountEmail" readonly style="background:#f1f5f9;"></div></div>
-                    <div class="field-box"><span class="field-label">البريد الجديد</span><div class="input-wrapper"><input type="email" id="newAccountEmail" placeholder="new@domain.com"></div></div>
-                    <div class="field-box"><span class="field-label">كلمة المرور الحالية للتأكيد</span><div class="input-wrapper"><input type="password" id="confirmEmailPass" placeholder="••••••••"></div></div>
-                    <button type="button" onclick="updateAccountEmail()" class="btn-main">تحديث البريد</button>
-                </div>
-                <div class="form-container">
-                    <h3><i class="fa-solid fa-key"></i> تغيير كلمة المرور</h3>
-                    <div class="field-box"><span class="field-label">كلمة المرور الجديدة</span><div class="input-wrapper"><input type="password" id="newAccountPassword" placeholder="••••••••"></div></div>
-                    <button type="button" onclick="updateAccountPassword()" class="btn-main" style="background:#3b82f6;">تغيير كلمة المرور</button>
-                    <button type="button" onclick="sendPasswordResetEmailFromSettings()" class="btn-main" style="background:#64748b; margin-top:8px;">إرسال رابط إعادة التعيين بالإيميل</button>
-                </div>
-            </div>
-
-            <!-- L. Backup Screen -->
-            <div id="backupScreen" class="screen-view" style="display:none;">
-                <div class="form-container" style="margin-bottom:14px;">
-                    <h3><i class="fa-solid fa-download"></i> تصدير النسخة الاحتياطية</h3>
-                    <p style="font-size:0.8rem; color:#64748b; margin-bottom:12px;">احفظ كافة بيانات المرضى، السجلات، والقاموس في ملف JSON آمن.</p>
-                    <button type="button" onclick="exportJsonBackup()" class="btn-main"><i class="fa-solid fa-file-arrow-down"></i> تحميل ملف النسخة الاحتياطية</button>
-                </div>
-                <div class="form-container">
-                    <h3><i class="fa-solid fa-upload"></i> استعادة البيانات من ملف</h3>
-                    <p style="font-size:0.8rem; color:#64748b; margin-bottom:12px;">اختر ملف النسخة الاحتياطية السابق لاستعادة البيانات فوراً.</p>
-                    <div class="field-box"><div class="input-wrapper"><input type="file" id="backupFileInput" accept=".json" onchange="restoreFromUploadedFile(this)"></div></div>
-                </div>
-            </div>
-
-            <!-- M. Permissions Screen -->
-            <div id="permissionsScreen" class="screen-view" style="display:none;">
-                <div class="form-container">
-                    <h3><i class="fa-solid fa-user-shield"></i> إنشاء وإدارة حساب السكرتير</h3>
-                    <p style="font-size:0.8rem; color:#64748b; margin-bottom:12px;">منح السكرتير صلاحية تسجيل وإدخال المرضى والأرشيف فقط.</p>
-                    <div class="field-box"><span class="field-label">بريد السكرتير</span><div class="input-wrapper"><input type="email" id="secEmailInput" placeholder="secretary@clinic.com"></div></div>
-                    <div class="field-box"><span class="field-label">كلمة المرور</span><div class="input-wrapper"><input type="password" id="secPassInput" placeholder="••••••••"></div></div>
-                    <div style="display:flex; gap:8px;">
-                        <button type="button" onclick="saveSecretaryAccount()" class="btn-main" style="flex:1;"><i class="fa-solid fa-check"></i> حفظ وحفظ الحساب</button>
-                        <button type="button" onclick="deleteSecretaryAccount()" style="background:#fee2e2; color:#ef4444; border:none; border-radius:12px; padding:0 14px; font-weight:700; font-size:0.85rem; cursor:pointer;">حذف</button>
-                    </div>
-                </div>
-            </div>
-
-        </main>
-
-        <footer class="app-footer">
-            <p id="footerText">نظام عيادة ماستر المتقدم v17.23</p>
-        </footer>
-    </div>
-
-    <!-- Modals -->
-
-    <!-- Medical History Modal -->
-    <div id="medHistoryModal" class="modal-backdrop" style="display:none;">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3 id="mhHeaderTitle"><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> تفاصيل التاريخ المرضي</h3>
-                <button onclick="closeMedHistoryModal()"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body">
-                <div class="field-box">
-                    <span id="mhLblChronic" class="field-label">الأمراض المزمنة</span>
-                    <div class="checkbox-grid">
-                        <label><input type="checkbox" class="mh-cd" value="Hypertension"> <span class="mh-cond-text" data-cond="Hypertension">ارتفاع ضغط الدم</span></label>
-                        <label><input type="checkbox" class="mh-cd" value="Diabetes"> <span class="mh-cond-text" data-cond="Diabetes">مرض السكري</span></label>
-                        <label><input type="checkbox" class="mh-cd" value="Asthma"> <span class="mh-cond-text" data-cond="Asthma">الربو</span></label>
-                        <label><input type="checkbox" class="mh-cd" value="Epilepsy"> <span class="mh-cond-text" data-cond="Epilepsy">الصرع</span></label>
-                        <label><input type="checkbox" class="mh-cd" value="Arthritis"> <span class="mh-cond-text" data-cond="Arthritis">التهاب المفاصل</span></label>
-                        <label><input type="checkbox" class="mh-cd" value="Malignancy"> <span class="mh-cond-text" data-cond="Malignancy">أورام خبيثة</span></label>
-                        <label><input type="checkbox" class="mh-cd" value="Hepatitis"> <span class="mh-cond-text" data-cond="Hepatitis">التهاب الكبد الوبائي</span></label>
-                        <label><input type="checkbox" class="mh-cd" value="Chronic kidney dis"> <span class="mh-cond-text" data-cond="Chronic kidney dis">أمراض الكلى المزمنة</span></label>
-                        <label><input type="checkbox" class="mh-cd" value="IHD"> <span class="mh-cond-text" data-cond="IHD">قصور الشريان التاجي</span></label>
-                    </div>
-                    <div style="margin-top:8px;"><label><input type="checkbox" id="mh-other-check" onchange="toggleOtherInput()"> <span id="mhOtherText">أخرى</span></label></div>
-                    <div id="mh-other-box" style="display:none; margin-top:6px; position:relative;">
-                        <textarea id="mh-cd-other" rows="1" placeholder="اكتب أمراض أخرى..." oninput="handleMhLiveInput(this, 'mh_other')" onblur="hideMhSuggestions('mh_other')"></textarea>
-                        <div class="suggestions-box" id="suggestions-mh_other"></div>
-                        <div class="live-save-bar" id="save-bar-mh_other">
-                            <span>Save: "<strong id="line-text-mh_other"></strong>"</span>
-                            <button type="button" class="btn-live-save" id="btn-save-mh_other" onmousedown="saveMhLineToDict(event, 'mh_other')">Save</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="field-box"><span id="mhLblAdmission" class="field-label">الدخول السابق للمستشفى</span><div class="input-wrapper" style="position:relative;"><textarea id="mh-prev-admission" rows="1" placeholder="تفاصيل الدخول السابق..." oninput="handleMhLiveInput(this, 'mh_admission')" onblur="hideMhSuggestions('mh_admission')"></textarea><div class="suggestions-box" id="suggestions-mh_admission"></div><div class="live-save-bar" id="save-bar-mh_admission"><span>Save: "<strong id="line-text-mh_admission"></strong>"</span><button type="button" class="btn-live-save" id="btn-save-mh_admission" onmousedown="saveMhLineToDict(event, 'mh_admission')">Save</button></div></div></div>
-                <div class="field-box"><span id="mhLblSurgery" class="field-label">العمليات الجراحية السابقة</span><div class="input-wrapper" style="position:relative;"><textarea id="mh-past-surgery" rows="1" placeholder="العمليات السابقة..." oninput="handleMhLiveInput(this, 'mh_surgery')" onblur="hideMhSuggestions('mh_surgery')"></textarea><div class="suggestions-box" id="suggestions-mh_surgery"></div><div class="live-save-bar" id="save-bar-mh_surgery"><span>Save: "<strong id="line-text-mh_surgery"></strong>"</span><button type="button" class="btn-live-save" id="btn-save-mh_surgery" onmousedown="saveMhLineToDict(event, 'mh_surgery')">Save</button></div></div></div>
-                <div class="field-box"><span id="mhLblFamily" class="field-label">التاريخ العائلي</span><div class="input-wrapper" style="position:relative;"><textarea id="mh-family-history" rows="1" placeholder="الأمراض الوراثية في العائلة..." oninput="handleMhLiveInput(this, 'mh_family')" onblur="hideMhSuggestions('mh_family')"></textarea><div class="suggestions-box" id="suggestions-mh_family"></div><div class="live-save-bar" id="save-bar-mh_family"><span>Save: "<strong id="line-text-mh_family"></strong>"</span><button type="button" class="btn-live-save" id="btn-save-mh_family" onmousedown="saveMhLineToDict(event, 'mh_family')">Save</button></div></div></div>
-                <div class="field-box"><span id="mhLblAllergy" class="field-label">حساسية الأدوية</span><div class="input-wrapper" style="position:relative;"><textarea id="mh-drug-allergy" rows="1" placeholder="حساسية الأدوية أو الطعام..." oninput="handleMhLiveInput(this, 'mh_allergy')" onblur="hideMhSuggestions('mh_allergy')"></textarea><div class="suggestions-box" id="suggestions-mh_allergy"></div><div class="live-save-bar" id="save-bar-mh_allergy"><span>Save: "<strong id="line-text-mh_allergy"></strong>"</span><button type="button" class="btn-live-save" id="btn-save-mh_allergy" onmousedown="saveMhLineToDict(event, 'mh_allergy')">Save</button></div></div></div>
-                <div class="field-box"><span id="mhLblChronicDrugs" class="field-label">استخدام الأدوية المزمنة</span><div class="input-wrapper" style="position:relative;"><textarea id="mh-chronic-drugs" rows="1" placeholder="الأدوية المستخدمة بانتظام..." oninput="handleMhLiveInput(this, 'mh_chronic_drugs')" onblur="hideMhSuggestions('mh_chronic_drugs')"></textarea><div class="suggestions-box" id="suggestions-mh_chronic_drugs"></div><div class="live-save-bar" id="save-bar-mh_chronic_drugs"><span>Save: "<strong id="line-text-mh_chronic_drugs"></strong>"</span><button type="button" class="btn-live-save" id="btn-save-mh_chronic_drugs" onmousedown="saveMhLineToDict(event, 'mh_chronic_drugs')">Save</button></div></div></div>
-                <div style="display:flex; gap:10px;">
-                    <div class="field-box" style="flex:1;"><span id="mhLblSmoking" class="field-label">حالة التدخين</span><div class="input-wrapper"><select id="mh-smoking"><option value="Non-smoker" id="optSmok1">غير مدخن</option><option value="Smoker" id="optSmok2">مدخن</option><option value="Passive smoker" id="optSmok3">مدخن سلبي</option></select></div></div>
-                    <div class="field-box" style="flex:1;"><span id="mhLblAlcohol" class="field-label">تناول الكحول</span><div class="input-wrapper"><select id="mh-alcohol"><option value="Non-drinker" id="optAlc1">لا يتناول الكحول</option><option value="Alcohol drinker" id="optAlc2">مدمن كحول</option><option value="Social drinker" id="optAlc3">شارب اجتماعي</option></select></div></div>
-                </div>
-                <div class="field-box"><span id="mhLblNotes" class="field-label">ملاحظات إضافية</span><div class="input-wrapper"><textarea id="mh-notes" rows="2" placeholder="ملاحظات أخرى..."></textarea></div></div>
-                <button type="button" id="btnMhDone" onclick="closeMedHistoryModal()" class="btn-main"><i class="fa-solid fa-check"></i> تم الحفظ</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- BMI Calculator Modal -->
-    <div id="bmiCalculatorModal" class="modal-backdrop" style="display:none;">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3 id="bmiTitleText"><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> حساب مؤشر كتلة الجسم (BMI)</h3>
-                <button onclick="closeBmiModal()"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body">
-                <div style="display:flex; gap:10px;">
-                    <div class="field-box" style="flex:1;"><span id="lblBmiWeight" class="field-label">الوزن (كغ)</span><div class="input-wrapper"><input type="number" id="bmiWeight" placeholder="70" oninput="calculateBmiLive()"></div></div>
-                    <div class="field-box" style="flex:1;"><span id="lblBmiHeight" class="field-label">الطول (سم)</span><div class="input-wrapper"><input type="number" id="bmiHeight" placeholder="170" oninput="calculateBmiLive()"></div></div>
-                </div>
-                <div class="bmi-score-box">
-                    <span id="lblBmiScore" style="font-size:0.85rem; color:#64748b; font-weight:700;">مؤشر كتلة الجسم (BMI):</span>
-                    <h2 id="bmiScoreDisplay" style="font-size:2rem; font-weight:900; color:#0f172a; margin:6px 0;">—</h2>
-                    <div id="bmiBadgeContainer"><span class="bmi-badge" id="bmiBadgeInitial">أدخل الوزن والطول للحساب</span></div>
-                </div>
-                <button type="button" id="btnBmiAgree" onclick="closeBmiModal()" class="btn-main"><i class="fa-solid fa-check"></i> موافق وحفظ</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- RX Prescription Print Modal -->
-    <div id="rxModal" class="modal-backdrop" style="display:none;">
-        <div class="modal-card" style="max-width:700px; width:95%; max-height:92vh; display:flex; flex-direction:column;">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-file-prescription" style="color:#a855f7;"></i> معاينة وطباعة الوصفة الطبية</h3>
-                <div style="display:flex; gap:6px;">
-                    <button onclick="printPrescriptionDirectly()" style="background:#0d9488; color:#fff; border:none; border-radius:6px; padding:4px 10px; font-size:0.75rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-print"></i> طباعة</button>
-                    <button onclick="openPrescriptionPDF()" style="background:#3b82f6; color:#fff; border:none; border-radius:6px; padding:4px 10px; font-size:0.75rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-file-pdf"></i> PDF</button>
-                    <button onclick="closeRxModal()"><i class="fa-solid fa-xmark"></i></button>
-                </div>
-            </div>
-            <div class="modal-body" style="overflow-y:auto; padding:10px;">
-                <div style="text-align:center; margin-bottom:10px;">
-                    <button type="button" id="rxConfigBtn" onclick="toggleRxConfigMode()" style="background:#f1f5f9; color:#475569; border:1px solid #cbd5e1; border-radius:8px; padding:6px 12px; font-size:0.75rem; font-weight:700; cursor:pointer;">
-                        <i class="fa-solid fa-arrows-up-down-left-right"></i> وضع سحب وترتيب الترويسة
-                    </button>
-                    <span id="rxModeHint" style="font-size:0.75rem; color:#64748b; margin-left:8px;">RX ready</span>
-                    <button type="button" id="rxSaveLayoutBtn" onclick="saveRxLayoutPositions()" style="display:none; background:#10b981; color:#fff; border:none; border-radius:8px; padding:6px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; margin-top:6px;">
-                        <i class="fa-solid fa-floppy-disk"></i> حفظ تنسيق الترويسة
-                    </button>
-                </div>
-
-                <div id="rxCanvasContainer" class="rx-printable-canvas">
-                    <!-- Draggable Box 1: Patient Details -->
-                    <div id="rxDragPatientDetails" class="draggable-box" style="top:25%; left:5%;">
-                        <div class="draggable-controls">
-                            <button onclick="changeBoxFontSize('patientDetails', 1)">+</button>
-                            <button onclick="changeBoxFontSize('patientDetails', -1)">-</button>
-                        </div>
-                        <div id="rxDragPatientDetailsText" class="rx-patient-details-text">اسم المريض | العمر | الجنس</div>
-                    </div>
-
-                    <!-- Draggable Box 2: Date -->
-                    <div id="rxDragDate" class="draggable-box" style="top:25%; left:75%;">
-                        <div class="draggable-controls">
-                            <button onclick="changeBoxFontSize('date', 1)">+</button>
-                            <button onclick="changeBoxFontSize('date', -1)">-</button>
-                        </div>
-                        <div id="rxDragDateText" class="rx-date-text">2026-01-01</div>
-                    </div>
-
-                    <!-- Draggable Box 3: Vitals -->
-                    <div id="rxDragVitals" class="draggable-box" style="top:33%; left:5%;">
-                        <div class="draggable-controls">
-                            <button onclick="changeBoxFontSize('vitals', 1)">+</button>
-                            <button onclick="changeBoxFontSize('vitals', -1)">-</button>
-                        </div>
-                        <div id="rxDragVitalsText" class="rx-vitals-text">BP: 120/80 | HR: 75 | Temp: 37</div>
-                    </div>
-
-                    <!-- Draggable Box 4: Treatment / Drugs -->
-                    <div id="rxDragTreatment" class="draggable-box" style="top:42%; left:5%;">
-                        <div class="draggable-controls">
-                            <button onclick="changeBoxFontSize('treatment', 1)">+</button>
-                            <button onclick="changeBoxFontSize('treatment', -1)">-</button>
-                        </div>
-                        <div id="rxDragTreatmentText" class="rx-treatment-text">1. Paracetamol 500mg 1x3</div>
-                    </div>
+            <div id="networkScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'Playfair Display',serif; font-size:1.05rem; font-weight:700; margin-bottom:10px; color:#0f172a;" id="netTitle"><i class="fa-solid fa-sitemap" style="color:#9333ea;"></i> Registered Users & Passwords Database</div>
+                    <div id="networkTreeContainer"></div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Edit Patient Modal -->
-    <div id="editPatientModal" class="modal-backdrop" style="display:none;">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3 id="editPatHeader"><i class="fa-solid fa-user-pen" style="color:#0d9488;"></i> تعديل معلومات المريض</h3>
-                <button onclick="closeEditPatientModal()"><i class="fa-solid fa-xmark"></i></button>
+        <div class="footer" id="footerText">Clinic Master Network v17.19</div>
+    </div>
+</div>
+
+<div id="mandatoryBackupModal" class="modal-overlay" style="z-index: 99999;">
+    <div class="modal-body" style="max-width: 420px; text-align: center;">
+        <div style="font-size: 45px; color: #4f46e5; margin-bottom: 4px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h3 style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: #0f172a; margin-bottom: 6px;" id="mandBackupTitle">النسخ الاحتياطي الشهري الإجباري</h3>
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 14px; line-height: 1.5;" id="mandBackupSub">
+            اليوم هو الأول من الشهر! حرصاً منا على عدم فقدان أي بيانات للعيادة، يرجى تحميل نسخة احتياطية جديدة لحفظ ملفات المرضى قبل المتابعة.
+        </p>
+        <button class="btn-main" onclick="executeMandatoryBackup()" id="btnMandatoryBackup" style="background: #4f46e5; margin-bottom: 10px;">
+            <i class="fa-solid fa-download"></i> تحميل نسخة الاحتياط الآن ومتابعة العمل
+        </button>
+    </div>
+</div>
+
+<div id="supportModal" class="modal-overlay">
+    <div class="modal-body" style="max-width: 400px; text-align: center;">
+        <div class="modal-header">
+            <h3 id="suppHeaderTitle"><i class="fa-solid fa-headset" style="color:#0d9488;"></i> Technical Support & Renewal</h3>
+            <button class="modal-close" onclick="closeSupportModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;" id="suppSubText">
+            Contact us directly via WhatsApp or Telegram at: <br><strong style="color: #0f172a; direction: ltr; display: inline-block;">+964 773 911 4548</strong>
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 5px;">
+            <a href="https://wa.me/9647739114548?text=Hello,%20I%20want%20to%20renew%20my%20Clinic%20Master%20subscription" target="_blank" style="background: #25d366; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.25);">
+                <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i> WhatsApp Chat
+            </a>
+
+            <a href="https://t.me/+9647739114548" target="_blank" style="background: #0088cc; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; box-shadow: 0 4px 10px rgba(0, 136, 204, 0.25);">
+                <i class="fa-brands fa-telegram" style="font-size: 1.3rem;"></i> Telegram Chat
+            </a>
+        </div>
+    </div>
+</div>
+
+<div id="founderDeleteModal" class="modal-overlay">
+    <div class="modal-body" style="max-width: 400px; text-align: center;">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> Confirm Account Deletion</h3>
+            <button class="modal-close" onclick="closeFounderDeleteModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">
+            To delete this account (<strong id="delTargetEmailDisplay" style="color:#0f172a;"></strong>), please enter your Founder password:
+        </p>
+        <div class="field-box" style="text-align: left;">
+            <span class="field-label">Founder Password *</span>
+            <div class="input-wrapper"><input type="password" id="founderConfirmPassInput" placeholder="Enter founder password..."></div>
+        </div>
+        <button class="btn-main" onclick="executeFounderDeleteAccount()" style="background: #ef4444; margin-top: 5px;">
+            <i class="fa-solid fa-trash"></i> Confirm & Delete Account
+        </button>
+    </div>
+</div>
+
+<div id="bmiCalculatorModal" class="modal-overlay">
+    <div class="modal-body">
+        <div class="modal-header">
+            <h3 id="bmiTitleText"><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> BMI Calculator</h3>
+            <button class="modal-close" onclick="closeBmiModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <div class="field-box" style="flex: 1;">
+                <span class="field-label" id="lblBmiWeight">Weight (kg)</span>
+                <div class="input-wrapper"><input type="number" id="bmiWeight" placeholder="e.g. 70" oninput="calculateBmiLive()"></div>
             </div>
-            <div class="modal-body">
-                <div class="field-box"><span id="editLblName" class="field-label">الاسم الكامل *</span><div class="input-wrapper"><input type="text" id="editPName"></div></div>
-                <div class="field-box"><span id="editLblSubName" class="field-label">اسم الجد الرابع / العشيرة / ملاحظة (اختياري)</span><div class="input-wrapper"><input type="text" id="editPSubName"></div></div>
-                <div style="display:flex; gap:10px;">
-                    <div class="field-box" style="flex:1;"><span id="editLblAge" class="field-label">العمر *</span><div class="input-wrapper"><input type="number" id="editPAge"></div></div>
-                    <div class="field-box" style="flex:1;">
-                        <span id="editLblGender" class="field-label">الجنس</span>
-                        <div class="input-wrapper">
-                            <select id="editPGender">
-                                <option value="" id="editOptGender">اختر الجنس</option>
-                                <option value="Male" id="editOptMale">ذكر</option>
-                                <option value="Female" id="editOptFemale">أنثى</option>
-                            </select>
-                        </div>
+            <div class="field-box" style="flex: 1;">
+                <span class="field-label" id="lblBmiHeight">Height (cm)</span>
+                <div class="input-wrapper"><input type="number" id="bmiHeight" placeholder="e.g. 175" oninput="calculateBmiLive()"></div>
+            </div>
+        </div>
+
+        <div class="bmi-result-card">
+            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b;" id="lblBmiScore">Body Mass Index (BMI Score):</span>
+            <div class="bmi-value" id="bmiScoreDisplay">—</div>
+            <div id="bmiBadgeContainer">
+                <span class="bmi-badge" id="bmiBadgeInitial" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>
+            </div>
+        </div>
+
+        <button class="btn-main" onclick="closeBmiModal()" id="btnBmiAgree" style="background: #0284c7; margin-top: 6px;">
+            <i class="fa-solid fa-check"></i> Agree & Save
+        </button>
+    </div>
+</div>
+
+<div id="editPatientModal" class="modal-overlay">
+    <div class="modal-body">
+        <div class="modal-header">
+            <h3 id="editPatHeader"><i class="fa-solid fa-user-pen" style="color:#0d9488;"></i> Edit Patient Information</h3>
+            <button class="modal-close" onclick="closeEditPatientModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label" id="editLblName">Full Name *</span>
+            <div class="input-wrapper"><input type="text" id="editPName" placeholder="Enter patient full name..." required></div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label" id="editLblSubName">Grandfather Name / Tribe / Note (Optional)</span>
+            <div class="input-wrapper"><input type="text" id="editPSubName" placeholder="e.g. محمد / العشيرة"></div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <div class="field-box" style="flex: 1;">
+                <span class="field-label" id="editLblAge">Age *</span>
+                <div class="input-wrapper"><input type="number" id="editPAge" placeholder="Age..." required></div>
+            </div>
+
+            <div class="field-box" style="flex: 1;">
+                <span class="field-label" id="editLblGender">Gender</span>
+                <div class="input-wrapper">
+                    <select id="editPGender">
+                        <option value="" id="editOptGender">Select Gender</option>
+                        <option value="Male" id="editOptMale">Male</option>
+                        <option value="Female" id="editOptFemale">Female</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label" id="editLblMarital">Marital Status</span>
+            <div class="input-wrapper">
+                <select id="editPMarital">
+                    <option value="" id="editOptMarital">Select Status</option>
+                    <option value="Single" id="editOptSingle">Single</option>
+                    <option value="Married" id="editOptMarried">Married</option>
+                    <option value="Divorced" id="editOptDivorced">Divorced</option>
+                    <option value="Widow" id="editOptWidow">Widow</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label" id="editLblJob">Occupation</span>
+            <div class="input-wrapper">
+                <select id="editPJob">
+                    <option value="" id="editOptJob">Select Occupation</option>
+                    <option value="Employee" id="editJobEmp">Employee</option>
+                    <option value="Free Business" id="editJobFree">Free Business</option>
+                    <option value="Housewife" id="editJobHouse">Housewife</option>
+                    <option value="Student" id="editJobStud">Student</option>
+                    <option value="Other" id="editJobOther">Other</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label" id="editLblPhone">Phone Number</span>
+            <div class="input-wrapper"><input type="tel" id="editPPhone" placeholder="07XXXXXXXXX"></div>
+        </div>
+
+        <button class="btn-main" onclick="saveEditedPatient()" id="btnSaveEdit" style="margin-top: 10px;">
+            <i class="fa-solid fa-check"></i> Save Changes
+        </button>
+    </div>
+</div>
+
+<div id="medHistoryModal" class="modal-overlay">
+    <div class="modal-body">
+        <div class="modal-header">
+            <h3 id="mhHeaderTitle"><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History Details</h3>
+            <button class="modal-close" onclick="closeMedHistoryModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label" id="mhLblChronic">Chronic Diseases</span>
+            <div class="checkbox-grid">
+                <label class="checkbox-item"><input type="checkbox" value="Hypertension" class="mh-cd"> <span class="mh-cond-text" data-cond="Hypertension">Hypertension</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="Diabetes" class="mh-cd"> <span class="mh-cond-text" data-cond="Diabetes">Diabetes</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="Asthma" class="mh-cd"> <span class="mh-cond-text" data-cond="Asthma">Asthma</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="Epilepsy" class="mh-cd"> <span class="mh-cond-text" data-cond="Epilepsy">Epilepsy</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="Arthritis" class="mh-cd"> <span class="mh-cond-text" data-cond="Arthritis">Arthritis</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="Malignancy" class="mh-cd"> <span class="mh-cond-text" data-cond="Malignancy">Malignancy</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="Hepatitis" class="mh-cd"> <span class="mh-cond-text" data-cond="Hepatitis">Hepatitis</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="Chronic kidney dis" class="mh-cd"> <span class="mh-cond-text" data-cond="Chronic kidney dis">Chronic kidney dis</span></label>
+                <label class="checkbox-item"><input type="checkbox" value="IHD" class="mh-cd"> <span class="mh-cond-text" data-cond="IHD">IHD</span></label>
+                <label class="checkbox-item" style="grid-column: span 2;">
+                    <input type="checkbox" id="mh-other-check" onchange="toggleOtherInput()"> <span id="mhOtherText">Other</span>
+                </label>
+            </div>
+            <div class="input-wrapper" id="mh-other-box" style="display:none; margin-top: 8px; position: relative;">
+                <input type="text" id="mh-cd-other" placeholder="Specify other chronic conditions..." oninput="handleMhLiveInput(this, 'mh_other')" onblur="hideMhSuggestions('mh_other')">
+                <div class="suggestions-box" id="suggestions-mh_other"></div>
+                <div class="live-save-bar" id="save-bar-mh_other">
+                    <span>Save: "<strong id="line-text-mh_other"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_other" onmousedown="saveMhLineToDict(event, 'mh_other')">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label" id="mhLblAdmission">Previous admission to hospital</span>
+            <div class="input-wrapper" style="position: relative;">
+                <textarea id="mh-prev-admission" rows="1" placeholder="Details & dates..." oninput="handleMhLiveInput(this, 'mh_admission')" onblur="hideMhSuggestions('mh_admission')"></textarea>
+                <div class="suggestions-box" id="suggestions-mh_admission"></div>
+                <div class="live-save-bar" id="save-bar-mh_admission">
+                    <span>Save: "<strong id="line-text-mh_admission"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_admission" onmousedown="saveMhLineToDict(event, 'mh_admission')">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label" id="mhLblSurgery">Past surgery</span>
+            <div class="input-wrapper" style="position: relative;">
+                <textarea id="mh-past-surgery" rows="1" placeholder="Surgical history..." oninput="handleMhLiveInput(this, 'mh_surgery')" onblur="hideMhSuggestions('mh_surgery')"></textarea>
+                <div class="suggestions-box" id="suggestions-mh_surgery"></div>
+                <div class="live-save-bar" id="save-bar-mh_surgery">
+                    <span>Save: "<strong id="line-text-mh_surgery"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_surgery" onmousedown="saveMhLineToDict(event, 'mh_surgery')">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label" id="mhLblFamily">Family history</span>
+            <div class="input-wrapper" style="position: relative;">
+                <textarea id="mh-family-history" rows="1" placeholder="Hereditary diseases..." oninput="handleMhLiveInput(this, 'mh_family')" onblur="hideMhSuggestions('mh_family')"></textarea>
+                <div class="suggestions-box" id="suggestions-mh_family"></div>
+                <div class="live-save-bar" id="save-bar-mh_family">
+                    <span>Save: "<strong id="line-text-mh_family"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_family" onmousedown="saveMhLineToDict(event, 'mh_family')">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label" id="mhLblAllergy">Drugs allergy</span>
+            <div class="input-wrapper" style="position: relative;">
+                <textarea id="mh-drug-allergy" rows="1" placeholder="Known drug allergies..." oninput="handleMhLiveInput(this, 'mh_allergy')" onblur="hideMhSuggestions('mh_allergy')"></textarea>
+                <div class="suggestions-box" id="suggestions-mh_allergy"></div>
+                <div class="live-save-bar" id="save-bar-mh_allergy">
+                    <span>Save: "<strong id="line-text-mh_allergy"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_allergy" onmousedown="saveMhLineToDict(event, 'mh_allergy')">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label" id="mhLblChronicDrugs">Chronic use of drugs</span>
+            <div class="input-wrapper" style="position: relative;">
+                <textarea id="mh-chronic-drugs" rows="1" placeholder="Long-term medications..." oninput="handleMhLiveInput(this, 'mh_chronic_drugs')" onblur="hideMhSuggestions('mh_chronic_drugs')"></textarea>
+                <div class="suggestions-box" id="suggestions-mh_chronic_drugs"></div>
+                <div class="live-save-bar" id="save-bar-mh_chronic_drugs">
+                    <span>Save: "<strong id="line-text-mh_chronic_drugs"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_chronic_drugs" onmousedown="saveMhLineToDict(event, 'mh_chronic_drugs')">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <div class="field-box" style="flex:1;">
+                <span class="field-label" id="mhLblSmoking">Smoking status</span>
+                <div class="input-wrapper"><select id="mh-smoking"><option value="Non-smoker" id="optSmok1">Non-smoker</option><option value="Smoker" id="optSmok2">Smoker</option><option value="Passive smoker" id="optSmok3">Passive smoker</option></select></div>
+            </div>
+            <div class="field-box" style="flex:1;">
+                <span class="field-label" id="mhLblAlcohol">Drinking Alcohol</span>
+                <div class="input-wrapper"><select id="mh-alcohol"><option value="Non-drinker" id="optAlc1">Non-drinker</option><option value="Alcohol drinker" id="optAlc2">Alcohol drinker</option><option value="Social drinker" id="optAlc3">Social drinker</option></select></div>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label" id="mhLblNotes">Notes</span>
+            <div class="input-wrapper" style="position: relative;">
+                <textarea id="mh-notes" rows="2" placeholder="Additional clinical notes..." oninput="handleMhLiveInput(this, 'mh_notes')" onblur="hideMhSuggestions('mh_notes')"></textarea>
+                <div class="suggestions-box" id="suggestions-mh_notes"></div>
+                <div class="live-save-bar" id="save-bar-mh_notes">
+                    <span>Save: "<strong id="line-text-mh_notes"></strong>"</span>
+                    <button type="button" class="btn-live-save" id="btn-save-mh_notes" onmousedown="saveMhLineToDict(event, 'mh_notes')">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-main" onclick="closeMedHistoryModal()" id="btnMhDone" style="margin-top: 10px;">
+            <i class="fa-solid fa-check"></i> Done & Save
+        </button>
+    </div>
+</div>
+
+<div id="imagePreviewModal" onclick="closeImagePreview()">
+    <div class="modal-body" onclick="event.stopPropagation()">
+        <button class="modal-close" style="position: absolute; top: 15px; right: 15px; background: #fff; z-index: 10;" onclick="closeImagePreview()"><i class="fa-solid fa-xmark"></i></button>
+        <img id="previewModalImg" src="" alt="Preview">
+    </div>
+</div>
+
+<div id="rxModal" class="modal-overlay">
+    <div class="modal-body" style="max-width: 480px; text-align: left; direction: ltr;">
+        <div class="modal-header" style="direction: ltr;">
+            <h3 style="font-family: 'Playfair Display', serif;"><i class="fa-solid fa-file-prescription" style="color:#0d9488;"></i> RX Prescription</h3>
+            <button class="modal-close" onclick="closeRxModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+            <span style="font-size: 0.72rem; color: #64748b;" id="rxModeHint">RX ready. (Click Configure Layout to edit)</span>
+            <button id="rxConfigToggleBtn" onclick="toggleRxConfigMode()" style="background: #f0fdfa; color: #0d9488; border: 1px solid #0d9488; border-radius: 8px; padding: 4px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
+                <i class="fa-solid fa-sliders"></i> Configure Layout
+            </button>
+        </div>
+
+        <div id="rxCanvasContainer" class="rx-canvas-container">
+            <div id="dragBoxPatientDetails" class="draggable-box" style="top: 20px; left: 15px;">
+                <div class="box-font-controls">
+                    <span>Name Font:</span>
+                    <div style="display:flex; gap:3px;">
+                        <button type="button" onclick="changeBoxFontSize('patientDetails', -1)">-</button>
+                        <button type="button" onclick="changeBoxFontSize('patientDetails', 1)">+</button>
                     </div>
                 </div>
-                <div style="display:flex; gap:10px;">
-                    <div class="field-box" style="flex:1;">
-                        <span id="editLblMarital" class="field-label">الحالة الزوجية</span>
-                        <div class="input-wrapper">
-                            <select id="editPMarital">
-                                <option value="" id="editOptMarital">اختر الحالة</option>
-                                <option value="Single" id="editOptSingle">أعزب / عزباء</option>
-                                <option value="Married" id="editOptMarried">متزوج / متزوجة</option>
-                                <option value="Divorced" id="editOptDivorced">مطلق / مطلقة</option>
-                                <option value="Widow" id="editOptWidow">أرمل / أرملة</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="field-box" style="flex:1;">
-                        <span id="editLblJob" class="field-label">المهنة</span>
-                        <div class="input-wrapper"><input type="text" id="editPJob"></div>
+                <div id="rxDragPatientDetailsText" class="rx-patient-details-text">-</div>
+            </div>
+
+            <div id="dragBoxDate" class="draggable-box" style="top: 20px; left: 250px;">
+                <div class="box-font-controls">
+                    <span>Date Font:</span>
+                    <div style="display:flex; gap:3px;">
+                        <button type="button" onclick="changeBoxFontSize('date', -1)">-</button>
+                        <button type="button" onclick="changeBoxFontSize('date', 1)">+</button>
                     </div>
                 </div>
-                <div class="field-box"><span id="editLblPhone" class="field-label">رقم الهاتف</span><div class="input-wrapper"><input type="tel" id="editPPhone"></div></div>
-                <button type="button" id="btnSaveEdit" onclick="saveEditedPatient()" class="btn-main"><i class="fa-solid fa-check"></i> حفظ التغييرات</button>
+                <div id="rxDragDateText" class="rx-date-text">-</div>
             </div>
-        </div>
-    </div>
 
-    <!-- Support Modal -->
-    <div id="supportModal" class="modal-backdrop" style="display:none;">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-headset" style="color:#0d9488;"></i> الدعم الفني والاشتراك</h3>
-                <button onclick="closeSupportModal()"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body" style="text-align:center; padding:16px;">
-                <p style="font-size:0.85rem; color:#475569; line-height:1.6; margin-bottom:14px;">لتجديد اشتراك النظام أو الحصول على مفتاح التفعيل الرسمي، يرجى التواصل مع فريق الدعم الفني.</p>
-                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:12px; margin-bottom:14px; font-size:0.9rem; font-weight:700; color:#0f172a;">
-                    <i class="fa-solid fa-envelope" style="color:#0d9488;"></i> musqaqa009@gmail.com
+            <div id="dragBoxVitals" class="draggable-box" style="top: 80px; left: 15px;">
+                <div class="box-font-controls">
+                    <span>Vitals Font:</span>
+                    <div style="display:flex; gap:3px;">
+                        <button type="button" onclick="changeBoxFontSize('vitals', -1)">-</button>
+                        <button type="button" onclick="changeBoxFontSize('vitals', 1)">+</button>
+                    </div>
                 </div>
-                <button type="button" onclick="closeSupportModal()" class="btn-main">إغلاق</button>
+                <div id="rxDragVitalsText" class="rx-vitals-text">-</div>
             </div>
+
+            <div id="dragBoxTreatment" class="draggable-box" style="top: 150px; left: 15px; min-width: 220px;">
+                <div class="box-font-controls">
+                    <span>Drugs Font:</span>
+                    <div style="display:flex; gap:3px;">
+                        <button type="button" onclick="changeBoxFontSize('treatment', -1)">-</button>
+                        <button type="button" onclick="changeBoxFontSize('treatment', 1)">+</button>
+                    </div>
+                </div>
+                <div class="rx-treatment-wrapper">
+                    <div class="rx-rx-title">RX</div>
+                    <div id="rxDragTreatmentText" class="rx-treatment-text">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+            <button id="rxSaveLayoutBtn" class="btn-main" onclick="saveRxLayoutPositions()" style="display: none; background: #0284c7;">
+                <i class="fa-solid fa-floppy-disk"></i> Save RX Layout & Fonts
+            </button>
+            <button class="btn-main" onclick="printPrescriptionDirectly()" id="btnPrintRxDirect" style="font-family: 'Plus Jakarta Sans', sans-serif; background: #16a34a; width: 100%;">
+                <i class="fa-solid fa-print"></i> طباعة الروشتة (PDF / طباعة مباشرة)
+            </button>
+            <button class="btn-main" onclick="openPrescriptionPDF()" id="btnSaveRxPDF" style="font-family: 'Plus Jakarta Sans', sans-serif; background: #0284c7; width: 100%;">
+                <i class="fa-solid fa-file-pdf"></i> Save as PDF File
+            </button>
         </div>
     </div>
+</div>
 
-    <!-- Mandatory Monthly Backup Modal -->
-    <div id="mandatoryBackupModal" class="modal-backdrop" style="display:none; z-index:9999;">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-triangle-exclamation" style="color:#f59e0b;"></i> النسخة الاحتياطية الشهرية</h3>
-            </div>
-            <div class="modal-body" style="text-align:center; padding:16px;">
-                <p style="font-size:0.85rem; color:#475569; line-height:1.6; margin-bottom:14px;">عزيزي الطبيب، اليوم الأول من الشهر الجديد. لحماية بيانات مرضاك، يرجى حفظ نسخة احتياطية جديدة.</p>
-                <button type="button" onclick="executeMandatoryBackup()" class="btn-main"><i class="fa-solid fa-download"></i> حفظ النسخة الآن</button>
-            </div>
-        </div>
+<div id="pdfReportExportContainer" style="position: absolute; left: -9999px; top: 0; width: 750px; background: #ffffff; padding: 40px; font-family: 'Plus Jakarta Sans', sans-serif; color: #0f172a; direction: ltr; text-align: left;">
+    <div style="text-align: center; border-bottom: 2.5px solid #0d9488; padding-bottom: 15px; margin-bottom: 20px;">
+        <div style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: #0f172a; margin-bottom: 4px;">CLINIC MASTER MEDICAL RECORD</div>
+        <div style="font-size: 0.8rem; color: #0d9488; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Official Comprehensive Patient Clinical Report</div>
+        <div style="font-size: 0.72rem; color: #64748b; margin-top: 4px;" id="pdfRepDateLabel">Generated on: —</div>
     </div>
 
-    <!-- Founder Delete Confirmation Modal -->
-    <div id="founderDeleteModal" class="modal-backdrop" style="display:none;">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> تأكيد حذف حساب المستخدم</h3>
-                <button onclick="closeFounderDeleteModal()"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body">
-                <p style="font-size:0.85rem; color:#475569; margin-bottom:10px;">أنت على وشك حذف الحساب: <strong id="delTargetEmailDisplay" style="color:#ef4444;"></strong></p>
-                <div class="field-box"><span class="field-label">أدخل كلمة مرور المؤسس الخاصة بك للتأكيد</span><div class="input-wrapper"><input type="password" id="founderConfirmPassInput" placeholder="••••••••"></div></div>
-                <button type="button" onclick="executeFounderDeleteAccount()" class="btn-main" style="background:#ef4444;"><i class="fa-solid fa-trash"></i> تأكيد الحذف النهائي</button>
-            </div>
-        </div>
+    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px; margin-bottom: 20px;">
+        <div style="font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: #0f766e; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;"><i class="fa-solid fa-id-card"></i> Patient Profile</div>
+        <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
+            <tr>
+                <td style="padding: 4px 0; font-weight: 700; color: #475569; width: 22%;">Full Name:</td>
+                <td style="padding: 4px 0; font-weight: 700; color: #0f172a;" id="pdfRepName">—</td>
+                <td style="padding: 4px 0; font-weight: 700; color: #475569; width: 18%;">Age:</td>
+                <td style="padding: 4px 0; font-weight: 700; color: #0f172a;" id="pdfRepAge">—</td>
+            </tr>
+            <tr>
+                <td style="padding: 4px 0; font-weight: 700; color: #475569;">Gender:</td>
+                <td style="padding: 4px 0; font-weight: 700; color: #0f172a;" id="pdfRepGender">—</td>
+                <td style="padding: 4px 0; font-weight: 700; color: #475569;">Marital Status:</td>
+                <td style="padding: 4px 0; font-weight: 700; color: #0f172a;" id="pdfRepMarital">—</td>
+            </tr>
+            <tr>
+                <td style="padding: 4px 0; font-weight: 700; color: #475569;">Occupation:</td>
+                <td style="padding: 4px 0; font-weight: 700; color: #0f172a;" id="pdfRepJob">—</td>
+                <td style="padding: 4px 0; font-weight: 700; color: #475569;">Phone Number:</td>
+                <td style="padding: 4px 0; font-weight: 700; color: #0f172a;" id="pdfRepPhone">—</td>
+            </tr>
+        </table>
     </div>
 
-    <!-- Image Preview Modal -->
-    <div id="imagePreviewModal" class="modal-backdrop" style="display:none;" onclick="closeImagePreview()">
-        <div style="max-width:90%; max-height:90vh; position:relative;">
-            <img id="previewModalImg" src="" style="max-width:100%; max-height:90vh; border-radius:12px; border:2px solid #fff;">
-        </div>
+    <div>
+        <div style="font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 10px;"><i class="fa-solid fa-notes-medical"></i> Clinical Visits & Prescriptions Timeline</div>
+        <div id="pdfRepVisitsContainer" style="display: flex; flex-direction: column; gap: 14px;"></div>
     </div>
 
-    <!-- Hidden PDF Report Export Container -->
-    <div id="pdfReportExportContainer" style="position:absolute; left:-9999px; top:0; width:794px; background:#ffffff; padding:40px; font-family:'Cairo',sans-serif; color:#0f172a; direction:rtl;">
-        <div style="border-bottom:3px solid #0d9488; padding-bottom:16px; margin-bottom:20px; display:flex; justify-content:space-between; align-items:center;">
-            <div>
-                <h2 style="font-size:1.8rem; font-weight:900; color:#0f172a; margin:0;">تقرير سجل المريض الطبي</h2>
-                <p style="font-size:0.9rem; color:#64748b; margin:4px 0 0;" id="pdfRepDateLabel">Generated on: ---</p>
-            </div>
-            <div style="background:#ccfbf1; color:#0f766e; padding:8px 16px; border-radius:12px; font-weight:800; font-size:1rem;">Clinic Master System</div>
+    <div style="margin-top: 30px; display: flex; justify-content: space-between; align-items: flex-end; border-top: 1.5px solid #cbd5e1; padding-top: 12px; font-size: 0.75rem;">
+        <div>
+            <span style="color: #64748b; font-weight: 700;">Clinic Master System — Certified Document</span>
         </div>
-        <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:12px; padding:16px; margin-bottom:20px; display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:0.9rem;">
-            <div><strong>اسم المريض:</strong> <span id="pdfRepName">---</span></div>
-            <div><strong>العمر:</strong> <span id="pdfRepAge">---</span></div>
-            <div><strong>الجنس:</strong> <span id="pdfRepGender">---</span></div>
-            <div><strong>الحالة الزوجية:</strong> <span id="pdfRepMarital">---</span></div>
-            <div><strong>المهنة:</strong> <span id="pdfRepJob">---</span></div>
-            <div><strong>رقم الهاتف:</strong> <span id="pdfRepPhone">---</span></div>
+        <div style="text-align: right;">
+            <span style="font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 900; color: #0f172a;">Attending Doctor Signature</span>
         </div>
-        <h3 style="font-size:1.2rem; font-weight:800; color:#0f172a; margin-bottom:12px; border-right:4px solid #0d9488; padding-right:8px;">سجل الزيارات والتشخيصات</h3>
-        <div id="pdfRepVisitsContainer"></div>
     </div>
+</div>
 
-    <!-- Script file with version cache-buster -->
-    <script src="script.js?v=17.21"></script>
+<!-- ربط ملف الـ JavaScript الخارجي -->
+<script src="script.js"></script>
 </body>
 </html>
