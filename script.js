@@ -64,7 +64,7 @@
             switchLogin: "لديك حساب بالفعل؟ <span onclick=\"toggleAuthMode()\">سجل الدخول</span>",
             
             activTitle: "تفعيل الحساب مطلوب",
-            activSub: "يرجى إدخال رمز التفعيل الخاص بك.",
+            activSub: "يرجى إدخال رمز التفعيل أو الاشتراك الخاص بك.",
             lblActivCode: "رمز التفعيل / الاشتراك",
             btnActivate: "تفعيل النظام",
 
@@ -106,7 +106,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.19",
+            footer: "نظام عيادة ماستر المتقدم v17.25",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -268,7 +268,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.19",
+            footer: "Clinic Master Network v17.25",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -781,14 +781,17 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById('pDate').value = getTodayFormatted();
+        const pDateEl = document.getElementById('pDate');
+        if (pDateEl) pDateEl.value = getTodayFormatted();
         applyLanguage();
         applyDarkModeState();
 
         if (!navigator.onLine) {
             const bar = document.getElementById('networkStatusBar');
-            bar.classList.add('offline');
-            bar.style.display = 'block';
+            if (bar) {
+                bar.classList.add('offline');
+                bar.style.display = 'block';
+            }
         }
 
         auth.onAuthStateChanged(async user => {
@@ -889,9 +892,12 @@
                 isUserSecretary = false;
                 isSubscriptionExpired = false;
                 sessionStorage.removeItem('target_doctor_uid');
-                document.getElementById('activationScreen').style.display = 'none';
-                document.getElementById('appContainer').style.display = 'none';
-                document.getElementById('authScreen').style.display = 'flex';
+                const activScreen = document.getElementById('activationScreen');
+                const appCont = document.getElementById('appContainer');
+                const authScreen = document.getElementById('authScreen');
+                if (activScreen) activScreen.style.display = 'none';
+                if (appCont) appCont.style.display = 'none';
+                if (authScreen) authScreen.style.display = 'flex';
             }
         });
 
@@ -943,7 +949,7 @@
         const cardNewPat = document.getElementById('cardNewPatient');
         cardNewPat.classList.add('disabled-card');
         cardNewPat.onclick = function() {
-            alert('⚠️ انتهت صلاحية الاشتراك. التطبيق يعمل في وضع القراءة فقط.');
+            alert('⚠️️ انتهت صلاحية الاشتراك. التطبيق يعمل في وضع القراءة فقط.');
             openSupportModal();
         };
 
@@ -953,7 +959,7 @@
         banner.style.display = 'flex';
         banner.className = 'sub-status-banner expired';
         titleEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> انتهت صلاحية الاشتراك - وضع القراءة فقط`;
-        textEl.innerText = `انتهى اشتراكك. يمكنك تصفح الأرشيف وقراءة الملفات والتقارير بحرية تامة.`;
+        textEl.innerText = `انتهى اشتراكك. يمكنك تصفح الأرشيف وقراءة الملفات والتقارير بحرية تامة أو تجديد الكود.`;
 
         restorePreviousScreenState();
     }
@@ -1057,6 +1063,19 @@
         document.getElementById('supportModal').style.display = 'none';
     }
 
+    // دوال التجديد الحر عبر إدخال الكود في أي وقت
+    function openActivationScreenForRenewal() {
+        document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('activationScreen').style.display = 'flex';
+        document.getElementById('activationInput').value = '';
+        document.getElementById('activationInput').focus();
+    }
+
+    function cancelRenewal() {
+        document.getElementById('activationScreen').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'flex';
+    }
+
     function restorePreviousScreenState() {
         const savedScreen = sessionStorage.getItem('current_screen');
         const savedTitle = sessionStorage.getItem('header_title') || translations[currentLang].headerTitle;
@@ -1126,7 +1145,7 @@
                 }, { merge: true });
             }
 
-            alert('System activated successfully!');
+            alert('System activated / renewed successfully!');
             document.getElementById('activationScreen').style.display = 'none';
             isSubscriptionExpired = false;
             setupClientInterfaceAfterAuth(expiryDateIso, false);
@@ -1300,14 +1319,18 @@
                         console.log(e);
                     }
 
+                    document.getElementById('authScreen').style.display = 'none';
                     if (isSec) {
-                        document.getElementById('authScreen').style.display = 'none';
                         document.getElementById('appContainer').style.display = 'flex';
                         document.getElementById('cardPermissions').style.display = 'none';
                         document.getElementById('subStatusBanner').style.display = 'none';
                         isUserSecretary = true;
                         applySecretaryUIVisibility();
                         restorePreviousScreenState();
+                    } else if (loginEmail.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
+                        setupFounderInterfaceAfterAuth();
+                    } else {
+                        checkUserSubscriptionStatus(res.user.uid, false);
                     }
                 })
                 .catch(err => alert('خطأ: ' + err.message));
@@ -1502,7 +1525,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.19",
+            version: "17.25",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
