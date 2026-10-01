@@ -17,10 +17,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- استدعاء خط المسيري عبر Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- استدعاء خط المسيري والخطوط المساعدة -->
-    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Amiri:wght@400;700&family=Cinzel:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-auth-compat.js"></script>
@@ -28,10 +29,12 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <!-- تطبيق خط المسيري على كافة عناصر الواجهة -->
+    <!-- ضمان تطبيق خط المسيري بقوة على كافة العناصر بدون استثناء -->
     <style>
-        body, input, select, textarea, button, .menu-card, .auth-form, .group-card, .visit-card {
-            font-family: 'El Messiri', 'Plus Jakarta Sans', sans-serif !important;
+        @import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700&display=swap');
+
+        body, input, select, textarea, button, .menu-card, .auth-form, .group-card, .visit-card, h1, h2, h3, h4, h5, h6, span, p, a, label {
+            font-family: 'El Messiri', sans-serif !important;
         }
     </style>
 </head>
