@@ -2123,6 +2123,31 @@
         savePatientToCloudAndLocal(patient);
     }
 
+    function handleLmpInput(visitId, lmpVal) {
+        updateVisitFieldData(visitId, 'obsLmp', lmpVal);
+        if (lmpVal) {
+            let lmpDate = new Date(lmpVal);
+            if (!isNaN(lmpDate.getTime())) {
+                let eddDate = new Date(lmpDate.getTime() + (280 * 24 * 60 * 60 * 1000));
+                let year = eddDate.getFullYear();
+                let month = String(eddDate.getMonth() + 1).padStart(2, '0');
+                let day = String(eddDate.getDate()).padStart(2, '0');
+                let eddStr = `${year}-${month}-${day}`;
+                
+                const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+                if (patient) {
+                    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+                    if (visit) {
+                        visit.obsEdd = eddStr;
+                        savePatientToCloudAndLocal(patient);
+                        const eddInput = document.getElementById(`obsEdd-${visitId}`);
+                        if (eddInput) eddInput.value = eddStr;
+                    }
+                }
+            }
+        }
+    }
+
     function updateVisitDate(visitId, newDate) {
         if (isSubscriptionExpired) return;
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
@@ -2750,8 +2775,8 @@
                 <div class="group-card" style="background:#fce7f3; border-color:#f472b6; margin-bottom:12px; padding:12px;">
                     <span style="font-weight:800; font-size:0.85rem; color:#be185d; display:block; margin-bottom:10px;"><i class="fa-solid fa-person-pregnant"></i> تفاصيل النسائية والتوليد (Obstetrics & Gynecology)</span>
                     <div style="display:flex; gap:8px; margin-bottom:8px;">
-                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">LMP (آخر دورة)</span><div class="input-wrapper"><input type="date" value="${v.obsLmp || ''}" oninput="updateVisitFieldData(${v.visitId}, 'obsLmp', this.value)" style="font-size:0.85rem;"></div></div>
-                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">EDD (موعد الولادة)</span><div class="input-wrapper"><input type="date" value="${v.obsEdd || ''}" oninput="updateVisitFieldData(${v.visitId}, 'obsEdd', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">LMP (آخر دورة)</span><div class="input-wrapper"><input type="date" id="obsLmp-${v.visitId}" value="${v.obsLmp || ''}" oninput="handleLmpInput(${v.visitId}, this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">EDD (موعد الولادة التلقائي)</span><div class="input-wrapper"><input type="date" id="obsEdd-${v.visitId}" value="${v.obsEdd || ''}" oninput="updateVisitFieldData(${v.visitId}, 'obsEdd', this.value)" style="font-size:0.85rem;"></div></div>
                     </div>
                     <div style="display:flex; gap:8px; margin-bottom:8px;">
                         <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Gravidity (عدد مرات الحمل - G)</span><div class="input-wrapper"><input type="text" value="${v.obsG || ''}" placeholder="مثال: G3" oninput="updateVisitFieldData(${v.visitId}, 'obsG', this.value)" style="font-size:0.85rem;"></div></div>
