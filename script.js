@@ -106,7 +106,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.28",
+            footer: "نظام عيادة ماستر المتقدم v17.26",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -268,7 +268,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.28",
+            footer: "Clinic Master Network v17.26",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -464,6 +464,8 @@
         document.getElementById('menuRxSub').innerText = t.rxTemplateSub;
         document.getElementById('menuSpecTitle').innerText = t.specialtiesDash;
         document.getElementById('menuSpecSub').innerText = t.specialtiesDashSub;
+        document.getElementById('menuGrowthTitle').innerText = "منحنيات نمو الأطفال";
+        document.getElementById('menuGrowthSub').innerText = "تقييم الوزن والطول مع منظمة الصحة العالمية";
         document.getElementById('menuDictTitle').innerText = t.dict;
         document.getElementById('menuDictSub').innerText = t.dictSub;
 
@@ -607,7 +609,7 @@
         const bar = document.getElementById('networkStatusBar');
         if (!navigator.onLine) {
             bar.classList.add('offline');
-            bar.innerText = "⚠ Offline Mode - Changes saved locally, will sync when online";
+            bar.innerText = "⚠️ Offline Mode - Changes saved locally, will sync when online";
         } else {
             bar.classList.remove('offline');
             bar.style.display = 'none';
@@ -769,6 +771,7 @@
         document.getElementById('addPatientScreen').style.display = 'none';
         document.getElementById('rxTemplateScreen').style.display = 'none';
         document.getElementById('specialtiesDashboardScreen').style.display = 'none';
+        document.getElementById('pediatricGrowthScreen').style.display = 'none';
         document.getElementById('archiveScreen').style.display = 'none';
         document.getElementById('trashScreen').style.display = 'none';
         document.getElementById('medicalRecordScreen').style.display = 'none';
@@ -1004,6 +1007,7 @@
             document.getElementById('cardPermissions').style.display = 'none';
             document.getElementById('cardRxTemplate').style.display = 'none';
             document.getElementById('cardSpecialtiesDashboard').style.display = 'none';
+            document.getElementById('cardGrowth').style.display = 'none';
             document.getElementById('cardDict').style.display = 'none';
             document.getElementById('cardAnalytics').style.display = 'none';
             document.getElementById('cardBackup').style.display = 'none';
@@ -1082,7 +1086,7 @@
         const savedPatientId = sessionStorage.getItem('current_patient_id');
 
         if (savedScreen && savedScreen !== 'mainScreen' && document.getElementById(savedScreen)) {
-            if (isUserSecretary && ['rxTemplateScreen', 'specialtiesDashboardScreen', 'dictScreen', 'analyticsScreen', 'backupScreen', 'trashScreen', 'settingsScreen', 'permissionsScreen'].includes(savedScreen)) {
+            if (isUserSecretary && ['rxTemplateScreen', 'specialtiesDashboardScreen', 'pediatricGrowthScreen', 'dictScreen', 'analyticsScreen', 'backupScreen', 'trashScreen', 'settingsScreen', 'permissionsScreen'].includes(savedScreen)) {
                 navigateTo('mainScreen', translations[currentLang].headerTitle, translations[currentLang].headerSub, false);
                 return;
             }
@@ -1341,6 +1345,7 @@
         document.getElementById('cardArchive').style.display = 'flex';
         document.getElementById('cardRxTemplate').style.display = 'flex';
         document.getElementById('cardSpecialtiesDashboard').style.display = 'flex';
+        document.getElementById('cardGrowth').style.display = 'flex';
         document.getElementById('cardDict').style.display = 'flex';
         document.getElementById('cardAnalytics').style.display = 'flex';
         document.getElementById('cardBackup').style.display = 'flex';
@@ -1354,6 +1359,7 @@
         document.getElementById('cardArchive').style.display = 'flex';
         document.getElementById('cardRxTemplate').style.display = 'none';
         document.getElementById('cardSpecialtiesDashboard').style.display = 'none';
+        document.getElementById('cardGrowth').style.display = 'none';
         document.getElementById('cardDict').style.display = 'none';
         document.getElementById('cardAnalytics').style.display = 'none';
         document.getElementById('cardBackup').style.display = 'none';
@@ -1362,55 +1368,64 @@
         document.getElementById('cardPermissions').style.display = 'none';
     }
 
-    function calculateVisitGrowthPercentiles(visitId) {
-        const ageM = parseFloat(document.getElementById(`growthAgeM-${visitId}`).value);
-        const w = parseFloat(document.getElementById(`growthW-${visitId}`).value);
-        const h = parseFloat(document.getElementById(`growthH-${visitId}`).value);
-        const resEl = document.getElementById(`growthRes-${visitId}`);
+    function openPediatricGrowthScreen() {
+        navigateTo('pediatricGrowthScreen', 'منحنيات نمو الأطفال البيومترية', 'حاسبة منظمة الصحة العالمية');
+        document.getElementById('growthGender').value = 'male';
+        document.getElementById('growthAgeMonths').value = '';
+        document.getElementById('growthWeightKg').value = '';
+        document.getElementById('growthHeightCm').value = '';
+        document.getElementById('growthResultContainer').style.display = 'none';
+    }
 
-        if (!ageM || isNaN(ageM) || ageM < 0) {
-            alert('الرجاء إدخال عمر الطفل بالأشهر صالحاً.');
+    function calculateChildGrowthPercentiles() {
+        const gender = document.getElementById('growthGender').value;
+        const ageMonths = parseFloat(document.getElementById('growthAgeMonths').value);
+        const weight = parseFloat(document.getElementById('growthWeightKg').value);
+        const height = parseFloat(document.getElementById('growthHeightCm').value);
+
+        if (!ageMonths || isNaN(ageMonths) || ageMonths < 0) {
+            alert('الرجاء إدخال عمر صالح بالأسابيع أو الأشهر.');
             return;
         }
 
-        let wStatus = 'وزن طبيعي (Normal Weight - P15-P85)';
-        let hStatus = 'طول طبيعي (Normal Height - P15-P85)';
-        let wColor = '#166534';
-        let hColor = '#166534';
+        let weightStatus = 'وزن طبيعي (Normal Weight - P15-P85)';
+        let heightStatus = 'طول طبيعي (Normal Height - P15-P85)';
+        let weightColor = '#166534';
+        let heightColor = '#166534';
 
-        const expW = (ageM * 0.5) + 3.3;
-        const expH = (ageM * 1.5) + 50;
+        // خوارزمية تقريبية معيارية ذكية لتقييم النسب المئوية بناءً على المتوسطات العمرية للطفل
+        const expectedWeight = (ageMonths * 0.5) + 3.3; // تقريب تقريبي لوسط الوزن حسب العمر
+        const expectedHeight = (ageMonths * 1.5) + 50;  // تقريب تقريبي لوسط الطول حسب العمر
 
-        if (w) {
-            if (w < expW * 0.8) {
-                wStatus = 'نحافة ملحوظة أو نقص بالوزن (Underweight - < P3)';
-                wColor = '#b91c1c';
-            } else if (w > expW * 1.25) {
-                wStatus = 'زيادة وزن محتملة (Overweight - > P85)';
-                wColor = '#c2410c';
+        if (weight) {
+            if (weight < expectedWeight * 0.8) {
+                weightStatus = 'نحافة ملحوظة أو نقص بالوزن (Underweight - < P3)';
+                weightColor = '#b91c1c';
+            } else if (weight > expectedWeight * 1.25) {
+                weightStatus = 'زيادة وزن محتملة (Overweight - > P85)';
+                weightColor = '#c2410c';
             }
         }
 
-        if (h) {
-            if (h < expH * 0.88) {
-                wStatus = 'قصر قامة / تقزم محتمل (Stunting - < P3)';
-                wColor = '#b91c1c';
-            } else if (h > expH * 1.12) {
-                wStatus = 'طول أعلى من المعدل (Above average)';
-                wColor = '#0284c7';
+        if (height) {
+            if (height < expectedHeight * 0.88) {
+                heightStatus = 'قصر قامة / تقزم محتمل (Stunting - < P3)';
+                heightColor = '#b91c1c';
+            } else if (height > expectedHeight * 1.12) {
+                heightStatus = 'طول أعلى من المعدل (Above average)';
+                weightColor = '#0284c7';
             }
         }
 
-        resEl.innerHTML = `
-            • <b>الوزن مقابل العمر:</b> <span style="color:${wColor};">${wStatus}</span><br>
-            • <b>الطول مقابل العمر:</b> <span style="color:${hColor};">${hStatus}</span><br>
-            • <b>توصية WHO:</b> متابعة المخطط البياني بانتظام.
+        const resContainer = document.getElementById('growthResultContainer');
+        const resDetails = document.getElementById('growthResultDetails');
+
+        resDetails.innerHTML = `
+            • <b>تقييم الوزن مقابل العمر:</b> <span style="color:${weightColor}; font-weight:700;">${weightStatus}</span><br>
+            • <b>تقييم الطول مقابل العمر:</b> <span style="color:${heightColor}; font-weight:700;">${heightStatus}</span><br>
+            • <b>التوصية السريرية:</b> يوصى بمقارنة النتائج مع المخططات البيانية الورقية أو الرقمية الرسمية لـ WHO ومعالجة أي انحراف مبكراً.
         `;
-        resEl.style.display = 'block';
-
-        updateVisitFieldData(visitId, 'pedsGrowthAge', ageM);
-        updateVisitFieldData(visitId, 'pedsGrowthW', w);
-        updateVisitFieldData(visitId, 'pedsGrowthH', h);
+        resContainer.style.display = 'block';
     }
 
     function openSpecialtiesDashboard() {
@@ -1575,7 +1590,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.28",
+            version: "17.26",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -1884,168 +1899,41 @@
             `).join('');
     }
 
-    // نافذة التحميل المخصصة لتطبيق فايرفوكس PWA
-    function showPdfDownloadModal(dataUri, filename) {
-        let modal = document.getElementById('customPdfModal');
-        if (!modal) {
-            modal = document.createElement('div');
-            modal.id = 'customPdfModal';
-            modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; z-index:99999;';
-            modal.innerHTML = `
-                <div style="background:#ffffff; padding:22px; border-radius:16px; width:90%; max-width:340px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.3);">
-                    <i class="fa-solid fa-file-pdf" style="font-size:3rem; color:#0d9488; margin-bottom:10px;"></i>
-                    <h3 style="margin-bottom:8px; color:#0f172a; font-size:1.1rem; font-weight:800;">تم تجهيز تقرير الزيارة بنجاح</h3>
-                    <p style="color:#64748b; font-size:0.82rem; margin-bottom:16px; line-height:1.4;">اضغط على الزر أدناه لتحميل الملف مباشرة على جهازك:</p>
-                    <a id="customPdfDownloadLink" href="" download="" class="btn-main" style="display:block; background:#0d9488; color:#fff; padding:12px; border-radius:10px; text-decoration:none; font-weight:700; font-size:0.9rem; margin-bottom:10px;">تحميل الملف الآن</a>
-                    <button type="button" onclick="document.getElementById('customPdfModal').style.display='none'" style="background:#f1f5f9; color:#475569; border:none; padding:8px 16px; border-radius:8px; font-size:0.8rem; cursor:pointer; width:100%;">إلغاء</button>
-                </div>
-            `;
-            document.body.appendChild(modal);
-        }
-        
-        const link = document.getElementById('customPdfDownloadLink');
-        link.href = dataUri;
-        link.download = filename;
-        modal.style.display = 'flex';
-    }
-
-    // دالة تصدير تقرير الزيارة المحددة فقط عند الضغط على زر الـ PDF داخل بطاقة الزيارة
-    function exportSingleVisitPDF(visitId) {
+    function exportPatientMedicalReportPDF() {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
-        const visit = (patient.visits || []).find(v => Number(v.visitId) === Number(visitId));
-        if (!visit) return;
 
-        const exportContainer = document.getElementById('pdfReportExportContainer');
-        if (!exportContainer) {
-            alert('عنصر التصدير غير موجود في الصفحة.');
-            return;
-        }
+        document.getElementById('pdfRepName').innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
+        document.getElementById('pdfRepAge').innerText = patient.age;
+        document.getElementById('pdfRepGender').innerText = patient.gender || 'N/A';
+        document.getElementById('pdfRepMarital').innerText = patient.marital || 'N/A';
+        document.getElementById('pdfRepJob').innerText = patient.job || 'N/A';
+        document.getElementById('pdfRepPhone').innerText = patient.phone || 'N/A';
+        document.getElementById('pdfRepDateLabel').innerText = `Generated on: ${new Date().toLocaleString()}`;
 
-        let mh = visit.medHistory || {};
-        let conditionsText = mh.conditions && mh.conditions.length > 0 ? `<b>الأمراض المزمنة:</b> ${mh.conditions.join(', ')}` : '';
-        let mhFullText = '';
-        if (conditionsText || mh.otherCondition || mh.admission || mh.surgery || mh.family || mh.allergy || mh.chronicDrugs || mh.smoking || mh.notes) {
-            mhFullText = `
-                <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; margin-bottom: 12px; font-size: 0.8rem; line-height: 1.5;">
-                    <strong style="color: #0f172a; display: block; margin-bottom: 4px;">التاريخ المرضي والأمراض المزمنة:</strong>
-                    ${conditionsText ? conditionsText + '<br>' : ''}
-                    ${mh.otherCondition ? `<b>أخرى:</b> ${mh.otherCondition}<br>` : ''}
-                    ${mh.admission ? `<b>دخول المستشفى:</b> ${mh.admission}<br>` : ''}
-                    ${mh.surgery ? `<b>العمليات:</b> ${mh.surgery}<br>` : ''}
-                    ${mh.family ? `<b>التاريخ العائلي:</b> ${mh.family}<br>` : ''}
-                    ${mh.allergy ? `<b>حساسية الأدوية:</b> ${mh.allergy}<br>` : ''}
-                    ${mh.chronicDrugs ? `<b>أدوية مزمنة:</b> ${mh.chronicDrugs}<br>` : ''}
-                    ${mh.smoking ? `<b>التدخين:</b> ${mh.smoking} | الكحول: ${mh.alcohol || 'N/A'}<br>` : ''}
-                    ${mh.notes ? `<b>ملاحظات:</b> ${mh.notes}` : ''}
-                </div>
-            `;
-        }
+        const visitsContainer = document.getElementById('pdfRepVisitsContainer');
+        const visits = patient.visits || [];
 
-        let vitalsSummary = `
-            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; margin-bottom: 12px; font-size: 0.8rem; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
-                <div><strong>ضغط الدم (BP):</strong> ${v.bp || 'غير مسجل'}</div>
-                <div><strong>نبض القلب (HR):</strong> ${v.hr ? v.hr + ' bpm' : 'غير مسجل'}</div>
-                <div><strong>درجة الحرارة:</strong> ${v.temp ? v.temp + ' °C' : 'غير مسجل'}</div>
-                <div><strong>الوزن & BMI:</strong> ${v.bmiWeight ? v.bmiWeight + ' kg' : 'غير مسجل'} (BMI: ${v.bmiScore || '—'})</div>
-            </div>
-        `;
-
-        let specialtyHtml = '';
-        if (v.obsLmp || v.obsEdd || v.obsG) {
-            specialtyHtml += `<div style="margin-bottom:8px; background:#fce7f3; border:1px solid #f472b6; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>النسائية والتوليد:</strong> LMP: ${v.obsLmp || '-'} | EDD: ${v.obsEdd || '-'} | G: ${v.obsG || '-'} P: ${v.obsP || '-'} A: ${v.obsA || '-'}<br>${v.obsNotes || ''}</div>`;
-        }
-        if (v.orthoJoint || v.orthoGrade) {
-            specialtyHtml += `<div style="margin-bottom:8px; background:#fef3c7; border:1px solid #f59e0b; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>العظام والمفاصل:</strong> المفصل: ${v.orthoJoint || '-'} | الدرجة: ${v.orthoGrade || '-'}<br>${v.orthoNotes || ''}</div>`;
-        }
-        if (v.neuroGcs || v.neuroNerves) {
-            specialtyHtml += `<div style="margin-bottom:8px; background:#f3e8ff; border:1px solid #c084fc; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>الجملة العصبية:</strong> GCS: ${v.neuroGcs || '-'} | الأعصاب القحفية: ${v.neuroNerves || '-'}<br>${v.neuroNotes || ''}</div>`;
-        }
-        if (v.pedsGrowthAge || v.pedsVaccine) {
-            specialtyHtml += `<div style="margin-bottom:8px; background:#e0f2fe; border:1px solid #38bdf8; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>الأطفال والنمو:</strong> العمر: ${v.pedsGrowthAge || '-'} شهر | اللقاحات: ${v.pedsVaccine || '-'} | التغذية: ${v.pedsFeeding || '-'}<br>${v.pedsNotes || ''}</div>`;
-        }
-        if (v.dermType || v.dermSite) {
-            specialtyHtml += `<div style="margin-bottom:8px; background:#ffedd5; border:1px solid #fb923c; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>الجلدية:</strong> النوع: ${v.dermType || '-'} | المكان: ${v.dermSite || '-'}<br>${v.dermNotes || ''}</div>`;
-        }
-        if (v.entEar || v.entThroat) {
-            specialtyHtml += `<div style="margin-bottom:8px; background:#ecfdf5; border:1px solid #34d399; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>الأذن والأنف والحنجرة:</strong> الأذن: ${v.entEar || '-'} | الحلق: ${v.entThroat || '-'}<br>${v.entNotes || ''}</div>`;
-        }
-        if (v.ophthalVa || v.ophthalIop) {
-            specialtyHtml += `<div style="margin-bottom:8px; background:#e0e7ff; border:1px solid #818cf8; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>العيون:</strong> حدة البصر: ${v.ophthalVa || '-'} | ضغط العين: ${v.ophthalIop || '-'}<br>${v.ophthalNotes || ''}</div>`;
-        }
-        if (v.cardioEcg || v.cardioSounds) {
-            specialtyHtml += `<div style="margin-bottom:8px; background:#fee2e2; border:1px solid #f87171; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>القلب والشرايين:</strong> تخطيط القلب: ${v.cardioEcg || '-'} | أصوات القلب: ${v.cardioSounds || '-'}<br>${v.cardioNotes || ''}</div>`;
-        }
-
-        exportContainer.innerHTML = `
-            <div style="padding: 20px; font-family: 'Cairo', Arial, sans-serif; direction: rtl; text-align: right; background: #ffffff; color: #0f172a; width: 210mm; box-sizing: border-box;">
-                <div style="border-bottom: 3px solid #0d9488; padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
-                    <div>
-                        <h2 style="margin: 0; font-size: 1.3rem; color: #0f172a; font-weight: 850;">تقرير زيارة المراجعة الطبية</h2>
-                        <p style="margin: 3px 0 0 0; font-size: 0.75rem; color: #64748b;">نظام عيادة ماستر المتقدم - Visit Medical Report</p>
+        visitsContainer.innerHTML = visits.length === 0 
+            ? '<p style="font-size:0.85rem; color:#64748b;">No visits.</p>'
+            : visits.map((v, idx) => `
+                <div style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
+                    <div style="background: #0f172a; color: #ffffff; padding: 6px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; display: flex; justify-content: space-between;">
+                        <span>Visit #${visits.length - idx}</span><span>Date: ${v.date || 'N/A'}</span>
                     </div>
-                    <div style="text-align: left; font-size: 0.7rem; color: #64748b;">
-                        تاريخ الإصدار: ${new Date().toLocaleString()}
-                    </div>
+                    <div style="font-size: 0.8rem; margin-top: 6px;"><strong>Diagnosis & Notes:</strong> ${v.notes || 'None'}</div>
+                    ${v.drugs ? `<div style="font-size: 0.8rem; margin-top: 4px;"><strong>Medications:</strong> ${v.drugs}</div>` : ''}
                 </div>
+            `).join('');
 
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-bottom: 14px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 0.8rem;">
-                    <div><strong>اسم المريض:</strong> ${patient.name + (patient.subName ? ` (${patient.subName})` : '')}</div>
-                    <div><strong>العمر:</strong> ${patient.age} سنة</div>
-                    <div><strong>الجنس:</strong> ${patient.gender || 'غير محدد'}</div>
-                    <div><strong>الحالة الزوجية:</strong> ${patient.marital || 'غير محدد'}</div>
-                    <div><strong>رقم الهاتف:</strong> ${patient.phone || 'غير محدد'}</div>
-                    <div><strong>تاريخ الزيارة:</strong> <span style="color:#0d9488; font-weight:700;">${v.date || 'غير محدد'}</span></div>
-                </div>
-
-                ${mhFullText}
-                ${vitalsSummary}
-                ${specialtyHtml}
-
-                ${v.labs ? `<div style="margin-bottom:10px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; font-size:0.8rem;"><strong>التحاليل المختبرية:</strong><br>${v.labs.replace(/\n/g, '<br>')}</div>` : ''}
-                ${v.scans ? `<div style="margin-bottom:10px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; font-size:0.8rem;"><strong>الأشعة والفحوصات:</strong><br>${v.scans.replace(/\n/g, '<br>')}</div>` : ''}
-                ${v.notes ? `<div style="margin-bottom:10px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; font-size:0.8rem;"><strong>التشخيص والملاحظات:</strong><br>${v.notes.replace(/\n/g, '<br>')}</div>` : ''}
-                ${v.drugs ? `<div style="margin-bottom:10px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px; font-size:0.8rem;"><strong>الأدوية والعلاجات الموصوفة (RX):</strong><br>${v.drugs.replace(/\n/g, '<br>')}</div>` : ''}
-            </div>
-        `;
-
-        exportContainer.style.visibility = 'visible';
-
-        html2canvas(exportContainer, { scale: 2, useCORS: true, logging: false }).then(canvas => {
+        html2canvas(document.getElementById('pdfReportExportContainer'), { scale: 2, useCORS: true }).then(canvas => {
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('portrait', 'mm', 'a4');
             const imgWidth = 210;
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            
-            let heightLeft = imgHeight;
-            let position = 0;
-            let pageHeight = 295;
-
-            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-            }
-
-            const dataUri = pdf.output('datauristring');
-            exportContainer.style.visibility = 'hidden';
-
-            showPdfDownloadModal(dataUri, `Visit_Report_${patient.name.replace(/\s+/g, '_')}_${v.date || 'date'}.pdf`);
-        }).catch(err => {
-            alert('حدث خطأ أثناء تحميل تقرير الزيارة: ' + err.message);
-            exportContainer.style.visibility = 'hidden';
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+            pdf.save(`Medical_Report_${patient.name.replace(/\s+/g, '_')}.pdf`);
         });
-    }
-
-    // دالة وهمية متوافقة للاستدعاء القديم إذا تطلب الأمر
-    function exportPatientMedicalReportPDF() {
-        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-        if (!patient || !patient.visits || patient.visits.length === 0) return;
-        exportSingleVisitPDF(patient.visits[0].visitId);
     }
 
     function openBmiCalculator(visitId) {
@@ -2073,3 +1961,1096 @@
                     visit.bmiHeight = h;
                     if (w && h && Number(h) > 0) {
                         const hM = Number(h) / 100;
+                        visit.bmiScore = (Number(w) / (hM * hM)).toFixed(1);
+                    } else {
+                        visit.bmiScore = '';
+                    }
+                    savePatientToCloudAndLocal(patient);
+                    renderVisits(patient.visits, false);
+                }
+            }
+        }
+        document.getElementById('bmiCalculatorModal').style.display = 'none';
+    }
+
+    function calculateBmiLive() {
+        const w = parseFloat(document.getElementById('bmiWeight').value);
+        const h = parseFloat(document.getElementById('bmiHeight').value);
+        const scoreDisplay = document.getElementById('bmiScoreDisplay');
+        const badgeContainer = document.getElementById('bmiBadgeContainer');
+
+        if (!w || !h || w <= 0 || h <= 0) {
+            scoreDisplay.innerText = '—';
+            badgeContainer.innerHTML = '<span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>';
+            return;
+        }
+
+        const hM = h / 100;
+        const bmi = (w / (hM * hM)).toFixed(1);
+        scoreDisplay.innerText = bmi;
+
+        let badgeText = '';
+        let badgeStyle = '';
+
+        if (bmi < 18.5) {
+            badgeText = `نحافة (Underweight: ${bmi})`;
+            badgeStyle = 'background:#fef3c7; color:#d97706;';
+        } else if (bmi >= 18.5 && bmi <= 24.9) {
+            badgeText = `وزن طبيعي (Normal: ${bmi})`;
+            badgeStyle = 'background:#dcfce7; color:#15803d;';
+        } else if (bmi >= 25 && bmi <= 29.9) {
+            badgeText = `زيادة وزن (Overweight: ${bmi})`;
+            badgeStyle = 'background:#ffedd5; color:#c2410c;';
+        } else {
+            badgeText = `سمنة (Obese: ${bmi})`;
+            badgeStyle = 'background:#fee2e2; color:#b91c1c;';
+        }
+
+        badgeContainer.innerHTML = `<span class="bmi-badge" style="${badgeStyle}">${badgeText}</span>`;
+    }
+
+    function autoResizeTextarea(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = (textarea.scrollHeight) + 'px';
+    }
+
+    function handleDrugsInput(textarea, visitId) {
+        if (isUserSecretary || isSubscriptionExpired) return;
+        autoResizeTextarea(textarea);
+        handleLiveInput(textarea, 'drugs', visitId);
+    }
+
+    function handleDrugsKeyDown(event, textarea, visitId) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            textarea.value = textarea.value.substring(0, start) + '\n\n' + textarea.value.substring(end);
+            textarea.selectionStart = textarea.selectionEnd = start + 2;
+            autoResizeTextarea(textarea);
+            handleLiveInput(textarea, 'drugs', visitId);
+        }
+    }
+
+    function handleLiveInput(textarea, category, visitId) {
+        if (isUserSecretary || isSubscriptionExpired) return;
+        autoResizeTextarea(textarea);
+        const val = textarea.value.trim();
+        const box = document.getElementById(`suggestions-${category}-${visitId}`);
+        const saveBar = document.getElementById(`save-bar-${category}-${visitId}`);
+        
+        if (!val || val.length < 1) {
+            if (box) box.style.display = 'none';
+            if (saveBar) saveBar.style.display = 'none';
+            updateVisitFieldData(visitId, category, textarea.value);
+            return;
+        }
+
+        const lines = textarea.value.split('\n');
+        const currentLine = lines[lines.length - 1].trim();
+
+        if (currentLine.length > 0) {
+            if (saveBar) {
+                saveBar.style.display = 'flex';
+                document.getElementById(`line-text-${category}-${visitId}`).innerText = currentLine;
+            }
+            const terms = medicalDict[category] || [];
+            const matches = terms.filter(t => t.toLowerCase().includes(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
+
+            if (matches.length > 0 && box) {
+                box.innerHTML = matches.map(m => `<div class="suggestion-item" onmousedown="selectSuggestion('${category}', ${visitId}, '${m.replace(/'/g, "\\'")}')">${m}</div>`).join('');
+                box.style.display = 'block';
+            } else if (box) {
+                box.style.display = 'none';
+            }
+        } else {
+            if (saveBar) saveBar.style.display = 'none';
+            if (box) box.style.display = 'none';
+        }
+
+        updateVisitFieldData(visitId, category, textarea.value);
+    }
+
+    function selectSuggestion(category, visitId, term) {
+        const textarea = document.getElementById(`${category === 'drugs' ? 'vDrugs' : category === 'labs' ? 'vLabs' : category === 'scans' ? 'vScans' : 'vNotes'}-${visitId}`);
+        if (!textarea) return;
+
+        const lines = textarea.value.split('\n');
+        lines[lines.length - 1] = term;
+        textarea.value = lines.join('\n') + '\n';
+        autoResizeTextarea(textarea);
+
+        document.getElementById(`suggestions-${category}-${visitId}`).style.display = 'none';
+        document.getElementById(`save-bar-${category}-${visitId}`).style.display = 'none';
+        updateVisitFieldData(visitId, category, textarea.value);
+        textarea.focus();
+    }
+
+    function hideSuggestions(category, visitId) {
+        setTimeout(() => {
+            const box = document.getElementById(`suggestions-${category}-${visitId}`);
+            const bar = document.getElementById(`save-bar-${category}-${visitId}`);
+            if (box) box.style.display = 'none';
+            if (bar) bar.style.display = 'none';
+        }, 200);
+    }
+
+    function saveLineToDict(event, category, visitId) {
+        event.preventDefault();
+        const textSpan = document.getElementById(`line-text-${category}-${visitId}`);
+        if (!textSpan) return;
+        const lineText = textSpan.innerText.trim();
+        if (lineText && medicalDict[category] && !medicalDict[category].includes(lineText)) {
+            medicalDict[category].push(lineText);
+            saveSettingsToCloudAndLocal();
+            const btn = document.getElementById(`btn-save-${category}-${visitId}`);
+            if (btn) {
+                btn.innerText = 'Saved!';
+                btn.classList.add('saved');
+                setTimeout(() => {
+                    btn.innerText = 'Save';
+                    btn.classList.remove('saved');
+                    document.getElementById(`save-bar-${category}-${visitId}`).style.display = 'none';
+                }, 1000);
+            }
+        }
+    }
+
+    function handleMhLiveInput(inputEl, inputKey) {
+        autoResizeTextarea(inputEl);
+        const val = inputEl.value.trim();
+        const box = document.getElementById(`suggestions-${inputKey}`);
+        const saveBar = document.getElementById(`save-bar-${inputKey}`);
+
+        if (!val || val.length < 1) {
+            if (box) box.style.display = 'none';
+            if (saveBar) saveBar.style.display = 'none';
+            return;
+        }
+
+        const lines = inputEl.value.split('\n');
+        const currentLine = lines[lines.length - 1].trim();
+
+        if (currentLine.length > 0) {
+            if (saveBar) {
+                saveBar.style.display = 'flex';
+                document.getElementById(`line-text-${inputKey}`).innerText = currentLine;
+            }
+            const terms = medicalDict.mh_history || [];
+            const matches = terms.filter(t => t.toLowerCase().includes(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
+
+            if (matches.length > 0 && box) {
+                box.innerHTML = matches.map(m => `<div class="suggestion-item" onmousedown="selectMhSuggestion('${inputKey}', '${m.replace(/'/g, "\\'")}')">${m}</div>`).join('');
+                box.style.display = 'block';
+            } else if (box) {
+                box.style.display = 'none';
+            }
+        } else {
+            if (saveBar) saveBar.style.display = 'none';
+            if (box) box.style.display = 'none';
+        }
+    }
+
+    function selectMhSuggestion(inputKey, term) {
+        const el = inputKey === 'mh_other' ? document.getElementById('mh-cd-other') : document.getElementById(`mh-${inputKey.replace('mh_', '')}`);
+        if (!el) return;
+
+        const lines = el.value.split('\n');
+        lines[lines.length - 1] = term;
+        el.value = lines.join('\n') + '\n';
+        autoResizeTextarea(el);
+
+        document.getElementById(`suggestions-${inputKey}`).style.display = 'none';
+        document.getElementById(`save-bar-${inputKey}`).style.display = 'none';
+        el.focus();
+    }
+
+    function hideMhSuggestions(inputKey) {
+        setTimeout(() => {
+            const box = document.getElementById(`suggestions-${inputKey}`);
+            const bar = document.getElementById(`save-bar-${inputKey}`);
+            if (box) box.style.display = 'none';
+            if (bar) bar.style.display = 'none';
+        }, 200);
+    }
+
+    function saveMhLineToDict(event, inputKey) {
+        event.preventDefault();
+        const textSpan = document.getElementById(`line-text-${inputKey}`);
+        if (!textSpan) return;
+        const lineText = textSpan.innerText.trim();
+        if (lineText && !medicalDict.mh_history.includes(lineText)) {
+            medicalDict.mh_history.push(lineText);
+            saveSettingsToCloudAndLocal();
+            const btn = document.getElementById(`btn-save-${inputKey}`);
+            if (btn) {
+                btn.innerText = 'Saved!';
+                btn.classList.add('saved');
+                setTimeout(() => {
+                    btn.innerText = 'Save';
+                    btn.classList.remove('saved');
+                    document.getElementById(`save-bar-${inputKey}`).style.display = 'none';
+                }, 1000);
+            }
+        }
+    }
+
+    function toggleOtherInput() {
+        const isChecked = document.getElementById('mh-other-check').checked;
+        document.getElementById('mh-other-box').style.display = isChecked ? 'block' : 'none';
+    }
+
+    function updateVisitFieldData(visitId, category, value) {
+        if (isSubscriptionExpired) return;
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+        if (!visit) return;
+
+        visit[category] = value;
+        savePatientToCloudAndLocal(patient);
+    }
+
+    function handleLmpInput(visitId, lmpVal) {
+        updateVisitFieldData(visitId, 'obsLmp', lmpVal);
+        if (lmpVal) {
+            let lmpDate = new Date(lmpVal);
+            if (!isNaN(lmpDate.getTime())) {
+                let eddDate = new Date(lmpDate.getTime() + (280 * 24 * 60 * 60 * 1000));
+                let year = eddDate.getFullYear();
+                let month = String(eddDate.getMonth() + 1).padStart(2, '0');
+                let day = String(eddDate.getDate()).padStart(2, '0');
+                let eddStr = `${year}-${month}-${day}`;
+                
+                const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+                if (patient) {
+                    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+                    if (visit) {
+                        visit.obsEdd = eddStr;
+                        savePatientToCloudAndLocal(patient);
+                        const eddInput = document.getElementById(`obsEdd-${visitId}`);
+                        if (eddInput) eddInput.value = eddStr;
+                    }
+                }
+            }
+        }
+    }
+
+    function updateVisitDate(visitId, newDate) {
+        if (isSubscriptionExpired) return;
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+        if (!visit) return;
+
+        visit.date = newDate;
+        savePatientToCloudAndLocal(patient);
+    }
+
+    function updateBpFields(visitId) {
+        if (isSubscriptionExpired) return;
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+        if (!visit) return;
+
+        const sys = document.getElementById(`vBpSys-${visitId}`).value.trim();
+        const dias = document.getElementById(`vBpDias-${visitId}`).value.trim();
+
+        if (sys || dias) {
+            visit.bp = `${sys || '___'}/${dias || '___'} mmHg`;
+        } else {
+            visit.bp = '';
+        }
+        savePatientToCloudAndLocal(patient);
+    }
+
+    function handleFileUpload(input, visitId) {
+        if (isSubscriptionExpired) return;
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    let width = img.width;
+                    let height = img.height;
+                    const maxDim = 800;
+
+                    if (width > height && width > maxDim) {
+                        height = Math.round((height * maxDim) / width);
+                        width = maxDim;
+                    } else if (height > maxDim) {
+                        width = Math.round((width * maxDim) / height);
+                        height = maxDim;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
+
+                    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+                    if (!patient) return;
+                    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+                    if (!visit) return;
+
+                    if (!visit.attachments) visit.attachments = [];
+                    visit.attachments.push({ name: file.name, dataUrl: compressedDataUrl });
+                    savePatientToCloudAndLocal(patient);
+                    renderVisits(patient.visits, false);
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function handleScannerScan(visitId) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.capture = 'environment';
+        input.onchange = e => handleFileUpload(e.target, visitId);
+        input.click();
+    }
+
+    function previewAttachmentImage(imgSrc) {
+        document.getElementById('previewModalImg').src = imgSrc;
+        document.getElementById('imagePreviewModal').style.display = 'flex';
+    }
+
+    function closeImagePreview() {
+        document.getElementById('imagePreviewModal').style.display = 'none';
+    }
+
+    function openEditPatientModal() {
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+        document.getElementById('editPName').value = patient.name || '';
+        document.getElementById('editPSubName').value = patient.subName || '';
+        document.getElementById('editPAge').value = patient.age || '';
+        document.getElementById('editPGender').value = patient.gender || '';
+        document.getElementById('editPMarital').value = patient.marital || '';
+        document.getElementById('editPJob').value = patient.job || '';
+        document.getElementById('editPPhone').value = patient.phone || '';
+        document.getElementById('editPatientModal').style.display = 'flex';
+    }
+
+    function closeEditPatientModal() {
+        document.getElementById('editPatientModal').style.display = 'none';
+    }
+
+    function saveEditedPatient() {
+        const name = document.getElementById('editPName').value.trim();
+        const subName = document.getElementById('editPSubName').value.trim();
+        const age = Number(document.getElementById('editPAge').value);
+        if (!name || !age) return;
+
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+
+        patient.name = name;
+        patient.subName = subName;
+        patient.age = age;
+        patient.gender = document.getElementById('editPGender').value || 'Unspecified';
+        patient.marital = document.getElementById('editPMarital').value || 'Single';
+        patient.job = document.getElementById('editPJob').value || 'Unspecified';
+        patient.phone = document.getElementById('editPPhone').value || 'N/A';
+
+        savePatientToCloudAndLocal(patient);
+        closeEditPatientModal();
+        document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
+        document.getElementById('recPatientMeta').innerHTML = `Age: ${patient.age} | Gender: ${patient.gender} | Marital: ${patient.marital} | Job: ${patient.job} | Phone: ${patient.phone}`;
+    }
+
+    function confirmDeletePatientRecord() {
+        if (confirm('Delete patient record?')) {
+            const idx = patients.findIndex(p => Number(p.id) === Number(currentPatientId));
+            if (idx !== -1) {
+                trashBin.unshift({ type: 'patient', deletedAt: new Date().toLocaleString(), data: patients.splice(idx, 1)[0] });
+                saveTrashToCloudAndLocal();
+                localStorage.setItem('clinic_patients', JSON.stringify(patients));
+            }
+            openPatientsArchive();
+        }
+    }
+
+    function confirmDeleteVisit(visitId) {
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient || patient.visits.length <= 1) return;
+        if (confirm('Delete visit?')) {
+            const vIndex = patient.visits.findIndex(v => Number(v.visitId) === Number(visitId));
+            if (vIndex !== -1) {
+                trashBin.unshift({ type: 'visit', patientId: patient.id, patientName: patient.name, deletedAt: new Date().toLocaleString(), data: patient.visits.splice(vIndex, 1)[0] });
+                saveTrashToCloudAndLocal();
+                savePatientToCloudAndLocal(patient);
+                renderVisits(patient.visits, false);
+            }
+        }
+    }
+
+    function openTrashBin() {
+        navigateTo('trashScreen', 'Trash Bin', 'Recover deleted items');
+        renderTrashItems();
+    }
+
+    function renderTrashItems() {
+        const container = document.getElementById('trashItemsContainer');
+        container.innerHTML = trashBin.length === 0 
+            ? '<p style="text-align:center; color:#64748b;">Empty.</p>'
+            : trashBin.map((item, index) => `
+                <div class="trash-card">
+                    <div><h4>${item.data.name || item.patientName}</h4></div>
+                    <button class="btn-restore" onclick="restoreTrashItem(${index})">Restore</button>
+                </div>
+            `).join('');
+    }
+
+    function restoreTrashItem(index) {
+        const item = trashBin.splice(index, 1)[0];
+        if (item.type === 'patient') {
+            patients.unshift(item.data);
+            savePatientToCloudAndLocal(item.data);
+        } else {
+            const patient = patients.find(p => Number(p.id) === Number(item.patientId));
+            if (patient) {
+                patient.visits.unshift(item.data);
+                savePatientToCloudAndLocal(patient);
+            }
+        }
+        saveTrashToCloudAndLocal();
+        renderTrashItems();
+    }
+
+    function confirmEmptyTrash() {
+        trashBin = [];
+        saveTrashToCloudAndLocal();
+        renderTrashItems();
+    }
+
+    function openMedHistoryModal(visitId) {
+        currentVisitIdForModal = visitId;
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+        if (!visit) return;
+
+        const mh = visit.medHistory || {};
+        const checkboxes = document.querySelectorAll('.mh-cd');
+        checkboxes.forEach(cb => {
+            cb.checked = mh.conditions && mh.conditions.includes(cb.value);
+        });
+
+        document.getElementById('mh-other-check').checked = !!mh.otherCondition;
+        document.getElementById('mh-cd-other').value = mh.otherCondition || '';
+        document.getElementById('mh-other-box').style.display = mh.otherCondition ? 'block' : 'none';
+
+        document.getElementById('mh-prev-admission').value = mh.admission || '';
+        document.getElementById('mh-past-surgery').value = mh.surgery || '';
+        document.getElementById('mh-family-history').value = mh.family || '';
+        document.getElementById('mh-drug-allergy').value = mh.allergy || '';
+        document.getElementById('mh-chronic-drugs').value = mh.chronicDrugs || '';
+        document.getElementById('mh-smoking').value = mh.smoking || 'Non-smoker';
+        document.getElementById('mh-alcohol').value = mh.alcohol || 'Non-drinker';
+        document.getElementById('mh-notes').value = mh.notes || '';
+
+        document.getElementById('medHistoryModal').style.display = 'flex';
+    }
+
+    function closeMedHistoryModal() {
+        if (!isSubscriptionExpired && currentVisitIdForModal && currentPatientId) {
+            const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+            if (patient) {
+                const visit = patient.visits.find(v => Number(v.visitId) === Number(currentVisitIdForModal));
+                if (visit) {
+                    const conditions = [];
+                    document.querySelectorAll('.mh-cd:checked').forEach(cb => conditions.push(cb.value));
+
+                    visit.medHistory = {
+                        conditions: conditions,
+                        otherCondition: document.getElementById('mh-other-check').checked ? document.getElementById('mh-cd-other').value : '',
+                        admission: document.getElementById('mh-prev-admission').value,
+                        surgery: document.getElementById('mh-past-surgery').value,
+                        family: document.getElementById('mh-family-history').value,
+                        allergy: document.getElementById('mh-drug-allergy').value,
+                        chronicDrugs: document.getElementById('mh-chronic-drugs').value,
+                        smoking: document.getElementById('mh-smoking').value,
+                        alcohol: document.getElementById('mh-alcohol').value,
+                        notes: document.getElementById('mh-notes').value
+                    };
+
+                    savePatientToCloudAndLocal(patient);
+                    renderVisits(patient.visits, false);
+                }
+            }
+        }
+        document.getElementById('medHistoryModal').style.display = 'none';
+    }
+
+    function openRxModal(visitId) {
+        currentVisitIdForModal = visitId;
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+        if (!visit) return;
+
+        document.getElementById('rxDragPatientDetailsText').innerText = `Name: ${patient.name + (patient.subName ? ` (${patient.subName})` : '')} | Age: ${patient.age} | ${patient.gender || ''}`;
+        document.getElementById('rxDragDateText').innerText = visit.date || getTodayFormatted();
+        
+        const bpVal = visit.bp ? `BP: ${visit.bp}` : 'BP: _____ / _____ mmHg';
+        const hrVal = visit.hr ? `HR: ${visit.hr} bpm` : 'HR: _____ bpm';
+        const tempVal = visit.temp ? `Temp: ${visit.temp} °C` : 'Temp: _____ °C';
+        const bmiVal = visit.bmiScore ? `BMI: ${visit.bmiScore}` : 'BMI: _____';
+
+        document.getElementById('rxDragVitalsText').innerText = `${bpVal} | ${hrVal} | ${tempVal} | ${bmiVal}`;
+        document.getElementById('rxDragTreatmentText').innerText = visit.drugs || 'No medications prescribed.';
+
+        const container = document.getElementById('rxCanvasContainer');
+        const oldImg = container.querySelector('.rx-bg-img');
+        if (oldImg) oldImg.remove();
+
+        if (currentDoctorRxImage) {
+            const img = document.createElement('img');
+            img.src = currentDoctorRxImage;
+            img.className = 'rx-bg-img';
+            container.insertBefore(img, container.firstChild);
+        }
+
+        loadSavedRxLayout();
+        document.getElementById('rxModal').style.display = 'flex';
+    }
+
+    function closeRxModal() {
+        document.getElementById('rxModal').style.display = 'none';
+    }
+
+    function toggleRxConfigMode() {
+        isConfigMode = !isConfigMode;
+        document.querySelectorAll('.draggable-box').forEach(box => {
+            if (isConfigMode) box.classList.add('config-mode');
+            else box.classList.remove('config-mode');
+        });
+        updateConfigModeUI();
+    }
+
+    function updateConfigModeUI() {
+        const hint = document.getElementById('rxModeHint');
+        const saveBtn = document.getElementById('rxSaveLayoutBtn');
+        if (isConfigMode) {
+            hint.innerText = 'Config mode active';
+            saveBtn.style.display = 'block';
+        } else {
+            hint.innerText = 'RX ready';
+            saveBtn.style.display = 'none';
+        }
+    }
+
+    function changeBoxFontSize(boxType, delta) {
+        const map = {
+            patientDetails: 'rxDragPatientDetailsText',
+            date: 'rxDragDateText',
+            vitals: 'rxDragVitalsText',
+            treatment: 'rxDragTreatmentText'
+        };
+        const el = document.getElementById(map[boxType]);
+        if (!el) return;
+        const currentSize = parseFloat(window.getComputedStyle(el).fontSize);
+        el.style.fontSize = `${currentSize + delta}px`;
+    }
+
+    function saveRxLayoutPositions() {
+        isConfigMode = false;
+        document.querySelectorAll('.draggable-box').forEach(b => b.classList.remove('config-mode'));
+        updateConfigModeUI();
+        saveSettingsToCloudAndLocal();
+        alert('RX Layout saved successfully!');
+    }
+
+    function loadSavedRxLayout() {
+        const savedLayout = JSON.parse(localStorage.getItem('doctor_rx_layout') || '{}');
+        for (const [boxId, data] of Object.entries(savedLayout)) {
+            const box = document.getElementById(boxId);
+            if (box && data) {
+                if (data.top) box.style.top = data.top;
+                if (data.left) box.style.left = data.left;
+                if (data.fontSize) {
+                    const textEl = box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text');
+                    if (textEl) textEl.style.fontSize = data.fontSize;
+                }
+            }
+        }
+    }
+
+    function printPrescriptionDirectly() {
+        window.print();
+    }
+
+    function openPrescriptionPDF() {
+        const container = document.getElementById('rxModal').querySelector('.modal-body');
+        html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('portrait', 'mm', 'a4');
+            const imgWidth = 210;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+            pdf.save(`Prescription_${Date.now()}.pdf`);
+        });
+    }
+
+    function initDraggableElements() {
+        let activeBox = null;
+        let startX = 0, startY = 0, initialX = 0, initialY = 0;
+
+        document.querySelectorAll('.draggable-box').forEach(box => {
+            box.addEventListener('pointerdown', e => {
+                if (!isConfigMode || e.target.tagName === 'BUTTON') return;
+                activeBox = box;
+                startX = e.clientX;
+                startY = e.clientY;
+                initialX = box.offsetLeft;
+                initialY = box.offsetTop;
+                box.setPointerCapture(e.pointerId);
+                e.stopPropagation();
+            });
+
+            box.addEventListener('pointermove', e => {
+                if (!activeBox || activeBox !== box) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                box.style.left = `${initialX + dx}px`;
+                box.style.top = `${initialY + dy}px`;
+            });
+
+            box.addEventListener('pointerup', e => {
+                if (activeBox === box) {
+                    activeBox = null;
+                    box.releasePointerCapture(e.pointerId);
+                }
+            });
+        });
+    }
+
+    function autoSaveMedicalRecord() {}
+
+    function showMainMenu() {
+        navigateTo('mainScreen');
+    }
+
+    function openPatientsArchive() {
+        navigateTo('archiveScreen', translations[currentLang].archive, 'Search & records');
+        renderPatientsList(patients);
+    }
+
+    function openDictionaryManager() {
+        navigateTo('dictScreen', 'Dictionary Manager', 'Manage terms');
+        renderDictTerms();
+    }
+
+    function renderDictTerms() {
+        const cat = document.getElementById('dictCategorySelect').value;
+        const terms = medicalDict[cat] || [];
+        const container = document.getElementById('dictItemsList');
+
+        container.innerHTML = terms.length === 0 
+            ? '<p style="text-align:center; color:#64748b;">No terms in this category.</p>'
+            : terms.map((term, index) => `
+                <div class="dict-tag">
+                    <span>${term}</span>
+                    <button onclick="removeDictTerm('${cat}', ${index})">Delete</button>
+                </div>
+            `).join('') + `
+                <div style="display:flex; gap:8px; margin-top:12px;">
+                    <div class="input-wrapper" style="flex:1;"><input type="text" id="newDictTermInput" placeholder="Add new term..."></div>
+                    <button class="btn-main" onclick="addNewDictTerm('${cat}')" style="width:auto; padding:0 16px;">Add</button>
+                </div>
+            `;
+    }
+
+    function addNewDictTerm(cat) {
+        const input = document.getElementById('newDictTermInput');
+        const val = input.value.trim();
+        if (val && medicalDict[cat] && !medicalDict[cat].includes(val)) {
+            medicalDict[cat].push(val);
+            saveSettingsToCloudAndLocal();
+            renderDictTerms();
+        }
+    }
+
+    function removeDictTerm(category, index) {
+        if (medicalDict[category]) {
+            medicalDict[category].splice(index, 1);
+            saveSettingsToCloudAndLocal();
+            renderDictTerms();
+        }
+    }
+
+    function saveNewPatient(e) {
+        e.preventDefault();
+        const rawName = document.getElementById('pName').value.trim();
+        const rawSubName = document.getElementById('pSubName').value.trim();
+
+        const nameExists = patients.some(p => p.name.toLowerCase() === rawName.toLowerCase());
+        if (nameExists && !rawSubName) {
+            alert('⚠️ تنبيه: يوجد مريض بنفس الاسم مسجل مسبقاً! يرجى إدخال اسم الجد الرابع أو العشيرة أو ملاحظة تمييز في حقل "اسم الجد الرابع/العشيرة" للمتابعة.');
+            document.getElementById('pSubName').focus();
+            return;
+        }
+
+        const newPatient = {
+            id: Date.now(),
+            name: rawName,
+            subName: rawSubName,
+            age: Number(document.getElementById('pAge').value),
+            gender: document.getElementById('pGender').value || 'Unspecified',
+            marital: document.getElementById('pMarital').value || 'Single',
+            job: document.getElementById('pJob').value || 'Unspecified',
+            phone: document.getElementById('pPhone').value || 'N/A',
+            visits: [{ visitId: Date.now(), date: getTodayFormatted(), medHistory: {}, notes: '', attachments: [] }]
+        };
+        patients.unshift(newPatient);
+        savePatientToCloudAndLocal(newPatient);
+        openMedicalRecord(newPatient.id);
+    }
+
+    function renderPatientsList(list) {
+        const container = document.getElementById('patientsList');
+        container.innerHTML = list.length === 0 
+            ? '<p style="text-align:center; color:#64748b;">No matching patients found.</p>'
+            : list.map(p => `
+                <div class="patient-card" onclick="openMedicalRecord(${p.id})">
+                    <div class="patient-info">
+                        <h4>${p.name} ${p.subName ? `<span style="font-size:0.75rem; color:#0d9488; font-weight:normal;">(${p.subName})</span>` : ''}</h4>
+                        <p><i class="fa-solid fa-phone"></i> ${p.phone} | Age: ${p.age}</p>
+                    </div>
+                    <span class="badge-gender ${p.gender === 'Female' ? 'gender-female' : 'gender-male'}">${p.gender || 'N/A'}</span>
+                </div>
+            `).join('');
+    }
+
+    function filterPatients() {
+        const query = document.getElementById('searchInput').value.toLowerCase();
+        const gender = document.getElementById('filterGender').value;
+        const ageGroup = document.getElementById('filterAgeGroup').value;
+
+        const filtered = patients.filter(p => {
+            const fullNameFull = (p.name + " " + (p.subName || "")).toLowerCase();
+            const matchQuery = fullNameFull.includes(query) || (p.phone && p.phone.includes(query));
+            const matchGender = !gender || p.gender === gender;
+            let matchAge = true;
+            if (ageGroup === 'child') matchAge = p.age < 18;
+            else if (ageGroup === 'adult') matchAge = p.age >= 18 && p.age <= 50;
+            else if (ageGroup === 'senior') matchAge = p.age > 50;
+
+            return matchQuery && matchGender && matchAge;
+        });
+        renderPatientsList(filtered);
+    }
+
+    function openMedicalRecord(id, saveState = true) {
+        currentPatientId = id;
+        navigateTo('medicalRecordScreen', 'Patient Medical Record', 'View details', saveState);
+        const patient = patients.find(p => Number(p.id) === Number(id));
+        if (patient) {
+            document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
+            document.getElementById('recPatientMeta').innerHTML = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
+            renderVisits(patient.visits || [], true);
+        }
+    }
+
+    function addNewVisit() {
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient) return;
+        patient.visits.unshift({ visitId: Date.now(), date: getTodayFormatted(), medHistory: {}, notes: '', attachments: [] });
+        savePatientToCloudAndLocal(patient);
+        renderVisits(patient.visits, true);
+    }
+
+    function renderVisits(visits, forceFullRender = true) {
+        const container = document.getElementById('visitsContainer');
+        container.innerHTML = visits.map((v, index) => {
+            const mh = v.medHistory || {};
+            const t = translations[currentLang];
+            let mhSummaryParts = [];
+            
+            if (mh.conditions && mh.conditions.length > 0) {
+                const translatedConds = mh.conditions.map(c => (t.chronicNames && t.chronicNames[c]) ? t.chronicNames[c] : c);
+                mhSummaryParts.push(`<b>الأمراض المزمنة:</b> ${translatedConds.join(', ')}`);
+            }
+            if (mh.otherCondition) mhSummaryParts.push(`<b>أخرى:</b> ${mh.otherCondition}`);
+            if (mh.admission) mhSummaryParts.push(`<b>دخول المستشفى:</b> ${mh.admission}`);
+            if (mh.surgery) mhSummaryParts.push(`<b>العمليات:</b> ${mh.surgery}`);
+            if (mh.family) mhSummaryParts.push(`<b>التاريخ العائلي:</b> ${mh.family}`);
+            if (mh.allergy) mhSummaryParts.push(`<b>حساسية الأدوية:</b> ${mh.allergy}`);
+            if (mh.chronicDrugs) mhSummaryParts.push(`<b>أدوية مزمنة:</b> ${mh.chronicDrugs}`);
+            if (mh.smoking) mhSummaryParts.push(`<b>التدخين:</b> ${mh.smoking}`);
+            if (mh.alcohol) mhSummaryParts.push(`<b>الكحول:</b> ${mh.alcohol}`);
+            if (mh.notes) mhSummaryParts.push(`<b>ملاحظات:</b> ${mh.notes}`);
+
+            const mhSummaryText = mhSummaryParts.length > 0 ? mhSummaryParts.join(' | ') : 'لم يتم تسجيل تفاصيل التاريخ المرضي بعد.';
+
+            let bpSys = '';
+            let bpDias = '';
+            if (v.bp && v.bp.includes('/')) {
+                const parts = v.bp.split('/');
+                bpSys = parts[0] !== '___' ? parts[0] : '';
+                bpDias = parts[1] ? parts[1].replace(' mmHg', '').trim() : '';
+            } else if (v.bp) {
+                bpSys = v.bp;
+            }
+
+            const cfg = specialtyConfig;
+
+            return `
+            <div class="visit-card" data-visit-id="${v.visitId}">
+                <div class="visit-header">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span>Visit Date:</span>
+                        <input type="date" value="${v.date || getTodayFormatted()}" onchange="updateVisitDate(${v.visitId}, this.value)" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.8rem; font-weight: 700; outline: none; cursor: pointer;">
+                    </div>
+                    ${visits.length > 1 ? `<button onclick="confirmDeleteVisit(${v.visitId})" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:2px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i> Delete Visit</button>` : ''}
+                </div>
+
+                ${cfg.medHistory ? `
+                <button type="button" class="btn-med-history" onclick="openMedHistoryModal(${v.visitId})">
+                    <span><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History & Chronic Diseases</span>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+                <div class="medical-history-preview-card">
+                    ${mhSummaryText}
+                </div>
+                ` : ''}
+
+                ${cfg.vitals ? `
+                <button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(${v.visitId})">
+                    <span><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> Vital Signs & BMI Calculator</span>
+                    <span style="font-size:0.75rem; background:#e0f2fe; padding:2px 8px; border-radius:6px;">Score: ${v.bmiScore || '—'}</span>
+                </button>
+
+                <div class="vital-box" style="margin-bottom: 12px;">
+                    <div class="vital-row">
+                        <div class="vital-item">
+                            <span class="vital-label"><i class="fa-solid fa-arrow-trend-up"></i> Systolic BP (الضغط العالي)</span>
+                            <div class="vital-inputs"><input type="number" id="vBpSys-${v.visitId}" value="${bpSys}" placeholder="120" oninput="updateBpFields(${v.visitId})"><span>mmHg</span></div>
+                        </div>
+                        <div class="vital-item">
+                            <span class="vital-label"><i class="fa-solid fa-arrow-trend-down"></i> Diastolic BP (الضغط الواطي)</span>
+                            <div class="vital-inputs"><input type="number" id="vBpDias-${v.visitId}" value="${bpDias}" placeholder="80" oninput="updateBpFields(${v.visitId})"><span>mmHg</span></div>
+                        </div>
+                    </div>
+                    <div class="vital-row">
+                        <div class="vital-item">
+                            <span class="vital-label"><i class="fa-solid fa-heart"></i> Heart Rate (HR)</span>
+                            <div class="vital-inputs"><input type="number" value="${v.hr || ''}" placeholder="75" oninput="updateVisitFieldData(${v.visitId}, 'hr', this.value)"><span>bpm</span></div>
+                        </div>
+                        <div class="vital-item">
+                            <span class="vital-label"><i class="fa-solid fa-temperature-high"></i> Temperature</span>
+                            <div class="vital-inputs"><input type="number" step="0.1" value="${v.temp || ''}" placeholder="37.0" oninput="updateVisitFieldData(${v.visitId}, 'temp', this.value)"><span>°C</span></div>
+                        </div>
+                    </div>
+                    <div class="vital-row">
+                        <div class="vital-item" style="grid-column: span 2;">
+                            <span class="vital-label"><i class="fa-solid fa-weight-scale"></i> Weight</span>
+                            <div class="vital-inputs"><input type="number" value="${v.bmiWeight || ''}" placeholder="70" oninput="updateVisitFieldData(${v.visitId}, 'bmiWeight', this.value)"><span>kg</span></div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                ${cfg.obsGyn ? `
+                <div class="group-card" style="background:#fce7f3; border-color:#f472b6; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.85rem; color:#be185d; display:block; margin-bottom:10px;"><i class="fa-solid fa-person-pregnant"></i> تفاصيل النسائية والتوليد (Obstetrics & Gynecology)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">LMP (آخر دورة)</span><div class="input-wrapper"><input type="date" id="obsLmp-${v.visitId}" value="${v.obsLmp || ''}" oninput="handleLmpInput(${v.visitId}, this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">EDD (موعد الولادة التلقائي)</span><div class="input-wrapper"><input type="date" id="obsEdd-${v.visitId}" value="${v.obsEdd || ''}" oninput="updateVisitFieldData(${v.visitId}, 'obsEdd', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Gravidity (عدد مرات الحمل - G)</span><div class="input-wrapper"><input type="text" value="${v.obsG || ''}" placeholder="مثال: G3" oninput="updateVisitFieldData(${v.visitId}, 'obsG', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Parity (الولادات - P)</span><div class="input-wrapper"><input type="text" value="${v.obsP || ''}" placeholder="مثال: P2" oninput="updateVisitFieldData(${v.visitId}, 'obsP', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Abortions (الإسقاطات - A)</span><div class="input-wrapper"><input type="text" value="${v.obsA || ''}" placeholder="مثال: A1" oninput="updateVisitFieldData(${v.visitId}, 'obsA', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات السونار والفحص السريري للنسائية</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل السونار أو الفحص النسائي..." oninput="updateVisitFieldData(${v.visitId}, 'obsNotes', this.value)" style="font-size:0.85rem;">${v.obsNotes || ''}</textarea></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.ortho ? `
+                <div class="group-card" style="background:#fef3c7; border-color:#f59e0b; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.85rem; color:#b45309; display:block; margin-bottom:10px;"><i class="fa-solid fa-bone"></i> تقييم العظام والمفاصل والكسور (Orthopedics)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">المفصل / الإصابة المتأثرة</span><div class="input-wrapper"><input type="text" value="${v.orthoJoint || ''}" placeholder="مثال: مفصل الركبة اليمنى" oninput="updateVisitFieldData(${v.visitId}, 'orthoJoint', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">درجة الخشونة / الإصابة</span><div class="input-wrapper"><input type="text" value="${v.orthoGrade || ''}" placeholder="مثال: Grade II / خشونة متوسطة" oninput="updateVisitFieldData(${v.visitId}, 'orthoGrade', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مدى الحركة والفحص الفيزيائي (Range of Motion)</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب نتائج الفحص الحركي والفيزيائي..." oninput="updateVisitFieldData(${v.visitId}, 'orthoNotes', this.value)" style="font-size:0.85rem;">${v.orthoNotes || ''}</textarea></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.neuro ? `
+                <div class="group-card" style="background:#f3e8ff; border-color:#c084fc; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.85rem; color:#7e22ce; display:block; margin-bottom:10px;"><i class="fa-solid fa-brain"></i> فحص الجملة العصبية (Neurology)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مقياس غلاسكو للوعي (GCS)</span><div class="input-wrapper"><input type="text" value="${v.neuroGcs || ''}" placeholder="مثال: 15/15" oninput="updateVisitFieldData(${v.visitId}, 'neuroGcs', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الأعصاب القحفية (Cranial Nerves)</span><div class="input-wrapper"><input type="text" value="${v.neuroNerves || ''}" placeholder="مثال: Intact / سليمة" oninput="updateVisitFieldData(${v.visitId}, 'neuroNerves', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الفحص الحسي والحركي وملاحظات الأعصاب</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل الفحص العصبي..." oninput="updateVisitFieldData(${v.visitId}, 'neuroNotes', this.value)" style="font-size:0.85rem;">${v.neuroNotes || ''}</textarea></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.peds ? `
+                <div class="group-card" style="background:#e0f2fe; border-color:#38bdf8; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.85rem; color:#0369a1; display:block; margin-bottom:10px;"><i class="fa-solid fa-child"></i> فحص الأطفال والنمو (Pediatrics)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حالة اللقاحات والمطعوم</span><div class="input-wrapper"><input type="text" value="${v.pedsVaccine || ''}" placeholder="مثال: مكتملة حسب العمر" oninput="updateVisitFieldData(${v.visitId}, 'pedsVaccine', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع التغذية</span><div class="input-wrapper"><input type="text" value="${v.pedsFeeding || ''}" placeholder="مثال: رضاعة طبيعية / صناعية" oninput="updateVisitFieldData(${v.visitId}, 'pedsFeeding', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مخطط النمو وملاحظات طب الأطفال</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل نمو الطفل والفحص..." oninput="updateVisitFieldData(${v.visitId}, 'pedsNotes', this.value)" style="font-size:0.85rem;">${v.pedsNotes || ''}</textarea></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.derm ? `
+                <div class="group-card" style="background:#ffedd5; border-color:#fb923c; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.85rem; color:#c2410c; display:block; margin-bottom:10px;"><i class="fa-solid fa-hand-dots"></i> فحص الجلدية والتناسلية (Dermatology)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع الآفة الجلدية</span><div class="input-wrapper"><input type="text" value="${v.dermType || ''}" placeholder="مثال: Plaque / Papules" oninput="updateVisitFieldData(${v.visitId}, 'dermType', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مكان التوزيع في الجسم</span><div class="input-wrapper"><input type="text" value="${v.dermSite || ''}" placeholder="مثال: الوجه والذراعين" oninput="updateVisitFieldData(${v.visitId}, 'dermSite', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الفحص الجلدي ومصباح وود</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب وصف الطفح والتشخيص..." oninput="updateVisitFieldData(${v.visitId}, 'dermNotes', this.value)" style="font-size:0.85rem;">${v.dermNotes || ''}</textarea></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.ent ? `
+                <div class="group-card" style="background:#ecfdf5; border-color:#34d399; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.85rem; color:#047857; display:block; margin-bottom:10px;"><i class="fa-solid fa-ear-deaf"></i> فحص الأذن والأنف والحنجرة (ENT)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأذن (TM)</span><div class="input-wrapper"><input type="text" value="${v.entEar || ''}" placeholder="مثال: غشاء الطبل طبيعي / احمرار" oninput="updateVisitFieldData(${v.visitId}, 'entEar', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الحلق واللوزتين</span><div class="input-wrapper"><input type="text" value="${v.entThroat || ''}" placeholder="مثال: احمرار اللوزتين Acute Tonsillitis" oninput="updateVisitFieldData(${v.visitId}, 'entThroat', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأنف والجيوب وملاحظات ENT</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل فحص الأذن والأنف والحنجرة..." oninput="updateVisitFieldData(${v.visitId}, 'entNotes', this.value)" style="font-size:0.85rem;">${v.entNotes || ''}</textarea></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.ophthal ? `
+                <div class="group-card" style="background:#e0e7ff; border-color:#818cf8; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.85rem; color:#4338ca; display:block; margin-bottom:10px;"><i class="fa-solid fa-eye"></i> فحص العيون (Ophthalmology)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (Visual Acuity)</span><div class="input-wrapper"><input type="text" value="${v.ophthalVa || ''}" placeholder="RE: 6/6, LE: 6/9" oninput="updateVisitFieldData(${v.visitId}, 'ophthalVa', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalIop || ''}" placeholder="مثال: 15 mmHg" oninput="updateVisitFieldData(${v.visitId}, 'ophthalIop', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص قاع العين وملاحظات العيون</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل قاع العين والفحص..." oninput="updateVisitFieldData(${v.visitId}, 'ophthalNotes', this.value)" style="font-size:0.85rem;">${v.ophthalNotes || ''}</textarea></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.cardio ? `
+                <div class="group-card" style="background:#fee2e2; border-color:#f87171; margin-bottom:12px; padding:12px;">
+                    <span style="font-weight:800; font-size:0.85rem; color:#b91c1c; display:block; margin-bottom:10px;"><i class="fa-solid fa-heart-pulse"></i> فحص القلب والشرايين (Cardiology)</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">تخطيط القلب (ECG)</span><div class="input-wrapper"><input type="text" value="${v.cardioEcg || ''}" placeholder="مثال: Normal Sinus Rhythm" oninput="updateVisitFieldData(${v.visitId}, 'cardioEcg', this.value)" style="font-size:0.85rem;"></div></div>
+                        <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">أصوات القلب (Heart Sounds)</span><div class="input-wrapper"><input type="text" value="${v.cardioSounds || ''}" placeholder="مثال: S1 S2 normal, no murmur" oninput="updateVisitFieldData(${v.visitId}, 'cardioSounds', this.value)" style="font-size:0.85rem;"></div></div>
+                    </div>
+                    <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الفحص القلبي الإضافية</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب نتائج الفحص القلبي..." oninput="updateVisitFieldData(${v.visitId}, 'cardioNotes', this.value)" style="font-size:0.85rem;">${v.cardioNotes || ''}</textarea></div></div>
+                </div>
+                ` : ''}
+
+                ${cfg.labs ? `
+                <div class="field-box">
+                    <span class="field-label">Lab Tests</span>
+                    <div class="input-wrapper" style="position: relative;">
+                        <textarea id="vLabs-${v.visitId}" rows="1" placeholder="Request lab tests..." oninput="handleLiveInput(this, 'labs', ${v.visitId})" onblur="hideSuggestions('labs', ${v.visitId})">${v.labs || ''}</textarea>
+                        <div class="suggestions-box" id="suggestions-labs-${v.visitId}"></div>
+                        <div class="live-save-bar" id="save-bar-labs-${v.visitId}">
+                            <span>Save: "<strong id="line-text-labs-${v.visitId}"></strong>"</span>
+                            <button type="button" class="btn-live-save" id="btn-save-labs-${v.visitId}" onmousedown="saveLineToDict(event, 'labs', ${v.visitId})">Save</button>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                ${cfg.scans ? `
+                <div class="field-box">
+                    <span class="field-label">Radiology & Scans</span>
+                    <div class="input-wrapper" style="position: relative;">
+                        <textarea id="vScans-${v.visitId}" rows="1" placeholder="Request radiology..." oninput="handleLiveInput(this, 'scans', ${v.visitId})" onblur="hideSuggestions('scans', ${v.visitId})">${v.scans || ''}</textarea>
+                        <div class="suggestions-box" id="suggestions-scans-${v.visitId}"></div>
+                        <div class="live-save-bar" id="save-bar-scans-${v.visitId}">
+                            <span>Save: "<strong id="line-text-scans-${v.visitId}"></strong>"</span>
+                            <button type="button" class="btn-live-save" id="btn-save-scans-${v.visitId}" onmousedown="saveLineToDict(event, 'scans', ${v.visitId})">Save</button>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                ${cfg.notes ? `
+                <div class="field-box">
+                    <span class="field-label">Diagnosis & Notes</span>
+                    <div class="input-wrapper" style="position: relative;">
+                        <textarea id="vNotes-${v.visitId}" rows="2" placeholder="Clinical notes & diagnosis..." oninput="handleLiveInput(this, 'notes', ${v.visitId})" onblur="hideSuggestions('notes', ${v.visitId})">${v.notes || ''}</textarea>
+                        <div class="suggestions-box" id="suggestions-notes-${v.visitId}"></div>
+                        <div class="live-save-bar" id="save-bar-notes-${v.visitId}">
+                            <span>Save: "<strong id="line-text-notes-${v.visitId}"></strong>"</span>
+                            <button type="button" class="btn-live-save" id="btn-save-notes-${v.visitId}" onmousedown="saveLineToDict(event, 'notes', ${v.visitId})">Save</button>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                ${cfg.rx ? `
+                <div class="field-box">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+                        <span class="field-label" style="margin-bottom:0;">Prescribed Medications (RX)</span>
+                        <button type="button" onclick="openRxModal(${v.visitId})" style="background:#fae8ff; color:#c084fc; border:none; border-radius:8px; padding:4px 10px; font-size:0.75rem; font-weight:700; cursor:pointer;">
+                            <i class="fa-solid fa-file-prescription"></i> Print RX Prescription
+                        </button>
+                    </div>
+                    <div class="input-wrapper" style="position: relative;">
+                        <textarea id="vDrugs-${v.visitId}" rows="3" placeholder="Write prescription drugs here..." oninput="handleDrugsInput(this, ${v.visitId})" onkeydown="handleDrugsKeyDown(event, this, ${v.visitId})" onblur="hideSuggestions('drugs', ${v.visitId})">${v.drugs || ''}</textarea>
+                        <div class="suggestions-box" id="suggestions-drugs-${v.visitId}"></div>
+                        <div class="live-save-bar" id="save-bar-drugs-${v.visitId}">
+                            <span>Save: "<strong id="line-text-drugs-${v.visitId}"></strong>"</span>
+                            <button type="button" class="btn-live-save" id="btn-save-drugs-${v.visitId}" onmousedown="saveLineToDict(event, 'drugs', ${v.visitId})">Save</button>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
+
+                ${cfg.attachments ? `
+                <div class="field-box">
+                    <span class="field-label">Attachments & Medical Reports</span>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <label style="flex:1; background:#f1f5f9; border:1px dashed #cbd5e1; border-radius:10px; padding:10px; text-align:center; font-size:0.8rem; font-weight:700; color:#475569; cursor:pointer;">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Upload Image / File
+                            <input type="file" accept="image/*" style="display:none;" onchange="handleFileUpload(this, ${v.visitId})">
+                        </label>
+                        <button type="button" onclick="handleScannerScan(${v.visitId})" style="flex:1; background:#f0fdfa; border:1px dashed #0d9488; border-radius:10px; padding:10px; font-size:0.8rem; font-weight:700; color:#0d9488; cursor:pointer;">
+                            <i class="fa-solid fa-camera"></i> Camera Scanner
+                        </button>
+                    </div>
+                    <div style="display:flex; flex-wrap:wrap; gap:8px;" id="attachments-container-${v.visitId}">
+                        ${(v.attachments || []).map((att, aIdx) => {
+                            if (!att || !att.dataUrl || att.dataUrl.length < 50) {
+                                return `<div style="padding:6px 10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; font-size:0.7rem; color:#b91c1c;">⚠️ صورة تالفة أو قديمة</div>`;
+                            }
+                            return `
+                            <div style="position:relative; width:65px; height:65px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; cursor:pointer;" onclick="previewAttachmentImage('${att.dataUrl}')">
+                                <img src="${att.dataUrl}" style="width:100%; height:100%; object-fit:cover;">
+                            </div>
+                        `;
+                        }).join('')}
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+        `;
+        }).join('');
+
+        visits.forEach(v => {
+            const noteEl = document.getElementById(`vNotes-${v.visitId}`);
+            const drugEl = document.getElementById(`vDrugs-${v.visitId}`);
+            const labsEl = document.getElementById(`vLabs-${v.visitId}`);
+            const scansEl = document.getElementById(`vScans-${v.visitId}`);
+            if (noteEl) autoResizeTextarea(noteEl);
+            if (drugEl) autoResizeTextarea(drugEl);
+            if (labsEl) autoResizeTextarea(labsEl);
+            if (scansEl) autoResizeTextarea(scansEl);
+        });
+    }
