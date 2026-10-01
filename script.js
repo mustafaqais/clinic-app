@@ -1884,35 +1884,131 @@
             `).join('');
     }
 
-    // دالة تصدير تقرير المريض الشامل (متوافقة مع تطبيق فايرفوكس PWA عبر نافذة التأكيد)
-    function exportPatientMedicalReportPDF() {
+    // نافذة التحميل المخصصة لتطبيق فايرفوكس PWA
+    function showPdfDownloadModal(dataUri, filename) {
+        let modal = document.getElementById('customPdfModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'customPdfModal';
+            modal.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; justify-content:center; align-items:center; z-index:99999;';
+            modal.innerHTML = `
+                <div style="background:#ffffff; padding:22px; border-radius:16px; width:90%; max-width:340px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.3);">
+                    <i class="fa-solid fa-file-pdf" style="font-size:3rem; color:#0d9488; margin-bottom:10px;"></i>
+                    <h3 style="margin-bottom:8px; color:#0f172a; font-size:1.1rem; font-weight:800;">تم تجهيز تقرير الزيارة بنجاح</h3>
+                    <p style="color:#64748b; font-size:0.82rem; margin-bottom:16px; line-height:1.4;">اضغط على الزر أدناه لتحميل الملف مباشرة على جهازك:</p>
+                    <a id="customPdfDownloadLink" href="" download="" class="btn-main" style="display:block; background:#0d9488; color:#fff; padding:12px; border-radius:10px; text-decoration:none; font-weight:700; font-size:0.9rem; margin-bottom:10px;">تحميل الملف الآن</a>
+                    <button type="button" onclick="document.getElementById('customPdfModal').style.display='none'" style="background:#f1f5f9; color:#475569; border:none; padding:8px 16px; border-radius:8px; font-size:0.8rem; cursor:pointer; width:100%;">إلغاء</button>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        const link = document.getElementById('customPdfDownloadLink');
+        link.href = dataUri;
+        link.download = filename;
+        modal.style.display = 'flex';
+    }
+
+    // دالة تصدير تقرير الزيارة المحددة فقط عند الضغط على زر الـ PDF داخل بطاقة الزيارة
+    function exportSingleVisitPDF(visitId) {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
-
-        document.getElementById('pdfRepName').innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
-        document.getElementById('pdfRepAge').innerText = patient.age;
-        document.getElementById('pdfRepGender').innerText = patient.gender || 'N/A';
-        document.getElementById('pdfRepMarital').innerText = patient.marital || 'N/A';
-        document.getElementById('pdfRepJob').innerText = patient.job || 'N/A';
-        document.getElementById('pdfRepPhone').innerText = patient.phone || 'N/A';
-        document.getElementById('pdfRepDateLabel').innerText = `Generated on: ${new Date().toLocaleString()}`;
-
-        const visitsContainer = document.getElementById('pdfRepVisitsContainer');
-        const visits = patient.visits || [];
-
-        visitsContainer.innerHTML = visits.length === 0 
-            ? '<p style="font-size:0.85rem; color:#64748b;">No visits.</p>'
-            : visits.map((v, idx) => `
-                <div style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
-                    <div style="background: #0f172a; color: #ffffff; padding: 6px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; display: flex; justify-content: space-between;">
-                        <span>Visit #${visits.length - idx}</span><span>Date: ${v.date || 'N/A'}</span>
-                    </div>
-                    <div style="font-size: 0.8rem; margin-top: 6px;"><strong>Diagnosis & Notes:</strong> ${v.notes || 'None'}</div>
-                    ${v.drugs ? `<div style="font-size: 0.8rem; margin-top: 4px;"><strong>Medications:</strong> ${v.drugs}</div>` : ''}
-                </div>
-            `).join('');
+        const visit = (patient.visits || []).find(v => Number(v.visitId) === Number(visitId));
+        if (!visit) return;
 
         const exportContainer = document.getElementById('pdfReportExportContainer');
+        if (!exportContainer) {
+            alert('عنصر التصدير غير موجود في الصفحة.');
+            return;
+        }
+
+        let mh = visit.medHistory || {};
+        let conditionsText = mh.conditions && mh.conditions.length > 0 ? `<b>الأمراض المزمنة:</b> ${mh.conditions.join(', ')}` : '';
+        let mhFullText = '';
+        if (conditionsText || mh.otherCondition || mh.admission || mh.surgery || mh.family || mh.allergy || mh.chronicDrugs || mh.smoking || mh.notes) {
+            mhFullText = `
+                <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; margin-bottom: 12px; font-size: 0.8rem; line-height: 1.5;">
+                    <strong style="color: #0f172a; display: block; margin-bottom: 4px;">التاريخ المرضي والأمراض المزمنة:</strong>
+                    ${conditionsText ? conditionsText + '<br>' : ''}
+                    ${mh.otherCondition ? `<b>أخرى:</b> ${mh.otherCondition}<br>` : ''}
+                    ${mh.admission ? `<b>دخول المستشفى:</b> ${mh.admission}<br>` : ''}
+                    ${mh.surgery ? `<b>العمليات:</b> ${mh.surgery}<br>` : ''}
+                    ${mh.family ? `<b>التاريخ العائلي:</b> ${mh.family}<br>` : ''}
+                    ${mh.allergy ? `<b>حساسية الأدوية:</b> ${mh.allergy}<br>` : ''}
+                    ${mh.chronicDrugs ? `<b>أدوية مزمنة:</b> ${mh.chronicDrugs}<br>` : ''}
+                    ${mh.smoking ? `<b>التدخين:</b> ${mh.smoking} | الكحول: ${mh.alcohol || 'N/A'}<br>` : ''}
+                    ${mh.notes ? `<b>ملاحظات:</b> ${mh.notes}` : ''}
+                </div>
+            `;
+        }
+
+        let vitalsSummary = `
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; margin-bottom: 12px; font-size: 0.8rem; display: grid; grid-template-columns: 1fr 1fr; gap: 6px;">
+                <div><strong>ضغط الدم (BP):</strong> ${v.bp || 'غير مسجل'}</div>
+                <div><strong>نبض القلب (HR):</strong> ${v.hr ? v.hr + ' bpm' : 'غير مسجل'}</div>
+                <div><strong>درجة الحرارة:</strong> ${v.temp ? v.temp + ' °C' : 'غير مسجل'}</div>
+                <div><strong>الوزن & BMI:</strong> ${v.bmiWeight ? v.bmiWeight + ' kg' : 'غير مسجل'} (BMI: ${v.bmiScore || '—'})</div>
+            </div>
+        `;
+
+        let specialtyHtml = '';
+        if (v.obsLmp || v.obsEdd || v.obsG) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#fce7f3; border:1px solid #f472b6; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>النسائية والتوليد:</strong> LMP: ${v.obsLmp || '-'} | EDD: ${v.obsEdd || '-'} | G: ${v.obsG || '-'} P: ${v.obsP || '-'} A: ${v.obsA || '-'}<br>${v.obsNotes || ''}</div>`;
+        }
+        if (v.orthoJoint || v.orthoGrade) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#fef3c7; border:1px solid #f59e0b; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>العظام والمفاصل:</strong> المفصل: ${v.orthoJoint || '-'} | الدرجة: ${v.orthoGrade || '-'}<br>${v.orthoNotes || ''}</div>`;
+        }
+        if (v.neuroGcs || v.neuroNerves) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#f3e8ff; border:1px solid #c084fc; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>الجملة العصبية:</strong> GCS: ${v.neuroGcs || '-'} | الأعصاب القحفية: ${v.neuroNerves || '-'}<br>${v.neuroNotes || ''}</div>`;
+        }
+        if (v.pedsGrowthAge || v.pedsVaccine) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#e0f2fe; border:1px solid #38bdf8; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>الأطفال والنمو:</strong> العمر: ${v.pedsGrowthAge || '-'} شهر | اللقاحات: ${v.pedsVaccine || '-'} | التغذية: ${v.pedsFeeding || '-'}<br>${v.pedsNotes || ''}</div>`;
+        }
+        if (v.dermType || v.dermSite) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#ffedd5; border:1px solid #fb923c; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>الجلدية:</strong> النوع: ${v.dermType || '-'} | المكان: ${v.dermSite || '-'}<br>${v.dermNotes || ''}</div>`;
+        }
+        if (v.entEar || v.entThroat) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#ecfdf5; border:1px solid #34d399; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>الأذن والأنف والحنجرة:</strong> الأذن: ${v.entEar || '-'} | الحلق: ${v.entThroat || '-'}<br>${v.entNotes || ''}</div>`;
+        }
+        if (v.ophthalVa || v.ophthalIop) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#e0e7ff; border:1px solid #818cf8; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>العيون:</strong> حدة البصر: ${v.ophthalVa || '-'} | ضغط العين: ${v.ophthalIop || '-'}<br>${v.ophthalNotes || ''}</div>`;
+        }
+        if (v.cardioEcg || v.cardioSounds) {
+            specialtyHtml += `<div style="margin-bottom:8px; background:#fee2e2; border:1px solid #f87171; padding:8px; border-radius:8px; font-size:0.8rem;"><strong>القلب والشرايين:</strong> تخطيط القلب: ${v.cardioEcg || '-'} | أصوات القلب: ${v.cardioSounds || '-'}<br>${v.cardioNotes || ''}</div>`;
+        }
+
+        exportContainer.innerHTML = `
+            <div style="padding: 20px; font-family: 'Cairo', Arial, sans-serif; direction: rtl; text-align: right; background: #ffffff; color: #0f172a; width: 210mm; box-sizing: border-box;">
+                <div style="border-bottom: 3px solid #0d9488; padding-bottom: 10px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 style="margin: 0; font-size: 1.3rem; color: #0f172a; font-weight: 850;">تقرير زيارة المراجعة الطبية</h2>
+                        <p style="margin: 3px 0 0 0; font-size: 0.75rem; color: #64748b;">نظام عيادة ماستر المتقدم - Visit Medical Report</p>
+                    </div>
+                    <div style="text-align: left; font-size: 0.7rem; color: #64748b;">
+                        تاريخ الإصدار: ${new Date().toLocaleString()}
+                    </div>
+                </div>
+
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-bottom: 14px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; font-size: 0.8rem;">
+                    <div><strong>اسم المريض:</strong> ${patient.name + (patient.subName ? ` (${patient.subName})` : '')}</div>
+                    <div><strong>العمر:</strong> ${patient.age} سنة</div>
+                    <div><strong>الجنس:</strong> ${patient.gender || 'غير محدد'}</div>
+                    <div><strong>الحالة الزوجية:</strong> ${patient.marital || 'غير محدد'}</div>
+                    <div><strong>رقم الهاتف:</strong> ${patient.phone || 'غير محدد'}</div>
+                    <div><strong>تاريخ الزيارة:</strong> <span style="color:#0d9488; font-weight:700;">${v.date || 'غير محدد'}</span></div>
+                </div>
+
+                ${mhFullText}
+                ${vitalsSummary}
+                ${specialtyHtml}
+
+                ${v.labs ? `<div style="margin-bottom:10px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; font-size:0.8rem;"><strong>التحاليل المختبرية:</strong><br>${v.labs.replace(/\n/g, '<br>')}</div>` : ''}
+                ${v.scans ? `<div style="margin-bottom:10px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; font-size:0.8rem;"><strong>الأشعة والفحوصات:</strong><br>${v.scans.replace(/\n/g, '<br>')}</div>` : ''}
+                ${v.notes ? `<div style="margin-bottom:10px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:10px; font-size:0.8rem;"><strong>التشخيص والملاحظات:</strong><br>${v.notes.replace(/\n/g, '<br>')}</div>` : ''}
+                ${v.drugs ? `<div style="margin-bottom:10px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:10px; font-size:0.8rem;"><strong>الأدوية والعلاجات الموصوفة (RX):</strong><br>${v.drugs.replace(/\n/g, '<br>')}</div>` : ''}
+            </div>
+        `;
+
         exportContainer.style.visibility = 'visible';
 
         html2canvas(exportContainer, { scale: 2, useCORS: true, logging: false }).then(canvas => {
@@ -1920,25 +2016,36 @@
             const pdf = new jsPDF('portrait', 'mm', 'a4');
             const imgWidth = 210;
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
             
+            let heightLeft = imgHeight;
+            let position = 0;
+            let pageHeight = 295;
+
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
             const dataUri = pdf.output('datauristring');
             exportContainer.style.visibility = 'hidden';
 
-            let userAction = confirm("تم تجهيز تقرير الـ PDF بنجاح!\nاضغط 'موافق' (OK) لفتح رابط التحميل المباشر على جهازك.");
-            if (userAction) {
-                const downloadLink = document.createElement('a');
-                downloadLink.href = dataUri;
-                downloadLink.download = `Medical_Report_${patient.name.replace(/\s+/g, '_')}.pdf`;
-                downloadLink.target = '_blank';
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-            }
+            showPdfDownloadModal(dataUri, `Visit_Report_${patient.name.replace(/\s+/g, '_')}_${v.date || 'date'}.pdf`);
         }).catch(err => {
-            alert('حدث خطأ أثناء تحميل التقرير: ' + err.message);
+            alert('حدث خطأ أثناء تحميل تقرير الزيارة: ' + err.message);
             exportContainer.style.visibility = 'hidden';
         });
+    }
+
+    // دالة وهمية متوافقة للاستدعاء القديم إذا تطلب الأمر
+    function exportPatientMedicalReportPDF() {
+        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        if (!patient || !patient.visits || patient.visits.length === 0) return;
+        exportSingleVisitPDF(patient.visits[0].visitId);
     }
 
     function openBmiCalculator(visitId) {
@@ -2593,7 +2700,6 @@
         window.print();
     }
 
-    // دالة تصدير الروشتة PDF (متوافقة مع تطبيق فايرفوكس PWA عبر نافذة التأكيد)
     function openPrescriptionPDF() {
         const container = document.getElementById('rxModal').querySelector('.modal-body');
         html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
@@ -2604,17 +2710,7 @@
             pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
             
             const dataUri = pdf.output('datauristring');
-
-            let userAction = confirm("تم تجهيز الوصفة الطبية (RX) بنجاح!\nاضغط 'موافق' (OK) لفتح وتحميل ملف الـ PDF.");
-            if (userAction) {
-                const downloadLink = document.createElement('a');
-                downloadLink.href = dataUri;
-                downloadLink.download = `Prescription_${Date.now()}.pdf`;
-                downloadLink.target = '_blank';
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-            }
+            showPdfDownloadModal(dataUri, `Prescription_${Date.now()}.pdf`);
         }).catch(err => {
             alert('حدث خطأ: ' + err.message);
         });
@@ -2830,7 +2926,12 @@
                         <span>Visit Date:</span>
                         <input type="date" value="${v.date || getTodayFormatted()}" onchange="updateVisitDate(${v.visitId}, this.value)" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.8rem; font-weight: 700; outline: none; cursor: pointer;">
                     </div>
-                    ${visits.length > 1 ? `<button onclick="confirmDeleteVisit(${v.visitId})" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:2px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i> Delete Visit</button>` : ''}
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <button type="button" onclick="exportSingleVisitPDF(${v.visitId})" style="background:#ffffff; color:#0369a1; border:none; border-radius:6px; padding:4px 10px; font-size:0.75rem; font-weight:700; cursor:pointer;">
+                            <i class="fa-solid fa-file-pdf"></i> PDF الزيارة
+                        </button>
+                        ${visits.length > 1 ? `<button onclick="confirmDeleteVisit(${v.visitId})" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.75rem; cursor:pointer;"><i class="fa-solid fa-trash"></i> Delete</button>` : ''}
+                    </div>
                 </div>
 
                 ${cfg.medHistory ? `
