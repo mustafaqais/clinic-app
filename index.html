@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.19</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.25</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -78,6 +78,7 @@
             <div class="input-wrapper"><input type="text" id="activationInput" placeholder="Enter code..." style="text-align: center; letter-spacing: 2px; text-transform: uppercase;"></div>
         </div>
         <button class="btn-main" style="max-width: 400px;" onclick="verifyActivationCode()" id="btnActivate">Activate System</button>
+        <button class="btn-main" style="max-width: 400px; background: #64748b; margin-top: 8px;" onclick="cancelRenewal()">رجوع</button>
     </div>
 
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column; overflow: hidden;">
@@ -119,7 +120,7 @@
                         <h4 id="subBannerTitle"><i class="fa-solid fa-clock"></i> Active Subscription</h4>
                         <p id="subBannerText">Loading remaining days...</p>
                     </div>
-                    <button onclick="openSupportModal()" id="btnRenew" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:6px 10px; font-size:0.75rem; font-weight:700; cursor:pointer; white-space:nowrap;">Renew</button>
+                    <button onclick="openActivationScreenForRenewal()" id="btnRenew" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:6px 10px; font-size:0.75rem; font-weight:700; cursor:pointer; white-space:nowrap;">تجديد بالكود</button>
                 </div>
 
                 <div class="founder-panel" id="founderControlPanel" style="display: none;">
@@ -634,7 +635,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.19</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.25</div>
     </div>
 </div>
 
@@ -1050,6 +1051,6 @@
 </div>
 
 <!-- ربط ملف الـ JavaScript الخارجي -->
-<script src="script.js"></script>
+<script src="script.js?v=17.25"></script>
 </body>
 </html>
