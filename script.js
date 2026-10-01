@@ -106,7 +106,7 @@
             networkDb: "قاعدة بيانات الشبكة",
             networkDbSub: "المستخدمين وبيانات الدخول",
 
-            footer: "نظام عيادة ماستر المتقدم v17.27",
+            footer: "نظام عيادة ماستر المتقدم v17.28",
 
             patInfoTitle: "المعلومات الشخصية",
             lblPatName: "الاسم الكامل *",
@@ -268,7 +268,7 @@
             networkDb: "Network Database",
             networkDbSub: "Users & credentials",
 
-            footer: "Clinic Master Network v17.27",
+            footer: "Clinic Master Network v17.28",
 
             patInfoTitle: "Personal Information",
             lblPatName: "Full Name *",
@@ -1575,7 +1575,7 @@
     function exportJsonBackup() {
         const backupData = {
             exportDate: new Date().toISOString(),
-            version: "17.27",
+            version: "17.28",
             patients: patients,
             trashBin: trashBin,
             medicalDict: medicalDict,
@@ -1884,7 +1884,7 @@
             `).join('');
     }
 
-    // دالة تصدير تقرير المريض الشامل (متوافقة مع فايرفوكس وكروم باستخدام datauristring)
+    // دالة تصدير تقرير المريض الشامل (متوافقة مع تطبيق فايرفوكس PWA عبر نافذة التأكيد)
     function exportPatientMedicalReportPDF() {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
@@ -1923,14 +1923,18 @@
             pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
             
             const dataUri = pdf.output('datauristring');
-            const downloadLink = document.createElement('a');
-            downloadLink.href = dataUri;
-            downloadLink.download = `Medical_Report_${patient.name.replace(/\s+/g, '_')}.pdf`;
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
-
             exportContainer.style.visibility = 'hidden';
+
+            let userAction = confirm("تم تجهيز تقرير الـ PDF بنجاح!\nاضغط 'موافق' (OK) لفتح رابط التحميل المباشر على جهازك.");
+            if (userAction) {
+                const downloadLink = document.createElement('a');
+                downloadLink.href = dataUri;
+                downloadLink.download = `Medical_Report_${patient.name.replace(/\s+/g, '_')}.pdf`;
+                downloadLink.target = '_blank';
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            }
         }).catch(err => {
             alert('حدث خطأ أثناء تحميل التقرير: ' + err.message);
             exportContainer.style.visibility = 'hidden';
@@ -2589,7 +2593,7 @@
         window.print();
     }
 
-    // دالة تصدير الروشتة PDF (متوافقة مع فايرفوكس وكروم باستخدام datauristring)
+    // دالة تصدير الروشتة PDF (متوافقة مع تطبيق فايرفوكس PWA عبر نافذة التأكيد)
     function openPrescriptionPDF() {
         const container = document.getElementById('rxModal').querySelector('.modal-body');
         html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
@@ -2600,12 +2604,17 @@
             pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
             
             const dataUri = pdf.output('datauristring');
-            const downloadLink = document.createElement('a');
-            downloadLink.href = dataUri;
-            downloadLink.download = `Prescription_${Date.now()}.pdf`;
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-            document.body.removeChild(downloadLink);
+
+            let userAction = confirm("تم تجهيز الوصفة الطبية (RX) بنجاح!\nاضغط 'موافق' (OK) لفتح وتحميل ملف الـ PDF.");
+            if (userAction) {
+                const downloadLink = document.createElement('a');
+                downloadLink.href = dataUri;
+                downloadLink.download = `Prescription_${Date.now()}.pdf`;
+                downloadLink.target = '_blank';
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            }
         }).catch(err => {
             alert('حدث خطأ: ' + err.message);
         });
