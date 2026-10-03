@@ -609,7 +609,7 @@ function updateOnlineStatus() {
     const bar = document.getElementById('networkStatusBar');
     if (!navigator.onLine) {
         bar.classList.add('offline');
-        bar.innerText = "⚠️ Offline Mode - Changes saved locally, will sync when online";
+        bar.innerText = "⚠️️ Offline Mode - Changes saved locally, will sync when online";
     } else {
         bar.classList.remove('offline');
         bar.style.display = 'none';
@@ -2674,7 +2674,10 @@ function printPrescriptionDirectly() {
 }
 
 function openPrescriptionPDF() {
-    const container = document.getElementById('rxModal').querySelector('.modal-body');
+    const container = document.getElementById('rxCanvasContainer');
+    const controls = container.querySelectorAll('.box-font-controls');
+    controls.forEach(c => c.style.display = 'none');
+
     html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('portrait', 'mm', 'a4');
@@ -2682,6 +2685,7 @@ function openPrescriptionPDF() {
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
         pdf.save(`Prescription_${Date.now()}.pdf`);
+        controls.forEach(c => c.style.display = '');
     });
 }
 
