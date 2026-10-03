@@ -1787,6 +1787,40 @@ function saveRxTemplateImage() {
     }
 }
 
+async function scanFromDesktopScanner(visitId) {
+    alert("جاري الاتصال بالسكانر المكتبي وسحب المستند...");
+
+    try {
+        const response = await fetch('http://localhost:5000/scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.image) {
+            const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+            if (!patient) return;
+            const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+            if (!visit) return;
+
+            if (!visit.attachments) visit.attachments = [];
+            visit.attachments.push({ name: "Desktop_Scan_" + Date.now() + ".jpg", dataUrl: data.image });
+
+            savePatientToCloudAndLocal(patient);
+            renderVisits(patient.visits, false);
+            alert("تم سحب المستند من السكانر وتخزينه بنجاح!");
+        } else {
+            alert("تعذر السحب من السكانر: " + (data.error || "تأكد من توصيل الجهاز."));
+        }
+    } catch (err) {
+        console.error(err);
+        alert("فشل الاتصال بالجسر المحلي. تأكد أن نافذة البايثون السوداء تعمل على حاسوب العيادة.");
+    }
+}
+
 function openNetworkHierarchy() {
     navigateTo('networkScreen', 'قاعدة بيانات الشبكة', 'إدارة المستخدمين والأسماء البارزة');
     const container = document.getElementById('networkTreeContainer');
@@ -2366,15 +2400,6 @@ function handleFileUpload(input, visitId) {
             reader.readAsDataURL(file);
         });
     }
-}
-
-function handleScannerScan(visitId) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.capture = 'environment';
-    input.onchange = e => handleFileUpload(e.target, visitId);
-    input.click();
 }
 
 function previewAttachmentImage(imgSrc) {
@@ -3096,10 +3121,10 @@ function renderVisits(visits, forceFullRender = true) {
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
                     <label style="flex:1; background:#f1f5f9; border:1px dashed #cbd5e1; border-radius:10px; padding:10px; text-align:center; font-size:0.8rem; font-weight:700; color:#475569; cursor:pointer;">
                         <i class="fa-solid fa-cloud-arrow-up"></i> رفع صور متعددة / ملف
-                        <input type="file" accept="image/*" multiple style="display:none;" onchange="handleFileUpload(this, ${v.visitId})">
+                        <input type="file" accept="image/*,.pdf" multiple style="display:none;" onchange="handleFileUpload(this, ${v.visitId})">
                     </label>
-                    <button type="button" onclick="handleScannerScan(${v.visitId})" style="flex:1; background:#f0fdfa; border:1px dashed #0d9488; border-radius:10px; padding:10px; font-size:0.8rem; font-weight:700; color:#0d9488; cursor:pointer;">
-                        <i class="fa-solid fa-camera"></i> Camera Scanner
+                    <button type="button" onclick="scanFromDesktopScanner(${v.visitId})" style="flex:1; background:#f0fdfa; border:1px dashed #0d9488; border-radius:10px; padding:10px; font-size:0.8rem; font-weight:700; color:#0d9488; cursor:pointer;">
+                        <i class="fa-solid fa-print"></i> سحب من السكانر (حاسبة)
                     </button>
                 </div>
                 <div style="display:flex; flex-wrap:wrap; gap:8px;" id="attachments-container-${v.visitId}">
