@@ -18,7 +18,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- استدعاء خط المسيري عبر Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -29,16 +28,13 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <!-- التعديل النهائي الجذري: ثبات خط المسيري وحماية أيقونات Font Awesome لمنع ظهور علامة X -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700;800;900&display=swap');
 
-        /* فرض خط المسيري على النصوص والعناصر العامة */
         body, input, select, textarea, button, h1, h2, h3, h4, h5, h6, span, p, a, label, div, .menu-card, .auth-form {
             font-family: 'El Messiri', sans-serif !important;
         }
 
-        /* حماية أيقونات فونت أوسم لكي تعمل بشكل صحيح ولا تظهر كعلامة X */
         .fa, .fas, .far, .fab, .fa-solid, .fa-regular, .fa-brands, [class*="fa-"] {
             font-family: "Font Awesome 6 Free", "Font Awesome 6 Brands", sans-serif !important;
         }
@@ -47,7 +43,6 @@
             background-color: #0f172a;
         }
 
-        /* تنسيق اسم العيادة أو الطبيب البارز والفاخر في الهيدر */
         #headerTitle {
             font-family: 'El Messiri', sans-serif !important;
             font-size: 1.35rem !important;
@@ -59,6 +54,40 @@
             display: inline-block !important;
             margin: 4px 0 !important;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+        }
+
+        /* تخصيص الطباعة لطباعة ورقة الروشتة وحدها بدون أزرار */
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+            #rxModal, #rxModal * {
+                visibility: visible !important;
+            }
+            #rxModal {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                background: white !important;
+            }
+            .modal-body {
+                box-shadow: none !important;
+                border: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+            .modal-header, #rxModeHint, #rxConfigToggleBtn, #rxSaveLayoutBtn, #btnPrintRxDirect, #btnSaveRxPDF, .box-font-controls {
+                display: none !important;
+            }
+            #rxCanvasContainer {
+                border: none !important;
+                box-shadow: none !important;
+                width: 100% !important;
+            }
         }
     </style>
 </head>
