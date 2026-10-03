@@ -56,12 +56,12 @@
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
         }
 
-        /* ضبط أبعاد الروشتة لعرض آمن 520px وارتفاع 740px لتجنب القص الجانبي والعلوي/السفلي */
+        /* ضبط أبعاد الروشتة لتتطابق تماماً مع مقاس A5 الطبيعي (540x765 بكسل) */
         .rx-canvas-container {
             position: relative !important;
-            width: 520px !important;
-            height: 740px !important;
-            min-height: 740px !important;
+            width: 540px !important;
+            height: 765px !important;
+            min-height: 765px !important;
             background: #ffffff !important;
             margin: 0 auto !important;
             overflow: hidden !important;
@@ -69,12 +69,12 @@
             border-radius: 12px;
         }
 
-        /* تحجيم تلقائي للروشتة على الموبايل لكي تظهر بالكامل دون زوم مزعج أو قص */
+        /* تحجيم مرن للموبايل لكي تظهر بالكامل دون زوم مزعج */
         @media screen and (max-width: 600px) {
             .rx-canvas-container {
-                transform: scale(0.72) !important;
+                transform: scale(0.75) !important;
                 transform-origin: top center !important;
-                margin-bottom: -180px !important;
+                margin-bottom: -160px !important;
             }
         }
 
@@ -87,10 +87,10 @@
             text-align: center;
         }
 
-        /* إعدادات الطباعة لملء ورقة A5 بدقة ودون قص الأطراف أو الانتقال لصفحة ثانية */
+        /* إعدادات الطباعة لملء ورقة A5 بالكامل وبدون أي فراغات أو قص */
         @page {
             size: A5 portrait;
-            margin: 2mm;
+            margin: 0mm;
         }
 
         body.is-printing-rx * {
@@ -115,13 +115,12 @@
             position: absolute !important;
             left: 50% !important;
             top: 0 !important;
-            transform: translateX(-50%) scale(0.96) !important;
-            transform-origin: top center !important;
+            transform: translateX(-50%) !important;
             border: none !important;
             box-shadow: none !important;
             margin: 0 !important;
-            width: 520px !important;
-            height: 740px !important;
+            width: 540px !important;
+            height: 765px !important;
             page-break-after: avoid !important;
             page-break-inside: avoid !important;
         }
