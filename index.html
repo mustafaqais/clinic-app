@@ -56,12 +56,12 @@
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
         }
 
-        /* تثبيت أبعاد حاوية الروشتة لتكون مرنة وثابتة الإحداثيات */
+        /* ضبط أبعاد الروشتة لتتطابق تماماً مع مقاس A5 دون الانتقال لصفحة ثانية */
         .rx-canvas-container {
             position: relative !important;
-            width: 650px !important;
-            height: 900px !important;
-            min-height: 900px !important;
+            width: 560px !important;
+            height: 790px !important;
+            min-height: 790px !important;
             background: #ffffff !important;
             margin: 0 auto !important;
             overflow: hidden !important;
@@ -77,7 +77,7 @@
             padding: 10px !important;
         }
 
-        /* الطباعة بحرية تامة وبدون قيود على حجم الورقة */
+        /* تنسيق الطباعة لضمان احتوائها في صفحة A5 واحدة وعدم القص */
         body.is-printing-rx * {
             visibility: hidden !important;
         }
@@ -104,8 +104,10 @@
             border: none !important;
             box-shadow: none !important;
             margin: 0 !important;
-            width: 650px !important;
-            height: 900px !important;
+            width: 560px !important;
+            height: 790px !important;
+            page-break-after: avoid !important;
+            page-break-inside: avoid !important;
         }
     </style>
 </head>
