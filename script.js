@@ -1,4 +1,4 @@
-Const firebaseConfig = {
+const firebaseConfig = {
     apiKey: "AIzaSyCgS-TYiCiVIjUrPSkf_z4U837v8LoRUMY",
     authDomain: "mustafaqais-31e2c.firebaseapp.com",
     projectId: "mustafaqais-31e2c",
@@ -422,10 +422,7 @@ function toggleLanguage() {
         renderDictTerms();
     } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-        if (patient) {
-            if (patient.visits) patient.visits.sort((a, b) => (b.visitId || 0) - (a.visitId || 0));
-            renderVisits(patient.visits || [], false);
-        }
+        if (patient) renderVisits(patient.visits || [], false);
     }
 }
 
@@ -612,7 +609,7 @@ function updateOnlineStatus() {
     const bar = document.getElementById('networkStatusBar');
     if (!navigator.onLine) {
         bar.classList.add('offline');
-        bar.innerText = "⚠ Offline Mode - Changes saved locally, will sync when online";
+        bar.innerText = "⚠️️ Offline Mode - Changes saved locally, will sync when online";
     } else {
         bar.classList.remove('offline');
         bar.style.display = 'none';
@@ -832,9 +829,6 @@ document.addEventListener("DOMContentLoaded", () => {
             await loadDoctorBranding(dataOwnerUid);
 
             patients = JSON.parse(localStorage.getItem(`clinic_patients_${dataOwnerUid}`)) || patients;
-            // ترتيب المرضى تنازلياً (الأحدث أولاً)
-            patients.sort((a, b) => (b.id || 0) - (a.id || 0));
-            
             trashBin = JSON.parse(localStorage.getItem(`clinic_trash_${dataOwnerUid}`)) || trashBin;
 
             if (patientsListenerUnsubscribe) {
@@ -878,8 +872,6 @@ document.addEventListener("DOMContentLoaded", () => {
                         snapshot.forEach(doc => {
                             cloudPatients.push(doc.data());
                         });
-                        // ترتيب المرضى من السحاب تنازلياً (الأحدث أولاً)
-                        cloudPatients.sort((a, b) => (b.id || 0) - (a.id || 0));
                         patients = cloudPatients;
                         localStorage.setItem(`clinic_patients_${dataOwnerUid}`, JSON.stringify(patients));
                         localStorage.setItem('clinic_patients', JSON.stringify(patients));
@@ -890,7 +882,6 @@ document.addEventListener("DOMContentLoaded", () => {
                             const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
                             if (pat) {
                                 if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) return;
-                                if (pat.visits) pat.visits.sort((a, b) => (b.visitId || 0) - (a.visitId || 0));
                                 renderVisits(pat.visits || [], false);
                             } else {
                                 showMainMenu();
@@ -1200,9 +1191,6 @@ function savePatientToCloudAndLocal(patientObj) {
     } else {
         patients.unshift(patientObj);
     }
-    // ضمان بقاء المرضى مرتبين تنازلياً (الأحدث أولاً)
-    patients.sort((a, b) => (b.id || 0) - (a.id || 0));
-
     localStorage.setItem(`clinic_patients_${ownerUid}`, JSON.stringify(patients));
     localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
@@ -1454,7 +1442,6 @@ function calculateVisitChildGrowth(visitId) {
 
     visit.pedsGrowthResult = resultText;
     savePatientToCloudAndLocal(patient);
-    if (patient.visits) patient.visits.sort((a, b) => (b.visitId || 0) - (a.visitId || 0));
     renderVisits(patient.visits, false);
 }
 
@@ -1659,9 +1646,6 @@ function restoreFromUploadedFile(input) {
 
                 if (confirm(`Restore data with (${parsed.patients.length}) patients?`)) {
                     patients = parsed.patients;
-                    // ترتيب المرضى تنازلياً بعد الاستعادة
-                    patients.sort((a, b) => (b.id || 0) - (a.id || 0));
-
                     trashBin = parsed.trashBin || [];
                     medicalDict = parsed.medicalDict || medicalDict;
                     if (parsed.rxImage) currentDoctorRxImage = parsed.rxImage;
@@ -1826,7 +1810,6 @@ async function scanFromDesktopScanner(visitId) {
             visit.attachments.push({ name: "Desktop_Scan_" + Date.now() + ".jpg", dataUrl: data.image });
 
             savePatientToCloudAndLocal(patient);
-            if (patient.visits) patient.visits.sort((a, b) => (b.visitId || 0) - (a.visitId || 0));
             renderVisits(patient.visits, false);
             alert("تم سحب المستند من السكانر وتخزينه بنجاح!");
         } else {
@@ -2068,7 +2051,6 @@ function closeBmiModal() {
                     visit.bmiScore = '';
                 }
                 savePatientToCloudAndLocal(patient);
-                if (patient.visits) patient.visits.sort((a, b) => (b.visitId || 0) - (a.visitId || 0));
                 renderVisits(patient.visits, false);
             }
         }
@@ -2411,7 +2393,6 @@ function handleFileUpload(input, visitId) {
 
                     if (processedCount === filesArray.length) {
                         savePatientToCloudAndLocal(patient);
-                        if (patient.visits) patient.visits.sort((a, b) => (b.visitId || 0) - (a.visitId || 0));
                         renderVisits(patient.visits, false);
                     }
                 };
@@ -2491,7 +2472,6 @@ function confirmDeleteVisit(visitId) {
             trashBin.unshift({ type: 'visit', patientId: patient.id, patientName: patient.name, deletedAt: new Date().toLocaleString(), data: patient.visits.splice(vIndex, 1)[0] });
             saveTrashToCloudAndLocal();
             savePatientToCloudAndLocal(patient);
-            if (patient.visits) patient.visits.sort((a, b) => (b.visitId || 0) - (a.visitId || 0));
             renderVisits(patient.visits, false);
         }
     }
@@ -2518,13 +2498,11 @@ function restoreTrashItem(index) {
     const item = trashBin.splice(index, 1)[0];
     if (item.type === 'patient') {
         patients.unshift(item.data);
-        patients.sort((a, b) => (b.id || 0) - (a.id || 0));
         savePatientToCloudAndLocal(item.data);
     } else {
         const patient = patients.find(p => Number(p.id) === Number(item.patientId));
         if (patient) {
             patient.visits.unshift(item.data);
-            patient.visits.sort((a, b) => (b.visitId || 0) - (a.visitId || 0));
             savePatientToCloudAndLocal(patient);
         }
     }
@@ -2590,7 +2568,6 @@ function closeMedHistoryModal() {
                 };
 
                 savePatientToCloudAndLocal(patient);
-                if (patient.visits) patient.visits.sort((a, b) => (b.visitId || 0) - (a.visitId || 0));
                 renderVisits(patient.visits, false);
             }
         }
@@ -2754,8 +2731,6 @@ function showMainMenu() {
 
 function openPatientsArchive() {
     navigateTo('archiveScreen', translations[currentLang].archive, 'Search & records');
-    // ضمان ترتيب المرضى تنازلياً عند فتح الأرشيف
-    patients.sort((a, b) => (b.id || 0) - (a.id || 0));
     renderPatientsList(patients);
 }
 
@@ -2826,7 +2801,6 @@ function saveNewPatient(e) {
         visits: [{ visitId: Date.now(), date: getTodayFormatted(), medHistory: {}, notes: '', attachments: [] }]
     };
     patients.unshift(newPatient);
-    patients.sort((a, b) => (b.id || 0) - (a.id || 0));
     savePatientToCloudAndLocal(newPatient);
     openMedicalRecord(newPatient.id);
 }
@@ -2862,8 +2836,6 @@ function filterPatients() {
 
         return matchQuery && matchGender && matchAge;
     });
-    // ترتيب النتائج المفلترة تنازلياً (الأحدث أولاً)
-    filtered.sort((a, b) => (b.id || 0) - (a.id || 0));
     renderPatientsList(filtered);
 }
 
@@ -2874,11 +2846,6 @@ function openMedicalRecord(id, saveState = true) {
     if (patient) {
         document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
         document.getElementById('recPatientMeta').innerHTML = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
-        
-        // ترتيب زيارات المريض تنازلياً (الزيارة الأخيرة في الأعلى)
-        if (patient.visits) {
-            patient.visits.sort((a, b) => (b.visitId || 0) - (a.visitId || 0));
-        }
         renderVisits(patient.visits || [], true);
     }
 }
@@ -2886,19 +2853,12 @@ function openMedicalRecord(id, saveState = true) {
 function addNewVisit() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
-    if (!patient.visits) patient.visits = [];
     patient.visits.unshift({ visitId: Date.now(), date: getTodayFormatted(), medHistory: {}, notes: '', attachments: [] });
-    patient.visits.sort((a, b) => (b.visitId || 0) - (a.visitId || 0));
     savePatientToCloudAndLocal(patient);
     renderVisits(patient.visits, true);
 }
 
 function renderVisits(visits, forceFullRender = true) {
-    // التأكد من أن الزيارات مرتبطة دائماً من الأحدث للأقدم
-    if (visits) {
-        visits.sort((a, b) => (b.visitId || 0) - (a.visitId || 0));
-    }
-
     const container = document.getElementById('visitsContainer');
     container.innerHTML = visits.map((v, index) => {
         const mh = v.medHistory || {};
@@ -3069,7 +3029,7 @@ function renderVisits(visits, forceFullRender = true) {
             <div class="group-card" style="background:#ecfdf5; border-color:#34d399; margin-bottom:12px; padding:12px;">
                 <span style="font-weight:800; font-size:0.85rem; color:#047857; display:block; margin-bottom:10px;"><i class="fa-solid fa-ear-deaf"></i> فحص الأذن والأنف والحنجرة (ENT)</span>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأذن (TM)</span><div class="input-wrapper"><input type="text" value="${v.entEar \vert{}\vert{} ''}" placeholder="مثال: غشاء الطبل طبيعي / احمرار" oninput="updateVisitFieldData(${v.visitId}, 'entEar', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأذن (TM)</span><div class="input-wrapper"><input type="text" value="${v.entEar || ''}" placeholder="مثال: غشاء الطبل طبيعي / احمرار" oninput="updateVisitFieldData(${v.visitId}, 'entEar', this.value)" style="font-size:0.85rem;"></div></div>
                     <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الحلق واللوزتين</span><div class="input-wrapper"><input type="text" value="${v.entThroat || ''}" placeholder="مثال: احمرار اللوزتين Acute Tonsillitis" oninput="updateVisitFieldData(${v.visitId}, 'entThroat', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
                 <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأنف والجيوب وملاحظات ENT</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل فحص الأذن والأنف والحنجرة..." oninput="updateVisitFieldData(${v.visitId}, 'entNotes', this.value)" style="font-size:0.85rem;">${v.entNotes || ''}</textarea></div></div>
@@ -3080,8 +3040,8 @@ function renderVisits(visits, forceFullRender = true) {
             <div class="group-card" style="background:#e0e7ff; border-color:#818cf8; margin-bottom:12px; padding:12px;">
                 <span style="font-weight:800; font-size:0.85rem; color:#4338ca; display:block; margin-bottom:10px;"><i class="fa-solid fa-eye"></i> فحص العيون (Ophthalmology)</span>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (Visual Acuity)</span><div class="input-wrapper"><input type="text" value="${v.ophthalVa \vert{}\vert{} ''}" placeholder="RE: 6/6, LE: 6/9" oninput="updateVisitFieldData(${v.visitId}, 'ophthalVa', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalIop \vert{}\vert{} ''}" placeholder="مثال: 15 mmHg" oninput="updateVisitFieldData(${v.visitId}, 'ophthalIop', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (Visual Acuity)</span><div class="input-wrapper"><input type="text" value="${v.ophthalVa || ''}" placeholder="RE: 6/6, LE: 6/9" oninput="updateVisitFieldData(${v.visitId}, 'ophthalVa', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalIop || ''}" placeholder="مثال: 15 mmHg" oninput="updateVisitFieldData(${v.visitId}, 'ophthalIop', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
                 <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص قاع العين وملاحظات العيون</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل قاع العين والفحص..." oninput="updateVisitFieldData(${v.visitId}, 'ophthalNotes', this.value)" style="font-size:0.85rem;">${v.ophthalNotes || ''}</textarea></div></div>
             </div>
