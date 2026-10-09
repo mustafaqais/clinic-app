@@ -132,7 +132,7 @@
     <div id="networkStatusBar" class="network-status-bar">⚠️ Offline Mode - Changes saved locally, will sync when online</div>
 
     <div id="authScreen" class="auth-screen">
-        <div style="position: absolute; top: 15px; right: 15px;">
+        <div style="position: absolute; top: 15px; right: 15px; z-index: 10;">
             <button onclick="toggleLanguage()" id="authLangBtn" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; color: #0f172a;">عربي / EN</button>
         </div>
         <div class="activ-icon"><i class="fa-solid fa-user-doctor"></i></div>
@@ -159,11 +159,11 @@
             </div>
 
             <div class="forgot-pass" id="forgotPassBtn" onclick="resetPassword()">هل نسيت كلمة المرور؟</div>
-            <button type="submit" class="btn-main" id="authSubmitBtn" style="margin-top: 6px;">تسجيل الدخول</button>
+            <button type="submit" class="btn-main" id="authSubmitBtn" style="margin-top: 6px; cursor: pointer;">تسجيل الدخول</button>
         </form>
 
         <div class="auth-switch" id="authSwitchText">
-            ليس لديك حساب؟ <span onclick="toggleAuthMode()">سجل الآن</span>
+            ليس لديك حساب؟ <span onclick="toggleAuthMode()" style="cursor: pointer; color: #0d9488; font-weight: 700;">سجل الآن</span>
         </div>
     </div>
 
@@ -642,7 +642,6 @@
                 </div>
             </div>
 
-            <!-- أرشيف المرضى باستخدام Flexbox الآمن والمستقر -->
             <div id="archiveScreen" style="display: none;">
                 <div class="filter-container">
                     <div class="field-box" style="margin-bottom: 8px;">
@@ -742,7 +741,8 @@
     </div>
 </div>
 
-<div id="mandatoryBackupModal" class="modal-overlay" style="z-index: 99999;">
+<!-- النوافذ المنبثقة مخفية تماماً باسم display: none لتجنب تغطية الشاشة -->
+<div id="mandatoryBackupModal" class="modal-overlay" style="display: none; z-index: 99999;">
     <div class="modal-body" style="max-width: 420px; text-align: center;">
         <div style="font-size: 45px; color: #4f46e5; margin-bottom: 4px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
         <h3 style="font-family: 'El Messiri', serif; font-size: 1.2rem; color: #0f172a; margin-bottom: 6px;" id="mandBackupTitle">النسخ الاحتياطي الشهري الإجباري</h3>
@@ -755,7 +755,7 @@
     </div>
 </div>
 
-<div id="supportModal" class="modal-overlay">
+<div id="supportModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 400px; text-align: center;">
         <div class="modal-header">
             <h3 id="suppHeaderTitle"><i class="fa-solid fa-headset" style="color:#0d9488;"></i> Technical Support & Renewal</h3>
@@ -777,7 +777,7 @@
     </div>
 </div>
 
-<div id="founderDeleteModal" class="modal-overlay">
+<div id="founderDeleteModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 400px; text-align: center;">
         <div class="modal-header">
             <h3><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> Confirm Account Deletion</h3>
@@ -796,7 +796,7 @@
     </div>
 </div>
 
-<div id="founderEditNameModal" class="modal-overlay">
+<div id="founderEditNameModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 400px; text-align: center;">
         <div class="modal-header">
             <h3><i class="fa-solid fa-pen-to-square" style="color:#0d9488;"></i> تعديل اسم الطبيب أو العيادة</h3>
@@ -815,7 +815,7 @@
     </div>
 </div>
 
-<div id="bmiCalculatorModal" class="modal-overlay">
+<div id="bmiCalculatorModal" class="modal-overlay" style="display: none;">
     <div class="modal-body">
         <div class="modal-header">
             <h3 id="bmiTitleText"><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> BMI Calculator</h3>
@@ -847,7 +847,7 @@
     </div>
 </div>
 
-<div id="editPatientModal" class="modal-overlay">
+<div id="editPatientModal" class="modal-overlay" style="display: none;">
     <div class="modal-body">
         <div class="modal-header">
             <h3 id="editPatHeader"><i class="fa-solid fa-user-pen" style="color:#0d9488;"></i> Edit Patient Information</h3>
@@ -920,7 +920,7 @@
     </div>
 </div>
 
-<div id="medHistoryModal" class="modal-overlay">
+<div id="medHistoryModal" class="modal-overlay" style="display: none;">
     <div class="modal-body">
         <div class="modal-header">
             <h3 id="mhHeaderTitle"><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History Details</h3>
@@ -1042,14 +1042,14 @@
     </div>
 </div>
 
-<div id="imagePreviewModal" onclick="closeImagePreview()">
+<div id="imagePreviewModal" class="modal-overlay" style="display: none;" onclick="closeImagePreview()">
     <div class="modal-body" onclick="event.stopPropagation()">
         <button class="modal-close" style="position: absolute; top: 15px; right: 15px; background: #fff; z-index: 10;" onclick="closeImagePreview()"><i class="fa-solid fa-xmark"></i></button>
         <img id="previewModalImg" src="" alt="Preview">
     </div>
 </div>
 
-<div id="rxModal" class="modal-overlay">
+<div id="rxModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 480px; text-align: left; direction: ltr;">
         <div class="modal-header" style="direction: ltr;">
             <h3 style="font-family: 'El Messiri', serif;"><i class="fa-solid fa-file-prescription" style="color:#0d9488;"></i> RX Prescription</h3>
@@ -1172,7 +1172,7 @@
     </div>
 </div>
 
-<!-- تفعيل ملف السكريبت بشكل طبيعي -->
+<!-- تفعيل ملف السكريبت بشكل طبيعي ومفعل -->
 <script src="script.js?v=17.28"></script>
 
 <script>
