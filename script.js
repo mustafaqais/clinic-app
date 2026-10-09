@@ -382,7 +382,7 @@ const translations = {
 function toggleDropdownMenu(e) {
     e.stopPropagation();
     const menu = document.getElementById('headerDropdownMenu');
-    menu.classList.toggle('show');
+    if (menu) menu.classList.toggle('show');
 }
 
 window.addEventListener('click', function() {
@@ -420,11 +420,15 @@ function toggleLanguage() {
     localStorage.setItem('clinic_lang', currentLang);
     applyLanguage();
     
-    if (document.getElementById('archiveScreen').style.display === 'block') {
+    const archiveScreen = document.getElementById('archiveScreen');
+    const dictScreen = document.getElementById('dictScreen');
+    const recScreen = document.getElementById('medicalRecordScreen');
+
+    if (archiveScreen && archiveScreen.style.display === 'block') {
         openPatientsArchive();
-    } else if (document.getElementById('dictScreen').style.display === 'block') {
+    } else if (dictScreen && dictScreen.style.display === 'block') {
         renderDictTerms();
-    } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
+    } else if (recScreen && recScreen.style.display === 'block' && currentPatientId) {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (patient) renderVisits(patient.visits || [], false);
     }
@@ -433,161 +437,193 @@ function toggleLanguage() {
 function applyLanguage() {
     const t = translations[currentLang];
     const isAr = currentLang === 'ar';
-    document.body.style.direction = isAr ? 'rtl' : 'ltr';
+    if (document.body) document.body.style.direction = isAr ? 'rtl' : 'ltr';
 
-    document.getElementById('authTitle').innerText = isRegisterMode ? t.registerTitle : t.loginTitle;
-    document.getElementById('authSubText').innerText = isRegisterMode ? t.registerSub : t.loginSub;
-    document.getElementById('lblEmail').innerText = isRegisterMode ? t.regEmailLabel : t.emailLabel;
-    document.getElementById('lblRegPhone').innerText = t.regPhoneLabel;
-    document.getElementById('lblPass').innerText = t.passLabel;
-    document.getElementById('forgotPassBtn').style.display = isRegisterMode ? 'none' : 'block';
-    document.getElementById('authSubmitBtn').innerText = isRegisterMode ? t.btnRegister : t.btnLogin;
-    document.getElementById('authSwitchText').innerHTML = isRegisterMode ? t.switchLogin : t.switchRegister;
+    const safeSet = (id, text, isHtml = false) => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (isHtml) el.innerHTML = text;
+            else el.innerText = text;
+        }
+    };
 
-    document.getElementById('activTitle').innerText = t.activTitle;
-    document.getElementById('activSub').innerText = t.activSub;
-    document.getElementById('lblActivCode').innerText = t.lblActivCode;
-    document.getElementById('btnActivate').innerText = t.btnActivate;
+    safeSet('authTitle', isRegisterMode ? t.registerTitle : t.loginTitle);
+    safeSet('authSubText', isRegisterMode ? t.registerSub : t.loginSub);
+    safeSet('lblEmail', isRegisterMode ? t.regEmailLabel : t.emailLabel);
+    safeSet('lblRegPhone', t.regPhoneLabel);
+    safeSet('lblPass', t.passLabel);
+    
+    const forgotBtn = document.getElementById('forgotPassBtn');
+    if (forgotBtn) forgotBtn.style.display = isRegisterMode ? 'none' : 'block';
+    
+    safeSet('authSubmitBtn', isRegisterMode ? t.btnRegister : t.btnLogin);
+    safeSet('authSwitchText', isRegisterMode ? t.switchLogin : t.switchRegister, true);
+
+    safeSet('activTitle', t.activTitle);
+    safeSet('activSub', t.activSub);
+    safeSet('lblActivCode', t.lblActivCode);
+    safeSet('btnActivate', t.btnActivate);
 
     const savedCustomName = localStorage.getItem('clinic_custom_brand_name');
-    document.getElementById('headerTitle').innerText = savedCustomName || "نظام عيادة ماستر";
-    document.getElementById('headerSub').innerText = t.headerSub;
-    document.getElementById('txtBack').innerText = t.txtBack;
+    safeSet('headerTitle', savedCustomName || "نظام عيادة ماستر");
+    safeSet('headerSub', t.headerSub);
+    safeSet('txtBack', t.txtBack);
     
-    document.getElementById('dropLangText').innerText = t.dropLang;
-    document.getElementById('dropDarkModeText').innerText = t.dropDarkMode;
-    document.getElementById('dropSupportText').innerText = t.dropSupport;
-    document.getElementById('dropLogoutText').innerText = t.dropLogout;
+    safeSet('dropLangText', t.dropLang);
+    safeSet('dropDarkModeText', t.dropDarkMode);
+    safeSet('dropSupportText', t.dropSupport);
+    safeSet('dropLogoutText', t.dropLogout);
 
-    document.getElementById('secGroup1').innerHTML = `<i class="fa-solid fa-stethoscope"></i> ${t.group1}`;
-    document.getElementById('menuNewPatientTitle').innerText = t.newPatient;
-    document.getElementById('menuNewPatientSub').innerText = t.newPatientSub;
-    document.getElementById('menuArchiveTitle').innerText = t.archive;
-    document.getElementById('menuArchiveSub').innerText = t.archiveSub;
+    const secGrp1 = document.getElementById('secGroup1');
+    if (secGrp1) secGrp1.innerHTML = `<i class="fa-solid fa-stethoscope"></i> ${t.group1}`;
+    safeSet('menuNewPatientTitle', t.newPatient);
+    safeSet('menuNewPatientSub', t.newPatientSub);
+    safeSet('menuArchiveTitle', t.archive);
+    safeSet('menuArchiveSub', t.archiveSub);
 
-    document.getElementById('secGroup2').innerHTML = `<i class="fa-solid fa-file-prescription"></i> ${t.group2}`;
-    document.getElementById('menuRxTitle').innerText = t.rxTemplate;
-    document.getElementById('menuRxSub').innerText = t.rxTemplateSub;
-    document.getElementById('menuSpecTitle').innerText = t.specialtiesDash;
-    document.getElementById('menuSpecSub').innerText = t.specialtiesDashSub;
-    document.getElementById('menuDictTitle').innerText = t.dict;
-    document.getElementById('menuDictSub').innerText = t.dictSub;
+    const secGrp2 = document.getElementById('secGroup2');
+    if (secGrp2) secGrp2.innerHTML = `<i class="fa-solid fa-file-prescription"></i> ${t.group2}`;
+    safeSet('menuRxTitle', t.rxTemplate);
+    safeSet('menuRxSub', t.rxTemplateSub);
+    safeSet('menuSpecTitle', t.specialtiesDash);
+    safeSet('menuSpecSub', t.specialtiesDashSub);
+    safeSet('menuDictTitle', t.dict);
+    safeSet('menuDictSub', t.dictSub);
 
-    document.getElementById('secGroup3').innerHTML = `<i class="fa-solid fa-chart-pie"></i> ${t.group3}`;
-    document.getElementById('menuAnalyticsTitle').innerText = t.analytics;
-    document.getElementById('menuAnalyticsSub').innerText = t.analyticsSub;
+    const secGrp3 = document.getElementById('secGroup3');
+    if (secGrp3) secGrp3.innerHTML = `<i class="fa-solid fa-chart-pie"></i> ${t.group3}`;
+    safeSet('menuAnalyticsTitle', t.analytics);
+    safeSet('menuAnalyticsSub', t.analyticsSub);
 
-    document.getElementById('secGroup4').innerHTML = `<i class="fa-solid fa-shield-halved"></i> ${t.group4}`;
-    document.getElementById('menuBackupTitle').innerText = t.backup;
-    document.getElementById('menuBackupSub').innerText = t.backupSub;
-    document.getElementById('menuTrashTitle').innerText = t.trash;
-    document.getElementById('menuTrashSub').innerText = t.trashSub;
-    document.getElementById('menuSettingsTitle').innerText = t.settings;
-    document.getElementById('menuSettingsSub').innerText = t.settingsSub;
-    document.getElementById('menuPermTitle').innerText = t.permissions;
-    document.getElementById('menuPermSub').innerText = t.permissionsSub;
-    document.getElementById('menuNetTitle').innerText = t.networkDb;
-    document.getElementById('menuNetSub').innerText = t.networkDbSub;
+    const secGrp4 = document.getElementById('secGroup4');
+    if (secGrp4) secGrp4.innerHTML = `<i class="fa-solid fa-shield-halved"></i> ${t.group4}`;
+    safeSet('menuBackupTitle', t.backup);
+    safeSet('menuBackupSub', t.backupSub);
+    safeSet('menuTrashTitle', t.trash);
+    safeSet('menuTrashSub', t.trashSub);
+    safeSet('menuSettingsTitle', t.settings);
+    safeSet('menuSettingsSub', t.settingsSub);
+    safeSet('menuPermTitle', t.permissions);
+    safeSet('menuPermSub', t.permissionsSub);
+    safeSet('menuNetTitle', t.networkDb);
+    safeSet('menuNetSub', t.networkDbSub);
 
-    document.getElementById('patInfoTitle').innerHTML = `<i class="fa-solid fa-id-card"></i> ${t.patInfoTitle}`;
-    document.getElementById('lblPatName').innerText = t.lblPatName;
-    document.getElementById('lblPatSubName').innerText = t.lblPatSubName;
-    document.getElementById('lblPatAge').innerText = t.lblPatAge;
-    document.getElementById('lblPatGender').innerText = t.lblPatGender;
-    document.getElementById('optSelGender').innerText = t.optSelGender;
-    document.getElementById('optMale').innerText = t.optMale;
-    document.getElementById('optFemale').innerText = t.optFemale;
-    document.getElementById('lblPatMarital').innerText = t.lblPatMarital;
-    document.getElementById('optSelMarital').innerText = t.optSelMarital;
-    document.getElementById('optSingle').innerText = t.optSingle;
-    document.getElementById('optMarried').innerText = t.optMarried;
-    document.getElementById('optDivorced').innerText = t.optDivorced;
-    document.getElementById('optWidow').innerText = t.optWidow;
-    document.getElementById('lblPatJob').innerText = t.lblPatJob;
-    document.getElementById('optSelJob').innerText = t.optSelJob;
-    document.getElementById('optJobEmp').innerText = t.optJobEmp;
-    document.getElementById('optJobFree').innerText = t.optJobFree;
-    document.getElementById('optJobHouse').innerText = t.optJobHouse;
-    document.getElementById('optJobStud').innerText = t.optJobStud;
-    document.getElementById('optJobOther').innerText = t.optJobOther;
-    document.getElementById('lblPatPhone').innerText = t.lblPatPhone;
-    document.getElementById('lblPatDate').innerText = t.lblPatDate;
-    document.getElementById('btnSavePatRec').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> ${t.btnSavePatRec}`;
-
-    document.getElementById('searchInput').placeholder = t.searchPlaceholder;
-    document.getElementById('optAllGenders').innerText = t.optAllGenders;
-    document.getElementById('optFilterMale').innerText = t.optFilterMale;
-    document.getElementById('optFilterFemale').innerText = t.optFilterFemale;
-    document.getElementById('optAllAges').innerText = t.optAllAges;
-    document.getElementById('optChild').innerText = t.optChild;
-    document.getElementById('optAdult').innerText = t.optAdult;
-    document.getElementById('optSenior').innerText = t.optSenior;
+    const patInfo = document.getElementById('patInfoTitle');
+    if (patInfo) patInfo.innerHTML = `<i class="fa-solid fa-id-card"></i> ${t.patInfoTitle}`;
+    safeSet('lblPatName', t.lblPatName);
+    safeSet('lblPatSubName', t.lblPatSubName);
+    safeSet('lblPatAge', t.lblPatAge);
+    safeSet('lblPatGender', t.lblPatGender);
+    safeSet('optSelGender', t.optSelGender);
+    safeSet('optMale', t.optMale);
+    safeSet('optFemale', t.optFemale);
+    safeSet('lblPatMarital', t.lblPatMarital);
+    safeSet('optSelMarital', t.optSelMarital);
+    safeSet('optSingle', t.optSingle);
+    safeSet('optMarried', t.optMarried);
+    safeSet('optDivorced', t.optDivorced);
+    safeSet('optWidow', t.optWidow);
+    safeSet('lblPatJob', t.lblPatJob);
+    safeSet('optSelJob', t.optSelJob);
+    safeSet('optJobEmp', t.optJobEmp);
+    safeSet('optJobFree', t.optJobFree);
+    safeSet('optJobHouse', t.optJobHouse);
+    safeSet('optJobStud', t.optJobStud);
+    safeSet('optJobOther', t.optJobOther);
+    safeSet('lblPatPhone', t.lblPatPhone);
+    safeSet('lblPatDate', t.lblPatDate);
     
-    const sortNewEl = document.getElementById('optSortNewest');
-    const sortOldEl = document.getElementById('optSortOldest');
-    if (sortNewEl) sortNewEl.innerText = t.sortNewest;
-    if (sortOldEl) sortOldEl.innerText = t.sortOldest;
+    const savePat = document.getElementById('btnSavePatRec');
+    if (savePat) savePat.innerHTML = `<i class="fa-solid fa-floppy-disk"></i> ${t.btnSavePatRec}`;
 
-    document.getElementById('txtEdit').innerText = t.txtEdit;
-    document.getElementById('txtDelete').innerText = t.txtDelete;
-    document.getElementById('btnDownloadPDF').innerHTML = `<i class="fa-solid fa-file-pdf"></i> ${t.btnDownloadPDF}`;
-    document.getElementById('btnAddVisitMain').innerHTML = `<i class="fa-solid fa-calendar-plus"></i> ${t.btnAddVisit}`;
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) searchInput.placeholder = t.searchPlaceholder;
+    
+    safeSet('optAllGenders', t.optAllGenders);
+    safeSet('optFilterMale', t.optFilterMale);
+    safeSet('optFilterFemale', t.optFilterFemale);
+    safeSet('optAllAges', t.optAllAges);
+    safeSet('optChild', t.optChild);
+    safeSet('optAdult', t.optAdult);
+    safeSet('optSenior', t.optSenior);
+    
+    safeSet('optSortNewest', t.sortNewest);
+    safeSet('optSortOldest', t.sortOldest);
 
-    document.getElementById('optCatDrugs').innerText = t.optCatDrugs;
-    document.getElementById('optCatLabs').innerText = t.optCatLabs;
-    document.getElementById('optCatScans').innerText = t.optCatScans;
-    document.getElementById('optCatNotes').innerText = t.optCatNotes;
-    document.getElementById('optCatMh').innerText = t.optCatMh;
+    safeSet('txtEdit', t.txtEdit);
+    safeSet('txtDelete', t.txtDelete);
+    
+    const downPdf = document.getElementById('btnDownloadPDF');
+    if (downPdf) downPdf.innerHTML = `<i class="fa-solid fa-file-pdf"></i> ${t.btnDownloadPDF}`;
+    
+    const addVisitMain = document.getElementById('btnAddVisitMain');
+    if (addVisitMain) addVisitMain.innerHTML = `<i class="fa-solid fa-calendar-plus"></i> ${t.btnAddVisit}`;
 
-    document.getElementById('trashTitleText').innerHTML = `<i class="fa-solid fa-trash-can"></i> ${t.trashTitleText}`;
-    document.getElementById('txtEmptyTrash').innerText = t.txtEmptyTranslation;
-    document.getElementById('trashSubText').innerText = t.trashSubText;
+    safeSet('optCatDrugs', t.optCatDrugs);
+    safeSet('optCatLabs', t.optCatLabs);
+    safeSet('optCatScans', t.optCatScans);
+    safeSet('optCatNotes', t.optCatNotes);
+    safeSet('optCatMh', t.optCatMh);
 
-    document.getElementById('mhHeaderTitle').innerHTML = `<i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> ${t.mhHeaderTitle || 'Medical History Details'}`;
-    document.getElementById('mhLblChronic').innerText = t.mhLblChronic;
-    document.getElementById('mhOtherText').innerText = t.mhOtherText;
-    document.getElementById('mhLblAdmission').innerText = t.mhLblAdmission;
-    document.getElementById('mhLblSurgery').innerText = t.mhLblSurgery;
-    document.getElementById('mhLblFamily').innerText = t.mhLblFamily;
-    document.getElementById('mhLblAllergy').innerText = t.mhLblAllergy;
-    document.getElementById('mhLblChronicDrugs').innerText = t.mhLblChronicDrugs;
-    document.getElementById('mhLblSmoking').innerText = t.mhLblSmoking;
-    document.getElementById('mhLblAlcohol').innerText = t.mhLblAlcohol;
-    document.getElementById('mhLblNotes').innerText = t.mhLblNotes;
-    document.getElementById('btnMhDone').innerHTML = `<i class="fa-solid fa-check"></i> ${t.btnMhDone}`;
+    const trashTitle = document.getElementById('trashTitleText');
+    if (trashTitle) trashTitle.innerHTML = `<i class="fa-solid fa-trash-can"></i> ${t.trashTitleText}`;
+    safeSet('txtEmptyTrash', t.txtEmptyTranslation);
+    safeSet('trashSubText', t.trashSubText);
 
-    document.getElementById('optSmok1').innerText = t.optSmok1;
-    document.getElementById('optSmok2').innerText = t.optSmok2;
-    document.getElementById('optSmok3').innerText = t.optSmok3;
-    document.getElementById('optAlc1').innerText = t.optAlc1;
-    document.getElementById('optAlc2').innerText = t.optAlc2;
-    document.getElementById('optAlc3').innerText = t.optAlc3;
+    const mhTitle = document.getElementById('mhHeaderTitle');
+    if (mhTitle) mhTitle.innerHTML = `<i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> ${t.mhHeaderTitle || 'Medical History Details'}`;
+    safeSet('mhLblChronic', t.mhLblChronic);
+    safeSet('mhOtherText', t.mhOtherText);
+    safeSet('mhLblAdmission', t.mhLblAdmission);
+    safeSet('mhLblSurgery', t.mhLblSurgery);
+    safeSet('mhLblFamily', t.mhLblFamily);
+    safeSet('mhLblAllergy', t.mhLblAllergy);
+    safeSet('mhLblChronicDrugs', t.mhLblChronicDrugs);
+    safeSet('mhLblSmoking', t.mhLblSmoking);
+    safeSet('mhLblAlcohol', t.mhLblAlcohol);
+    safeSet('mhLblNotes', t.mhLblNotes);
+    
+    const btnMhDone = document.getElementById('btnMhDone');
+    if (btnMhDone) btnMhDone.innerHTML = `<i class="fa-solid fa-check"></i> ${t.btnMhDone}`;
 
-    document.getElementById('bmiTitleText').innerHTML = `<i class="fa-solid fa-calculator" style="color:#0284c7;"></i> ${t.bmiTitleText}`;
-    document.getElementById('lblBmiWeight').innerText = t.lblBmiWeight;
-    document.getElementById('lblBmiHeight').innerText = t.lblBmiHeight;
-    document.getElementById('lblBmiScore').innerText = t.lblBmiScore;
-    document.getElementById('bmiBadgeInitial').innerText = t.bmiBadgeInitial;
-    document.getElementById('btnBmiAgree').innerHTML = `<i class="fa-solid fa-check"></i> ${t.btnBmiAgree}`;
+    safeSet('optSmok1', t.optSmok1);
+    safeSet('optSmok2', t.optSmok2);
+    safeSet('optSmok3', t.optSmok3);
+    safeSet('optAlc1', t.optAlc1);
+    safeSet('optAlc2', t.optAlc2);
+    safeSet('optAlc3', t.optAlc3);
 
-    document.getElementById('editPatHeader').innerHTML = `<i class="fa-solid fa-user-pen" style="color:#0d9488;"></i> ${t.editPatHeader}`;
-    document.getElementById('editLblName').innerText = t.editLblName;
-    document.getElementById('editLblSubName').innerText = t.editLblSubName;
-    document.getElementById('editLblAge').innerText = t.editLblAge;
-    document.getElementById('editLblGender').innerText = t.editLblGender;
-    document.getElementById('editOptGender').innerText = t.editOptGender;
-    document.getElementById('editOptMale').innerText = t.editOptMale;
-    document.getElementById('editOptFemale').innerText = t.editOptFemale;
-    document.getElementById('editLblMarital').innerText = t.editLblMarital;
-    document.getElementById('editOptMarital').innerText = t.editOptMarital;
-    document.getElementById('editOptSingle').innerText = t.editOptSingle;
-    document.getElementById('editOptMarried').innerText = t.editOptMarried;
-    document.getElementById('editOptDivorced').innerText = t.editOptDivorced;
-    document.getElementById('editOptWidow').innerText = t.editOptWidow;
-    document.getElementById('editLblJob').innerText = t.editLblJob;
-    document.getElementById('editOptJob').innerText = t.editOptJob;
-    document.getElementById('editLblPhone').innerText = t.editLblPhone;
-    document.getElementById('btnSaveEdit').innerHTML = `<i class="fa-solid fa-check"></i> ${t.btnSaveEdit}`;
+    const bmiTitle = document.getElementById('bmiTitleText');
+    if (bmiTitle) bmiTitle.innerHTML = `<i class="fa-solid fa-calculator" style="color:#0284c7;"></i> ${t.bmiTitleText}`;
+    safeSet('lblBmiWeight', t.lblBmiWeight);
+    safeSet('lblBmiHeight', t.lblBmiHeight);
+    safeSet('lblBmiScore', t.lblBmiScore);
+    safeSet('bmiBadgeInitial', t.bmiBadgeInitial);
+    
+    const btnBmiAgree = document.getElementById('btnBmiAgree');
+    if (btnBmiAgree) btnBmiAgree.innerHTML = `<i class="fa-solid fa-check"></i> ${t.btnBmiAgree}`;
+
+    const editPatHeader = document.getElementById('editPatHeader');
+    if (editPatHeader) editPatHeader.innerHTML = `<i class="fa-solid fa-user-pen" style="color:#0d9488;"></i> ${t.editPatHeader}`;
+    safeSet('editLblName', t.editLblName);
+    safeSet('editLblSubName', t.editLblSubName);
+    safeSet('editLblAge', t.editLblAge);
+    safeSet('editLblGender', t.editLblGender);
+    safeSet('editOptGender', t.editOptGender);
+    safeSet('editOptMale', t.editOptMale);
+    safeSet('editOptFemale', t.editOptFemale);
+    safeSet('editLblMarital', t.editLblMarital);
+    safeSet('editOptMarital', t.editOptMarital);
+    safeSet('editOptSingle', t.editOptSingle);
+    safeSet('editOptMarried', t.editOptMarried);
+    safeSet('editOptDivorced', t.editOptDivorced);
+    safeSet('editOptWidow', t.editOptWidow);
+    safeSet('editLblJob', t.editLblJob);
+    safeSet('editOptJob', t.editOptJob);
+    safeSet('editLblPhone', t.editLblPhone);
+    
+    const btnSaveEdit = document.getElementById('btnSaveEdit');
+    if (btnSaveEdit) btnSaveEdit.innerHTML = `<i class="fa-solid fa-check"></i> ${t.btnSaveEdit}`;
 
     document.querySelectorAll('.mh-cond-text').forEach(span => {
         const key = span.getAttribute('data-cond');
@@ -596,7 +632,7 @@ function applyLanguage() {
         }
     });
 
-    document.getElementById('footerText').innerText = t.footer;
+    safeSet('footerText', t.footer);
 }
 
 let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
@@ -616,6 +652,7 @@ window.addEventListener('offline', updateOnlineStatus);
 
 function updateOnlineStatus() {
     const bar = document.getElementById('networkStatusBar');
+    if (!bar) return;
     if (!navigator.onLine) {
         bar.classList.add('offline');
         bar.innerText = "⚠ Offline Mode - Changes saved locally, will sync when online";
@@ -671,8 +708,10 @@ async function generateNewKey(type) {
             isUsed: false,
             createdAt: new Date().toISOString()
         });
-        document.getElementById('dynamicFounderCode').innerText = newCode;
-        document.getElementById('keyTypeHint').innerText = `Generated (${type}) valid for ${days} days.`;
+        const dynCode = document.getElementById('dynamicFounderCode');
+        const hint = document.getElementById('keyTypeHint');
+        if (dynCode) dynCode.innerText = newCode;
+        if (hint) hint.innerText = `Generated (${type}) valid for ${days} days.`;
     } catch (e) {
         alert('Error generating key: ' + e.message);
     }
@@ -692,8 +731,10 @@ function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', save
     const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
     const headerTitleText = (screenId === 'mainScreen') ? customBrandName : (title || customBrandName);
 
-    document.getElementById('headerTitle').innerText = headerTitleText;
-    document.getElementById('headerSub').innerText = sub;
+    const titleEl = document.getElementById('headerTitle');
+    const subEl = document.getElementById('headerSub');
+    if (titleEl) titleEl.innerText = headerTitleText;
+    if (subEl) subEl.innerText = sub;
 
     if (saveState) {
         sessionStorage.setItem('current_screen', screenId);
@@ -705,11 +746,12 @@ function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', save
         }
     }
 
+    const backBtn = document.getElementById('backBtn');
     if (screenId === 'mainScreen') {
-        document.getElementById('backBtn').style.display = 'none';
+        if (backBtn) backBtn.style.display = 'none';
         screenHistory = ['mainScreen'];
     } else {
-        document.getElementById('backBtn').style.display = 'flex';
+        if (backBtn) backBtn.style.display = 'flex';
         if (screenHistory[screenHistory.length - 1] !== screenId) {
             screenHistory.push(screenId);
         }
@@ -725,22 +767,26 @@ function goBackScreen() {
         const prevScreen = screenHistory[screenHistory.length - 1];
         
         hideAllScreensInner();
-        document.getElementById(prevScreen).style.display = 'block';
+        const target = document.getElementById(prevScreen);
+        if (target) target.style.display = 'block';
         sessionStorage.setItem('current_screen', prevScreen);
 
         const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
+        const titleEl = document.getElementById('headerTitle');
+        const subEl = document.getElementById('headerSub');
+        const backBtn = document.getElementById('backBtn');
 
         if (prevScreen === 'mainScreen') {
-            document.getElementById('backBtn').style.display = 'none';
-            document.getElementById('headerTitle').innerText = customBrandName;
-            document.getElementById('headerSub').innerText = translations[currentLang].headerSub;
+            if (backBtn) backBtn.style.display = 'none';
+            if (titleEl) titleEl.innerText = customBrandName;
+            if (subEl) subEl.innerText = translations[currentLang].headerSub;
             sessionStorage.setItem('header_title', customBrandName);
             sessionStorage.setItem('header_sub', translations[currentLang].headerSub);
             sessionStorage.removeItem('current_patient_id');
             currentPatientId = null;
         } else if (prevScreen === 'archiveScreen') {
-            document.getElementById('headerTitle').innerText = translations[currentLang].archive;
-            document.getElementById('headerSub').innerText = 'Advanced search, filters & records';
+            if (titleEl) titleEl.innerText = translations[currentLang].archive;
+            if (subEl) subEl.innerText = 'Advanced search, filters & records';
             sessionStorage.removeItem('current_patient_id');
             currentPatientId = null;
         }
@@ -751,23 +797,29 @@ function goBackScreen() {
 
 window.addEventListener('popstate', function(event) {
     event.preventDefault();
-    if (document.getElementById('medHistoryModal').style.display === 'flex') {
+    const mhModal = document.getElementById('medHistoryModal');
+    const bmiModal = document.getElementById('bmiCalculatorModal');
+    const rxModal = document.getElementById('rxModal');
+    const editModal = document.getElementById('editPatientModal');
+    const suppModal = document.getElementById('supportModal');
+
+    if (mhModal && mhModal.style.display === 'flex') {
         closeMedHistoryModal();
         return;
     }
-    if (document.getElementById('bmiCalculatorModal').style.display === 'flex') {
+    if (bmiModal && bmiModal.style.display === 'flex') {
         closeBmiModal();
         return;
     }
-    if (document.getElementById('rxModal').style.display === 'flex') {
+    if (rxModal && rxModal.style.display === 'flex') {
         closeRxModal();
         return;
     }
-    if (document.getElementById('editPatientModal').style.display === 'flex') {
+    if (editModal && editModal.style.display === 'flex') {
         closeEditPatientModal();
         return;
     }
-    if (document.getElementById('supportModal').style.display === 'flex') {
+    if (suppModal && suppModal.style.display === 'flex') {
         closeSupportModal();
         return;
     }
@@ -781,26 +833,22 @@ window.addEventListener('popstate', function(event) {
 history.pushState(null, '', window.location.href);
 
 function hideAllScreensInner() {
-    document.getElementById('mainScreen').style.display = 'none';
-    document.getElementById('addPatientScreen').style.display = 'none';
-    document.getElementById('rxTemplateScreen').style.display = 'none';
-    document.getElementById('specialtiesDashboardScreen').style.display = 'none';
-    document.getElementById('archiveScreen').style.display = 'none';
-    document.getElementById('trashScreen').style.display = 'none';
-    document.getElementById('medicalRecordScreen').style.display = 'none';
-    document.getElementById('dictScreen').style.display = 'none';
-    document.getElementById('networkScreen').style.display = 'none';
-    document.getElementById('analyticsScreen').style.display = 'none';
-    document.getElementById('settingsScreen').style.display = 'none';
-    document.getElementById('backupScreen').style.display = 'none';
-    document.getElementById('permissionsScreen').style.display = 'none';
+    const screens = [
+        'mainScreen', 'addPatientScreen', 'rxTemplateScreen', 
+        'specialtiesDashboardScreen', 'archiveScreen', 'trashScreen', 
+        'medicalRecordScreen', 'dictScreen', 'networkScreen', 
+        'analyticsScreen', 'settingsScreen', 'backupScreen', 'permissionsScreen'
+    ];
+    screens.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
     const pDateEl = document.getElementById('pDate');
     if (pDateEl) pDateEl.value = getTodayFormatted();
     
-    // تفعيل اللغات والواجهة فوراً لمنع أي تجمد
     applyLanguage();
     applyDarkModeState();
 
@@ -888,9 +936,12 @@ document.addEventListener("DOMContentLoaded", () => {
                             localStorage.setItem(`clinic_patients_${dataOwnerUid}`, JSON.stringify(patients));
                             localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
-                            if (document.getElementById('archiveScreen').style.display === 'block') {
+                            const archiveScreen = document.getElementById('archiveScreen');
+                            const recScreen = document.getElementById('medicalRecordScreen');
+
+                            if (archiveScreen && archiveScreen.style.display === 'block') {
                                 filterPatients();
-                            } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
+                            } else if (recScreen && recScreen.style.display === 'block' && currentPatientId) {
                                 const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
                                 if (pat) {
                                     if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) return;
@@ -979,48 +1030,67 @@ async function checkUserSubscriptionStatus(uid, isSecretary = false) {
 }
 
 function setupReadOnlyModeAfterExpiration(expiryDateIso) {
-    document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('activationScreen').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'flex';
-    document.getElementById('founderControlPanel').style.display = 'none';
-    document.getElementById('networkMenuCard').style.display = 'none';
-    document.getElementById('cardPermissions').style.display = 'none';
+    const authSc = document.getElementById('authScreen');
+    const actSc = document.getElementById('activationScreen');
+    const appCont = document.getElementById('appContainer');
+    const foundPanel = document.getElementById('founderControlPanel');
+    const netCard = document.getElementById('networkMenuCard');
+    const cardPerm = document.getElementById('cardPermissions');
+
+    if (authSc) authSc.style.display = 'none';
+    if (actSc) actSc.style.display = 'none';
+    if (appCont) appCont.style.display = 'flex';
+    if (foundPanel) foundPanel.style.display = 'none';
+    if (netCard) netCard.style.display = 'none';
+    if (cardPerm) cardPerm.style.display = 'none';
     showAllCardsForDoctor();
 
     const cardNewPat = document.getElementById('cardNewPatient');
-    cardNewPat.classList.add('disabled-card');
-    cardNewPat.onclick = function() {
-        alert('⚠ انتهت صلاحية الاشتراك. التطبيق يعمل في وضع القراءة فقط.');
-        openSupportModal();
-    };
+    if (cardNewPat) {
+        cardNewPat.classList.add('disabled-card');
+        cardNewPat.onclick = function() {
+            alert('⚠ انتهت صلاحية الاشتراك. التطبيق يعمل في وضع القراءة فقط.');
+            openSupportModal();
+        };
+    }
 
     const banner = document.getElementById('subStatusBanner');
     const titleEl = document.getElementById('subBannerTitle');
     const textEl = document.getElementById('subBannerText');
-    banner.style.display = 'flex';
-    banner.className = 'sub-status-banner expired';
-    titleEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> انتهت صلاحية الاشتراك - وضع القراءة فقط`;
-    textEl.innerText = `انتهى اشتراكك. يمكنك تصفح الأرشيف وقراءة الملفات والتقارير بحرية تامة أو تجديد الكود.`;
+    if (banner) banner.style.display = 'flex';
+    if (banner) banner.className = 'sub-status-banner expired';
+    if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> انتهت صلاحية الاشتراك - وضع القراءة فقط`;
+    if (textEl) textEl.innerText = `انتهى اشتراكك. يمكنك تصفح الأرشيف وقراءة الملفات والتقارير بحرية تامة أو تجديد الكود.`;
 
     restorePreviousScreenState();
 }
 
 function setupFounderInterfaceAfterAuth() {
     isSubscriptionExpired = false;
-    document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('activationScreen').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'flex';
-    document.getElementById('founderControlPanel').style.display = 'block';
-    document.getElementById('networkMenuCard').style.display = 'flex';
-    document.getElementById('cardPermissions').style.display = 'flex';
-    document.getElementById('subStatusBanner').style.display = 'none'; 
+    const authSc = document.getElementById('authScreen');
+    const actSc = document.getElementById('activationScreen');
+    const appCont = document.getElementById('appContainer');
+    const foundPanel = document.getElementById('founderControlPanel');
+    const netCard = document.getElementById('networkMenuCard');
+    const cardPerm = document.getElementById('cardPermissions');
+    const banner = document.getElementById('subStatusBanner');
+
+    if (authSc) authSc.style.display = 'none';
+    if (actSc) actSc.style.display = 'none';
+    if (appCont) appCont.style.display = 'flex';
+    if (foundPanel) foundPanel.style.display = 'block';
+    if (netCard) netCard.style.display = 'flex';
+    if (cardPerm) cardPerm.style.display = 'flex';
+    if (banner) banner.style.display = 'none';
     isUserSecretary = false;
     
     const cardNewPat = document.getElementById('cardNewPatient');
-    cardNewPat.classList.remove('disabled-card');
-    cardNewPat.onclick = function() {
-        navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub);
-    };
+    if (cardNewPat) {
+        cardNewPat.classList.remove('disabled-card');
+        cardNewPat.onclick = function() {
+            navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub);
+        };
+    }
 
     restorePreviousScreenState();
     checkMandatoryMonthlyBackup();
@@ -1028,32 +1098,50 @@ function setupFounderInterfaceAfterAuth() {
 
 function setupClientInterfaceAfterAuth(expiryDateIso, isSecretary = false) {
     isSubscriptionExpired = false;
-    document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('activationScreen').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'flex';
-    document.getElementById('founderControlPanel').style.display = 'none';
-    document.getElementById('networkMenuCard').style.display = 'none';
+    const authSc = document.getElementById('authScreen');
+    const actSc = document.getElementById('activationScreen');
+    const appCont = document.getElementById('appContainer');
+    const foundPanel = document.getElementById('founderControlPanel');
+    const netCard = document.getElementById('networkMenuCard');
+
+    if (authSc) authSc.style.display = 'none';
+    if (actSc) actSc.style.display = 'none';
+    if (appCont) appCont.style.display = 'flex';
+    if (foundPanel) foundPanel.style.display = 'none';
+    if (netCard) netCard.style.display = 'none';
 
     const cardNewPat = document.getElementById('cardNewPatient');
-    cardNewPat.classList.remove('disabled-card');
-    cardNewPat.onclick = function() {
-        navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub);
-    };
+    if (cardNewPat) {
+        cardNewPat.classList.remove('disabled-card');
+        cardNewPat.onclick = function() {
+            navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub);
+        };
+    }
+
+    const cardPerm = document.getElementById('cardPermissions');
+    const cardRx = document.getElementById('cardRxTemplate');
+    const cardSpec = document.getElementById('cardSpecialtiesDashboard');
+    const cardDict = document.getElementById('cardDict');
+    const cardAna = document.getElementById('cardAnalytics');
+    const cardBack = document.getElementById('cardBackup');
+    const cardTrash = document.getElementById('cardTrash');
+    const cardSet = document.getElementById('cardSettings');
+    const banner = document.getElementById('subStatusBanner');
 
     if (isSecretary) {
         isUserSecretary = true;
-        document.getElementById('cardPermissions').style.display = 'none';
-        document.getElementById('cardRxTemplate').style.display = 'none';
-        document.getElementById('cardSpecialtiesDashboard').style.display = 'none';
-        document.getElementById('cardDict').style.display = 'none';
-        document.getElementById('cardAnalytics').style.display = 'none';
-        document.getElementById('cardBackup').style.display = 'none';
-        document.getElementById('cardTrash').style.display = 'none';
-        document.getElementById('cardSettings').style.display = 'none';
-        document.getElementById('subStatusBanner').style.display = 'none';
+        if (cardPerm) cardPerm.style.display = 'none';
+        if (cardRx) cardRx.style.display = 'none';
+        if (cardSpec) cardSpec.style.display = 'none';
+        if (cardDict) cardDict.style.display = 'none';
+        if (cardAna) cardAna.style.display = 'none';
+        if (cardBack) cardBack.style.display = 'none';
+        if (cardTrash) cardTrash.style.display = 'none';
+        if (cardSet) cardSet.style.display = 'none';
+        if (banner) banner.style.display = 'none';
     } else {
         isUserSecretary = false;
-        document.getElementById('cardPermissions').style.display = 'flex';
+        if (cardPerm) cardPerm.style.display = 'flex';
         showAllCardsForDoctor();
     }
 
@@ -1063,12 +1151,11 @@ function setupClientInterfaceAfterAuth(expiryDateIso, isSecretary = false) {
         const diffTime = expiryTime - now;
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        const banner = document.getElementById('subStatusBanner');
         const titleEl = document.getElementById('subBannerTitle');
         const textEl = document.getElementById('subBannerText');
-        banner.style.display = 'flex';
-        titleEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Active Subscription`;
-        textEl.innerText = `You have ${diffDays} day(s) remaining.`;
+        if (banner) banner.style.display = 'flex';
+        if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Active Subscription`;
+        if (textEl) textEl.innerText = `You have ${diffDays} day(s) remaining.`;
     }
 
     restorePreviousScreenState();
@@ -1084,7 +1171,8 @@ function checkMandatoryMonthlyBackup() {
     const lastMandatoryBackupDate = localStorage.getItem('last_mandatory_backup_date');
 
     if (dayOfMonth === 1 && lastMandatoryBackupDate !== todayDateStr) {
-        document.getElementById('mandatoryBackupModal').style.display = 'flex';
+        const modal = document.getElementById('mandatoryBackupModal');
+        if (modal) modal.style.display = 'flex';
     }
 }
 
@@ -1092,28 +1180,39 @@ function executeMandatoryBackup() {
     exportJsonBackup();
     const todayDateStr = getTodayFormatted();
     localStorage.setItem('last_mandatory_backup_date', todayDateStr);
-    document.getElementById('mandatoryBackupModal').style.display = 'none';
+    const modal = document.getElementById('mandatoryBackupModal');
+    if (modal) modal.style.display = 'none';
     alert('تم حفظ النسخة الاحتياطية بنجاح!');
 }
 
 function openSupportModal() {
-    document.getElementById('supportModal').style.display = 'flex';
+    const modal = document.getElementById('supportModal');
+    if (modal) modal.style.display = 'flex';
 }
 
 function closeSupportModal() {
-    document.getElementById('supportModal').style.display = 'none';
+    const modal = document.getElementById('supportModal');
+    if (modal) modal.style.display = 'none';
 }
 
 function openActivationScreenForRenewal() {
-    document.getElementById('appContainer').style.display = 'none';
-    document.getElementById('activationScreen').style.display = 'flex';
-    document.getElementById('activationInput').value = '';
-    document.getElementById('activationInput').focus();
+    const appCont = document.getElementById('appContainer');
+    const actSc = document.getElementById('activationScreen');
+    const actInput = document.getElementById('activationInput');
+
+    if (appCont) appCont.style.display = 'none';
+    if (actSc) actSc.style.display = 'flex';
+    if (actInput) {
+        actInput.value = '';
+        actInput.focus();
+    }
 }
 
 function cancelRenewal() {
-    document.getElementById('activationScreen').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'flex';
+    const actSc = document.getElementById('activationScreen');
+    const appCont = document.getElementById('appContainer');
+    if (actSc) actSc.style.display = 'none';
+    if (appCont) appCont.style.display = 'flex';
 }
 
 function restorePreviousScreenState() {
@@ -1139,7 +1238,8 @@ function restorePreviousScreenState() {
 }
 
 async function verifyActivationCode() {
-    const inputCode = document.getElementById('activationInput').value.trim().toUpperCase();
+    const actInput = document.getElementById('activationInput');
+    const inputCode = actInput ? actInput.value.trim().toUpperCase() : '';
     if (!inputCode) { alert('Please enter an activation code.'); return; }
 
     if (!navigator.onLine) {
@@ -1187,7 +1287,8 @@ async function verifyActivationCode() {
         }
 
         alert('System activated / renewed successfully!');
-        document.getElementById('activationScreen').style.display = 'none';
+        const actSc = document.getElementById('activationScreen');
+        if (actSc) actSc.style.display = 'none';
         isSubscriptionExpired = false;
         setupClientInterfaceAfterAuth(expiryDateIso, false);
 
@@ -1241,10 +1342,11 @@ function saveSettingsToCloudAndLocal() {
 
     const rxLayoutData = {};
     document.querySelectorAll('.draggable-box').forEach(box => {
+        const textEl = box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text');
         rxLayoutData[box.id] = {
             top: box.style.top,
             left: box.style.left,
-            fontSize: box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text') ? window.getComputedStyle(box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text')).fontSize : '1rem'
+            fontSize: textEl ? window.getComputedStyle(textEl).fontSize : '1rem'
         };
     });
     localStorage.setItem('doctor_rx_layout', JSON.stringify(rxLayoutData));
@@ -1269,30 +1371,41 @@ function getTodayFormatted() {
 function toggleAuthMode() {
     isRegisterMode = !isRegisterMode;
     applyLanguage();
-    document.getElementById('registerPhoneBox').style.display = isRegisterMode ? 'block' : 'none';
+    const phoneBox = document.getElementById('registerPhoneBox');
+    if (phoneBox) phoneBox.style.display = isRegisterMode ? 'block' : 'none';
 }
 
 function togglePasswordVisibility() {
     const passInput = document.getElementById('authPassword');
     const toggleBtn = document.getElementById('togglePasswordBtn');
+    if (!passInput) return;
     if (passInput.type === 'password') {
         passInput.type = 'text';
-        toggleBtn.classList.remove('fa-eye');
-        toggleBtn.classList.add('fa-eye-slash');
+        if (toggleBtn) {
+            toggleBtn.classList.remove('fa-eye');
+            toggleBtn.classList.add('fa-eye-slash');
+        }
     } else {
         passInput.type = 'password';
-        toggleBtn.classList.remove('fa-eye-slash');
-        toggleBtn.classList.add('fa-eye');
+        if (toggleBtn) {
+            toggleBtn.classList.remove('fa-eye-slash');
+            toggleBtn.classList.add('fa-eye');
+        }
     }
 }
 
 async function handleAuthSubmit(e) {
     e.preventDefault();
-    const identifier = document.getElementById('authEmail').value.trim();
-    const pass = document.getElementById('authPassword').value;
+    const emailEl = document.getElementById('authEmail');
+    const passEl = document.getElementById('authPassword');
+    if (!emailEl || !passEl) return;
+
+    const identifier = emailEl.value.trim();
+    const pass = passEl.value;
 
     if (isRegisterMode) {
-        const phone = document.getElementById('regPhoneInput').value.trim();
+        const phoneEl = document.getElementById('regPhoneInput');
+        const phone = phoneEl ? phoneEl.value.trim() : '';
         auth.createUserWithEmailAndPassword(identifier, pass)
             .then(async res => {
                 pendingUserPass = pass;
@@ -1318,8 +1431,10 @@ async function handleAuthSubmit(e) {
                     localStorage.setItem(`sub_expiry_${res.user.uid}`, expiryDate.toISOString());
                     setupFounderInterfaceAfterAuth();
                 } else {
-                    document.getElementById('authScreen').style.display = 'none';
-                    document.getElementById('activationScreen').style.display = 'flex';
+                    const authSc = document.getElementById('authScreen');
+                    const actSc = document.getElementById('activationScreen');
+                    if (authSc) authSc.style.display = 'none';
+                    if (actSc) actSc.style.display = 'flex';
                 }
             })
             .catch(err => alert('خطأ: ' + err.message));
@@ -1366,11 +1481,16 @@ async function handleAuthSubmit(e) {
 
                 await loadDoctorBranding(dataOwnerUid);
 
-                document.getElementById('authScreen').style.display = 'none';
+                const authSc = document.getElementById('authScreen');
+                if (authSc) authSc.style.display = 'none';
+
                 if (isSec) {
-                    document.getElementById('appContainer').style.display = 'flex';
-                    document.getElementById('cardPermissions').style.display = 'none';
-                    document.getElementById('subStatusBanner').style.display = 'none';
+                    const appCont = document.getElementById('appContainer');
+                    const cardPerm = document.getElementById('cardPermissions');
+                    const banner = document.getElementById('subStatusBanner');
+                    if (appCont) appCont.style.display = 'flex';
+                    if (cardPerm) cardPerm.style.display = 'none';
+                    if (banner) banner.style.display = 'none';
                     isUserSecretary = true;
                     applySecretaryUIVisibility();
                     restorePreviousScreenState();
@@ -1385,29 +1505,25 @@ async function handleAuthSubmit(e) {
 }
 
 function showAllCardsForDoctor() {
-    document.getElementById('cardNewPatient').style.display = 'flex';
-    document.getElementById('cardArchive').style.display = 'flex';
-    document.getElementById('cardRxTemplate').style.display = 'flex';
-    document.getElementById('cardSpecialtiesDashboard').style.display = 'flex';
-    document.getElementById('cardDict').style.display = 'flex';
-    document.getElementById('cardAnalytics').style.display = 'flex';
-    document.getElementById('cardBackup').style.display = 'flex';
-    document.getElementById('cardTrash').style.display = 'flex';
-    document.getElementById('cardSettings').style.display = 'flex';
-    document.getElementById('cardPermissions').style.display = 'flex';
+    const ids = [
+        'cardNewPatient', 'cardArchive', 'cardRxTemplate', 
+        'cardSpecialtiesDashboard', 'cardDict', 'cardAnalytics', 
+        'cardBackup', 'cardTrash', 'cardSettings', 'cardPermissions'
+    ];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'flex';
+    });
 }
 
 function applySecretaryUIVisibility() {
-    document.getElementById('cardNewPatient').style.display = 'flex';
-    document.getElementById('cardArchive').style.display = 'flex';
-    document.getElementById('cardRxTemplate').style.display = 'none';
-    document.getElementById('cardSpecialtiesDashboard').style.display = 'none';
-    document.getElementById('cardDict').style.display = 'none';
-    document.getElementById('cardAnalytics').style.display = 'none';
-    document.getElementById('cardBackup').style.display = 'none';
-    document.getElementById('cardTrash').style.display = 'none';
-    document.getElementById('cardSettings').style.display = 'none';
-    document.getElementById('cardPermissions').style.display = 'none';
+    const showIds = ['cardNewPatient', 'cardArchive'];
+    const hideIds = [
+        'cardRxTemplate', 'cardSpecialtiesDashboard', 'cardDict', 
+        'cardAnalytics', 'cardBackup', 'cardTrash', 'cardSettings', 'cardPermissions'
+    ];
+    showIds.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'flex'; });
+    hideIds.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
 }
 
 function calculateVisitChildGrowth(visitId) {
@@ -1416,9 +1532,13 @@ function calculateVisitChildGrowth(visitId) {
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
 
-    const ageMonths = parseFloat(document.getElementById(`pedsAgeMonths-${visitId}`).value);
-    const weight = parseFloat(document.getElementById(`pedsWeight-${visitId}`).value);
-    const height = parseFloat(document.getElementById(`pedsHeight-${visitId}`).value);
+    const ageMonthsEl = document.getElementById(`pedsAgeMonths-${visitId}`);
+    const weightEl = document.getElementById(`pedsWeight-${visitId}`);
+    const heightEl = document.getElementById(`pedsHeight-${visitId}`);
+
+    const ageMonths = ageMonthsEl ? parseFloat(ageMonthsEl.value) : NaN;
+    const weight = weightEl ? parseFloat(weightEl.value) : NaN;
+    const height = heightEl ? parseFloat(heightEl.value) : NaN;
 
     if (!ageMonths || isNaN(ageMonths) || ageMonths < 0) {
         alert('الرجاء إدخال عمر الطفل بالأشهر أولاً.');
@@ -1466,22 +1586,23 @@ function calculateVisitChildGrowth(visitId) {
 function openSpecialtiesDashboard() {
     navigateTo('specialtiesDashboardScreen', 'لوحة تحكم الاختصاصات', 'تخصيص وتفعيل الحقول الطبية');
     
-    document.getElementById('mod_medHistory').checked = !!specialtyConfig.medHistory;
-    document.getElementById('mod_vitals').checked = !!specialtyConfig.vitals;
-    document.getElementById('mod_labs').checked = !!specialtyConfig.labs;
-    document.getElementById('mod_scans').checked = !!specialtyConfig.scans;
-    document.getElementById('mod_notes').checked = !!specialtyConfig.notes;
-    document.getElementById('mod_rx').checked = !!specialtyConfig.rx;
-    document.getElementById('mod_attachments').checked = !!specialtyConfig.attachments;
+    const setChecked = (id, val) => { const el = document.getElementById(id); if (el) el.checked = !!val; };
+    setChecked('mod_medHistory', specialtyConfig.medHistory);
+    setChecked('mod_vitals', specialtyConfig.vitals);
+    setChecked('mod_labs', specialtyConfig.labs);
+    setChecked('mod_scans', specialtyConfig.scans);
+    setChecked('mod_notes', specialtyConfig.notes);
+    setChecked('mod_rx', specialtyConfig.rx);
+    setChecked('mod_attachments', specialtyConfig.attachments);
 
-    document.getElementById('mod_obsGyn').checked = !!specialtyConfig.obsGyn;
-    document.getElementById('mod_ortho').checked = !!specialtyConfig.ortho;
-    document.getElementById('mod_neuro').checked = !!specialtyConfig.neuro;
-    document.getElementById('mod_peds').checked = !!specialtyConfig.peds;
-    document.getElementById('mod_derm').checked = !!specialtyConfig.derm;
-    document.getElementById('mod_ent').checked = !!specialtyConfig.ent;
-    document.getElementById('mod_ophthal').checked = !!specialtyConfig.ophthal;
-    document.getElementById('mod_cardio').checked = !!specialtyConfig.cardio;
+    setChecked('mod_obsGyn', specialtyConfig.obsGyn);
+    setChecked('mod_ortho', specialtyConfig.ortho);
+    setChecked('mod_neuro', specialtyConfig.neuro);
+    setChecked('mod_peds', specialtyConfig.peds);
+    setChecked('mod_derm', specialtyConfig.derm);
+    setChecked('mod_ent', specialtyConfig.ent);
+    setChecked('mod_ophthal', specialtyConfig.ophthal);
+    setChecked('mod_cardio', specialtyConfig.cardio);
 }
 
 function saveSpecialtiesDashboardConfig() {
@@ -1489,22 +1610,23 @@ function saveSpecialtiesDashboardConfig() {
         alert('التطبيق في وضع القراءة فقط.');
         return;
     }
+    const getChecked = (id) => { const el = document.getElementById(id); return el ? el.checked : false; };
     specialtyConfig = {
-        medHistory: document.getElementById('mod_medHistory').checked,
-        vitals: document.getElementById('mod_vitals').checked,
-        labs: document.getElementById('mod_labs').checked,
-        scans: document.getElementById('mod_scans').checked,
-        notes: document.getElementById('mod_notes').checked,
-        rx: document.getElementById('mod_rx').checked,
-        attachments: document.getElementById('mod_attachments').checked,
-        obsGyn: document.getElementById('mod_obsGyn').checked,
-        ortho: document.getElementById('mod_ortho').checked,
-        neuro: document.getElementById('mod_neuro').checked,
-        peds: document.getElementById('mod_peds').checked,
-        derm: document.getElementById('mod_derm').checked,
-        ent: document.getElementById('mod_ent').checked,
-        ophthal: document.getElementById('mod_ophthal').checked,
-        cardio: document.getElementById('mod_cardio').checked
+        medHistory: getChecked('mod_medHistory'),
+        vitals: getChecked('mod_vitals'),
+        labs: getChecked('mod_labs'),
+        scans: getChecked('mod_scans'),
+        notes: getChecked('mod_notes'),
+        rx: getChecked('mod_rx'),
+        attachments: getChecked('mod_attachments'),
+        obsGyn: getChecked('mod_obsGyn'),
+        ortho: getChecked('mod_ortho'),
+        neuro: getChecked('mod_neuro'),
+        peds: getChecked('mod_peds'),
+        derm: getChecked('mod_derm'),
+        ent: getChecked('mod_ent'),
+        ophthal: getChecked('mod_ophthal'),
+        cardio: getChecked('mod_cardio')
     };
 
     saveSettingsToCloudAndLocal();
@@ -1514,8 +1636,10 @@ function saveSpecialtiesDashboardConfig() {
 
 function openPermissionsManager() {
     navigateTo('permissionsScreen', 'Secretary Management', 'Create account & permissions');
-    document.getElementById('secEmailInput').value = secretaryAccount.email || '';
-    document.getElementById('secPassInput').value = secretaryAccount.password || '';
+    const emailIn = document.getElementById('secEmailInput');
+    const passIn = document.getElementById('secPassInput');
+    if (emailIn) emailIn.value = secretaryAccount.email || '';
+    if (passIn) passIn.value = secretaryAccount.password || '';
 }
 
 async function saveSecretaryAccount() {
@@ -1523,8 +1647,10 @@ async function saveSecretaryAccount() {
         alert('التطبيق في وضع القراءة فقط.');
         return;
     }
-    const email = document.getElementById('secEmailInput').value.trim();
-    const password = document.getElementById('secPassInput').value;
+    const emailIn = document.getElementById('secEmailInput');
+    const passIn = document.getElementById('secPassInput');
+    const email = emailIn ? emailIn.value.trim() : '';
+    const password = passIn ? passIn.value : '';
 
     if (!email || !password) {
         alert('Please enter both email and password.');
@@ -1573,8 +1699,10 @@ async function deleteSecretaryAccount() {
     if (isSubscriptionExpired) return;
     if (confirm('Are you sure you want to delete secretary account?')) {
         secretaryAccount = { email: "", password: "" };
-        document.getElementById('secEmailInput').value = '';
-        document.getElementById('secPassInput').value = '';
+        const emailIn = document.getElementById('secEmailInput');
+        const passIn = document.getElementById('secPassInput');
+        if (emailIn) emailIn.value = '';
+        if (passIn) passIn.value = '';
         
         if (currentUserId) {
             await db.collection('network_hierarchy').doc(currentUserId).set({
@@ -1593,7 +1721,8 @@ function saveSecretaryPermissions() {
 }
 
 function resetPassword() {
-    const identifier = document.getElementById('authEmail').value;
+    const emailIn = document.getElementById('authEmail');
+    const identifier = emailIn ? emailIn.value : '';
     if (!identifier) { alert('Enter email first.'); return; }
     auth.sendPasswordResetEmail(identifier)
         .then(() => alert('Reset link sent!'))
@@ -1612,14 +1741,17 @@ function logoutUser() {
         isSubscriptionExpired = false;
         patients = [];
         trashBin = [];
-        document.getElementById('appContainer').style.display = 'none';
-        document.getElementById('authScreen').style.display = 'flex';
+        const appCont = document.getElementById('appContainer');
+        const authSc = document.getElementById('authScreen');
+        if (appCont) appCont.style.display = 'none';
+        if (authSc) authSc.style.display = 'flex';
     });
 }
 
 function openBackupManager() {
     navigateTo('backupScreen', 'Backup Manager', 'Export and restore data');
-    document.getElementById('backupFileInput').value = '';
+    const fileIn = document.getElementById('backupFileInput');
+    if (fileIn) fileIn.value = '';
 }
 
 function exportJsonBackup() {
@@ -1693,18 +1825,25 @@ function restoreFromUploadedFile(input) {
 function openAccountSettings() {
     navigateTo('settingsScreen', 'Account Settings', 'Change email and password');
     const user = auth.currentUser;
-    if (user) {
-        document.getElementById('currentAccountEmail').value = user.email || '';
-    }
-    document.getElementById('newAccountEmail').value = '';
-    document.getElementById('confirmEmailPass').value = '';
-    document.getElementById('newAccountPassword').value = '';
+    const curEmail = document.getElementById('currentAccountEmail');
+    const newEmail = document.getElementById('newAccountEmail');
+    const confPass = document.getElementById('confirmEmailPass');
+    const newPass = document.getElementById('newAccountPassword');
+
+    if (user && curEmail) curEmail.value = user.email || '';
+    if (newEmail) newEmail.value = '';
+    if (confPass) confPass.value = '';
+    if (newPass) newPass.value = '';
 }
 
 function updateAccountEmail() {
-    const newEmail = document.getElementById('newAccountEmail').value.trim();
-    const password = document.getElementById('confirmEmailPass').value;
+    const newEmailEl = document.getElementById('newAccountEmail');
+    const passEl = document.getElementById('confirmEmailPass');
+    const curEmailEl = document.getElementById('currentAccountEmail');
     const user = auth.currentUser;
+
+    const newEmail = newEmailEl ? newEmailEl.value.trim() : '';
+    const password = passEl ? passEl.value : '';
 
     if (!newEmail || !password) {
         alert('Please enter new email and current password.');
@@ -1715,13 +1854,14 @@ function updateAccountEmail() {
     user.reauthenticateWithCredential(credential).then(() => {
         user.updateEmail(newEmail).then(() => {
             alert('Email updated!');
-            document.getElementById('currentAccountEmail').value = newEmail;
+            if (curEmailEl) curEmailEl.value = newEmail;
         }).catch(error => alert('Error: ' + error.message));
     }).catch(error => alert('Incorrect password: ' + error.message));
 }
 
 function updateAccountPassword() {
-    const newPass = document.getElementById('newAccountPassword').value;
+    const newPassEl = document.getElementById('newAccountPassword');
+    const newPass = newPassEl ? newPassEl.value : '';
     const user = auth.currentUser;
 
     if (!newPass || newPass.length < 6) {
@@ -1732,7 +1872,7 @@ function updateAccountPassword() {
     if (confirm('Change password?')) {
         user.updatePassword(newPass).then(() => {
             alert('Password changed!');
-            document.getElementById('newAccountPassword').value = '';
+            if (newPassEl) newPassEl.value = '';
         }).catch(error => alert('Error: ' + error.message));
     }
 }
@@ -1752,12 +1892,14 @@ function openRxTemplateManager() {
     const noText = document.getElementById('noRxText');
 
     if (currentDoctorRxImage) {
-        previewImg.src = currentDoctorRxImage;
-        previewImg.style.display = 'block';
-        noText.style.display = 'none';
+        if (previewImg) {
+            previewImg.src = currentDoctorRxImage;
+            previewImg.style.display = 'block';
+        }
+        if (noText) noText.style.display = 'none';
     } else {
-        previewImg.style.display = 'none';
-        noText.style.display = 'block';
+        if (previewImg) previewImg.style.display = 'none';
+        if (noText) noText.style.display = 'block';
     }
 }
 
@@ -1767,7 +1909,7 @@ function saveRxTemplateImage() {
         return;
     }
     const fileInput = document.getElementById('rxImageFileInput');
-    if (fileInput.files && fileInput.files[0]) {
+    if (fileInput && fileInput.files && fileInput.files[0]) {
         const file = fileInput.files[0];
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -1842,6 +1984,7 @@ async function scanFromDesktopScanner(visitId) {
 function openNetworkHierarchy() {
     navigateTo('networkScreen', 'قاعدة بيانات الشبكة', 'إدارة المستخدمين والأسماء البارزة');
     const container = document.getElementById('networkTreeContainer');
+    if (!container) return;
     container.innerHTML = '<p style="text-align:center; color:#64748b;">Loading...</p>';
 
     if (!navigator.onLine) {
@@ -1885,18 +2028,24 @@ function openNetworkHierarchy() {
 
 function promptFounderEditName(nodeUid, currentName, userEmail) {
     targetNodeUidForNameEdit = nodeUid;
-    document.getElementById('editNameTargetEmail').innerText = userEmail;
-    document.getElementById('founderInputDoctorName').value = currentName !== 'غير مسجل' ? currentName : '';
-    document.getElementById('founderEditNameModal').style.display = 'flex';
+    const emailDisp = document.getElementById('editNameTargetEmail');
+    const nameInput = document.getElementById('founderInputDoctorName');
+    const modal = document.getElementById('founderEditNameModal');
+
+    if (emailDisp) emailDisp.innerText = userEmail;
+    if (nameInput) nameInput.value = currentName !== 'غير مسجل' ? currentName : '';
+    if (modal) modal.style.display = 'flex';
 }
 
 function closeFounderEditNameModal() {
-    document.getElementById('founderEditNameModal').style.display = 'none';
+    const modal = document.getElementById('founderEditNameModal');
+    if (modal) modal.style.display = 'none';
     targetNodeUidForNameEdit = null;
 }
 
 async function executeFounderUpdateDoctorName() {
-    const newName = document.getElementById('founderInputDoctorName').value.trim();
+    const nameInput = document.getElementById('founderInputDoctorName');
+    const newName = nameInput ? nameInput.value.trim() : '';
     if (!targetNodeUidForNameEdit) return;
 
     try {
@@ -1915,19 +2064,25 @@ async function executeFounderUpdateDoctorName() {
 function promptFounderDeleteNode(nodeUid, nodeEmail) {
     targetNodeUidToDelete = nodeUid;
     targetNodeEmailToDelete = nodeEmail;
-    document.getElementById('delTargetEmailDisplay').innerText = nodeEmail;
-    document.getElementById('founderConfirmPassInput').value = '';
-    document.getElementById('founderDeleteModal').style.display = 'flex';
+    const emailDisp = document.getElementById('delTargetEmailDisplay');
+    const passInput = document.getElementById('founderConfirmPassInput');
+    const modal = document.getElementById('founderDeleteModal');
+
+    if (emailDisp) emailDisp.innerText = nodeEmail;
+    if (passInput) passInput.value = '';
+    if (modal) modal.style.display = 'flex';
 }
 
 function closeFounderDeleteModal() {
-    document.getElementById('founderDeleteModal').style.display = 'none';
+    const modal = document.getElementById('founderDeleteModal');
+    if (modal) modal.style.display = 'none';
     targetNodeUidToDelete = null;
     targetNodeEmailToDelete = null;
 }
 
 async function executeFounderDeleteAccount() {
-    const inputPass = document.getElementById('founderConfirmPassInput').value;
+    const passInput = document.getElementById('founderConfirmPassInput');
+    const inputPass = passInput ? passInput.value : '';
     if (!inputPass) return;
 
     try {
@@ -1975,68 +2130,82 @@ function openAnalyticsDashboard() {
         }
     });
 
-    document.getElementById('statTotalPatients').innerText = totalPatients;
-    document.getElementById('statTodayVisits').innerText = todayVisitsCount;
-    document.getElementById('statMaleCount').innerText = maleCount;
-    document.getElementById('statFemaleCount').innerText = femaleCount;
+    const safeText = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+    safeText('statTotalPatients', totalPatients);
+    safeText('statTodayVisits', todayVisitsCount);
+    safeText('statMaleCount', maleCount);
+    safeText('statFemaleCount', femaleCount);
 
     const totalGender = maleCount + femaleCount;
     const malePct = totalGender > 0 ? Math.round((maleCount / totalGender) * 100) : 50;
     const femalePct = totalGender > 0 ? 100 - malePct : 50;
 
-    document.getElementById('ratioMaleBar').style.width = `${malePct}%`;
-    document.getElementById('ratioFemaleBar').style.width = `${femalePct}%`;
-    document.getElementById('ratioMaleText').innerText = `Male: ${malePct}%`;
-    document.getElementById('ratioFemaleText').innerText = `Female: ${femalePct}%`;
+    const maleBar = document.getElementById('ratioMaleBar');
+    const femaleBar = document.getElementById('ratioFemaleBar');
+    const maleTxt = document.getElementById('ratioMaleText');
+    const femaleTxt = document.getElementById('ratioFemaleText');
+
+    if (maleBar) maleBar.style.width = `${malePct}%`;
+    if (femaleBar) femaleBar.style.width = `${femalePct}%`;
+    if (maleTxt) maleTxt.innerText = `Male: ${malePct}%`;
+    if (femaleTxt) femaleTxt.innerText = `Female: ${femalePct}%`;
 
     const sortedDrugs = Object.entries(drugFrequency).sort((a, b) => b[1] - a[1]).slice(0, 5);
     const topDrugsContainer = document.getElementById('topDrugsList');
 
-    topDrugsContainer.innerHTML = sortedDrugs.length === 0 
-        ? '<p style="font-size:0.8rem; color:#64748b; text-align:center;">No data.</p>'
-        : sortedDrugs.map(([drug, count], idx) => `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:10px; font-size:0.85rem; font-weight:600;">
-                <span>${idx + 1}. ${drug}</span>
-                <span style="background:#ccfbf1; color:#0f766e; padding:2px 8px; border-radius:6px; font-size:0.75rem;">${count} times</span>
-            </div>
-        `).join('');
+    if (topDrugsContainer) {
+        topDrugsContainer.innerHTML = sortedDrugs.length === 0 
+            ? '<p style="font-size:0.8rem; color:#64748b; text-align:center;">No data.</p>'
+            : sortedDrugs.map(([drug, count], idx) => `
+                <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:10px; font-size:0.85rem; font-weight:600;">
+                    <span>${idx + 1}. ${drug}</span>
+                    <span style="background:#ccfbf1; color:#0f766e; padding:2px 8px; border-radius:6px; font-size:0.75rem;">${count} times</span>
+                </div>
+            `).join('');
+    }
 }
 
 function exportPatientMedicalReportPDF() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
 
-    document.getElementById('pdfRepName').innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
-    document.getElementById('pdfRepAge').innerText = patient.age;
-    document.getElementById('pdfRepGender').innerText = patient.gender || 'N/A';
-    document.getElementById('pdfRepMarital').innerText = patient.marital || 'N/A';
-    document.getElementById('pdfRepJob').innerText = patient.job || 'N/A';
-    document.getElementById('pdfRepPhone').innerText = patient.phone || 'N/A';
-    document.getElementById('pdfRepDateLabel').innerText = `Generated on: ${new Date().toLocaleString()}`;
+    const safeText = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+    safeText('pdfRepName', patient.name + (patient.subName ? ` (${patient.subName})` : ''));
+    safeText('pdfRepAge', patient.age);
+    safeText('pdfRepGender', patient.gender || 'N/A');
+    safeText('pdfRepMarital', patient.marital || 'N/A');
+    safeText('pdfRepJob', patient.job || 'N/A');
+    safeText('pdfRepPhone', patient.phone || 'N/A');
+    safeText('pdfRepDateLabel', `Generated on: ${new Date().toLocaleString()}`);
 
     const visitsContainer = document.getElementById('pdfRepVisitsContainer');
     const visits = patient.visits || [];
 
-    visitsContainer.innerHTML = visits.length === 0 
-        ? '<p style="font-size:0.85rem; color:#64748b;">No visits.</p>'
-        : visits.map((v, idx) => `
-            <div style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
-                <div style="background: #0f172a; color: #ffffff; padding: 6px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; display: flex; justify-content: space-between;">
-                    <span>Visit #${visits.length - idx}</span><span>Date: ${v.date || 'N/A'}</span>
+    if (visitsContainer) {
+        visitsContainer.innerHTML = visits.length === 0 
+            ? '<p style="font-size:0.85rem; color:#64748b;">No visits.</p>'
+            : visits.map((v, idx) => `
+                <div style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
+                    <div style="background: #0f172a; color: #ffffff; padding: 6px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; display: flex; justify-content: space-between;">
+                        <span>Visit #${visits.length - idx}</span><span>Date: ${v.date || 'N/A'}</span>
+                    </div>
+                    <div style="font-size: 0.8rem; margin-top: 6px;"><strong>Diagnosis & Notes:</strong> ${v.notes || 'None'}</div>
+                    ${v.drugs ? `<div style="font-size: 0.8rem; margin-top: 4px;"><strong>Medications:</strong> ${v.drugs}</div>` : ''}
                 </div>
-                <div style="font-size: 0.8rem; margin-top: 6px;"><strong>Diagnosis & Notes:</strong> ${v.notes || 'None'}</div>
-                ${v.drugs ? `<div style="font-size: 0.8rem; margin-top: 4px;"><strong>Medications:</strong> ${v.drugs}</div>` : ''}
-            </div>
-        `).join('');
+            `).join('');
+    }
 
-    html2canvas(document.getElementById('pdfReportExportContainer'), { scale: 2, useCORS: true }).then(canvas => {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('portrait', 'mm', 'a4');
-        const imgWidth = 210;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
-        pdf.save(`Medical_Report_${patient.name.replace(/\s+/g, '_')}.pdf`);
-    });
+    const reportContainer = document.getElementById('pdfReportExportContainer');
+    if (reportContainer) {
+        html2canvas(reportContainer, { scale: 2, useCORS: true }).then(canvas => {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('portrait', 'mm', 'a4');
+            const imgWidth = 210;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+            pdf.save(`Medical_Report_${patient.name.replace(/\s+/g, '_')}.pdf`);
+        });
+    }
 }
 
 function openBmiCalculator(visitId) {
@@ -2046,10 +2215,14 @@ function openBmiCalculator(visitId) {
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
 
-    document.getElementById('bmiWeight').value = visit.bmiWeight || '';
-    document.getElementById('bmiHeight').value = visit.bmiHeight || '';
+    const bmiW = document.getElementById('bmiWeight');
+    const bmiH = document.getElementById('bmiHeight');
+    const bmiModal = document.getElementById('bmiCalculatorModal');
+
+    if (bmiW) bmiW.value = visit.bmiWeight || '';
+    if (bmiH) bmiH.value = visit.bmiHeight || '';
     calculateBmiLive();
-    document.getElementById('bmiCalculatorModal').style.display = 'flex';
+    if (bmiModal) bmiModal.style.display = 'flex';
 }
 
 function closeBmiModal() {
@@ -2058,8 +2231,10 @@ function closeBmiModal() {
         if (patient) {
             const visit = patient.visits.find(v => Number(v.visitId) === Number(currentVisitIdForModal));
             if (visit) {
-                const w = document.getElementById('bmiWeight').value;
-                const h = document.getElementById('bmiHeight').value;
+                const wInput = document.getElementById('bmiWeight');
+                const hInput = document.getElementById('bmiHeight');
+                const w = wInput ? wInput.value : '';
+                const h = hInput ? hInput.value : '';
                 visit.bmiWeight = w;
                 visit.bmiHeight = h;
                 if (w && h && Number(h) > 0) {
@@ -2073,24 +2248,27 @@ function closeBmiModal() {
             }
         }
     }
-    document.getElementById('bmiCalculatorModal').style.display = 'none';
+    const bmiModal = document.getElementById('bmiCalculatorModal');
+    if (bmiModal) bmiModal.style.display = 'none';
 }
 
 function calculateBmiLive() {
-    const w = parseFloat(document.getElementById('bmiWeight').value);
-    const h = parseFloat(document.getElementById('bmiHeight').value);
+    const wInput = document.getElementById('bmiWeight');
+    const hInput = document.getElementById('bmiHeight');
+    const w = wInput ? parseFloat(wInput.value) : NaN;
+    const h = hInput ? parseFloat(hInput.value) : NaN;
     const scoreDisplay = document.getElementById('bmiScoreDisplay');
     const badgeContainer = document.getElementById('bmiBadgeContainer');
 
     if (!w || !h || w <= 0 || h <= 0) {
-        scoreDisplay.innerText = '—';
-        badgeContainer.innerHTML = '<span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>';
+        if (scoreDisplay) scoreDisplay.innerText = '—';
+        if (badgeContainer) badgeContainer.innerHTML = '<span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>';
         return;
     }
 
     const hM = h / 100;
     const bmi = (w / (hM * hM)).toFixed(1);
-    scoreDisplay.innerText = bmi;
+    if (scoreDisplay) scoreDisplay.innerText = bmi;
 
     let badgeText = '';
     let badgeStyle = '';
@@ -2109,10 +2287,11 @@ function calculateBmiLive() {
         badgeStyle = 'background:#fee2e2; color:#b91c1c;';
     }
 
-    badgeContainer.innerHTML = `<span class="bmi-badge" style="${badgeStyle}">${badgeText}</span>`;
+    if (badgeContainer) badgeContainer.innerHTML = `<span class="bmi-badge" style="${badgeStyle}">${badgeText}</span>`;
 }
 
 function autoResizeTextarea(textarea) {
+    if (!textarea) return;
     textarea.style.height = 'auto';
     textarea.style.height = (textarea.scrollHeight) + 'px';
 }
@@ -2155,7 +2334,8 @@ function handleLiveInput(textarea, category, visitId) {
     if (currentLine.length > 0) {
         if (saveBar) {
             saveBar.style.display = 'flex';
-            document.getElementById(`line-text-${category}-${visitId}`).innerText = currentLine;
+            const lineTextSpan = document.getElementById(`line-text-${category}-${visitId}`);
+            if (lineTextSpan) lineTextSpan.innerText = currentLine;
         }
         const terms = medicalDict[category] || [];
         const matches = terms.filter(t => t.toLowerCase().includes(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
@@ -2183,8 +2363,11 @@ function selectSuggestion(category, visitId, term) {
     textarea.value = lines.join('\n') + '\n';
     autoResizeTextarea(textarea);
 
-    document.getElementById(`suggestions-${category}-${visitId}`).style.display = 'none';
-    document.getElementById(`save-bar-${category}-${visitId}`).style.display = 'none';
+    const box = document.getElementById(`suggestions-${category}-${visitId}`);
+    const bar = document.getElementById(`save-bar-${category}-${visitId}`);
+    if (box) box.style.display = 'none';
+    if (bar) bar.style.display = 'none';
+
     updateVisitFieldData(visitId, category, textarea.value);
     textarea.focus();
 }
@@ -2213,7 +2396,8 @@ function saveLineToDict(event, category, visitId) {
             setTimeout(() => {
                 btn.innerText = 'Save';
                 btn.classList.remove('saved');
-                document.getElementById(`save-bar-${category}-${visitId}`).style.display = 'none';
+                const bar = document.getElementById(`save-bar-${category}-${visitId}`);
+                if (bar) bar.style.display = 'none';
             }, 1000);
         }
     }
@@ -2237,7 +2421,8 @@ function handleMhLiveInput(inputEl, inputKey) {
     if (currentLine.length > 0) {
         if (saveBar) {
             saveBar.style.display = 'flex';
-            document.getElementById(`line-text-${inputKey}`).innerText = currentLine;
+            const lineTextSpan = document.getElementById(`line-text-${inputKey}`);
+            if (lineTextSpan) lineTextSpan.innerText = currentLine;
         }
         const terms = medicalDict.mh_history || [];
         const matches = terms.filter(t => t.toLowerCase().includes(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
@@ -2263,8 +2448,10 @@ function selectMhSuggestion(inputKey, term) {
     el.value = lines.join('\n') + '\n';
     autoResizeTextarea(el);
 
-    document.getElementById(`suggestions-${inputKey}`).style.display = 'none';
-    document.getElementById(`save-bar-${inputKey}`).style.display = 'none';
+    const box = document.getElementById(`suggestions-${inputKey}`);
+    const bar = document.getElementById(`save-bar-${inputKey}`);
+    if (box) box.style.display = 'none';
+    if (bar) bar.style.display = 'none';
     el.focus();
 }
 
@@ -2292,15 +2479,17 @@ function saveMhLineToDict(event, inputKey) {
             setTimeout(() => {
                 btn.innerText = 'Save';
                 btn.classList.remove('saved');
-                document.getElementById(`save-bar-${inputKey}`).style.display = 'none';
+                const bar = document.getElementById(`save-bar-${inputKey}`);
+                if (bar) bar.style.display = 'none';
             }, 1000);
         }
     }
 }
 
 function toggleOtherInput() {
-    const isChecked = document.getElementById('mh-other-check').checked;
-    document.getElementById('mh-other-box').style.display = isChecked ? 'block' : 'none';
+    const chk = document.getElementById('mh-other-check');
+    const box = document.getElementById('mh-other-box');
+    if (chk && box) box.style.display = chk.checked ? 'block' : 'none';
 }
 
 function updateVisitFieldData(visitId, category, value) {
@@ -2357,8 +2546,10 @@ function updateBpFields(visitId) {
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
 
-    const sys = document.getElementById(`vBpSys-${visitId}`).value.trim();
-    const dias = document.getElementById(`vBpDias-${visitId}`).value.trim();
+    const sysEl = document.getElementById(`vBpSys-${visitId}`);
+    const diasEl = document.getElementById(`vBpDias-${visitId}`);
+    const sys = sysEl ? sysEl.value.trim() : '';
+    const dias = diasEl ? diasEl.value.trim() : '';
 
     if (sys || dias) {
         visit.bp = `${sys || '___'}/${dias || '___'} mmHg`;
@@ -2421,35 +2612,51 @@ function handleFileUpload(input, visitId) {
 }
 
 function previewAttachmentImage(imgSrc) {
-    document.getElementById('previewModalImg').src = imgSrc;
-    document.getElementById('imagePreviewModal').style.display = 'flex';
+    const modalImg = document.getElementById('previewModalImg');
+    const modal = document.getElementById('imagePreviewModal');
+    if (modalImg) modalImg.src = imgSrc;
+    if (modal) modal.style.display = 'flex';
 }
 
 function closeImagePreview() {
-    document.getElementById('imagePreviewModal').style.display = 'none';
+    const modal = document.getElementById('imagePreviewModal');
+    if (modal) modal.style.display = 'none';
 }
 
 function openEditPatientModal() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
-    document.getElementById('editPName').value = patient.name || '';
-    document.getElementById('editPSubName').value = patient.subName || '';
-    document.getElementById('editPAge').value = patient.age || '';
-    document.getElementById('editPGender').value = patient.gender || '';
-    document.getElementById('editPMarital').value = patient.marital || '';
-    document.getElementById('editPJob').value = patient.job || '';
-    document.getElementById('editPPhone').value = patient.phone || '';
-    document.getElementById('editPatientModal').style.display = 'flex';
+    
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    setVal('editPName', patient.name);
+    setVal('editPSubName', patient.subName);
+    setVal('editPAge', patient.age);
+    setVal('editPGender', patient.gender);
+    setVal('editPMarital', patient.marital);
+    setVal('editPJob', patient.job);
+    setVal('editPPhone', patient.phone);
+
+    const modal = document.getElementById('editPatientModal');
+    if (modal) modal.style.display = 'flex';
 }
 
 function closeEditPatientModal() {
-    document.getElementById('editPatientModal').style.display = 'none';
+    const modal = document.getElementById('editPatientModal');
+    if (modal) modal.style.display = 'none';
 }
 
 function saveEditedPatient() {
-    const name = document.getElementById('editPName').value.trim();
-    const subName = document.getElementById('editPSubName').value.trim();
-    const age = Number(document.getElementById('editPAge').value);
+    const nameEl = document.getElementById('editPName');
+    const subNameEl = document.getElementById('editPSubName');
+    const ageEl = document.getElementById('editPAge');
+    const genderEl = document.getElementById('editPGender');
+    const maritalEl = document.getElementById('editPMarital');
+    const jobEl = document.getElementById('editPJob');
+    const phoneEl = document.getElementById('editPPhone');
+
+    const name = nameEl ? nameEl.value.trim() : '';
+    const subName = subNameEl ? subNameEl.value.trim() : '';
+    const age = ageEl ? Number(ageEl.value) : 0;
     if (!name || !age) return;
 
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
@@ -2458,15 +2665,18 @@ function saveEditedPatient() {
     patient.name = name;
     patient.subName = subName;
     patient.age = age;
-    patient.gender = document.getElementById('editPGender').value || 'Unspecified';
-    patient.marital = document.getElementById('editPMarital').value || 'Single';
-    patient.job = document.getElementById('editPJob').value || 'Unspecified';
-    patient.phone = document.getElementById('editPPhone').value || 'N/A';
+    patient.gender = genderEl ? genderEl.value || 'Unspecified' : 'Unspecified';
+    patient.marital = maritalEl ? maritalEl.value || 'Single' : 'Single';
+    patient.job = jobEl ? jobEl.value || 'Unspecified' : 'Unspecified';
+    patient.phone = phoneEl ? phoneEl.value || 'N/A' : 'N/A';
 
     savePatientToCloudAndLocal(patient);
     closeEditPatientModal();
-    document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
-    document.getElementById('recPatientMeta').innerHTML = `Age: ${patient.age} | Gender: ${patient.gender} | Marital: ${patient.marital} | Job: ${patient.job} | Phone: ${patient.phone}`;
+
+    const recName = document.getElementById('recPatientName');
+    const recMeta = document.getElementById('recPatientMeta');
+    if (recName) recName.innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
+    if (recMeta) recMeta.innerHTML = `Age: ${patient.age} | Gender: ${patient.gender} | Marital: ${patient.marital} | Job: ${patient.job} | Phone: ${patient.phone}`;
 }
 
 function confirmDeletePatientRecord() {
@@ -2502,6 +2712,7 @@ function openTrashBin() {
 
 function renderTrashItems() {
     const container = document.getElementById('trashItemsContainer');
+    if (!container) return;
     container.innerHTML = trashBin.length === 0 
         ? '<p style="text-align:center; color:#64748b;">Empty.</p>'
         : trashBin.map((item, index) => `
@@ -2547,20 +2758,26 @@ function openMedHistoryModal(visitId) {
         cb.checked = mh.conditions && mh.conditions.includes(cb.value);
     });
 
-    document.getElementById('mh-other-check').checked = !!mh.otherCondition;
-    document.getElementById('mh-cd-other').value = mh.otherCondition || '';
-    document.getElementById('mh-other-box').style.display = mh.otherCondition ? 'block' : 'none';
+    const otherChk = document.getElementById('mh-other-check');
+    const otherIn = document.getElementById('mh-cd-other');
+    const otherBox = document.getElementById('mh-other-box');
 
-    document.getElementById('mh-prev-admission').value = mh.admission || '';
-    document.getElementById('mh-past-surgery').value = mh.surgery || '';
-    document.getElementById('mh-family-history').value = mh.family || '';
-    document.getElementById('mh-drug-allergy').value = mh.allergy || '';
-    document.getElementById('mh-chronic-drugs').value = mh.chronicDrugs || '';
-    document.getElementById('mh-smoking').value = mh.smoking || 'Non-smoker';
-    document.getElementById('mh-alcohol').value = mh.alcohol || 'Non-drinker';
-    document.getElementById('mh-notes').value = mh.notes || '';
+    if (otherChk) otherChk.checked = !!mh.otherCondition;
+    if (otherIn) otherIn.value = mh.otherCondition || '';
+    if (otherBox) otherBox.style.display = mh.otherCondition ? 'block' : 'none';
 
-    document.getElementById('medHistoryModal').style.display = 'flex';
+    const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+    setVal('mh-prev-admission', mh.admission);
+    setVal('mh-past-surgery', mh.surgery);
+    setVal('mh-family-history', mh.family);
+    setVal('mh-drug-allergy', mh.allergy);
+    setVal('mh-chronic-drugs', mh.chronicDrugs);
+    setVal('mh-smoking', mh.smoking || 'Non-smoker');
+    setVal('mh-alcohol', mh.alcohol || 'Non-drinker');
+    setVal('mh-notes', mh.notes);
+
+    const modal = document.getElementById('medHistoryModal');
+    if (modal) modal.style.display = 'flex';
 }
 
 function closeMedHistoryModal() {
@@ -2572,17 +2789,21 @@ function closeMedHistoryModal() {
                 const conditions = [];
                 document.querySelectorAll('.mh-cd:checked').forEach(cb => conditions.push(cb.value));
 
+                const otherChk = document.getElementById('mh-other-check');
+                const otherIn = document.getElementById('mh-cd-other');
+                const getVal = (id) => { const el = document.getElementById(id); return el ? el.value : ''; };
+
                 visit.medHistory = {
                     conditions: conditions,
-                    otherCondition: document.getElementById('mh-other-check').checked ? document.getElementById('mh-cd-other').value : '',
-                    admission: document.getElementById('mh-prev-admission').value,
-                    surgery: document.getElementById('mh-past-surgery').value,
-                    family: document.getElementById('mh-family-history').value,
-                    allergy: document.getElementById('mh-drug-allergy').value,
-                    chronicDrugs: document.getElementById('mh-chronic-drugs').value,
-                    smoking: document.getElementById('mh-smoking').value,
-                    alcohol: document.getElementById('mh-alcohol').value,
-                    notes: document.getElementById('mh-notes').value
+                    otherCondition: otherChk && otherChk.checked && otherIn ? otherIn.value : '',
+                    admission: getVal('mh-prev-admission'),
+                    surgery: getVal('mh-past-surgery'),
+                    family: getVal('mh-family-history'),
+                    allergy: getVal('mh-drug-allergy'),
+                    chronicDrugs: getVal('mh-chronic-drugs'),
+                    smoking: getVal('mh-smoking'),
+                    alcohol: getVal('mh-alcohol'),
+                    notes: getVal('mh-notes')
                 };
 
                 savePatientToCloudAndLocal(patient);
@@ -2590,7 +2811,8 @@ function closeMedHistoryModal() {
             }
         }
     }
-    document.getElementById('medHistoryModal').style.display = 'none';
+    const modal = document.getElementById('medHistoryModal');
+    if (modal) modal.style.display = 'none';
 }
 
 function openRxModal(visitId) {
@@ -2600,34 +2822,39 @@ function openRxModal(visitId) {
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
 
-    document.getElementById('rxDragPatientDetailsText').innerText = `Name: ${patient.name + (patient.subName ? ` (${patient.subName})` : '')} | Age: ${patient.age} | ${patient.gender || ''}`;
-    document.getElementById('rxDragDateText').innerText = visit.date || getTodayFormatted();
+    const safeText = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
+    safeText('rxDragPatientDetailsText', `Name: ${patient.name + (patient.subName ? ` (${patient.subName})` : '')} | Age: ${patient.age} | ${patient.gender || ''}`);
+    safeText('rxDragDateText', visit.date || getTodayFormatted());
     
     const bpVal = visit.bp ? `BP: ${visit.bp}` : 'BP: _____ / _____ mmHg';
     const hrVal = visit.hr ? `HR: ${visit.hr} bpm` : 'HR: _____ bpm';
     const tempVal = visit.temp ? `Temp: ${visit.temp} °C` : 'Temp: _____ °C';
     const bmiVal = visit.bmiScore ? `BMI: ${visit.bmiScore}` : 'BMI: _____';
 
-    document.getElementById('rxDragVitalsText').innerText = `${bpVal} | ${hrVal} | ${tempVal} | ${bmiVal}`;
-    document.getElementById('rxDragTreatmentText').innerText = visit.drugs || 'No medications prescribed.';
+    safeText('rxDragVitalsText', `${bpVal} | ${hrVal} | ${tempVal} | ${bmiVal}`);
+    safeText('rxDragTreatmentText', visit.drugs || 'No medications prescribed.');
 
     const container = document.getElementById('rxCanvasContainer');
-    const oldImg = container.querySelector('.rx-bg-img');
-    if (oldImg) oldImg.remove();
+    if (container) {
+        const oldImg = container.querySelector('.rx-bg-img');
+        if (oldImg) oldImg.remove();
 
-    if (currentDoctorRxImage) {
-        const img = document.createElement('img');
-        img.src = currentDoctorRxImage;
-        img.className = 'rx-bg-img';
-        container.insertBefore(img, container.firstChild);
+        if (currentDoctorRxImage) {
+            const img = document.createElement('img');
+            img.src = currentDoctorRxImage;
+            img.className = 'rx-bg-img';
+            container.insertBefore(img, container.firstChild);
+        }
     }
 
     loadSavedRxLayout();
-    document.getElementById('rxModal').style.display = 'flex';
+    const rxModal = document.getElementById('rxModal');
+    if (rxModal) rxModal.style.display = 'flex';
 }
 
 function closeRxModal() {
-    document.getElementById('rxModal').style.display = 'none';
+    const rxModal = document.getElementById('rxModal');
+    if (rxModal) rxModal.style.display = 'none';
 }
 
 function toggleRxConfigMode() {
@@ -2643,11 +2870,11 @@ function updateConfigModeUI() {
     const hint = document.getElementById('rxModeHint');
     const saveBtn = document.getElementById('rxSaveLayoutBtn');
     if (isConfigMode) {
-        hint.innerText = 'Config mode active';
-        saveBtn.style.display = 'block';
+        if (hint) hint.innerText = 'Config mode active';
+        if (saveBtn) saveBtn.style.display = 'block';
     } else {
-        hint.innerText = 'RX ready';
-        saveBtn.style.display = 'none';
+        if (hint) hint.innerText = 'RX ready';
+        if (saveBtn) saveBtn.style.display = 'none';
     }
 }
 
@@ -2693,6 +2920,7 @@ function printPrescriptionDirectly() {
 
 function openPrescriptionPDF() {
     const container = document.getElementById('rxCanvasContainer');
+    if (!container) return;
     const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
 
@@ -2822,9 +3050,11 @@ function openDictionaryManager() {
 }
 
 function renderDictTerms() {
-    const cat = document.getElementById('dictCategorySelect').value;
+    const catSelect = document.getElementById('dictCategorySelect');
+    const cat = catSelect ? catSelect.value : 'drugs';
     const terms = medicalDict[cat] || [];
     const container = document.getElementById('dictItemsList');
+    if (!container) return;
 
     container.innerHTML = terms.length === 0 
         ? '<p style="text-align:center; color:#64748b;">No terms in this category.</p>'
@@ -2843,6 +3073,7 @@ function renderDictTerms() {
 
 function addNewDictTerm(cat) {
     const input = document.getElementById('newDictTermInput');
+    if (!input) return;
     const val = input.value.trim();
     if (val && medicalDict[cat] && !medicalDict[cat].includes(val)) {
         medicalDict[cat].push(val);
@@ -2861,13 +3092,21 @@ function removeDictTerm(category, index) {
 
 function saveNewPatient(e) {
     e.preventDefault();
-    const rawName = document.getElementById('pName').value.trim();
-    const rawSubName = document.getElementById('pSubName').value.trim();
+    const pNameEl = document.getElementById('pName');
+    const pSubNameEl = document.getElementById('pSubName');
+    const pAgeEl = document.getElementById('pAge');
+    const pGenderEl = document.getElementById('pGender');
+    const pMaritalEl = document.getElementById('pMarital');
+    const pJobEl = document.getElementById('pJob');
+    const pPhoneEl = document.getElementById('pPhone');
+
+    const rawName = pNameEl ? pNameEl.value.trim() : '';
+    const rawSubName = pSubNameEl ? pSubNameEl.value.trim() : '';
 
     const nameExists = patients.some(p => p.name.toLowerCase() === rawName.toLowerCase());
     if (nameExists && !rawSubName) {
         alert('⚠️ تنبيه: يوجد مريض بنفس الاسم مسجل مسبقاً! يرجى إدخال اسم الجد الرابع أو العشيرة أو ملاحظة تمييز في حقل "اسم الجد الرابع/العشيرة" للمتابعة.');
-        document.getElementById('pSubName').focus();
+        if (pSubNameEl) pSubNameEl.focus();
         return;
     }
 
@@ -2875,11 +3114,11 @@ function saveNewPatient(e) {
         id: Date.now(),
         name: rawName,
         subName: rawSubName,
-        age: Number(document.getElementById('pAge').value),
-        gender: document.getElementById('pGender').value || 'Unspecified',
-        marital: document.getElementById('pMarital').value || 'Single',
-        job: document.getElementById('pJob').value || 'Unspecified',
-        phone: document.getElementById('pPhone').value || 'N/A',
+        age: pAgeEl ? Number(pAgeEl.value) : 0,
+        gender: pGenderEl ? pGenderEl.value || 'Unspecified' : 'Unspecified',
+        marital: pMaritalEl ? pMaritalEl.value || 'Single' : 'Single',
+        job: pJobEl ? pJobEl.value || 'Unspecified' : 'Unspecified',
+        phone: pPhoneEl ? pPhoneEl.value || 'N/A' : 'N/A',
         visits: [{ visitId: Date.now(), date: getTodayFormatted(), medHistory: {}, notes: '', attachments: [] }]
     };
     patients.unshift(newPatient);
@@ -2889,6 +3128,7 @@ function saveNewPatient(e) {
 
 function renderPatientsList(list) {
     const container = document.getElementById('patientsList');
+    if (!container) return;
     container.innerHTML = list.length === 0 
         ? '<p style="text-align:center; color:#64748b;">No matching patients found.</p>'
         : list.map(p => `
@@ -2907,8 +3147,10 @@ function openMedicalRecord(id, saveState = true) {
     navigateTo('medicalRecordScreen', 'Patient Medical Record', 'View details', saveState);
     const patient = patients.find(p => Number(p.id) === Number(id));
     if (patient) {
-        document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
-        document.getElementById('recPatientMeta').innerHTML = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
+        const recName = document.getElementById('recPatientName');
+        const recMeta = document.getElementById('recPatientMeta');
+        if (recName) recName.innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
+        if (recMeta) recMeta.innerHTML = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
         renderVisits(patient.visits || [], true);
     }
 }
@@ -2923,6 +3165,7 @@ function addNewVisit() {
 
 function renderVisits(visits, forceFullRender = true) {
     const container = document.getElementById('visitsContainer');
+    if (!container) return;
     container.innerHTML = visits.map((v, index) => {
         const mh = v.medHistory || {};
         const t = translations[currentLang];
@@ -3081,8 +3324,8 @@ function renderVisits(visits, forceFullRender = true) {
             <div class="group-card" style="background:#ffedd5; border-color:#fb923c; margin-bottom:12px; padding:12px;">
                 <span style="font-weight:800; font-size:0.85rem; color:#c2410c; display:block; margin-bottom:10px;"><i class="fa-solid fa-hand-dots"></i> فحص الجلدية والتناسلية (Dermatology)</span>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع الآفة الجلدية</span><div class="input-wrapper"><input type="text" value="${v.dermType \vert{}\vert{} ''}" placeholder="مثال: Plaque / Papules" oninput="updateVisitFieldData(${v.visitId}, 'dermType', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مكان التوزيع في الجسم</span><div class="input-wrapper"><input type="text" value="${v.dermSite \vert{}\vert{} ''}" placeholder="مثال: الوجه والذراعين" oninput="updateVisitFieldData(${v.visitId}, 'dermSite', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع الآفة الجلدية</span><div class="input-wrapper"><input type="text" value="${v.dermType || ''}" placeholder="مثال: Plaque / Papules" oninput="updateVisitFieldData(${v.visitId}, 'dermType', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مكان التوزيع في الجسم</span><div class="input-wrapper"><input type="text" value="${v.dermSite || ''}" placeholder="مثال: الوجه والذراعين" oninput="updateVisitFieldData(${v.visitId}, 'dermSite', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
                 <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الفحص الجلدي ومصباح وود</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب وصف الطفح والتشخيص..." oninput="updateVisitFieldData(${v.visitId}, 'dermNotes', this.value)" style="font-size:0.85rem;">${v.dermNotes || ''}</textarea></div></div>
             </div>
