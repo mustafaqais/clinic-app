@@ -142,6 +142,8 @@ const translations = {
         optChild: "أطفال (< 18)",
         optAdult: "بالغين (18 - 50)",
         optSenior: "كبار السن (> 50)",
+        sortNewest: "الأحدث أولاً",
+        sortOldest: "الأقدم أولاً",
 
         txtEdit: "تعديل",
         txtDelete: "حذف",
@@ -304,6 +306,8 @@ const translations = {
         optChild: "Children (< 18)",
         optAdult: "Adults (18 - 50)",
         optSenior: "Seniors (> 50)",
+        sortNewest: "Newest First",
+        sortOldest: "Oldest First",
 
         txtEdit: "Edit",
         txtDelete: "Delete",
@@ -518,6 +522,11 @@ function applyLanguage() {
     document.getElementById('optChild').innerText = t.optChild;
     document.getElementById('optAdult').innerText = t.optAdult;
     document.getElementById('optSenior').innerText = t.optSenior;
+    
+    const sortNewEl = document.getElementById('optSortNewest');
+    const sortOldEl = document.getElementById('optSortOldest');
+    if (sortNewEl) sortNewEl.innerText = t.sortNewest;
+    if (sortOldEl) sortOldEl.innerText = t.sortOldest;
 
     document.getElementById('txtEdit').innerText = t.txtEdit;
     document.getElementById('txtDelete').innerText = t.txtDelete;
@@ -609,7 +618,7 @@ function updateOnlineStatus() {
     const bar = document.getElementById('networkStatusBar');
     if (!navigator.onLine) {
         bar.classList.add('offline');
-        bar.innerText = "⚠️️ Offline Mode - Changes saved locally, will sync when online";
+        bar.innerText = "⚠ Offline Mode - Changes saved locally, will sync when online";
     } else {
         bar.classList.remove('offline');
         bar.style.display = 'none';
@@ -877,7 +886,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
                         if (document.getElementById('archiveScreen').style.display === 'block') {
-                            renderPatientsList(patients);
+                            filterPatients();
                         } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
                             const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
                             if (pat) {
@@ -1310,14 +1319,17 @@ async function handleAuthSubmit(e) {
             .catch(err => alert('خطأ: ' + err.message));
     } else {
         let loginEmail = identifier;
-        if (!identifier.includes('@')) {
+        
+        if (!identifier.includes('@') && navigator.onLine) {
             try {
-                const querySnap = await db.collection('network_hierarchy').where('phone', '==', identifier).get();
+                const queryPromise = db.collection('network_hierarchy').where('phone', '==', identifier).get();
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000));
+                const querySnap = await Promise.race([queryPromise, timeoutPromise]);
                 if (!querySnap.empty) {
                     loginEmail = querySnap.docs[0].data().email;
                 }
             } catch (err) {
-                console.log(err);
+                console.log("Phone login lookup bypassed:", err);
             }
         }
 
@@ -2731,7 +2743,25 @@ function showMainMenu() {
 
 function openPatientsArchive() {
     navigateTo('archiveScreen', translations[currentLang].archive, 'Search & records');
-    renderPatientsList(patients);
+    
+    // استرجاع الفلاتر وخيارات الترتيب المحفوظة عند فتح الأرشيف
+    const genderEl = document.getElementById('filterGender');
+    const ageGroupEl = document.getElementById('filterAgeGroup');
+    const sortEl = document.getElementById('filterSort');
+
+    const savedGender = localStorage.getItem('clinic_filter_gender');
+    const savedAgeGroup = localStorage.getItem('clinic_filter_age_group');
+    const savedSort = localStorage.getItem('clinic_filter_sort');
+
+    if (genderEl && savedGender !== null) genderEl.value = savedGender;
+    if (ageGroupEl && savedAgeGroup !== null) ageGroupEl.value = savedAgeGroup;
+    if (sortEl && savedSort !== null) {
+        sortEl.value = savedSort;
+    } else if (sortEl) {
+        sortEl.value = 'newest'; // الافتراضي الأحدث أولاً
+    }
+
+    filterPatients();
 }
 
 function openDictionaryManager() {
@@ -2822,10 +2852,20 @@ function renderPatientsList(list) {
 
 function filterPatients() {
     const query = document.getElementById('searchInput').value.toLowerCase();
-    const gender = document.getElementById('filterGender').value;
-    const ageGroup = document.getElementById('filterAgeGroup').value;
+    const genderEl = document.getElementById('filterGender');
+    const ageGroupEl = document.getElementById('filterAgeGroup');
+    const sortEl = document.getElementById('filterSort');
 
-    const filtered = patients.filter(p => {
+    const gender = genderEl ? genderEl.value : '';
+    const ageGroup = ageGroupEl ? ageGroupEl.value : '';
+    const sortOrder = sortEl ? sortEl.value : (localStorage.getItem('clinic_filter_sort') || 'newest');
+
+    // حفظ خيارات الفرز والتصفية في الذاكرة المحلية (localStorage) لتكون ثابتة عند إعادة الفتح
+    localStorage.setItem('clinic_filter_gender', gender);
+    localStorage.setItem('clinic_filter_age_group', ageGroup);
+    localStorage.setItem('clinic_filter_sort', sortOrder);
+
+    let filtered = patients.filter(p => {
         const fullNameFull = (p.name + " " + (p.subName || "")).toLowerCase();
         const matchQuery = fullNameFull.includes(query) || (p.phone && p.phone.includes(query));
         const matchGender = !gender || p.gender === gender;
@@ -2836,6 +2876,18 @@ function filterPatients() {
 
         return matchQuery && matchGender && matchAge;
     });
+
+    // ترتيب النتائج (الأحدث أولاً أو الأقدم أولاً)
+    filtered.sort((a, b) => {
+        const idA = Number(a.id) || 0;
+        const idB = Number(b.id) || 0;
+        if (sortOrder === 'oldest') {
+            return idA - idB; // من الأقدم إلى الأحدث
+        } else {
+            return idB - idA; // من الأحدث إلى الأقدم (الافتراضي)
+        }
+    });
+
     renderPatientsList(filtered);
 }
 
@@ -3029,7 +3081,7 @@ function renderVisits(visits, forceFullRender = true) {
             <div class="group-card" style="background:#ecfdf5; border-color:#34d399; margin-bottom:12px; padding:12px;">
                 <span style="font-weight:800; font-size:0.85rem; color:#047857; display:block; margin-bottom:10px;"><i class="fa-solid fa-ear-deaf"></i> فحص الأذن والأنف والحنجرة (ENT)</span>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأذن (TM)</span><div class="input-wrapper"><input type="text" value="${v.entEar || ''}" placeholder="مثال: غشاء الطبل طبيعي / احمرار" oninput="updateVisitFieldData(${v.visitId}, 'entEar', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأذن (TM)</span><div class="input-wrapper"><input type="text" value="${v.entEar \vert{}\vert{} ''}" placeholder="مثال: غشاء الطبل طبيعي / احمرار" oninput="updateVisitFieldData(${v.visitId}, 'entEar', this.value)" style="font-size:0.85rem;"></div></div>
                     <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الحلق واللوزتين</span><div class="input-wrapper"><input type="text" value="${v.entThroat || ''}" placeholder="مثال: احمرار اللوزتين Acute Tonsillitis" oninput="updateVisitFieldData(${v.visitId}, 'entThroat', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
                 <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأنف والجيوب وملاحظات ENT</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل فحص الأذن والأنف والحنجرة..." oninput="updateVisitFieldData(${v.visitId}, 'entNotes', this.value)" style="font-size:0.85rem;">${v.entNotes || ''}</textarea></div></div>
@@ -3040,8 +3092,8 @@ function renderVisits(visits, forceFullRender = true) {
             <div class="group-card" style="background:#e0e7ff; border-color:#818cf8; margin-bottom:12px; padding:12px;">
                 <span style="font-weight:800; font-size:0.85rem; color:#4338ca; display:block; margin-bottom:10px;"><i class="fa-solid fa-eye"></i> فحص العيون (Ophthalmology)</span>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (Visual Acuity)</span><div class="input-wrapper"><input type="text" value="${v.ophthalVa || ''}" placeholder="RE: 6/6, LE: 6/9" oninput="updateVisitFieldData(${v.visitId}, 'ophthalVa', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalIop || ''}" placeholder="مثال: 15 mmHg" oninput="updateVisitFieldData(${v.visitId}, 'ophthalIop', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (Visual Acuity)</span><div class="input-wrapper"><input type="text" value="${v.ophthalVa \vert{}\vert{} ''}" placeholder="RE: 6/6, LE: 6/9" oninput="updateVisitFieldData(${v.visitId}, 'ophthalVa', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalIop \vert{}\vert{} ''}" placeholder="مثال: 15 mmHg" oninput="updateVisitFieldData(${v.visitId}, 'ophthalIop', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
                 <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص قاع العين وملاحظات العيون</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل قاع العين والفحص..." oninput="updateVisitFieldData(${v.visitId}, 'ophthalNotes', this.value)" style="font-size:0.85rem;">${v.ophthalNotes || ''}</textarea></div></div>
             </div>
