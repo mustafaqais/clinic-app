@@ -56,7 +56,6 @@
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
         }
 
-        /* أبعاد ثابتة ومثالية للتحكم والسحب في الشاشة والداخل */
         .rx-canvas-container {
             position: relative !important;
             width: 540px !important;
@@ -69,7 +68,6 @@
             border-radius: 12px;
         }
 
-        /* تحجيم مرن وسلس للموبايل لمنع أي زوم مزعج */
         @media screen and (max-width: 600px) {
             .rx-canvas-container {
                 transform: scale(0.75) !important;
@@ -87,7 +85,6 @@
             text-align: center;
         }
 
-        /* إعدادات طباعة متقدمة لتغطية ورقة A5 أو A4 بالكامل ودون فراغات أو قص */
         @media print {
             @page {
                 size: auto;
@@ -645,7 +642,7 @@
                 </div>
             </div>
 
-            <!-- شاشة أرشيف المرضى مع الفلاتر وترتيب الأحدث والاقدم منظمة بنظام Grid ثلاثي -->
+            <!-- شاشة أرشيف المرضى (منظمة بنظام 3 أعمدة وآمنة تماماً ضد التجمد) -->
             <div id="archiveScreen" style="display: none;">
                 <div class="filter-container">
                     <div class="field-box" style="margin-bottom: 8px;">
@@ -655,19 +652,19 @@
                     </div>
                     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
                         <select id="filterGender" onchange="filterPatients()" style="width: 100%; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-size: 0.75rem;">
-                            <option value="" id="optAllGenders">All Genders</option>
-                            <option value="Male" id="optFilterMale">Male</option>
-                            <option value="Female" id="optFilterFemale">Female</option>
+                            <option value="">All Genders</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
                         </select>
                         <select id="filterAgeGroup" onchange="filterPatients()" style="width: 100%; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-size: 0.75rem;">
-                            <option value="" id="optAllAges">All Age Groups</option>
-                            <option value="child" id="optChild">Children (&lt; 18)</option>
-                            <option value="adult" id="optAdult">Adults (18 - 50)</option>
-                            <option value="senior" id="optSenior">Seniors (&gt; 50)</option>
+                            <option value="">All Age Groups</option>
+                            <option value="child">Children (&lt; 18)</option>
+                            <option value="adult">Adults (18 - 50)</option>
+                            <option value="senior">Seniors (&gt; 50)</option>
                         </select>
                         <select id="filterSort" onchange="filterPatients()" style="width: 100%; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-size: 0.75rem; font-weight: 700;">
-                            <option value="newest" id="optSortNewest">الأحدث أولاً</option>
-                            <option value="oldest" id="optSortOldest">الأقدم أولاً</option>
+                            <option value="newest">الأحدث أولاً</option>
+                            <option value="oldest">الأقدم أولاً</option>
                         </select>
                     </div>
                 </div>
