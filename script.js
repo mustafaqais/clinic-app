@@ -591,7 +591,7 @@ function applyLanguage() {
 }
 
 let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
-patients.sort((a, b) => b.id - a.id); // ترتيب محلي أولي
+patients.sort((a, b) => b.id - a.id);
 
 let trashBin = JSON.parse(localStorage.getItem('clinic_trash')) || [];
 let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || {
@@ -828,10 +828,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.log("Secretary query error:", e);
             }
 
-            await loadDoctorBranding(dataOwnerUid);
+            try {
+                await loadDoctorBranding(dataOwnerUid);
+            } catch (e) {
+                console.log("Branding error:", e);
+            }
 
             patients = JSON.parse(localStorage.getItem(`clinic_patients_${dataOwnerUid}`)) || patients;
-            patients.sort((a, b) => b.id - a.id); // ضمان الترتيب التنازلي
+            patients.sort((a, b) => b.id - a.id);
 
             trashBin = JSON.parse(localStorage.getItem(`clinic_trash_${dataOwnerUid}`)) || trashBin;
 
@@ -840,7 +844,8 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             if (navigator.onLine) {
-                db.collection('users_data').doc(dataOwnerUid).get().then(doc => {
+                try {
+                    const doc = await db.collection('users_data').doc(dataOwnerUid).get();
                     if (doc.exists) {
                         const data = doc.data();
                         if (data.rxImage) {
@@ -868,7 +873,9 @@ document.addEventListener("DOMContentLoaded", () => {
                             localStorage.setItem('clinic_specialty_config', JSON.stringify(specialtyConfig));
                         }
                     }
-                }).catch(err => console.log(err));
+                } catch (err) {
+                    console.log("Cloud sync load error:", err);
+                }
 
                 patientsListenerUnsubscribe = db.collection('users_data').doc(dataOwnerUid).collection('patients')
                     .onSnapshot(snapshot => {
@@ -876,10 +883,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         snapshot.forEach(doc => {
                             cloudPatients.push(doc.data());
                         });
-                        
-                        // ⬅️ فرز المرضى تنازلياً حسب الـ id (الأحدث في الأعلى)
                         cloudPatients.sort((a, b) => b.id - a.id);
-
                         patients = cloudPatients;
                         localStorage.setItem(`clinic_patients_${dataOwnerUid}`, JSON.stringify(patients));
                         localStorage.setItem('clinic_patients', JSON.stringify(patients));
@@ -901,7 +905,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
                 setupFounderInterfaceAfterAuth();
             } else {
-                checkUserSubscriptionStatus(user.uid, isUserSecretary);
+                await checkUserSubscriptionStatus(user.uid, isUserSecretary);
             }
         } else {
             if (patientsListenerUnsubscribe) patientsListenerUnsubscribe();
@@ -1199,7 +1203,7 @@ function savePatientToCloudAndLocal(patientObj) {
     } else {
         patients.unshift(patientObj);
     }
-    patients.sort((a, b) => b.id - a.id); // ضمان بقاء الأحدث في الأعلى دائماً
+    patients.sort((a, b) => b.id - a.id);
     
     localStorage.setItem(`clinic_patients_${ownerUid}`, JSON.stringify(patients));
     localStorage.setItem('clinic_patients', JSON.stringify(patients));
@@ -1331,48 +1335,9 @@ async function handleAuthSubmit(e) {
             }
         }
 
+        // تم إزالة التداخل: الاعتماد الكلي على onAuthStateChanged بعد نجاح تسجيل الدخول لمنع التعليق
         auth.signInWithEmailAndPassword(loginEmail, pass)
-            .then(async res => {
-                currentUserId = res.user.uid;
-                let dataOwnerUid = res.user.uid;
-                let isSec = false;
-
-                try {
-                    const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', loginEmail.toLowerCase()).get();
-                    if (!secQuery.empty) {
-                        const doctorDoc = secQuery.docs[0];
-                        dataOwnerUid = doctorDoc.id;
-                        sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
-                        isSec = true;
-                    } else {
-                        const directDoc = await db.collection('network_hierarchy').doc(res.user.uid).get();
-                        if (directDoc.exists && directDoc.data().doctorUid) {
-                            dataOwnerUid = directDoc.data().doctorUid;
-                            sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
-                            isSec = true;
-                        }
-                    }
-                } catch (e) {
-                    console.log(e);
-                }
-
-                await loadDoctorBranding(dataOwnerUid);
-
-                document.getElementById('authScreen').style.display = 'none';
-                if (isSec) {
-                    document.getElementById('appContainer').style.display = 'flex';
-                    document.getElementById('cardPermissions').style.display = 'none';
-                    document.getElementById('subStatusBanner').style.display = 'none';
-                    isUserSecretary = true;
-                    applySecretaryUIVisibility();
-                    restorePreviousScreenState();
-                } else if (loginEmail.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
-                    setupFounderInterfaceAfterAuth();
-                } else {
-                    checkUserSubscriptionStatus(res.user.uid, false);
-                }
-            })
-            .catch(err => alert('خطأ: ' + err.message));
+            .catch(err => alert('خطأ في تسجيل الدخول: ' + err.message));
     }
 }
 
@@ -1656,7 +1621,7 @@ function restoreFromUploadedFile(input) {
 
                 if (confirm(`Restore data with (${parsed.patients.length}) patients?`)) {
                     patients = parsed.patients;
-                    patients.sort((a, b) => b.id - a.id); // فرز تنازلي
+                    patients.sort((a, b) => b.id - a.id);
                     trashBin = parsed.trashBin || [];
                     medicalDict = parsed.medicalDict || medicalDict;
                     if (parsed.rxImage) currentDoctorRxImage = parsed.rxImage;
@@ -2814,7 +2779,7 @@ function saveNewPatient(e) {
     };
     
     patients.unshift(newPatient);
-    patients.sort((a, b) => b.id - a.id); // ترتيب تنازلي لضمان بقائه في الأعلى
+    patients.sort((a, b) => b.id - a.id);
     savePatientToCloudAndLocal(newPatient);
     openMedicalRecord(newPatient.id);
 }
