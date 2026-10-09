@@ -642,6 +642,7 @@
                 </div>
             </div>
 
+            <!-- أرشيف المرضى باستخدام Flexbox الآمن والمستقر -->
             <div id="archiveScreen" style="display: none;">
                 <div class="filter-container">
                     <div class="field-box" style="margin-bottom: 8px;">
@@ -649,19 +650,19 @@
                             <input type="text" id="searchInput" placeholder="🔍 Search by Name or Phone Number..." oninput="filterPatients()">
                         </div>
                     </div>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;">
-                        <select id="filterGender" onchange="filterPatients()" style="width: 100%; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-size: 0.75rem;">
+                    <div style="display: flex; gap: 6px; width: 100%;">
+                        <select id="filterGender" onchange="filterPatients()" style="flex: 1; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-size: 0.75rem;">
                             <option value="">All Genders</option>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                         </select>
-                        <select id="filterAgeGroup" onchange="filterPatients()" style="width: 100%; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-size: 0.75rem;">
+                        <select id="filterAgeGroup" onchange="filterPatients()" style="flex: 1; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-size: 0.75rem;">
                             <option value="">All Age Groups</option>
                             <option value="child">Children (&lt; 18)</option>
                             <option value="adult">Adults (18 - 50)</option>
                             <option value="senior">Seniors (&gt; 50)</option>
                         </select>
-                        <select id="filterSort" onchange="filterPatients()" style="width: 100%; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-size: 0.75rem; font-weight: 700;">
+                        <select id="filterSort" onchange="filterPatients()" style="flex: 1; padding: 8px 4px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--card-bg); color: var(--text-main); font-size: 0.75rem; font-weight: 700;">
                             <option value="newest">الأحدث أولاً</option>
                             <option value="oldest">الأقدم أولاً</option>
                         </select>
@@ -1171,8 +1172,8 @@
     </div>
 </div>
 
-<!-- تم تعطيل السكريبت هنا لمنع التجميد -->
-<!-- <script src="script.js?v=17.28"></script> -->
+<!-- تفعيل ملف السكريبت بشكل طبيعي -->
+<script src="script.js?v=17.28"></script>
 
 <script>
     function printPrescriptionDirectly() {
