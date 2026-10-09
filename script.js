@@ -1,4 +1,4 @@
-const firebaseConfig = {
+Const firebaseConfig = {
     apiKey: "AIzaSyCgS-TYiCiVIjUrPSkf_z4U837v8LoRUMY",
     authDomain: "mustafaqais-31e2c.firebaseapp.com",
     projectId: "mustafaqais-31e2c",
@@ -2744,24 +2744,70 @@ function showMainMenu() {
 function openPatientsArchive() {
     navigateTo('archiveScreen', translations[currentLang].archive, 'Search & records');
     
-    // استرجاع الفلاتر وخيارات الترتيب المحفوظة عند فتح الأرشيف
-    const genderEl = document.getElementById('filterGender');
-    const ageGroupEl = document.getElementById('filterAgeGroup');
-    const sortEl = document.getElementById('filterSort');
+    setTimeout(() => {
+        const genderEl = document.getElementById('filterGender');
+        const ageGroupEl = document.getElementById('filterAgeGroup');
+        const sortEl = document.getElementById('filterSort');
 
-    const savedGender = localStorage.getItem('clinic_filter_gender');
-    const savedAgeGroup = localStorage.getItem('clinic_filter_age_group');
-    const savedSort = localStorage.getItem('clinic_filter_sort');
+        const savedGender = localStorage.getItem('clinic_filter_gender');
+        const savedAgeGroup = localStorage.getItem('clinic_filter_age_group');
+        const savedSort = localStorage.getItem('clinic_filter_sort');
 
-    if (genderEl && savedGender !== null) genderEl.value = savedGender;
-    if (ageGroupEl && savedAgeGroup !== null) ageGroupEl.value = savedAgeGroup;
-    if (sortEl && savedSort !== null) {
-        sortEl.value = savedSort;
-    } else if (sortEl) {
-        sortEl.value = 'newest'; // الافتراضي الأحدث أولاً
+        if (genderEl && savedGender !== null) genderEl.value = savedGender;
+        if (ageGroupEl && savedAgeGroup !== null) ageGroupEl.value = savedAgeGroup;
+        if (sortEl && savedSort !== null) {
+            sortEl.value = savedSort;
+        } else if (sortEl) {
+            sortEl.value = 'newest';
+        }
+
+        filterPatients();
+    }, 50);
+}
+
+function filterPatients() {
+    try {
+        const searchInput = document.getElementById('searchInput');
+        const query = searchInput ? searchInput.value.toLowerCase() : '';
+        
+        const genderEl = document.getElementById('filterGender');
+        const ageGroupEl = document.getElementById('filterAgeGroup');
+        const sortEl = document.getElementById('filterSort');
+
+        const gender = genderEl ? genderEl.value : '';
+        const ageGroup = ageGroupEl ? ageGroupEl.value : '';
+        const sortOrder = sortEl ? sortEl.value : 'newest';
+
+        if (genderEl && ageGroupEl && sortEl) {
+            localStorage.setItem('clinic_filter_gender', gender);
+            localStorage.setItem('clinic_filter_age_group', ageGroup);
+            localStorage.setItem('clinic_filter_sort', sortOrder);
+        }
+
+        let filtered = patients.filter(p => {
+            if (!p) return false;
+            const fullNameFull = ((p.name || '') + " " + (p.subName || "")).toLowerCase();
+            const matchQuery = fullNameFull.includes(query) || (p.phone && String(p.phone).includes(query));
+            const matchGender = !gender || p.gender === gender;
+            let matchAge = true;
+            const age = Number(p.age) || 0;
+            if (ageGroup === 'child') matchAge = age < 18;
+            else if (ageGroup === 'adult') matchAge = age >= 18 && age <= 50;
+            else if (ageGroup === 'senior') matchAge = age > 50;
+
+            return matchQuery && matchGender && matchAge;
+        });
+
+        filtered.sort((a, b) => {
+            const idA = Number(a && a.id) || 0;
+            const idB = Number(b && b.id) || 0;
+            return sortOrder === 'oldest' ? idA - idB : idB - idA;
+        });
+
+        renderPatientsList(filtered);
+    } catch (e) {
+        console.error("Filter error:", e);
     }
-
-    filterPatients();
 }
 
 function openDictionaryManager() {
@@ -2848,47 +2894,6 @@ function renderPatientsList(list) {
                 <span class="badge-gender ${p.gender === 'Female' ? 'gender-female' : 'gender-male'}">${p.gender || 'N/A'}</span>
             </div>
         `).join('');
-}
-
-function filterPatients() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
-    const genderEl = document.getElementById('filterGender');
-    const ageGroupEl = document.getElementById('filterAgeGroup');
-    const sortEl = document.getElementById('filterSort');
-
-    const gender = genderEl ? genderEl.value : '';
-    const ageGroup = ageGroupEl ? ageGroupEl.value : '';
-    const sortOrder = sortEl ? sortEl.value : (localStorage.getItem('clinic_filter_sort') || 'newest');
-
-    // حفظ خيارات الفرز والتصفية في الذاكرة المحلية (localStorage) لتكون ثابتة عند إعادة الفتح
-    localStorage.setItem('clinic_filter_gender', gender);
-    localStorage.setItem('clinic_filter_age_group', ageGroup);
-    localStorage.setItem('clinic_filter_sort', sortOrder);
-
-    let filtered = patients.filter(p => {
-        const fullNameFull = (p.name + " " + (p.subName || "")).toLowerCase();
-        const matchQuery = fullNameFull.includes(query) || (p.phone && p.phone.includes(query));
-        const matchGender = !gender || p.gender === gender;
-        let matchAge = true;
-        if (ageGroup === 'child') matchAge = p.age < 18;
-        else if (ageGroup === 'adult') matchAge = p.age >= 18 && p.age <= 50;
-        else if (ageGroup === 'senior') matchAge = p.age > 50;
-
-        return matchQuery && matchGender && matchAge;
-    });
-
-    // ترتيب النتائج (الأحدث أولاً أو الأقدم أولاً)
-    filtered.sort((a, b) => {
-        const idA = Number(a.id) || 0;
-        const idB = Number(b.id) || 0;
-        if (sortOrder === 'oldest') {
-            return idA - idB; // من الأقدم إلى الأحدث
-        } else {
-            return idB - idA; // من الأحدث إلى الأقدم (الافتراضي)
-        }
-    });
-
-    renderPatientsList(filtered);
 }
 
 function openMedicalRecord(id, saveState = true) {
@@ -3070,8 +3075,8 @@ function renderVisits(visits, forceFullRender = true) {
             <div class="group-card" style="background:#ffedd5; border-color:#fb923c; margin-bottom:12px; padding:12px;">
                 <span style="font-weight:800; font-size:0.85rem; color:#c2410c; display:block; margin-bottom:10px;"><i class="fa-solid fa-hand-dots"></i> فحص الجلدية والتناسلية (Dermatology)</span>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع الآفة الجلدية</span><div class="input-wrapper"><input type="text" value="${v.dermType || ''}" placeholder="مثال: Plaque / Papules" oninput="updateVisitFieldData(${v.visitId}, 'dermType', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مكان التوزيع في الجسم</span><div class="input-wrapper"><input type="text" value="${v.dermSite || ''}" placeholder="مثال: الوجه والذراعين" oninput="updateVisitFieldData(${v.visitId}, 'dermSite', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع الآفة الجلدية</span><div class="input-wrapper"><input type="text" value="${v.dermType \vert{}\vert{} ''}" placeholder="مثال: Plaque / Papules" oninput="updateVisitFieldData(${v.visitId}, 'dermType', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مكان التوزيع في الجسم</span><div class="input-wrapper"><input type="text" value="${v.dermSite \vert{}\vert{} ''}" placeholder="مثال: الوجه والذراعين" oninput="updateVisitFieldData(${v.visitId}, 'dermSite', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
                 <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الفحص الجلدي ومصباح وود</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب وصف الطفح والتشخيص..." oninput="updateVisitFieldData(${v.visitId}, 'dermNotes', this.value)" style="font-size:0.85rem;">${v.dermNotes || ''}</textarea></div></div>
             </div>
