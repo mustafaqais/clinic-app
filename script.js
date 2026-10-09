@@ -591,6 +591,8 @@ function applyLanguage() {
 }
 
 let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
+patients.sort((a, b) => b.id - a.id); // ترتيب محلي أولي
+
 let trashBin = JSON.parse(localStorage.getItem('clinic_trash')) || [];
 let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || {
     labs: ["CBC", "RBS", "Lipid Profile", "HbA1c", "LFT", "KFT"],
@@ -829,6 +831,8 @@ document.addEventListener("DOMContentLoaded", () => {
             await loadDoctorBranding(dataOwnerUid);
 
             patients = JSON.parse(localStorage.getItem(`clinic_patients_${dataOwnerUid}`)) || patients;
+            patients.sort((a, b) => b.id - a.id); // ضمان الترتيب التنازلي
+
             trashBin = JSON.parse(localStorage.getItem(`clinic_trash_${dataOwnerUid}`)) || trashBin;
 
             if (patientsListenerUnsubscribe) {
@@ -872,6 +876,10 @@ document.addEventListener("DOMContentLoaded", () => {
                         snapshot.forEach(doc => {
                             cloudPatients.push(doc.data());
                         });
+                        
+                        // ⬅️ فرز المرضى تنازلياً حسب الـ id (الأحدث في الأعلى)
+                        cloudPatients.sort((a, b) => b.id - a.id);
+
                         patients = cloudPatients;
                         localStorage.setItem(`clinic_patients_${dataOwnerUid}`, JSON.stringify(patients));
                         localStorage.setItem('clinic_patients', JSON.stringify(patients));
@@ -1191,6 +1199,8 @@ function savePatientToCloudAndLocal(patientObj) {
     } else {
         patients.unshift(patientObj);
     }
+    patients.sort((a, b) => b.id - a.id); // ضمان بقاء الأحدث في الأعلى دائماً
+    
     localStorage.setItem(`clinic_patients_${ownerUid}`, JSON.stringify(patients));
     localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
@@ -1646,6 +1656,7 @@ function restoreFromUploadedFile(input) {
 
                 if (confirm(`Restore data with (${parsed.patients.length}) patients?`)) {
                     patients = parsed.patients;
+                    patients.sort((a, b) => b.id - a.id); // فرز تنازلي
                     trashBin = parsed.trashBin || [];
                     medicalDict = parsed.medicalDict || medicalDict;
                     if (parsed.rxImage) currentDoctorRxImage = parsed.rxImage;
@@ -2498,6 +2509,7 @@ function restoreTrashItem(index) {
     const item = trashBin.splice(index, 1)[0];
     if (item.type === 'patient') {
         patients.unshift(item.data);
+        patients.sort((a, b) => b.id - a.id);
         savePatientToCloudAndLocal(item.data);
     } else {
         const patient = patients.find(p => Number(p.id) === Number(item.patientId));
@@ -2800,7 +2812,9 @@ function saveNewPatient(e) {
         phone: document.getElementById('pPhone').value || 'N/A',
         visits: [{ visitId: Date.now(), date: getTodayFormatted(), medHistory: {}, notes: '', attachments: [] }]
     };
+    
     patients.unshift(newPatient);
+    patients.sort((a, b) => b.id - a.id); // ترتيب تنازلي لضمان بقائه في الأعلى
     savePatientToCloudAndLocal(newPatient);
     openMedicalRecord(newPatient.id);
 }
