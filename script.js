@@ -559,7 +559,7 @@ function applyLanguage() {
     document.getElementById('lblBmiHeight').innerText = t.lblBmiHeight;
     document.getElementById('lblBmiScore').innerText = t.lblBmiScore;
     document.getElementById('bmiBadgeInitial').innerText = t.bmiBadgeInitial;
-    document.getElementById('btnBmiAgree').innerHTML = `<i class="fa-solid fa-check"></i> ${t.btnMhDone || 'Agree & Save'}`;
+    document.getElementById('btnBmiAgree').innerHTML = `<i class="fa-solid fa-check"></i> ${t.btnBmiAgree}`;
 
     document.getElementById('editPatHeader').innerHTML = `<i class="fa-solid fa-user-pen" style="color:#0d9488;"></i> ${t.editPatHeader}`;
     document.getElementById('editLblName').innerText = t.editLblName;
@@ -591,8 +591,6 @@ function applyLanguage() {
 }
 
 let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
-patients.sort((a, b) => b.id - a.id);
-
 let trashBin = JSON.parse(localStorage.getItem('clinic_trash')) || [];
 let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || {
     labs: ["CBC", "RBS", "Lipid Profile", "HbA1c", "LFT", "KFT"],
@@ -611,7 +609,7 @@ function updateOnlineStatus() {
     const bar = document.getElementById('networkStatusBar');
     if (!navigator.onLine) {
         bar.classList.add('offline');
-        bar.innerText = "⚠ Offline Mode - Changes saved locally, will sync when online";
+        bar.innerText = "⚠️️ Offline Mode - Changes saved locally, will sync when online";
     } else {
         bar.classList.remove('offline');
         bar.style.display = 'none';
@@ -621,7 +619,7 @@ function updateOnlineStatus() {
 
 function syncLocalDataToCloud() {
     if (!currentUserId || !navigator.onLine) return;
-    const ownerUid = localStorage.getItem('cached_doctor_uid') || sessionStorage.getItem('target_doctor_uid') || currentUserId;
+    const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
 
     patients.forEach(patient => {
         db.collection('users_data').doc(ownerUid).collection('patients').doc(String(patient.id)).set(patient)
@@ -803,51 +801,41 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // الدالة الآمنة الخالية من التجميد (Non-blocking Auth State Handler)
-    auth.onAuthStateChanged(user => {
+    auth.onAuthStateChanged(async user => {
         if (user) {
             currentUserId = user.uid;
-            let dataOwnerUid = localStorage.getItem('cached_doctor_uid') || user.uid;
-            isUserSecretary = localStorage.getItem('is_user_secretary') === 'true';
+            let dataOwnerUid = user.uid;
+            isUserSecretary = false;
 
-            // 1. التحميل الفوري من التخزين المحلي لمنع أي تعليق
-            patients = JSON.parse(localStorage.getItem(`clinic_patients_${dataOwnerUid}`)) || JSON.parse(localStorage.getItem('clinic_patients')) || [];
-            patients.sort((a, b) => b.id - a.id);
-            trashBin = JSON.parse(localStorage.getItem(`clinic_trash_${dataOwnerUid}`)) || [];
-
-            // تحديد واجهة المستخدم فوراً
-            if (user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
-                setupFounderInterfaceAfterAuth();
-            } else if (isUserSecretary) {
-                setupClientInterfaceAfterAuth(null, true);
-            } else {
-                setupClientInterfaceAfterAuth(localStorage.getItem(`sub_expiry_${user.uid}`), false);
+            try {
+                const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', user.email.toLowerCase()).get();
+                if (!secQuery.empty) {
+                    const doctorDoc = secQuery.docs[0];
+                    dataOwnerUid = doctorDoc.id;
+                    sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
+                    isUserSecretary = true;
+                } else {
+                    const directDoc = await db.collection('network_hierarchy').doc(user.uid).get();
+                    if (directDoc.exists && directDoc.data().doctorUid) {
+                        dataOwnerUid = directDoc.data().doctorUid;
+                        sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
+                        isUserSecretary = true;
+                    }
+                }
+            } catch (e) {
+                console.log("Secretary query error:", e);
             }
 
-            // 2. التحقق الخلفي وتحديث الـ UID الخاص بالطبيب بدقة لضمان صحة الأرشيف والخزن
-            if (navigator.onLine) {
-                db.collection('network_hierarchy').where('secretaryEmail', '==', user.email.toLowerCase()).get().then(secQuery => {
-                    if (!secQuery.empty) {
-                        const doctorDoc = secQuery.docs[0];
-                        dataOwnerUid = doctorDoc.id;
-                        sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
-                        localStorage.setItem('cached_doctor_uid', dataOwnerUid);
-                        localStorage.setItem('is_user_secretary', 'true');
-                        isUserSecretary = true;
-                        
-                        // إعادة تحميل بيانات الطبيب الفعلية للسكرتير
-                        patients = JSON.parse(localStorage.getItem(`clinic_patients_${dataOwnerUid}`)) || [];
-                        patients.sort((a, b) => b.id - a.id);
-                        setupClientInterfaceAfterAuth(null, true);
-                        if (document.getElementById('archiveScreen').style.display === 'block') {
-                            renderPatientsList(patients);
-                        }
-                    } else {
-                        localStorage.setItem('cached_doctor_uid', user.uid);
-                        localStorage.setItem('is_user_secretary', 'false');
-                    }
-                }).catch(err => console.log("Background sec check error:", err));
+            await loadDoctorBranding(dataOwnerUid);
 
+            patients = JSON.parse(localStorage.getItem(`clinic_patients_${dataOwnerUid}`)) || patients;
+            trashBin = JSON.parse(localStorage.getItem(`clinic_trash_${dataOwnerUid}`)) || trashBin;
+
+            if (patientsListenerUnsubscribe) {
+                patientsListenerUnsubscribe();
+            }
+
+            if (navigator.onLine) {
                 db.collection('users_data').doc(dataOwnerUid).get().then(doc => {
                     if (doc.exists) {
                         const data = doc.data();
@@ -855,41 +843,64 @@ document.addEventListener("DOMContentLoaded", () => {
                             currentDoctorRxImage = data.rxImage;
                             localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
                         }
+                        if (data.rxLayout) {
+                            localStorage.setItem('doctor_rx_layout', JSON.stringify(data.rxLayout));
+                        }
                         if (data.dictionary) {
                             medicalDict = data.dictionary;
+                            if (!medicalDict.mh_history) medicalDict.mh_history = ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"];
                             localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
+                        }
+                        if (data.trashBin) {
+                            trashBin = data.trashBin;
+                            localStorage.setItem(`clinic_trash_${dataOwnerUid}`, JSON.stringify(trashBin));
+                        }
+                        if (data.secretaryAccount) {
+                            secretaryAccount = data.secretaryAccount;
+                            localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
                         }
                         if (data.specialtyConfig) {
                             specialtyConfig = data.specialtyConfig;
                             localStorage.setItem('clinic_specialty_config', JSON.stringify(specialtyConfig));
                         }
                     }
-                }).catch(err => console.log("Background data load error:", err));
+                }).catch(err => console.log(err));
 
-                if (patientsListenerUnsubscribe) patientsListenerUnsubscribe();
                 patientsListenerUnsubscribe = db.collection('users_data').doc(dataOwnerUid).collection('patients')
                     .onSnapshot(snapshot => {
                         let cloudPatients = [];
-                        snapshot.forEach(doc => cloudPatients.push(doc.data()));
-                        if (cloudPatients.length > 0) {
-                            cloudPatients.sort((a, b) => b.id - a.id);
-                            patients = cloudPatients;
-                            localStorage.setItem(`clinic_patients_${dataOwnerUid}`, JSON.stringify(patients));
-                            if (document.getElementById('archiveScreen').style.display === 'block') {
-                                renderPatientsList(patients);
+                        snapshot.forEach(doc => {
+                            cloudPatients.push(doc.data());
+                        });
+                        patients = cloudPatients;
+                        localStorage.setItem(`clinic_patients_${dataOwnerUid}`, JSON.stringify(patients));
+                        localStorage.setItem('clinic_patients', JSON.stringify(patients));
+
+                        if (document.getElementById('archiveScreen').style.display === 'block') {
+                            renderPatientsList(patients);
+                        } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
+                            const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
+                            if (pat) {
+                                if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) return;
+                                renderVisits(pat.visits || [], false);
+                            } else {
+                                showMainMenu();
                             }
                         }
-                    }, err => console.log("Listener error:", err));
+                    }, err => console.log("Real-time listener error:", err));
             }
 
+            if (user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
+                setupFounderInterfaceAfterAuth();
+            } else {
+                checkUserSubscriptionStatus(user.uid, isUserSecretary);
+            }
         } else {
             if (patientsListenerUnsubscribe) patientsListenerUnsubscribe();
             currentUserId = null;
             isUserSecretary = false;
             isSubscriptionExpired = false;
             sessionStorage.removeItem('target_doctor_uid');
-            localStorage.removeItem('cached_doctor_uid');
-            localStorage.removeItem('is_user_secretary');
             const activScreen = document.getElementById('activationScreen');
             const appCont = document.getElementById('appContainer');
             const authScreen = document.getElementById('authScreen');
@@ -1172,7 +1183,7 @@ async function verifyActivationCode() {
 
 function savePatientToCloudAndLocal(patientObj) {
     if (!currentUserId || isSubscriptionExpired) return;
-    const ownerUid = localStorage.getItem('cached_doctor_uid') || sessionStorage.getItem('target_doctor_uid') || currentUserId;
+    const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
 
     const idx = patients.findIndex(p => Number(p.id) === Number(patientObj.id));
     if (idx !== -1) {
@@ -1180,8 +1191,6 @@ function savePatientToCloudAndLocal(patientObj) {
     } else {
         patients.unshift(patientObj);
     }
-    patients.sort((a, b) => b.id - a.id);
-    
     localStorage.setItem(`clinic_patients_${ownerUid}`, JSON.stringify(patients));
     localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
@@ -1193,7 +1202,7 @@ function savePatientToCloudAndLocal(patientObj) {
 
 function saveTrashToCloudAndLocal() {
     if (!currentUserId || isSubscriptionExpired) return;
-    const ownerUid = localStorage.getItem('cached_doctor_uid') || sessionStorage.getItem('target_doctor_uid') || currentUserId;
+    const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
 
     localStorage.setItem(`clinic_trash_${ownerUid}`, JSON.stringify(trashBin));
     localStorage.setItem('clinic_trash', JSON.stringify(trashBin));
@@ -1208,7 +1217,7 @@ function saveTrashToCloudAndLocal() {
 
 function saveSettingsToCloudAndLocal() {
     if (!currentUserId || isSubscriptionExpired) return;
-    const ownerUid = localStorage.getItem('cached_doctor_uid') || sessionStorage.getItem('target_doctor_uid') || currentUserId;
+    const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
 
     localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
     localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
@@ -1301,25 +1310,59 @@ async function handleAuthSubmit(e) {
             .catch(err => alert('خطأ: ' + err.message));
     } else {
         let loginEmail = identifier;
-        
-        // التحقق من رقم الهاتف مع حماية كاملة (Timeout) لمنع تجميد التطبيق إذا رفضت قواعد الأمان القراءة
-        if (!identifier.includes('@') && navigator.onLine) {
+        if (!identifier.includes('@')) {
             try {
-                const queryPromise = db.collection('network_hierarchy').where('phone', '==', identifier).get();
-                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000));
-                
-                const querySnap = await Promise.race([queryPromise, timeoutPromise]);
+                const querySnap = await db.collection('network_hierarchy').where('phone', '==', identifier).get();
                 if (!querySnap.empty) {
                     loginEmail = querySnap.docs[0].data().email;
                 }
             } catch (err) {
-                console.log("Phone login lookup bypassed:", err);
+                console.log(err);
             }
         }
 
-        // تنفيذ تسجيل الدخول بشكل مباشر وآمن
         auth.signInWithEmailAndPassword(loginEmail, pass)
-            .catch(err => alert('خطأ في تسجيل الدخول: ' + err.message));
+            .then(async res => {
+                currentUserId = res.user.uid;
+                let dataOwnerUid = res.user.uid;
+                let isSec = false;
+
+                try {
+                    const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', loginEmail.toLowerCase()).get();
+                    if (!secQuery.empty) {
+                        const doctorDoc = secQuery.docs[0];
+                        dataOwnerUid = doctorDoc.id;
+                        sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
+                        isSec = true;
+                    } else {
+                        const directDoc = await db.collection('network_hierarchy').doc(res.user.uid).get();
+                        if (directDoc.exists && directDoc.data().doctorUid) {
+                            dataOwnerUid = directDoc.data().doctorUid;
+                            sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
+                            isSec = true;
+                        }
+                    }
+                } catch (e) {
+                    console.log(e);
+                }
+
+                await loadDoctorBranding(dataOwnerUid);
+
+                document.getElementById('authScreen').style.display = 'none';
+                if (isSec) {
+                    document.getElementById('appContainer').style.display = 'flex';
+                    document.getElementById('cardPermissions').style.display = 'none';
+                    document.getElementById('subStatusBanner').style.display = 'none';
+                    isUserSecretary = true;
+                    applySecretaryUIVisibility();
+                    restorePreviousScreenState();
+                } else if (loginEmail.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
+                    setupFounderInterfaceAfterAuth();
+                } else {
+                    checkUserSubscriptionStatus(res.user.uid, false);
+                }
+            })
+            .catch(err => alert('خطأ: ' + err.message));
     }
 }
 
@@ -1603,7 +1646,6 @@ function restoreFromUploadedFile(input) {
 
                 if (confirm(`Restore data with (${parsed.patients.length}) patients?`)) {
                     patients = parsed.patients;
-                    patients.sort((a, b) => b.id - a.id);
                     trashBin = parsed.trashBin || [];
                     medicalDict = parsed.medicalDict || medicalDict;
                     if (parsed.rxImage) currentDoctorRxImage = parsed.rxImage;
@@ -1611,7 +1653,7 @@ function restoreFromUploadedFile(input) {
                     if (parsed.secretaryAccount) secretaryAccount = parsed.secretaryAccount;
                     if (parsed.specialtyConfig) specialtyConfig = parsed.specialtyConfig;
 
-                    const ownerUid = localStorage.getItem('cached_doctor_uid') || sessionStorage.getItem('target_doctor_uid') || currentUserId;
+                    const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
                     if (ownerUid) {
                         localStorage.setItem(`clinic_patients_${ownerUid}`, JSON.stringify(patients));
                         localStorage.setItem(`clinic_trash_${ownerUid}`, JSON.stringify(trashBin));
@@ -2456,7 +2498,6 @@ function restoreTrashItem(index) {
     const item = trashBin.splice(index, 1)[0];
     if (item.type === 'patient') {
         patients.unshift(item.data);
-        patients.sort((a, b) => b.id - a.id);
         savePatientToCloudAndLocal(item.data);
     } else {
         const patient = patients.find(p => Number(p.id) === Number(item.patientId));
@@ -2759,9 +2800,7 @@ function saveNewPatient(e) {
         phone: document.getElementById('pPhone').value || 'N/A',
         visits: [{ visitId: Date.now(), date: getTodayFormatted(), medHistory: {}, notes: '', attachments: [] }]
     };
-    
     patients.unshift(newPatient);
-    patients.sort((a, b) => b.id - a.id);
     savePatientToCloudAndLocal(newPatient);
     openMedicalRecord(newPatient.id);
 }
@@ -2979,8 +3018,8 @@ function renderVisits(visits, forceFullRender = true) {
             <div class="group-card" style="background:#ffedd5; border-color:#fb923c; margin-bottom:12px; padding:12px;">
                 <span style="font-weight:800; font-size:0.85rem; color:#c2410c; display:block; margin-bottom:10px;"><i class="fa-solid fa-hand-dots"></i> فحص الجلدية والتناسلية (Dermatology)</span>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع الآفة الجلدية</span><div class="input-wrapper"><input type="text" value="${v.dermType \vert{}\vert{} ''}" placeholder="مثال: Plaque / Papules" oninput="updateVisitFieldData(${v.visitId}, 'dermType', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مكان التوزيع في الجسم</span><div class="input-wrapper"><input type="text" value="${v.dermSite \vert{}\vert{} ''}" placeholder="مثال: الوجه والذراعين" oninput="updateVisitFieldData(${v.visitId}, 'dermSite', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع الآفة الجلدية</span><div class="input-wrapper"><input type="text" value="${v.dermType || ''}" placeholder="مثال: Plaque / Papules" oninput="updateVisitFieldData(${v.visitId}, 'dermType', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مكان التوزيع في الجسم</span><div class="input-wrapper"><input type="text" value="${v.dermSite || ''}" placeholder="مثال: الوجه والذراعين" oninput="updateVisitFieldData(${v.visitId}, 'dermSite', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
                 <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الفحص الجلدي ومصباح وود</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب وصف الطفح والتشخيص..." oninput="updateVisitFieldData(${v.visitId}, 'dermNotes', this.value)" style="font-size:0.85rem;">${v.dermNotes || ''}</textarea></div></div>
             </div>
@@ -2990,7 +3029,7 @@ function renderVisits(visits, forceFullRender = true) {
             <div class="group-card" style="background:#ecfdf5; border-color:#34d399; margin-bottom:12px; padding:12px;">
                 <span style="font-weight:800; font-size:0.85rem; color:#047857; display:block; margin-bottom:10px;"><i class="fa-solid fa-ear-deaf"></i> فحص الأذن والأنف والحنجرة (ENT)</span>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأذن (TM)</span><div class="input-wrapper"><input type="text" value="${v.entEar \vert{}\vert{} ''}" placeholder="مثال: غشاء الطبل طبيعي / احمرار" oninput="updateVisitFieldData(${v.visitId}, 'entEar', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأذن (TM)</span><div class="input-wrapper"><input type="text" value="${v.entEar || ''}" placeholder="مثال: غشاء الطبل طبيعي / احمرار" oninput="updateVisitFieldData(${v.visitId}, 'entEar', this.value)" style="font-size:0.85rem;"></div></div>
                     <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الحلق واللوزتين</span><div class="input-wrapper"><input type="text" value="${v.entThroat || ''}" placeholder="مثال: احمرار اللوزتين Acute Tonsillitis" oninput="updateVisitFieldData(${v.visitId}, 'entThroat', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
                 <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأنف والجيوب وملاحظات ENT</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل فحص الأذن والأنف والحنجرة..." oninput="updateVisitFieldData(${v.visitId}, 'entNotes', this.value)" style="font-size:0.85rem;">${v.entNotes || ''}</textarea></div></div>
@@ -3001,8 +3040,8 @@ function renderVisits(visits, forceFullRender = true) {
             <div class="group-card" style="background:#e0e7ff; border-color:#818cf8; margin-bottom:12px; padding:12px;">
                 <span style="font-weight:800; font-size:0.85rem; color:#4338ca; display:block; margin-bottom:10px;"><i class="fa-solid fa-eye"></i> فحص العيون (Ophthalmology)</span>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (Visual Acuity)</span><div class="input-wrapper"><input type="text" value="${v.ophthalVa \vert{}\vert{} ''}" placeholder="RE: 6/6, LE: 6/9" oninput="updateVisitFieldData(${v.visitId}, 'ophthalVa', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalIop \vert{}\vert{} ''}" placeholder="مثال: 15 mmHg" oninput="updateVisitFieldData(${v.visitId}, 'ophthalIop', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (Visual Acuity)</span><div class="input-wrapper"><input type="text" value="${v.ophthalVa || ''}" placeholder="RE: 6/6, LE: 6/9" oninput="updateVisitFieldData(${v.visitId}, 'ophthalVa', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalIop || ''}" placeholder="مثال: 15 mmHg" oninput="updateVisitFieldData(${v.visitId}, 'ophthalIop', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
                 <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص قاع العين وملاحظات العيون</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل قاع العين والفحص..." oninput="updateVisitFieldData(${v.visitId}, 'ophthalNotes', this.value)" style="font-size:0.85rem;">${v.ophthalNotes || ''}</textarea></div></div>
             </div>
