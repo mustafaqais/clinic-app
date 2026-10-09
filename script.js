@@ -142,6 +142,8 @@ const translations = {
         optChild: "أطفال (< 18)",
         optAdult: "بالغين (18 - 50)",
         optSenior: "كبار السن (> 50)",
+        sortNewest: "الأحدث أولاً",
+        sortOldest: "الأقدم أولاً",
 
         txtEdit: "تعديل",
         txtDelete: "حذف",
@@ -304,6 +306,8 @@ const translations = {
         optChild: "Children (< 18)",
         optAdult: "Adults (18 - 50)",
         optSenior: "Seniors (> 50)",
+        sortNewest: "Newest First",
+        sortOldest: "Oldest First",
 
         txtEdit: "Edit",
         txtDelete: "Delete",
@@ -519,6 +523,11 @@ function applyLanguage() {
     document.getElementById('optAdult').innerText = t.optAdult;
     document.getElementById('optSenior').innerText = t.optSenior;
 
+    const sortNewestEl = document.getElementById('optSortNewest');
+    if (sortNewestEl) sortNewestEl.innerText = t.sortNewest;
+    const sortOldestEl = document.getElementById('optSortOldest');
+    if (sortOldestEl) sortOldestEl.innerText = t.sortOldest;
+
     document.getElementById('txtEdit').innerText = t.txtEdit;
     document.getElementById('txtDelete').innerText = t.txtDelete;
     document.getElementById('btnDownloadPDF').innerHTML = `<i class="fa-solid fa-file-pdf"></i> ${t.btnDownloadPDF}`;
@@ -609,7 +618,7 @@ function updateOnlineStatus() {
     const bar = document.getElementById('networkStatusBar');
     if (!navigator.onLine) {
         bar.classList.add('offline');
-        bar.innerText = "⚠️️ Offline Mode - Changes saved locally, will sync when online";
+        bar.innerText = "⚠ Offline Mode - Changes saved locally, will sync when online";
     } else {
         bar.classList.remove('offline');
         bar.style.display = 'none';
@@ -877,7 +886,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
                         if (document.getElementById('archiveScreen').style.display === 'block') {
-                            renderPatientsList(patients);
+                            filterPatients();
                         } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
                             const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
                             if (pat) {
@@ -2731,7 +2740,14 @@ function showMainMenu() {
 
 function openPatientsArchive() {
     navigateTo('archiveScreen', translations[currentLang].archive, 'Search & records');
-    renderPatientsList(patients);
+    
+    const savedSort = localStorage.getItem('clinic_archive_sort');
+    const sortEl = document.getElementById('filterSort');
+    if (sortEl && savedSort) {
+        sortEl.value = savedSort;
+    }
+
+    filterPatients();
 }
 
 function openDictionaryManager() {
@@ -2821,22 +2837,49 @@ function renderPatientsList(list) {
 }
 
 function filterPatients() {
-    const query = document.getElementById('searchInput').value.toLowerCase();
-    const gender = document.getElementById('filterGender').value;
-    const ageGroup = document.getElementById('filterAgeGroup').value;
+    try {
+        const searchInput = document.getElementById('searchInput');
+        const query = searchInput ? searchInput.value.toLowerCase() : '';
+        
+        const genderEl = document.getElementById('filterGender');
+        const ageGroupEl = document.getElementById('filterAgeGroup');
+        const sortEl = document.getElementById('filterSort');
 
-    const filtered = patients.filter(p => {
-        const fullNameFull = (p.name + " " + (p.subName || "")).toLowerCase();
-        const matchQuery = fullNameFull.includes(query) || (p.phone && p.phone.includes(query));
-        const matchGender = !gender || p.gender === gender;
-        let matchAge = true;
-        if (ageGroup === 'child') matchAge = p.age < 18;
-        else if (ageGroup === 'adult') matchAge = p.age >= 18 && p.age <= 50;
-        else if (ageGroup === 'senior') matchAge = p.age > 50;
+        const gender = genderEl ? genderEl.value : '';
+        const ageGroup = ageGroupEl ? ageGroupEl.value : '';
+        
+        let sortOrder = sortEl ? sortEl.value : null;
+        if (!sortOrder) {
+            sortOrder = localStorage.getItem('clinic_archive_sort') || 'newest';
+            if (sortEl) sortEl.value = sortOrder;
+        } else {
+            localStorage.setItem('clinic_archive_sort', sortOrder);
+        }
 
-        return matchQuery && matchGender && matchAge;
-    });
-    renderPatientsList(filtered);
+        let filtered = patients.filter(p => {
+            if (!p) return false;
+            const fullNameFull = ((p.name || '') + " " + (p.subName || "")).toLowerCase();
+            const matchQuery = fullNameFull.includes(query) || (p.phone && String(p.phone).includes(query));
+            const matchGender = !gender || p.gender === gender;
+            let matchAge = true;
+            const age = Number(p.age) || 0;
+            if (ageGroup === 'child') matchAge = age < 18;
+            else if (ageGroup === 'adult') matchAge = age >= 18 && age <= 50;
+            else if (ageGroup === 'senior') matchAge = age > 50;
+
+            return matchQuery && matchGender && matchAge;
+        });
+
+        filtered.sort((a, b) => {
+            const idA = Number(a && a.id) || 0;
+            const idB = Number(b && b.id) || 0;
+            return sortOrder === 'oldest' ? idA - idB : idB - idA;
+        });
+
+        renderPatientsList(filtered);
+    } catch (e) {
+        console.error("Filter error:", e);
+    }
 }
 
 function openMedicalRecord(id, saveState = true) {
