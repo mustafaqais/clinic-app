@@ -1301,17 +1301,23 @@ async function handleAuthSubmit(e) {
             .catch(err => alert('خطأ: ' + err.message));
     } else {
         let loginEmail = identifier;
-        if (!identifier.includes('@')) {
+        
+        // التحقق من رقم الهاتف مع حماية كاملة (Timeout) لمنع تجميد التطبيق إذا رفضت قواعد الأمان القراءة
+        if (!identifier.includes('@') && navigator.onLine) {
             try {
-                const querySnap = await db.collection('network_hierarchy').where('phone', '==', identifier).get();
+                const queryPromise = db.collection('network_hierarchy').where('phone', '==', identifier).get();
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000));
+                
+                const querySnap = await Promise.race([queryPromise, timeoutPromise]);
                 if (!querySnap.empty) {
                     loginEmail = querySnap.docs[0].data().email;
                 }
             } catch (err) {
-                console.log(err);
+                console.log("Phone login lookup bypassed:", err);
             }
         }
 
+        // تنفيذ تسجيل الدخول بشكل مباشر وآمن
         auth.signInWithEmailAndPassword(loginEmail, pass)
             .catch(err => alert('خطأ في تسجيل الدخول: ' + err.message));
     }
