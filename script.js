@@ -726,7 +726,6 @@ async function checkUserSubscriptionStatus(uid, isSecretary = false) {
         return;
     }
 
-    // إذا لم يوجد تاريخ انتهاء مسجل مسبقاً، نعتبره فعّالاً بشكل مؤقت أو نوجهه للشاشة الرئيسية لتفادي التعليق
     if (!expiryDateStr || new Date().getTime() < new Date(expiryDateStr).getTime()) {
         isSubscriptionExpired = false;
         setupClientInterfaceAfterAuth(expiryDateStr || new Date(Date.now() + 86400000*30).toISOString(), false);
@@ -1088,7 +1087,6 @@ async function handleAuthSubmit(e) {
     const identifier = document.getElementById('authEmail').value.trim();
     const pass = document.getElementById('authPassword').value;
 
-    // إخفاء شاشة الدخول فوراً لمنع شعور المستخدم بالتعليق
     const authScreen = document.getElementById('authScreen');
     const appContainer = document.getElementById('appContainer');
 
