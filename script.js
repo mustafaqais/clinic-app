@@ -1,8 +1,3 @@
-/* ==========================================================
-   CLINIC MASTER SYSTEM - CLOUD ULTIMATE EDITION v17.28
-   Fixed Authentication & Smooth Transition Engine
-   ========================================================== */
-
 const firebaseConfig = {
     apiKey: "AIzaSyCgS-TYiCiVIjUrPSkf_z4U837v8LoRUMY",
     authDomain: "mustafaqais-31e2c.firebaseapp.com",
