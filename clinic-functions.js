@@ -1,73 +1,6 @@
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 
-let currentLang = localStorage.getItem('clinic_lang') || 'ar';
-let isDarkMode = localStorage.getItem('clinic_dark_mode') === 'true';
-let isRegisterMode = false;
-let pendingUserPass = "";
-let currentUserId = null;
-let isUserSecretary = false;
-let isSubscriptionExpired = false;
-let currentPatientId = null;
-let currentVisitIdForModal = null;
-let targetNodeUidToDelete = null;
-let targetNodeEmailToDelete = null;
-let targetNodeUidForNameEdit = null;
-let patientsListenerUnsubscribe = null;
-let isConfigMode = false;
-
-const FOUNDER_EMAIL = "qqasim714@gmail.com";
-
-const translations = {
-    ar: {
-        headerSub: "لوحة التحكم السحابية الآمنة",
-        archive: "أرشيف المرضى",
-        newPatient: "مريض جديد"
-    },
-    en: {
-        headerSub: "Secure Cloud Control Panel",
-        archive: "Patients Archive",
-        newPatient: "New Patient"
-    }
-};
-
-let specialtyConfig = JSON.parse(localStorage.getItem('clinic_specialty_config')) || {
-    medHistory: true,
-    chiefComplaint: true,
-    historyPresentIllness: true,
-    reviewSystems: true,
-    vitals: true,
-    labs: true,
-    scans: true,
-    notes: true,
-    rx: true,
-    attachments: true,
-    obsGyn: false,
-    ortho: false,
-    neuro: false,
-    peds: false,
-    derm: false,
-    ent: false,
-    ophthal: false,
-    cardio: false
-};
-
-let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || {
-    drugs: ["Paracetamol 500mg 1x3", "Amoxicillin 500mg 1x3", "Metformin 500mg 1x2"],
-    labs: ["CBC", "FBS", "HbA1c", "Lipid Profile", "LFT", "KFT"],
-    scans: ["Chest X-Ray", "Abdominal Ultrasound", "Brain MRI", "CT Scan"],
-    notes: ["Normal examination", "Follow up after 1 week", "Needs rest and hydration"],
-    mh_history: ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"],
-    chief_complaint: ["Cough and fever", "Severe headache", "Chest pain"],
-    history_present: ["Started 3 days ago, progressive"],
-    review_systems: ["No fever, no shortness of breath"]
-};
-
-let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
-let trashBin = JSON.parse(localStorage.getItem('clinic_trash')) || [];
-let secretaryAccount = JSON.parse(localStorage.getItem('clinic_sec_account')) || { email: "", password: "" };
-let currentDoctorRxImage = localStorage.getItem('doctor_rx_template') || "";
-
 function updateOnlineStatus() {
     const bar = document.getElementById('networkStatusBar');
     if (!navigator.onLine) {
@@ -2625,8 +2558,8 @@ function renderVisits(visits, forceFullRender = true) {
                 
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
                     <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">العمر بالأشهر</span><div class="input-wrapper"><input type="number" id="pedsAgeMonths-${v.visitId}" value="${v.pedsAgeMonths || ''}" placeholder="مثال: 12" oninput="updateVisitFieldData(${v.visitId}, 'pedsAgeMonths', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الوزن الحالي (كغ)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsWeight-${v.visitId}" value="${v.pedsWeight || ''}" placeholder="مثال: 9.5" oninput="updateVisitFieldData(${v.visitId}, 'pedsWeight', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الطول الحالي (سم)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsHeight-${v.visitId}" value="${v.pedsHeight || ''}" placeholder="مثال: 75" oninput="updateVisitFieldData(${v.visitId}, 'pedsHeight', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الوزن الحالي (كغ)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsWeight-${v.visitId}" value="${v.pedsWeight \vert{}\vert{} ''}" placeholder="مثال: 9.5" oninput="updateVisitFieldData(${v.visitId}, 'pedsWeight', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الطول الحالي (سم)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsHeight-${v.visitId}" value="${v.pedsHeight \vert{}\vert{} ''}" placeholder="مثال: 75" oninput="updateVisitFieldData(${v.visitId}, 'pedsHeight', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
 
                 <button type="button" class="btn-main" onclick="calculateVisitChildGrowth(${v.visitId})" style="background:#0284c7; padding:6px 12px; font-size:0.78rem; margin-top:4px; margin-bottom:8px;">
