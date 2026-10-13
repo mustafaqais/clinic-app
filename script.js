@@ -28,9 +28,6 @@ let targetNodeEmailToDelete = null;
 let targetNodeUidForNameEdit = null;
 
 let specialtyConfig = JSON.parse(localStorage.getItem('clinic_specialty_config')) || {
-    chiefComplaint: true,
-    hpi: true,
-    ros: true,
     medHistory: true,
     vitals: true,
     labs: true,
@@ -605,9 +602,6 @@ function applyLanguage() {
 let patients = JSON.parse(localStorage.getItem('clinic_patients')) || [];
 let trashBin = JSON.parse(localStorage.getItem('clinic_trash')) || [];
 let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || {
-    chiefComplaint: ["Severe headache for 3 days", "Acute chest pain radiating to left arm", "Persistent dry cough", "High fever and body ache", "Upper abdominal pain after meals", "Lower back pain"],
-    hpi: ["Symptoms started gradually 3 days ago, moderate in severity.", "Acute onset of symptoms 24 hours ago, continuous and sharp."],
-    ros: ["CNS: No history of fits or dizziness.", "CVS: No chest pain or palpitation.", "RS: No chronic cough or wheezing."],
     labs: ["CBC", "RBS", "Lipid Profile", "HbA1c", "LFT", "KFT"],
     scans: ["Chest X-Ray", "Abdominal Ultrasound", "Brain MRI", "CT Scan"],
     drugs: ["Paracetamol 500mg 1x3", "Amoxicillin 500mg 1x3", "Metformin 500mg 1x2"],
@@ -801,6 +795,7 @@ function hideAllScreensInner() {
     document.getElementById('backupScreen').style.display = 'none';
     document.getElementById('permissionsScreen').style.display = 'none';
 }
+
 document.addEventListener("DOMContentLoaded", () => {
     const pDateEl = document.getElementById('pDate');
     if (pDateEl) pDateEl.value = getTodayFormatted();
@@ -1462,9 +1457,6 @@ function calculateVisitChildGrowth(visitId) {
 function openSpecialtiesDashboard() {
     navigateTo('specialtiesDashboardScreen', 'لوحة تحكم الاختصاصات', 'تخصيص وتفعيل الحقول الطبية');
     
-    document.getElementById('mod_chiefComplaint').checked = !!specialtyConfig.chiefComplaint;
-    document.getElementById('mod_hpi').checked = !!specialtyConfig.hpi;
-    document.getElementById('mod_ros').checked = !!specialtyConfig.ros;
     document.getElementById('mod_medHistory').checked = !!specialtyConfig.medHistory;
     document.getElementById('mod_vitals').checked = !!specialtyConfig.vitals;
     document.getElementById('mod_labs').checked = !!specialtyConfig.labs;
@@ -1489,9 +1481,6 @@ function saveSpecialtiesDashboardConfig() {
         return;
     }
     specialtyConfig = {
-        chiefComplaint: document.getElementById('mod_chiefComplaint').checked,
-        hpi: document.getElementById('mod_hpi').checked,
-        ros: document.getElementById('mod_ros').checked,
         medHistory: document.getElementById('mod_medHistory').checked,
         vitals: document.getElementById('mod_vitals').checked,
         labs: document.getElementById('mod_labs').checked,
@@ -2177,13 +2166,7 @@ function handleLiveInput(textarea, category, visitId) {
 }
 
 function selectSuggestion(category, visitId, term) {
-    const inputId = category === 'drugs' ? `vDrugs-${visitId}` :
-                    category === 'chiefComplaint' ? `vChiefComplaint-${visitId}` :
-                    category === 'hpi' ? `vHpi-${visitId}` :
-                    category === 'ros' ? `vRos-${visitId}` :
-                    category === 'labs' ? `vLabs-${visitId}` :
-                    category === 'scans' ? `vScans-${visitId}` : `vNotes-${visitId}`;
-    const textarea = document.getElementById(inputId);
+    const textarea = document.getElementById(`${category === 'drugs' ? 'vDrugs' : category === 'labs' ? 'vLabs' : category === 'scans' ? 'vScans' : 'vNotes'}-${visitId}`);
     if (!textarea) return;
 
     const lines = textarea.value.split('\n');
@@ -2191,10 +2174,8 @@ function selectSuggestion(category, visitId, term) {
     textarea.value = lines.join('\n') + '\n';
     autoResizeTextarea(textarea);
 
-    const sugBox = document.getElementById(`suggestions-${category}-${visitId}`);
-    const saveBar = document.getElementById(`save-bar-${category}-${visitId}`);
-    if (sugBox) sugBox.style.display = 'none';
-    if (saveBar) saveBar.style.display = 'none';
+    document.getElementById(`suggestions-${category}-${visitId}`).style.display = 'none';
+    document.getElementById(`save-bar-${category}-${visitId}`).style.display = 'none';
     updateVisitFieldData(visitId, category, textarea.value);
     textarea.focus();
 }
@@ -2965,48 +2946,6 @@ function renderVisits(visits, forceFullRender = true) {
                 ${visits.length > 1 ? `<button onclick="confirmDeleteVisit(${v.visitId})" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:2px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i> Delete Visit</button>` : ''}
             </div>
 
-            ${cfg.chiefComplaint !== false ? `
-            <div class="field-box">
-                <span class="field-label">الشكوى الرئيسية (Chief Complaint)</span>
-                <div class="input-wrapper" style="position: relative;">
-                    <textarea id="vChiefComplaint-${v.visitId}" rows="1" placeholder="أدخل الشكوى الرئيسية للمريض..." oninput="handleLiveInput(this, 'chiefComplaint', ${v.visitId})" onblur="hideSuggestions('chiefComplaint', ${v.visitId})">${v.chiefComplaint || ''}</textarea>
-                    <div class="suggestions-box" id="suggestions-chiefComplaint-${v.visitId}"></div>
-                    <div class="live-save-bar" id="save-bar-chiefComplaint-${v.visitId}">
-                        <span>Save: "<strong id="line-text-chiefComplaint-${v.visitId}"></strong>"</span>
-                        <button type="button" class="btn-live-save" id="btn-save-chiefComplaint-${v.visitId}" onmousedown="saveLineToDict(event, 'chiefComplaint', ${v.visitId})">Save</button>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
-
-            ${cfg.hpi !== false ? `
-            <div class="field-box">
-                <span class="field-label">تاريخ المرض الحالي (History of Present Illness - HPI)</span>
-                <div class="input-wrapper" style="position: relative;">
-                    <textarea id="vHpi-${v.visitId}" rows="2" placeholder="أدخل تفاصيل تطور المرض الحالي..." oninput="handleLiveInput(this, 'hpi', ${v.visitId})" onblur="hideSuggestions('hpi', ${v.visitId})">${v.hpi || ''}</textarea>
-                    <div class="suggestions-box" id="suggestions-hpi-${v.visitId}"></div>
-                    <div class="live-save-bar" id="save-bar-hpi-${v.visitId}">
-                        <span>Save: "<strong id="line-text-hpi-${v.visitId}"></strong>"</span>
-                        <button type="button" class="btn-live-save" id="btn-save-hpi-${v.visitId}" onmousedown="saveLineToDict(event, 'hpi', ${v.visitId})">Save</button>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
-
-            ${cfg.ros !== false ? `
-            <div class="field-box">
-                <span class="field-label">مراجعة بقية الأجهزة (Review of Systems - ROS)</span>
-                <div class="input-wrapper" style="position: relative;">
-                    <textarea id="vRos-${v.visitId}" rows="2" placeholder="مراجعة بقية الأجهزة (CNS, CVS, RS, GIS)..." oninput="handleLiveInput(this, 'ros', ${v.visitId})" onblur="hideSuggestions('ros', ${v.visitId})">${v.ros || ''}</textarea>
-                    <div class="suggestions-box" id="suggestions-ros-${v.visitId}"></div>
-                    <div class="live-save-bar" id="save-bar-ros-${v.visitId}">
-                        <span>Save: "<strong id="line-text-ros-${v.visitId}"></strong>"</span>
-                        <button type="button" class="btn-live-save" id="btn-save-ros-${v.visitId}" onmousedown="saveLineToDict(event, 'ros', ${v.visitId})">Save</button>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
-
             ${cfg.medHistory ? `
             <button type="button" class="btn-med-history" onclick="openMedHistoryModal(${v.visitId})">
                 <span><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History & Chronic Diseases</span>
@@ -3133,7 +3072,7 @@ function renderVisits(visits, forceFullRender = true) {
             <div class="group-card" style="background:#ecfdf5; border-color:#34d399; margin-bottom:12px; padding:12px;">
                 <span style="font-weight:800; font-size:0.85rem; color:#047857; display:block; margin-bottom:10px;"><i class="fa-solid fa-ear-deaf"></i> فحص الأذن والأنف والحنجرة (ENT)</span>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأذن (TM)</span><div class="input-wrapper"><input type="text" value="${v.entEar \vert{}\vert{} ''}" placeholder="مثال: غشاء الطبل طبيعي / احمرار" oninput="updateVisitFieldData(${v.visitId}, 'entEar', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأذن (TM)</span><div class="input-wrapper"><input type="text" value="${v.entEar || ''}" placeholder="مثال: غشاء الطبل طبيعي / احمرار" oninput="updateVisitFieldData(${v.visitId}, 'entEar', this.value)" style="font-size:0.85rem;"></div></div>
                     <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الحلق واللوزتين</span><div class="input-wrapper"><input type="text" value="${v.entThroat || ''}" placeholder="مثال: احمرار اللوزتين Acute Tonsillitis" oninput="updateVisitFieldData(${v.visitId}, 'entThroat', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
                 <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأنف والجيوب وملاحظات ENT</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل فحص الأذن والأنف والحنجرة..." oninput="updateVisitFieldData(${v.visitId}, 'entNotes', this.value)" style="font-size:0.85rem;">${v.entNotes || ''}</textarea></div></div>
@@ -3144,8 +3083,8 @@ function renderVisits(visits, forceFullRender = true) {
             <div class="group-card" style="background:#e0e7ff; border-color:#818cf8; margin-bottom:12px; padding:12px;">
                 <span style="font-weight:800; font-size:0.85rem; color:#4338ca; display:block; margin-bottom:10px;"><i class="fa-solid fa-eye"></i> فحص العيون (Ophthalmology)</span>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (Visual Acuity)</span><div class="input-wrapper"><input type="text" value="${v.ophthalVa \vert{}\vert{} ''}" placeholder="RE: 6/6, LE: 6/9" oninput="updateVisitFieldData(${v.visitId}, 'ophthalVa', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalIop \vert{}\vert{} ''}" placeholder="مثال: 15 mmHg" oninput="updateVisitFieldData(${v.visitId}, 'ophthalIop', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (Visual Acuity)</span><div class="input-wrapper"><input type="text" value="${v.ophthalVa || ''}" placeholder="RE: 6/6, LE: 6/9" oninput="updateVisitFieldData(${v.visitId}, 'ophthalVa', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalIop || ''}" placeholder="مثال: 15 mmHg" oninput="updateVisitFieldData(${v.visitId}, 'ophthalIop', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
                 <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص قاع العين وملاحظات العيون</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل قاع العين والفحص..." oninput="updateVisitFieldData(${v.visitId}, 'ophthalNotes', this.value)" style="font-size:0.85rem;">${v.ophthalNotes || ''}</textarea></div></div>
             </div>
@@ -3254,16 +3193,10 @@ function renderVisits(visits, forceFullRender = true) {
     }).join('');
 
     visits.forEach(v => {
-        const ccEl = document.getElementById(`vChiefComplaint-${v.visitId}`);
-        const hpiEl = document.getElementById(`vHpi-${v.visitId}`);
-        const rosEl = document.getElementById(`vRos-${v.visitId}`);
         const noteEl = document.getElementById(`vNotes-${v.visitId}`);
         const drugEl = document.getElementById(`vDrugs-${v.visitId}`);
         const labsEl = document.getElementById(`vLabs-${v.visitId}`);
         const scansEl = document.getElementById(`vScans-${v.visitId}`);
-        if (ccEl) autoResizeTextarea(ccEl);
-        if (hpiEl) autoResizeTextarea(hpiEl);
-        if (rosEl) autoResizeTextarea(rosEl);
         if (noteEl) autoResizeTextarea(noteEl);
         if (drugEl) autoResizeTextarea(drugEl);
         if (labsEl) autoResizeTextarea(labsEl);
