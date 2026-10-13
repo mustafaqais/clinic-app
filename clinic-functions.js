@@ -2110,12 +2110,20 @@ function changeBoxFontSize(boxType, delta) {
     el.style.fontSize = (currentSize + delta) + 'px';
 }
 
+function setRxPaperSize(size) {
+    const container = document.getElementById('rxCanvasContainer');
+    if (!container) return;
+    container.classList.remove('size-a4', 'size-a5');
+    container.classList.add('size-' + size);
+    localStorage.setItem('clinic_rx_paper_size', size);
+}
+
 function saveRxLayoutPositions() {
     isConfigMode = false;
     document.querySelectorAll('.draggable-box').forEach(b => b.classList.remove('config-mode'));
     updateConfigModeUI();
     saveSettingsToCloudAndLocal();
-    alert('RX Layout saved successfully!');
+    alert('تم حفظ أماكن وأحجام الراجيتة بنجاح!');
 }
 
 function loadSavedRxLayout() {
@@ -2131,6 +2139,8 @@ function loadSavedRxLayout() {
             }
         }
     }
+    const savedSize = localStorage.getItem('clinic_rx_paper_size') || 'a4';
+    setRxPaperSize(savedSize);
 }
 
 function printPrescriptionDirectly() {
@@ -2165,7 +2175,8 @@ function openPrescriptionPDF() {
 
 function initDraggableElements() {
     let activeBox = null;
-    let startX = 0, startY = 0, initialX = 0, initialY = 0;
+    let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
+    const container = document.getElementById('rxCanvasContainer');
 
     document.querySelectorAll('.draggable-box').forEach(box => {
         box.style.touchAction = 'none';
@@ -2175,8 +2186,13 @@ function initDraggableElements() {
             activeBox = box;
             startX = e.clientX;
             startY = e.clientY;
-            initialX = box.offsetLeft;
-            initialY = box.offsetTop;
+            
+            const cWidth = container.clientWidth;
+            const cHeight = container.clientHeight;
+            
+            initialLeftPct = (box.offsetLeft / cWidth) * 100;
+            initialTopPct = (box.offsetTop / cHeight) * 100;
+            
             box.setPointerCapture(e.pointerId);
             e.stopPropagation();
         });
@@ -2185,8 +2201,15 @@ function initDraggableElements() {
             if (!activeBox || activeBox !== box) return;
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
-            box.style.left = (initialX + dx) + 'px';
-            box.style.top = (initialY + dy) + 'px';
+            
+            const cWidth = container.clientWidth;
+            const cHeight = container.clientHeight;
+
+            let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
+            let newTopPct = initialTopPct + (dy / cHeight) * 100;
+
+            box.style.left = newLeftPct + '%';
+            box.style.top = newTopPct + '%';
         });
 
         box.addEventListener('pointerup', e => {
