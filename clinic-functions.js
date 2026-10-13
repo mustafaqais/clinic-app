@@ -1871,9 +1871,16 @@ function handleFileUpload(input, visitId) {
     }
 }
 
-function previewAttachmentImageByElement(el) {
-    const imgSrc = el.getAttribute('data-img-url');
-    previewAttachmentImage(imgSrc);
+function previewAttachmentByIndex(el) {
+    const visitId = el.getAttribute('data-visit-id');
+    const index = el.getAttribute('data-attachment-index');
+    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+    if (!patient) return;
+    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+    if (!visit || !visit.attachments || !visit.attachments[index]) return;
+    
+    const att = visit.attachments[index];
+    previewAttachmentImage(att.dataUrl);
 }
 
 function previewAttachmentImage(imgSrc) {
@@ -2590,7 +2597,7 @@ function renderVisits(visits, forceFullRender = true) {
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
                     <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">العمر بالأشهر</span><div class="input-wrapper"><input type="number" id="pedsAgeMonths-${v.visitId}" value="${v.pedsAgeMonths || ''}" placeholder="مثال: 12" oninput="updateVisitFieldData(${v.visitId}, 'pedsAgeMonths', this.value)" style="font-size:0.85rem;"></div></div>
                     <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الوزن الحالي (كغ)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsWeight-${v.visitId}" value="${v.pedsWeight || ''}" placeholder="مثال: 9.5" oninput="updateVisitFieldData(${v.visitId}, 'pedsWeight', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الطول الحالي (سم)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsHeight-${v.visitId}" value="${v.pedsHeight \vert{}\vert{} ''}" placeholder="مثال: 75" oninput="updateVisitFieldData(${v.visitId}, 'pedsHeight', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الطول الحالي (سم)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsHeight-${v.visitId}" value="${v.pedsHeight || ''}" placeholder="مثال: 75" oninput="updateVisitFieldData(${v.visitId}, 'pedsHeight', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
 
                 <button type="button" class="btn-main" onclick="calculateVisitChildGrowth(${v.visitId})" style="background:#0284c7; padding:6px 12px; font-size:0.78rem; margin-top:4px; margin-bottom:8px;">
@@ -2733,7 +2740,7 @@ function renderVisits(visits, forceFullRender = true) {
                             return `<div style="padding:6px 10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; font-size:0.7rem; color:#b91c1c;">⚠️ صورة تالفة أو قديمة</div>`;
                         }
                         return `
-                        <div style="position:relative; width:65px; height:65px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; cursor:pointer;" onclick="previewAttachmentImageByElement(this)" data-img-url="${att.dataUrl}">
+                        <div style="position:relative; width:65px; height:65px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; cursor:pointer;" data-visit-id="${v.visitId}" data-attachment-index="${aIdx}" onclick="previewAttachmentByIndex(this)">
                             <img src="${att.dataUrl}" style="width:100%; height:100%; object-fit:cover;">
                         </div>
                     `;
