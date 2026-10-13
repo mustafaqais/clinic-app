@@ -703,6 +703,12 @@
                             </select>
                         </div>
                     </div>
+
+                    <!-- زر إضافة قائمة كاملة دفعة واحدة -->
+                    <button type="button" class="btn-main" onclick="openBulkAddModal()" style="background: #0d9488; margin-bottom: 12px;">
+                        <i class="fa-solid fa-list-check"></i> 📋 إضافة قائمة كاملة دفعة واحدة (Bulk Add)
+                    </button>
+
                     <div id="dictItemsList" style="margin-top: 15px;"></div>
                 </div>
             </div>
@@ -719,6 +725,32 @@
     </div>
 </div>
 
+<!-- نافذة الإضافة الجماعية (Bulk Add Modal) -->
+<div id="bulkAddDictModal" class="modal-overlay">
+    <div class="modal-body" style="max-width: 480px; text-align: left; direction: ltr;">
+        <div class="modal-header" style="direction: ltr;">
+            <h3 style="font-family: 'El Messiri', serif;"><i class="fa-solid fa-list-check" style="color:#0d9488;"></i> Bulk Add to Dictionary</h3>
+            <button class="modal-close" onclick="closeBulkAddModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 10px;">
+            الصق قائمتك هنا (كل علاج أو فحص في سطر مستقل مع جرعته أو تفاصيله). سيقوم النظام بحفظها بالقاموس تلقائياً:
+        </p>
+        <div class="field-box">
+            <div class="input-wrapper">
+                <textarea id="bulkDictInput" rows="8" placeholder="مثال:
+Paracetamol 500mg - 1x3
+Amoxicillin 500mg - 1x2 after food
+CBC Test
+Chest X-Ray" style="font-size: 0.85rem; direction: ltr; text-align: left;"></textarea>
+            </div>
+        </div>
+        <button class="btn-main" onclick="processAndSaveBulkDict()" style="background: #0d9488; margin-top: 8px;">
+            <i class="fa-solid fa-floppy-disk"></i> معالجة وحفظ الكل في القاموس
+        </button>
+    </div>
+</div>
+
+<!-- بقية النوافذ التفاعلية -->
 <div id="mandatoryBackupModal" class="modal-overlay" style="z-index: 99999;">
     <div class="modal-body" style="max-width: 420px; text-align: center;">
         <div style="font-size: 45px; color: #4f46e5; margin-bottom: 4px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
