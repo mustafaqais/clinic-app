@@ -1282,8 +1282,8 @@ function openNetworkHierarchy() {
                     <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
                         <span class="node-badge" style="font-size:0.68rem; padding:2px 6px; background:#e0f2fe; color:#0369a1; border-radius:4px;">${data.role || 'Client'}</span>
                         <div style="display:flex; gap:4px;">
-                            <button onclick="promptFounderEditName('${nodeUid}', '${(data.doctorName || '').replace(/'/g, "\\'")}', '${userEmail}')" style="background:#ccfbf1; color:#0f766e; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-pen"></i> اسم</button>
-                            ${!isFounder ? `<button onclick="promptFounderDeleteNode('${nodeUid}', '${userEmail.replace(/'/g, "\\'")}')" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>` : ''}
+                            <button onclick="promptFounderEditNameByElement(this)" data-uid="${nodeUid}" data-name="${currentDocName}" data-email="${userEmail}" style="background:#ccfbf1; color:#0f766e; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-pen"></i> اسم</button>
+                            ${!isFounder ? `<button onclick="promptFounderDeleteNodeByElement(this)" data-uid="${nodeUid}" data-email="${userEmail}" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>` : ''}
                         </div>
                     </div>
                 </div>
@@ -1291,6 +1291,19 @@ function openNetworkHierarchy() {
         });
         container.innerHTML = html;
     });
+}
+
+function promptFounderEditNameByElement(btn) {
+    const nodeUid = btn.getAttribute('data-uid');
+    const currentName = btn.getAttribute('data-name');
+    const userEmail = btn.getAttribute('data-email');
+    promptFounderEditName(nodeUid, currentName, userEmail);
+}
+
+function promptFounderDeleteNodeByElement(btn) {
+    const nodeUid = btn.getAttribute('data-uid');
+    const userEmail = btn.getAttribute('data-email');
+    promptFounderDeleteNode(nodeUid, userEmail);
 }
 
 function promptFounderEditName(nodeUid, currentName, userEmail) {
@@ -1571,7 +1584,7 @@ function handleLiveInput(textarea, category, visitId) {
         const matches = terms.filter(t => t.toLowerCase().includes(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => `<div class="suggestion-item" onmousedown="selectSuggestion('${category}', ${visitId}, '${m.replace(/'/g, "\\'")}')">${m}</div>`).join('');
+            box.innerHTML = matches.map(m => `<div class="suggestion-item" onclick="selectSuggestionByClick(this)" data-category="${category}" data-visit-id="${visitId}" data-term="${encodeURIComponent(m)}">${m}</div>`).join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1582,6 +1595,13 @@ function handleLiveInput(textarea, category, visitId) {
     }
 
     updateVisitFieldData(visitId, category, textarea.value);
+}
+
+function selectSuggestionByClick(el) {
+    const category = el.getAttribute('data-category');
+    const visitId = el.getAttribute('data-visit-id');
+    const term = decodeURIComponent(el.getAttribute('data-term'));
+    selectSuggestion(category, visitId, term);
 }
 
 function selectSuggestion(category, visitId, term) {
@@ -1668,7 +1688,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().includes(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => `<div class="suggestion-item" onmousedown="selectMhSuggestion('${inputKey}', '${m.replace(/'/g, "\\'")}')">${m}</div>`).join('');
+            box.innerHTML = matches.map(m => `<div class="suggestion-item" onclick="selectMhSuggestionByClick(this)" data-input-key="${inputKey}" data-term="${encodeURIComponent(m)}">${m}</div>`).join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1677,6 +1697,12 @@ function handleMhLiveInput(inputEl, inputKey) {
         if (saveBar) saveBar.style.display = 'none';
         if (box) box.style.display = 'none';
     }
+}
+
+function selectMhSuggestionByClick(el) {
+    const inputKey = el.getAttribute('data-input-key');
+    const term = decodeURIComponent(el.getAttribute('data-term'));
+    selectMhSuggestion(inputKey, term);
 }
 
 function selectMhSuggestion(inputKey, term) {
@@ -2557,7 +2583,7 @@ function renderVisits(visits, forceFullRender = true) {
                 <span style="font-weight:800; font-size:0.85rem; color:#0369a1; display:block; margin-bottom:10px;"><i class="fa-solid fa-child"></i> فحص الأطفال ومنحنيات النمو البيومترية (WHO Pediatrics)</span>
                 
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">العمر بالأشهر</span><div class="input-wrapper"><input type="number" id="pedsAgeMonths-${v.visitId}" value="${v.pedsAgeMonths \vert{}\vert{} ''}" placeholder="مثال: 12" oninput="updateVisitFieldData(${v.visitId}, 'pedsAgeMonths', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">العمر بالأشهر</span><div class="input-wrapper"><input type="number" id="pedsAgeMonths-${v.visitId}" value="${v.pedsAgeMonths || ''}" placeholder="مثال: 12" oninput="updateVisitFieldData(${v.visitId}, 'pedsAgeMonths', this.value)" style="font-size:0.85rem;"></div></div>
                     <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الوزن الحالي (كغ)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsWeight-${v.visitId}" value="${v.pedsWeight \vert{}\vert{} ''}" placeholder="مثال: 9.5" oninput="updateVisitFieldData(${v.visitId}, 'pedsWeight', this.value)" style="font-size:0.85rem;"></div></div>
                     <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الطول الحالي (سم)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsHeight-${v.visitId}" value="${v.pedsHeight \vert{}\vert{} ''}" placeholder="مثال: 75" oninput="updateVisitFieldData(${v.visitId}, 'pedsHeight', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
