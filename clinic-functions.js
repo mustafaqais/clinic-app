@@ -59,7 +59,7 @@ async function generateNewKey(type) {
             createdAt: new Date().toISOString()
         });
         document.getElementById('dynamicFounderCode').innerText = newCode;
-        document.getElementById('keyTypeHint').innerText = `Generated (${type}) valid for ${days} days.`;
+        document.getElementById('keyTypeHint').innerText = "Generated (" + type + ") valid for " + days + " days.";
     } catch (e) {
         alert('Error generating key: ' + e.message);
     }
@@ -248,8 +248,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
             await loadDoctorBranding(dataOwnerUid);
 
-            patients = JSON.parse(localStorage.getItem(`clinic_patients_${dataOwnerUid}`)) || patients;
-            trashBin = JSON.parse(localStorage.getItem(`clinic_trash_${dataOwnerUid}`)) || trashBin;
+            patients = JSON.parse(localStorage.getItem('clinic_patients_' + dataOwnerUid)) || patients;
+            trashBin = JSON.parse(localStorage.getItem('clinic_trash_' + dataOwnerUid)) || trashBin;
 
             if (patientsListenerUnsubscribe) {
                 patientsListenerUnsubscribe();
@@ -276,7 +276,7 @@ window.addEventListener("DOMContentLoaded", () => {
                         }
                         if (data.trashBin) {
                             trashBin = data.trashBin;
-                            localStorage.setItem(`clinic_trash_${dataOwnerUid}`, JSON.stringify(trashBin));
+                            localStorage.setItem('clinic_trash_' + dataOwnerUid, JSON.stringify(trashBin));
                         }
                         if (data.secretaryAccount) {
                             secretaryAccount = data.secretaryAccount;
@@ -296,7 +296,7 @@ window.addEventListener("DOMContentLoaded", () => {
                             cloudPatients.push(doc.data());
                         });
                         patients = cloudPatients;
-                        localStorage.setItem(`clinic_patients_${dataOwnerUid}`, JSON.stringify(patients));
+                        localStorage.setItem('clinic_patients_' + dataOwnerUid, JSON.stringify(patients));
                         localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
                         if (document.getElementById('archiveScreen').style.display === 'block') {
@@ -355,7 +355,7 @@ async function loadDoctorBranding(ownerUid) {
 }
 
 async function checkUserSubscriptionStatus(uid, isSecretary = false) {
-    let expiryDateStr = localStorage.getItem(`sub_expiry_${uid}`);
+    let expiryDateStr = localStorage.getItem('sub_expiry_' + uid);
 
     if (navigator.onLine) {
         try {
@@ -364,7 +364,7 @@ async function checkUserSubscriptionStatus(uid, isSecretary = false) {
                 const data = docRef.data();
                 if (data.expiryDate) {
                     expiryDateStr = data.expiryDate;
-                    localStorage.setItem(`sub_expiry_${uid}`, expiryDateStr);
+                    localStorage.setItem('sub_expiry_' + uid, expiryDateStr);
                 }
             }
         } catch (e) {
@@ -407,8 +407,8 @@ function setupReadOnlyModeAfterExpiration(expiryDateIso) {
     const textEl = document.getElementById('subBannerText');
     banner.style.display = 'flex';
     banner.className = 'sub-status-banner expired';
-    titleEl.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> انتهت صلاحية الاشتراك - وضع القراءة فقط`;
-    textEl.innerText = `انتهى اشتراكك. يمكنك تصفح الأرشيف وقراءة الملفات والتقارير بحرية تامة أو تجديد الكود.`;
+    titleEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> انتهت صلاحية الاشتراك - وضع القراءة فقط';
+    textEl.innerText = 'انتهى اشتراكك. يمكنك تصفح الأرشيف وقراءة الملفات والتقارير بحرية تامة أو تجديد الكود.';
 
     restorePreviousScreenState();
 }
@@ -475,8 +475,8 @@ function setupClientInterfaceAfterAuth(expiryDateIso, isSecretary = false) {
         const titleEl = document.getElementById('subBannerTitle');
         const textEl = document.getElementById('subBannerText');
         banner.style.display = 'flex';
-        titleEl.innerHTML = `<i class="fa-solid fa-circle-check"></i> Active Subscription`;
-        textEl.innerText = `You have ${diffDays} day(s) remaining.`;
+        titleEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Active Subscription';
+        textEl.innerText = 'You have ' + diffDays + ' day(s) remaining.';
     }
 
     restorePreviousScreenState();
@@ -583,7 +583,7 @@ async function verifyActivationCode() {
 
         const user = auth.currentUser;
         if (user) {
-            localStorage.setItem(`sub_expiry_${user.uid}`, expiryDateIso);
+            localStorage.setItem('sub_expiry_' + user.uid, expiryDateIso);
             await db.collection('network_hierarchy').doc(user.uid).set({
                 email: user.email,
                 password: pendingUserPass || 'Saved',
@@ -614,7 +614,7 @@ function savePatientToCloudAndLocal(patientObj) {
     } else {
         patients.unshift(patientObj);
     }
-    localStorage.setItem(`clinic_patients_${ownerUid}`, JSON.stringify(patients));
+    localStorage.setItem('clinic_patients_' + ownerUid, JSON.stringify(patients));
     localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
     if (navigator.onLine) {
@@ -627,7 +627,7 @@ function saveTrashToCloudAndLocal() {
     if (!currentUserId || isSubscriptionExpired) return;
     const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
 
-    localStorage.setItem(`clinic_trash_${ownerUid}`, JSON.stringify(trashBin));
+    localStorage.setItem('clinic_trash_' + ownerUid, JSON.stringify(trashBin));
     localStorage.setItem('clinic_trash', JSON.stringify(trashBin));
 
     if (navigator.onLine) {
@@ -671,7 +671,7 @@ function saveSettingsToCloudAndLocal() {
 
 function getTodayFormatted() {
     const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 
 function toggleAuthMode() {
@@ -722,7 +722,7 @@ async function handleAuthSubmit(e) {
                 if (identifier.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
                     const expiryDate = new Date();
                     expiryDate.setFullYear(expiryDate.getFullYear() + 10);
-                    localStorage.setItem(`sub_expiry_${res.user.uid}`, expiryDate.toISOString());
+                    localStorage.setItem('sub_expiry_' + res.user.uid, expiryDate.toISOString());
                     setupFounderInterfaceAfterAuth();
                 } else {
                     document.getElementById('authScreen').style.display = 'none';
@@ -820,9 +820,9 @@ function calculateVisitChildGrowth(visitId) {
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
 
-    const ageMonths = parseFloat(document.getElementById(`pedsAgeMonths-${visitId}`).value);
-    const weight = parseFloat(document.getElementById(`pedsWeight-${visitId}`).value);
-    const height = parseFloat(document.getElementById(`pedsHeight-${visitId}`).value);
+    const ageMonths = parseFloat(document.getElementById('pedsAgeMonths-' + visitId).value);
+    const weight = parseFloat(document.getElementById('pedsWeight-' + visitId).value);
+    const height = parseFloat(document.getElementById('pedsHeight-' + visitId).value);
 
     if (!ageMonths || isNaN(ageMonths) || ageMonths < 0) {
         alert('الرجاء إدخال عمر الطفل بالأشهر أولاً.');
@@ -857,12 +857,9 @@ function calculateVisitChildGrowth(visitId) {
         }
     }
 
-    const resultText = `
-        • <b>تقييم الوزن:</b> <span style="color:${weightColor}; font-weight:700;">${weightStatus}</span><br>
-        • <b>تقييم الطول:</b> <span style="color:${heightColor}; font-weight:700;">${heightStatus}</span>
-    `;
+    visit.pedsGrowthResult = '• <b>تقييم الوزن:</b> <span style="color:' + weightColor + '; font-weight:700;">' + weightStatus + '</span><br>' +
+                             '• <b>تقييم الطول:</b> <span style="color:' + heightColor + '; font-weight:700;">' + heightStatus + '</span>';
 
-    visit.pedsGrowthResult = resultText;
     savePatientToCloudAndLocal(patient);
     renderVisits(patient.visits, false);
 }
@@ -1048,7 +1045,7 @@ function exportJsonBackup() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `Clinic_Master_Backup_${getTodayFormatted()}.json`);
+    downloadAnchor.setAttribute("download", "Clinic_Master_Backup_" + getTodayFormatted() + ".json");
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
@@ -1072,7 +1069,7 @@ function restoreFromUploadedFile(input) {
                     return;
                 }
 
-                if (confirm(`Restore data with (${parsed.patients.length}) patients?`)) {
+                if (confirm('Restore data with (' + parsed.patients.length + ') patients?')) {
                     patients = parsed.patients;
                     trashBin = parsed.trashBin || [];
                     medicalDict = parsed.medicalDict || medicalDict;
@@ -1083,8 +1080,8 @@ function restoreFromUploadedFile(input) {
 
                     const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
                     if (ownerUid) {
-                        localStorage.setItem(`clinic_patients_${ownerUid}`, JSON.stringify(patients));
-                        localStorage.setItem(`clinic_trash_${ownerUid}`, JSON.stringify(trashBin));
+                        localStorage.setItem('clinic_patients_' + ownerUid, JSON.stringify(patients));
+                        localStorage.setItem('clinic_trash_' + ownerUid, JSON.stringify(trashBin));
                     }
                     saveSettingsToCloudAndLocal();
                     syncLocalDataToCloud();
@@ -1272,22 +1269,18 @@ function openNetworkHierarchy() {
             const currentDocName = data.doctorName || 'غير مسجل';
             const isFounder = userEmail.toLowerCase() === FOUNDER_EMAIL.toLowerCase();
 
-            html += `
-                <div class="node-card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;">
-                    <div class="node-info">
-                        <h5 style="margin:0; font-size:0.85rem; color:#0f172a;"><i class="fa-solid fa-envelope" style="color:#0d9488;"></i> ${userEmail}</h5>
-                        <p style="margin:2px 0; font-size:0.75rem; color:#64748b;"><b>الاسم البارز:</b> <span style="color:#0d9488; font-weight:700;">${currentDocName}</span></p>
-                        <p style="margin:0; font-size:0.75rem; color:#64748b;"><b>Password:</b> ${data.password || 'N/A'}</p>
-                    </div>
-                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
-                        <span class="node-badge" style="font-size:0.68rem; padding:2px 6px; background:#e0f2fe; color:#0369a1; border-radius:4px;">${data.role || 'Client'}</span>
-                        <div style="display:flex; gap:4px;">
-                            <button onclick="promptFounderEditNameByElement(this)" data-uid="${nodeUid}" data-name="${currentDocName}" data-email="${userEmail}" style="background:#ccfbf1; color:#0f766e; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-pen"></i> اسم</button>
-                            ${!isFounder ? `<button onclick="promptFounderDeleteNodeByElement(this)" data-uid="${nodeUid}" data-email="${userEmail}" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
+            html += '<div class="node-card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;">' +
+                    '<div class="node-info">' +
+                    '<h5 style="margin:0; font-size:0.85rem; color:#0f172a;"><i class="fa-solid fa-envelope" style="color:#0d9488;"></i> ' + userEmail + '</h5>' +
+                    '<p style="margin:2px 0; font-size:0.75rem; color:#64748b;"><b>الاسم البارز:</b> <span style="color:#0d9488; font-weight:700;">' + currentDocName + '</span></p>' +
+                    '<p style="margin:0; font-size:0.75rem; color:#64748b;"><b>Password:</b> ' + (data.password || 'N/A') + '</p>' +
+                    '</div>' +
+                    '<div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">' +
+                    '<span class="node-badge" style="font-size:0.68rem; padding:2px 6px; background:#e0f2fe; color:#0369a1; border-radius:4px;">' + (data.role || 'Client') + '</span>' +
+                    '<div style="display:flex; gap:4px;">' +
+                    '<button onclick="promptFounderEditNameByElement(this)" data-uid="' + nodeUid + '" data-name="' + currentDocName + '" data-email="' + userEmail + '" style="background:#ccfbf1; color:#0f766e; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-pen"></i> اسم</button>' +
+                    (!isFounder ? '<button onclick="promptFounderDeleteNodeByElement(this)" data-uid="' + nodeUid + '" data-email="' + userEmail + '" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>' : '') +
+                    '</div></div></div>';
         });
         container.innerHTML = html;
     });
@@ -1407,50 +1400,49 @@ function openAnalyticsDashboard() {
     const malePct = totalGender > 0 ? Math.round((maleCount / totalGender) * 100) : 50;
     const femalePct = totalGender > 0 ? 100 - malePct : 50;
 
-    document.getElementById('ratioMaleBar').style.width = `${malePct}%`;
-    document.getElementById('ratioFemaleBar').style.width = `${femalePct}%`;
-    document.getElementById('ratioMaleText').innerText = `Male: ${malePct}%`;
-    document.getElementById('ratioFemaleText').innerText = `Female: ${femalePct}%`;
+    document.getElementById('ratioMaleBar').style.width = malePct + '%';
+    document.getElementById('ratioFemaleBar').style.width = femalePct + '%';
+    document.getElementById('ratioMaleText').innerText = 'Male: ' + malePct + '%';
+    document.getElementById('ratioFemaleText').innerText = 'Female: ' + femalePct + '%';
 
     const sortedDrugs = Object.entries(drugFrequency).sort((a, b) => b[1] - a[1]).slice(0, 5);
     const topDrugsContainer = document.getElementById('topDrugsList');
 
     topDrugsContainer.innerHTML = sortedDrugs.length === 0 
         ? '<p style="font-size:0.8rem; color:#64748b; text-align:center;">No data.</p>'
-        : sortedDrugs.map(([drug, count], idx) => `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:10px; font-size:0.85rem; font-weight:600;">
-                <span>${idx + 1}. ${drug}</span>
-                <span style="background:#ccfbf1; color:#0f766e; padding:2px 8px; border-radius:6px; font-size:0.75rem;">${count} times</span>
-            </div>
-        `).join('');
+        : sortedDrugs.map(([drug, count], idx) => 
+            '<div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:10px; font-size:0.85rem; font-weight:600;">' +
+            '<span>' + (idx + 1) + '. ' + drug + '</span>' +
+            '<span style="background:#ccfbf1; color:#0f766e; padding:2px 8px; border-radius:6px; font-size:0.75rem;">' + count + ' times</span>' +
+            '</div>'
+        ).join('');
 }
 
 function exportPatientMedicalReportPDF() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
 
-    document.getElementById('pdfRepName').innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
+    document.getElementById('pdfRepName').innerText = patient.name + (patient.subName ? ' (' + patient.subName + ')' : '');
     document.getElementById('pdfRepAge').innerText = patient.age;
     document.getElementById('pdfRepGender').innerText = patient.gender || 'N/A';
     document.getElementById('pdfRepMarital').innerText = patient.marital || 'N/A';
     document.getElementById('pdfRepJob').innerText = patient.job || 'N/A';
     document.getElementById('pdfRepPhone').innerText = patient.phone || 'N/A';
-    document.getElementById('pdfRepDateLabel').innerText = `Generated on: ${new Date().toLocaleString()}`;
+    document.getElementById('pdfRepDateLabel').innerText = 'Generated on: ' + new Date().toLocaleString();
 
     const visitsContainer = document.getElementById('pdfRepVisitsContainer');
     const visits = patient.visits || [];
 
     visitsContainer.innerHTML = visits.length === 0 
         ? '<p style="font-size:0.85rem; color:#64748b;">No visits.</p>'
-        : visits.map((v, idx) => `
-            <div style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 12px; padding: 14px; margin-bottom: 12px;">
-                <div style="background: #0f172a; color: #ffffff; padding: 6px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; display: flex; justify-content: space-between;">
-                    <span>Visit #${visits.length - idx}</span><span>Date: ${v.date || 'N/A'}</span>
-                </div>
-                <div style="font-size: 0.8rem; margin-top: 6px;"><strong>Diagnosis & Notes:</strong> ${v.notes || 'None'}</div>
-                ${v.drugs ? `<div style="font-size: 0.8rem; margin-top: 4px;"><strong>Medications:</strong> ${v.drugs}</div>` : ''}
-            </div>
-        `).join('');
+        : visits.map((v, idx) => 
+            '<div style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 12px; padding: 14px; margin-bottom: 12px;">' +
+            '<div style="background: #0f172a; color: #ffffff; padding: 6px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; display: flex; justify-content: space-between;">' +
+            '<span>Visit #' + (visits.length - idx) + '</span><span>Date: ' + (v.date || 'N/A') + '</span></div>' +
+            '<div style="font-size: 0.8rem; margin-top: 6px;"><strong>Diagnosis & Notes:</strong> ' + (v.notes || 'None') + '</div>' +
+            (v.drugs ? '<div style="font-size: 0.8rem; margin-top: 4px;"><strong>Medications:</strong> ' + v.drugs + '</div>' : '') +
+            '</div>'
+        ).join('');
 
     html2canvas(document.getElementById('pdfReportExportContainer'), { scale: 2, useCORS: true }).then(canvas => {
         const { jsPDF } = window.jspdf;
@@ -1458,7 +1450,7 @@ function exportPatientMedicalReportPDF() {
         const imgWidth = 210;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
-        pdf.save(`Medical_Report_${patient.name.replace(/\s+/g, '_')}.pdf`);
+        pdf.save('Medical_Report_' + patient.name.replace(/\s+/g, '_') + '.pdf');
     });
 }
 
@@ -1519,20 +1511,20 @@ function calculateBmiLive() {
     let badgeStyle = '';
 
     if (bmi < 18.5) {
-        badgeText = `نحافة (Underweight: ${bmi})`;
+        badgeText = 'نحافة (Underweight: ' + bmi + ')';
         badgeStyle = 'background:#fef3c7; color:#d97706;';
     } else if (bmi >= 18.5 && bmi <= 24.9) {
-        badgeText = `وزن طبيعي (Normal: ${bmi})`;
+        badgeText = 'وزن طبيعي (Normal: ' + bmi + ')';
         badgeStyle = 'background:#dcfce7; color:#15803d;';
     } else if (bmi >= 25 && bmi <= 29.9) {
-        badgeText = `زيادة وزن (Overweight: ${bmi})`;
+        badgeText = 'زيادة وزن (Overweight: ' + bmi + ')';
         badgeStyle = 'background:#ffedd5; color:#c2410c;';
     } else {
-        badgeText = `سمنة (Obese: ${bmi})`;
+        badgeText = 'سمنة (Obese: ' + bmi + ')';
         badgeStyle = 'background:#fee2e2; color:#b91c1c;';
     }
 
-    badgeContainer.innerHTML = `<span class="bmi-badge" style="${badgeStyle}">${badgeText}</span>`;
+    badgeContainer.innerHTML = '<span class="bmi-badge" style="' + badgeStyle + '">' + badgeText + '</span>';
 }
 
 function autoResizeTextarea(textarea) {
@@ -1562,8 +1554,8 @@ function handleLiveInput(textarea, category, visitId) {
     if (isUserSecretary || isSubscriptionExpired) return;
     autoResizeTextarea(textarea);
     const val = textarea.value.trim();
-    const box = document.getElementById(`suggestions-${category}-${visitId}`);
-    const saveBar = document.getElementById(`save-bar-${category}-${visitId}`);
+    const box = document.getElementById('suggestions-' + category + '-' + visitId);
+    const saveBar = document.getElementById('save-bar-' + category + '-' + visitId);
     
     if (!val || val.length < 1) {
         if (box) box.style.display = 'none';
@@ -1578,13 +1570,13 @@ function handleLiveInput(textarea, category, visitId) {
     if (currentLine.length > 0) {
         if (saveBar) {
             saveBar.style.display = 'flex';
-            document.getElementById(`line-text-${category}-${visitId}`).innerText = currentLine;
+            document.getElementById('line-text-' + category + '-' + visitId).innerText = currentLine;
         }
         const terms = medicalDict[category] || [];
         const matches = terms.filter(t => t.toLowerCase().includes(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => `<div class="suggestion-item" onclick="selectSuggestionByClick(this)" data-category="${category}" data-visit-id="${visitId}" data-term="${encodeURIComponent(m)}">${m}</div>`).join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onclick="selectSuggestionByClick(this)" data-category="' + category + '" data-visit-id="' + visitId + '" data-term="' + encodeURIComponent(m) + '">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1605,16 +1597,7 @@ function selectSuggestionByClick(el) {
 }
 
 function selectSuggestion(category, visitId, term) {
-    let catKey = category;
-    if (category === 'chiefComplaint') catKey = 'chief_complaint';
-    else if (category === 'historyPresentIllness') catKey = 'history_present';
-    else if (category === 'reviewSystems') catKey = 'review_systems';
-    else if (category === 'drugs') catKey = 'drugs';
-    else if (category === 'labs') catKey = 'labs';
-    else if (category === 'scans') catKey = 'scans';
-    else if (category === 'notes') catKey = 'notes';
-
-    const textarea = document.getElementById(`v${category.charAt(0).toUpperCase() + category.slice(1)}-${visitId}`);
+    const textarea = document.getElementById('v' + category.charAt(0).toUpperCase() + category.slice(1) + '-' + visitId);
     if (!textarea) return;
 
     const lines = textarea.value.split('\n');
@@ -1622,16 +1605,16 @@ function selectSuggestion(category, visitId, term) {
     textarea.value = lines.join('\n') + '\n';
     autoResizeTextarea(textarea);
 
-    document.getElementById(`suggestions-${category}-${visitId}`).style.display = 'none';
-    document.getElementById(`save-bar-${category}-${visitId}`).style.display = 'none';
+    document.getElementById('suggestions-' + category + '-' + visitId).style.display = 'none';
+    document.getElementById('save-bar-' + category + '-' + visitId).style.display = 'none';
     updateVisitFieldData(visitId, category, textarea.value);
     textarea.focus();
 }
 
 function hideSuggestions(category, visitId) {
     setTimeout(() => {
-        const box = document.getElementById(`suggestions-${category}-${visitId}`);
-        const bar = document.getElementById(`save-bar-${category}-${visitId}`);
+        const box = document.getElementById('suggestions-' + category + '-' + visitId);
+        const bar = document.getElementById('save-bar-' + category + '-' + visitId);
         if (box) box.style.display = 'none';
         if (bar) bar.style.display = 'none';
     }, 200);
@@ -1639,7 +1622,7 @@ function hideSuggestions(category, visitId) {
 
 function saveLineToDict(event, category, visitId) {
     event.preventDefault();
-    const textSpan = document.getElementById(`line-text-${category}-${visitId}`);
+    const textSpan = document.getElementById('line-text-' + category + '-' + visitId);
     if (!textSpan) return;
     const lineText = textSpan.innerText.trim();
     
@@ -1651,14 +1634,14 @@ function saveLineToDict(event, category, visitId) {
     if (lineText && medicalDict[dictKey] && !medicalDict[dictKey].includes(lineText)) {
         medicalDict[dictKey].push(lineText);
         saveSettingsToCloudAndLocal();
-        const btn = document.getElementById(`btn-save-${category}-${visitId}`);
+        const btn = document.getElementById('btn-save-' + category + '-' + visitId);
         if (btn) {
             btn.innerText = 'Saved!';
             btn.classList.add('saved');
             setTimeout(() => {
                 btn.innerText = 'Save';
                 btn.classList.remove('saved');
-                document.getElementById(`save-bar-${category}-${visitId}`).style.display = 'none';
+                document.getElementById('save-bar-' + category + '-' + visitId).style.display = 'none';
             }, 1000);
         }
     }
@@ -1667,8 +1650,8 @@ function saveLineToDict(event, category, visitId) {
 function handleMhLiveInput(inputEl, inputKey) {
     autoResizeTextarea(inputEl);
     const val = inputEl.value.trim();
-    const box = document.getElementById(`suggestions-${inputKey}`);
-    const saveBar = document.getElementById(`save-bar-${inputKey}`);
+    const box = document.getElementById('suggestions-' + inputKey);
+    const saveBar = document.getElementById('save-bar-' + inputKey);
 
     if (!val || val.length < 1) {
         if (box) box.style.display = 'none';
@@ -1682,13 +1665,13 @@ function handleMhLiveInput(inputEl, inputKey) {
     if (currentLine.length > 0) {
         if (saveBar) {
             saveBar.style.display = 'flex';
-            document.getElementById(`line-text-${inputKey}`).innerText = currentLine;
+            document.getElementById('line-text-' + inputKey).innerText = currentLine;
         }
         const terms = medicalDict.mh_history || [];
         const matches = terms.filter(t => t.toLowerCase().includes(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => `<div class="suggestion-item" onclick="selectMhSuggestionByClick(this)" data-input-key="${inputKey}" data-term="${encodeURIComponent(m)}">${m}</div>`).join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onclick="selectMhSuggestionByClick(this)" data-input-key="' + inputKey + '" data-term="' + encodeURIComponent(m) + '">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1706,7 +1689,7 @@ function selectMhSuggestionByClick(el) {
 }
 
 function selectMhSuggestion(inputKey, term) {
-    const el = inputKey === 'mh_other' ? document.getElementById('mh-cd-other') : document.getElementById(`mh-${inputKey.replace('mh_', '')}`);
+    const el = inputKey === 'mh_other' ? document.getElementById('mh-cd-other') : document.getElementById('mh-' + inputKey.replace('mh_', ''));
     if (!el) return;
 
     const lines = el.value.split('\n');
@@ -1714,15 +1697,15 @@ function selectMhSuggestion(inputKey, term) {
     el.value = lines.join('\n') + '\n';
     autoResizeTextarea(el);
 
-    document.getElementById(`suggestions-${inputKey}`).style.display = 'none';
-    document.getElementById(`save-bar-${inputKey}`).style.display = 'none';
+    document.getElementById('suggestions-' + inputKey).style.display = 'none';
+    document.getElementById('save-bar-' + inputKey).style.display = 'none';
     el.focus();
 }
 
 function hideMhSuggestions(inputKey) {
     setTimeout(() => {
-        const box = document.getElementById(`suggestions-${inputKey}`);
-        const bar = document.getElementById(`save-bar-${inputKey}`);
+        const box = document.getElementById('suggestions-' + inputKey);
+        const bar = document.getElementById('save-bar-' + inputKey);
         if (box) box.style.display = 'none';
         if (bar) bar.style.display = 'none';
     }, 200);
@@ -1730,20 +1713,20 @@ function hideMhSuggestions(inputKey) {
 
 function saveMhLineToDict(event, inputKey) {
     event.preventDefault();
-    const textSpan = document.getElementById(`line-text-${inputKey}`);
+    const textSpan = document.getElementById('line-text-' + inputKey);
     if (!textSpan) return;
     const lineText = textSpan.innerText.trim();
     if (lineText && !medicalDict.mh_history.includes(lineText)) {
         medicalDict.mh_history.push(lineText);
         saveSettingsToCloudAndLocal();
-        const btn = document.getElementById(`btn-save-${inputKey}`);
+        const btn = document.getElementById('btn-save-' + inputKey);
         if (btn) {
             btn.innerText = 'Saved!';
             btn.classList.add('saved');
             setTimeout(() => {
                 btn.innerText = 'Save';
                 btn.classList.remove('saved');
-                document.getElementById(`save-bar-${inputKey}`).style.display = 'none';
+                document.getElementById('save-bar-' + inputKey).style.display = 'none';
             }, 1000);
         }
     }
@@ -1774,7 +1757,7 @@ function handleLmpInput(visitId, lmpVal) {
             let year = eddDate.getFullYear();
             let month = String(eddDate.getMonth() + 1).padStart(2, '0');
             let day = String(eddDate.getDate()).padStart(2, '0');
-            let eddStr = `${year}-${month}-${day}`;
+            let eddStr = year + '-' + month + '-' + day;
             
             const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
             if (patient) {
@@ -1782,7 +1765,7 @@ function handleLmpInput(visitId, lmpVal) {
                 if (visit) {
                     visit.obsEdd = eddStr;
                     savePatientToCloudAndLocal(patient);
-                    const eddInput = document.getElementById(`obsEdd-${visitId}`);
+                    const eddInput = document.getElementById('obsEdd-' + visitId);
                     if (eddInput) eddInput.value = eddStr;
                 }
             }
@@ -1808,11 +1791,11 @@ function updateBpFields(visitId) {
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
 
-    const sys = document.getElementById(`vBpSys-${visitId}`).value.trim();
-    const dias = document.getElementById(`vBpDias-${visitId}`).value.trim();
+    const sys = document.getElementById('vBpSys-' + visitId).value.trim();
+    const dias = document.getElementById('vBpDias-' + visitId).value.trim();
 
     if (sys || dias) {
-        visit.bp = `${sys || '___'}/${dias || '___'} mmHg`;
+        visit.bp = (sys || '___') + '/' + (dias || '___') + ' mmHg';
     } else {
         visit.bp = '';
     }
@@ -1928,8 +1911,8 @@ function saveEditedPatient() {
 
     savePatientToCloudAndLocal(patient);
     closeEditPatientModal();
-    document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
-    document.getElementById('recPatientMeta').innerHTML = `Age: ${patient.age} | Gender: ${patient.gender} | Marital: ${patient.marital} | Job: ${patient.job} | Phone: ${patient.phone}`;
+    document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ' (' + patient.subName + ')' : '');
+    document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + patient.gender + ' | Marital: ' + patient.marital + ' | Job: ' + patient.job + ' | Phone: ' + patient.phone;
 }
 
 function confirmDeletePatientRecord() {
@@ -1967,12 +1950,12 @@ function renderTrashItems() {
     const container = document.getElementById('trashItemsContainer');
     container.innerHTML = trashBin.length === 0 
         ? '<p style="text-align:center; color:#64748b;">Empty.</p>'
-        : trashBin.map((item, index) => `
-            <div class="trash-card">
-                <div><h4>${item.data.name || item.patientName}</h4></div>
-                <button class="btn-restore" onclick="restoreTrashItem(${index})">Restore</button>
-            </div>
-        `).join('');
+        : trashBin.map((item, index) => 
+            '<div class="trash-card">' +
+            '<div><h4>' + (item.data.name || item.patientName) + '</h4></div>' +
+            '<button class="btn-restore" onclick="restoreTrashItem(' + index + ')">Restore</button>' +
+            '</div>'
+        ).join('');
 }
 
 function restoreTrashItem(index) {
@@ -2063,15 +2046,15 @@ function openRxModal(visitId) {
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
 
-    document.getElementById('rxDragPatientDetailsText').innerText = `Name: ${patient.name + (patient.subName ? ` (${patient.subName})` : '')} | Age: ${patient.age} | ${patient.gender || ''}`;
+    document.getElementById('rxDragPatientDetailsText').innerText = 'Name: ' + (patient.name + (patient.subName ? ' (' + patient.subName + ')' : '')) + ' | Age: ' + patient.age + ' | ' + (patient.gender || '');
     document.getElementById('rxDragDateText').innerText = visit.date || getTodayFormatted();
     
-    const bpVal = visit.bp ? `BP: ${visit.bp}` : 'BP: _____ / _____ mmHg';
-    const hrVal = visit.hr ? `HR: ${visit.hr} bpm` : 'HR: _____ bpm';
-    const tempVal = visit.temp ? `Temp: ${visit.temp} °C` : 'Temp: _____ °C';
-    const bmiVal = visit.bmiScore ? `BMI: ${visit.bmiScore}` : 'BMI: _____';
+    const bpVal = visit.bp ? 'BP: ' + visit.bp : 'BP: _____ / _____ mmHg';
+    const hrVal = visit.hr ? 'HR: ' + visit.hr + ' bpm' : 'HR: _____ bpm';
+    const tempVal = visit.temp ? 'Temp: ' + visit.temp + ' °C' : 'Temp: _____ °C';
+    const bmiVal = visit.bmiScore ? 'BMI: ' + visit.bmiScore : 'BMI: _____';
 
-    document.getElementById('rxDragVitalsText').innerText = `${bpVal} | ${hrVal} | ${tempVal} | ${bmiVal}`;
+    document.getElementById('rxDragVitalsText').innerText = bpVal + ' | ' + hrVal + ' | ' + tempVal + ' | ' + bmiVal;
     document.getElementById('rxDragTreatmentText').innerText = visit.drugs || 'No medications prescribed.';
 
     const container = document.getElementById('rxCanvasContainer');
@@ -2124,7 +2107,7 @@ function changeBoxFontSize(boxType, delta) {
     const el = document.getElementById(map[boxType]);
     if (!el) return;
     const currentSize = parseFloat(window.getComputedStyle(el).fontSize);
-    el.style.fontSize = `${currentSize + delta}px`;
+    el.style.fontSize = (currentSize + delta) + 'px';
 }
 
 function saveRxLayoutPositions() {
@@ -2175,7 +2158,7 @@ function openPrescriptionPDF() {
         const imgWidth = 210;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
-        pdf.save(`Prescription_${Date.now()}.pdf`);
+        pdf.save('Prescription_' + Date.now() + '.pdf');
         controls.forEach(c => c.style.display = '');
     });
 }
@@ -2202,8 +2185,8 @@ function initDraggableElements() {
             if (!activeBox || activeBox !== box) return;
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
-            box.style.left = `${initialX + dx}px`;
-            box.style.top = `${initialY + dy}px`;
+            box.style.left = (initialX + dx) + 'px';
+            box.style.top = (initialY + dy) + 'px';
         });
 
         box.addEventListener('pointerup', e => {
@@ -2253,20 +2236,18 @@ function renderDictTerms() {
 
     container.innerHTML = terms.length === 0 
         ? '<p style="text-align:center; color:#64748b;">No terms in this category.</p>'
-        : terms.map((term, index) => `
-            <div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #cbd5e1; padding:8px 12px; border-radius:8px; margin-bottom:6px;">
-                <span style="font-size:0.85rem; font-weight:600; color:#0f172a;">${term}</span>
-                <div style="display:flex; gap:4px;">
-                    <button onclick="editDictTerm('${cat}', ${index})" style="background:#e0f2fe; color:#0369a1; border:none; border-radius:6px; padding:4px 8px; font-size:0.72rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-pen"></i> تعديل</button>
-                    <button onclick="removeDictTerm('${cat}', ${index})" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.72rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-trash"></i> حذف</button>
-                </div>
-            </div>
-        `).join('') + `
-            <div style="display:flex; gap:8px; margin-top:12px;">
-                <div class="input-wrapper" style="flex:1;"><input type="text" id="newDictTermInput" placeholder="Add new term..."></div>
-                <button class="btn-main" onclick="addNewDictTerm('${cat}')" style="width:auto; padding:0 16px;">Add</button>
-            </div>
-        `;
+        : terms.map((term, index) => 
+            '<div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #cbd5e1; padding:8px 12px; border-radius:8px; margin-bottom:6px;">' +
+            '<span style="font-size:0.85rem; font-weight:600; color:#0f172a;">' + term + '</span>' +
+            '<div style="display:flex; gap:4px;">' +
+            '<button onclick="editDictTerm(\'' + cat + '\', ' + index + ')" style="background:#e0f2fe; color:#0369a1; border:none; border-radius:6px; padding:4px 8px; font-size:0.72rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-pen"></i> تعديل</button>' +
+            '<button onclick="removeDictTerm(\'' + cat + '\', ' + index + ')" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.72rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-trash"></i> حذف</button>' +
+            '</div></div>'
+        ).join('') + 
+        '<div style="display:flex; gap:8px; margin-top:12px;">' +
+        '<div class="input-wrapper" style="flex:1;"><input type="text" id="newDictTermInput" placeholder="Add new term..."></div>' +
+        '<button class="btn-main" onclick="addNewDictTerm(\'' + cat + '\')" style="width:auto; padding:0 16px;">Add</button>' +
+        '</div>';
 }
 
 function editDictTerm(category, index) {
@@ -2345,15 +2326,15 @@ function renderPatientsList(list) {
     const container = document.getElementById('patientsList');
     container.innerHTML = list.length === 0 
         ? '<p style="text-align:center; color:#64748b;">No matching patients found.</p>'
-        : list.map(p => `
-            <div class="patient-card" onclick="openMedicalRecord(${p.id})">
-                <div class="patient-info">
-                    <h4>${p.name} ${p.subName ? `<span style="font-size:0.75rem; color:#0d9488; font-weight:normal;">(${p.subName})</span>` : ''}</h4>
-                    <p><i class="fa-solid fa-phone"></i> ${p.phone} | Age: ${p.age}</p>
-                </div>
-                <span class="badge-gender ${p.gender === 'Female' ? 'gender-female' : 'gender-male'}">${p.gender || 'N/A'}</span>
-            </div>
-        `).join('');
+        : list.map(p => 
+            '<div class="patient-card" onclick="openMedicalRecord(' + p.id + ')">' +
+            '<div class="patient-info">' +
+            '<h4>' + p.name + (p.subName ? ' <span style="font-size:0.75rem; color:#0d9488; font-weight:normal;">(' + p.subName + ')</span>' : '') + '</h4>' +
+            '<p><i class="fa-solid fa-phone"></i> ' + p.phone + ' | Age: ' + p.age + '</p>' +
+            '</div>' +
+            '<span class="badge-gender ' + (p.gender === 'Female' ? 'gender-female' : 'gender-male') + '">' + (p.gender || 'N/A') + '</span>' +
+            '</div>'
+        ).join('');
 }
 
 function filterPatients() {
@@ -2407,8 +2388,8 @@ function openMedicalRecord(id, saveState = true) {
     navigateTo('medicalRecordScreen', 'Patient Medical Record', 'View details', saveState);
     const patient = patients.find(p => Number(p.id) === Number(id));
     if (patient) {
-        document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ` (${patient.subName})` : '');
-        document.getElementById('recPatientMeta').innerHTML = `Age: ${patient.age} | Gender: ${patient.gender || 'N/A'} | Marital: ${patient.marital || 'N/A'} | Job: ${patient.job || 'N/A'} | Phone: ${patient.phone || 'N/A'}`;
+        document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ' (' + patient.subName + ')' : '');
+        document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + (patient.gender || 'N/A') + ' | Marital: ' + (patient.marital || 'N/A') + ' | Job: ' + (patient.job || 'N/A') + ' | Phone: ' + (patient.phone || 'N/A');
         renderVisits(patient.visits || [], true);
     }
 }
@@ -2428,17 +2409,17 @@ function renderVisits(visits, forceFullRender = true) {
         let mhSummaryParts = [];
         
         if (mh.conditions && mh.conditions.length > 0) {
-            mhSummaryParts.push(`<b>الأمراض المزمنة:</b> ${mh.conditions.join(', ')}`);
+            mhSummaryParts.push('<b>الأمراض المزمنة:</b> ' + mh.conditions.join(', '));
         }
-        if (mh.otherCondition) mhSummaryParts.push(`<b>أخرى:</b> ${mh.otherCondition}`);
-        if (mh.admission) mhSummaryParts.push(`<b>دخول المستشفى:</b> ${mh.admission}`);
-        if (mh.surgery) mhSummaryParts.push(`<b>العمليات:</b> ${mh.surgery}`);
-        if (mh.family) mhSummaryParts.push(`<b>التاريخ العائلي:</b> ${mh.family}`);
-        if (mh.allergy) mhSummaryParts.push(`<b>حساسية الأدوية:</b> ${mh.allergy}`);
-        if (mh.chronicDrugs) mhSummaryParts.push(`<b>أدوية مزمنة:</b> ${mh.chronicDrugs}`);
-        if (mh.smoking) mhSummaryParts.push(`<b>التدخين:</b> ${mh.smoking}`);
-        if (mh.alcohol) mhSummaryParts.push(`<b>الكحول:</b> ${mh.alcohol}`);
-        if (mh.notes) mhSummaryParts.push(`<b>ملاحظات:</b> ${mh.notes}`);
+        if (mh.otherCondition) mhSummaryParts.push('<b>أخرى:</b> ' + mh.otherCondition);
+        if (mh.admission) mhSummaryParts.push('<b>دخول المستشفى:</b> ' + mh.admission);
+        if (mh.surgery) mhSummaryParts.push('<b>العمليات:</b> ' + mh.surgery);
+        if (mh.family) mhSummaryParts.push('<b>التاريخ العائلي:</b> ' + mh.family);
+        if (mh.allergy) mhSummaryParts.push('<b>حساسية الأدوية:</b> ' + mh.allergy);
+        if (mh.chronicDrugs) mhSummaryParts.push('<b>أدوية مزمنة:</b> ' + mh.chronicDrugs);
+        if (mh.smoking) mhSummaryParts.push('<b>التدخين:</b> ' + mh.smoking);
+        if (mh.alcohol) mhSummaryParts.push('<b>الكحول:</b> ' + mh.alcohol);
+        if (mh.notes) mhSummaryParts.push('<b>ملاحظات:</b> ' + mh.notes);
 
         const mhSummaryText = mhSummaryParts.length > 0 ? mhSummaryParts.join(' | ') : 'لم يتم تسجيل تفاصيل التاريخ المرضي بعد.';
 
@@ -2454,307 +2435,228 @@ function renderVisits(visits, forceFullRender = true) {
 
         const cfg = specialtyConfig;
 
-        return `
-        <div class="visit-card" data-visit-id="${v.visitId}">
-            <div class="visit-header">
-                <div style="display: flex; align-items: center; gap: 8px;">
-                    <span>Visit Date:</span>
-                    <input type="date" value="${v.date || getTodayFormatted()}" onchange="updateVisitDate(${v.visitId}, this.value)" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.8rem; font-weight: 700; outline: none; cursor: pointer;">
-                </div>
-                ${visits.length > 1 ? `<button onclick="confirmDeleteVisit(${v.visitId})" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:2px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i> Delete Visit</button>` : ''}
-            </div>
+        return '<div class="visit-card" data-visit-id="' + v.visitId + '">' +
+            '<div class="visit-header">' +
+            '<div style="display: flex; align-items: center; gap: 8px;">' +
+            '<span>Visit Date:</span>' +
+            '<input type="date" value="' + (v.date || getTodayFormatted()) + '" onchange="updateVisitDate(' + v.visitId + ', this.value)" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.8rem; font-weight: 700; outline: none; cursor: pointer;">' +
+            '</div>' +
+            (visits.length > 1 ? '<button onclick="confirmDeleteVisit(' + v.visitId + ')" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:2px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i> Delete Visit</button>' : '') +
+            '</div>' +
 
-            ${cfg.medHistory ? `
-            <button type="button" class="btn-med-history" onclick="openMedHistoryModal(${v.visitId})">
-                <span><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History & Chronic Diseases</span>
-                <i class="fa-solid fa-chevron-right"></i>
-            </button>
-            <div class="medical-history-preview-card">
-                ${mhSummaryText}
-            </div>
-            ` : ''}
+            (cfg.medHistory ? 
+            '<button type="button" class="btn-med-history" onclick="openMedHistoryModal(' + v.visitId + ')">' +
+            '<span><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History & Chronic Diseases</span>' +
+            '<i class="fa-solid fa-chevron-right"></i>' +
+            '</button>' +
+            '<div class="medical-history-preview-card">' + mhSummaryText + '</div>' : '') +
 
-            ${cfg.chiefComplaint ? `
-            <div class="field-box">
-                <span class="field-label">Chief Complaint (الشكوى الرئيسية)</span>
-                <div class="input-wrapper" style="position: relative;">
-                    <textarea id="vChiefComplaint-${v.visitId}" rows="1" placeholder="Write chief complaint..." oninput="handleLiveInput(this, 'chiefComplaint', ${v.visitId})" onblur="hideSuggestions('chiefComplaint', ${v.visitId})">${v.chiefComplaint || ''}</textarea>
-                    <div class="suggestions-box" id="suggestions-chiefComplaint-${v.visitId}"></div>
-                    <div class="live-save-bar" id="save-bar-chiefComplaint-${v.visitId}">
-                        <span>Save: "<strong id="line-text-chiefComplaint-${v.visitId}"></strong>"</span>
-                        <button type="button" class="btn-live-save" id="btn-save-chiefComplaint-${v.visitId}" onmousedown="saveLineToDict(event, 'chiefComplaint', ${v.visitId})">Save</button>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+            (cfg.chiefComplaint ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Chief Complaint (الشكوى الرئيسية)</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vChiefComplaint-' + v.visitId + '" rows="1" placeholder="Write chief complaint..." oninput="handleLiveInput(this, \'chiefComplaint\', ' + v.visitId + ')" onblur="hideSuggestions(\'chiefComplaint\', ' + v.visitId + ')">' + (v.chiefComplaint || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-chiefComplaint-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-chiefComplaint-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-chiefComplaint-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-chiefComplaint-' + v.visitId + '" onmousedown="saveLineToDict(event, \'chiefComplaint\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
 
-            ${cfg.historyPresentIllness ? `
-            <div class="field-box">
-                <span class="field-label">History of Present Illness - HPI (تاريخ المرض الحالي)</span>
-                <div class="input-wrapper" style="position: relative;">
-                    <textarea id="vHistoryPresentIllness-${v.visitId}" rows="2" placeholder="Write HPI details..." oninput="handleLiveInput(this, 'historyPresentIllness', ${v.visitId})" onblur="hideSuggestions('historyPresentIllness', ${v.visitId})">${v.historyPresentIllness || ''}</textarea>
-                    <div class="suggestions-box" id="suggestions-historyPresentIllness-${v.visitId}"></div>
-                    <div class="live-save-bar" id="save-bar-historyPresentIllness-${v.visitId}">
-                        <span>Save: "<strong id="line-text-historyPresentIllness-${v.visitId}"></strong>"</span>
-                        <button type="button" class="btn-live-save" id="btn-save-historyPresentIllness-${v.visitId}" onmousedown="saveLineToDict(event, 'historyPresentIllness', ${v.visitId})">Save</button>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+            (cfg.historyPresentIllness ? 
+            '<div class="field-box">' +
+            '<span class="field-label">History of Present Illness - HPI (تاريخ المرض الحالي)</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vHistoryPresentIllness-' + v.visitId + '" rows="2" placeholder="Write HPI details..." oninput="handleLiveInput(this, \'historyPresentIllness\', ' + v.visitId + ')" onblur="hideSuggestions(\'historyPresentIllness\', ' + v.visitId + ')">' + (v.historyPresentIllness || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-historyPresentIllness-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-historyPresentIllness-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-historyPresentIllness-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-historyPresentIllness-' + v.visitId + '" onmousedown="saveLineToDict(event, \'historyPresentIllness\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
 
-            ${cfg.reviewSystems ? `
-            <div class="field-box">
-                <span class="field-label">Review of Other Systems - ROS (مراجعة الأجهزة والأنظمة)</span>
-                <div class="input-wrapper" style="position: relative;">
-                    <textarea id="vReviewSystems-${v.visitId}" rows="2" placeholder="Write ROS details..." oninput="handleLiveInput(this, 'reviewSystems', ${v.visitId})" onblur="hideSuggestions('reviewSystems', ${v.visitId})">${v.reviewSystems || ''}</textarea>
-                    <div class="suggestions-box" id="suggestions-reviewSystems-${v.visitId}"></div>
-                    <div class="live-save-bar" id="save-bar-reviewSystems-${v.visitId}">
-                        <span>Save: "<strong id="line-text-reviewSystems-${v.visitId}"></strong>"</span>
-                        <button type="button" class="btn-live-save" id="btn-save-reviewSystems-${v.visitId}" onmousedown="saveLineToDict(event, 'reviewSystems', ${v.visitId})">Save</button>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+            (cfg.reviewSystems ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Review of Other Systems - ROS (مراجعة الأجهزة والأنظمة)</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vReviewSystems-' + v.visitId + '" rows="2" placeholder="Write ROS details..." oninput="handleLiveInput(this, \'reviewSystems\', ' + v.visitId + ')" onblur="hideSuggestions(\'reviewSystems\', ' + v.visitId + ')">' + (v.reviewSystems || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-reviewSystems-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-reviewSystems-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-reviewSystems-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-reviewSystems-' + v.visitId + '" onmousedown="saveLineToDict(event, \'reviewSystems\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
 
-            ${cfg.vitals ? `
-            <button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(${v.visitId})">
-                <span><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> Vital Signs & BMI Calculator</span>
-                <span style="font-size:0.75rem; background:#e0f2fe; padding:2px 8px; border-radius:6px;">Score: ${v.bmiScore || '—'}</span>
-            </button>
+            (cfg.vitals ? 
+            '<button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(' + v.visitId + ')">' +
+            '<span><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> Vital Signs & BMI Calculator</span>' +
+            '<span style="font-size:0.75rem; background:#e0f2fe; padding:2px 8px; border-radius:6px;">Score: ' + (v.bmiScore || '—') + '</span>' +
+            '</button>' +
+            '<div class="vital-box" style="margin-bottom: 12px;">' +
+            '<div class="vital-row">' +
+            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-arrow-trend-up"></i> Systolic BP (الضغط العالي)</span>' +
+            '<div class="vital-inputs"><input type="number" id="vBpSys-' + v.visitId + '" value="' + bpSys + '" placeholder="120" oninput="updateBpFields(' + v.visitId + ')"><span>mmHg</span></div></div>' +
+            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-arrow-trend-down"></i> Diastolic BP (الضغط الواطي)</span>' +
+            '<div class="vital-inputs"><input type="number" id="vBpDias-' + v.visitId + '" value="' + bpDias + '" placeholder="80" oninput="updateBpFields(' + v.visitId + ')"><span>mmHg</span></div></div>' +
+            '</div>' +
+            '<div class="vital-row">' +
+            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-heart"></i> Heart Rate (HR)</span>' +
+            '<div class="vital-inputs"><input type="number" value="' + (v.hr || '') + '" placeholder="75" oninput="updateVisitFieldData(' + v.visitId + ', \'hr\', this.value)"><span>bpm</span></div></div>' +
+            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-temperature-high"></i> Temperature</span>' +
+            '<div class="vital-inputs"><input type="number" step="0.1" value="' + (v.temp || '') + '" placeholder="37.0" oninput="updateVisitFieldData(' + v.visitId + ', \'temp\', this.value)"><span>°C</span></div></div>' +
+            '</div>' +
+            '<div class="vital-row">' +
+            '<div class="vital-item" style="grid-column: span 2;"><span class="vital-label"><i class="fa-solid fa-weight-scale"></i> Weight</span>' +
+            '<div class="vital-inputs"><input type="number" value="' + (v.bmiWeight || '') + '" placeholder="70" oninput="updateVisitFieldData(' + v.visitId + ', \'bmiWeight\', this.value)"><span>kg</span></div></div>' +
+            '</div></div>' : '') +
 
-            <div class="vital-box" style="margin-bottom: 12px;">
-                <div class="vital-row">
-                    <div class="vital-item">
-                        <span class="vital-label"><i class="fa-solid fa-arrow-trend-up"></i> Systolic BP (الضغط العالي)</span>
-                        <div class="vital-inputs"><input type="number" id="vBpSys-${v.visitId}" value="${bpSys}" placeholder="120" oninput="updateBpFields(${v.visitId})"><span>mmHg</span></div>
-                    </div>
-                    <div class="vital-item">
-                        <span class="vital-label"><i class="fa-solid fa-arrow-trend-down"></i> Diastolic BP (الضغط الواطي)</span>
-                        <div class="vital-inputs"><input type="number" id="vBpDias-${v.visitId}" value="${bpDias}" placeholder="80" oninput="updateBpFields(${v.visitId})"><span>mmHg</span></div>
-                    </div>
-                </div>
-                <div class="vital-row">
-                    <div class="vital-item">
-                        <span class="vital-label"><i class="fa-solid fa-heart"></i> Heart Rate (HR)</span>
-                        <div class="vital-inputs"><input type="number" value="${v.hr || ''}" placeholder="75" oninput="updateVisitFieldData(${v.visitId}, 'hr', this.value)"><span>bpm</span></div>
-                    </div>
-                    <div class="vital-item">
-                        <span class="vital-label"><i class="fa-solid fa-temperature-high"></i> Temperature</span>
-                        <div class="vital-inputs"><input type="number" step="0.1" value="${v.temp || ''}" placeholder="37.0" oninput="updateVisitFieldData(${v.visitId}, 'temp', this.value)"><span>°C</span></div>
-                    </div>
-                </div>
-                <div class="vital-row">
-                    <div class="vital-item" style="grid-column: span 2;">
-                        <span class="vital-label"><i class="fa-solid fa-weight-scale"></i> Weight</span>
-                        <div class="vital-inputs"><input type="number" value="${v.bmiWeight || ''}" placeholder="70" oninput="updateVisitFieldData(${v.visitId}, 'bmiWeight', this.value)"><span>kg</span></div>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
+            (cfg.obsGyn ? 
+            '<div class="group-card" style="background:#fce7f3; border-color:#f472b6; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#be185d; display:block; margin-bottom:10px;"><i class="fa-solid fa-person-pregnant"></i> تفاصيل النسائية والتوليد (Obstetrics & Gynecology)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">LMP (آخر دورة)</span><div class="input-wrapper"><input type="date" id="obsLmp-' + v.visitId + '" value="' + (v.obsLmp || '') + '" oninput="handleLmpInput(' + v.visitId + ', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">EDD (موعد الولادة)</span><div class="input-wrapper"><input type="date" id="obsEdd-' + v.visitId + '" value="' + (v.obsEdd || '') + '" oninput="updateVisitFieldData(' + v.visitId + ', \'obsEdd\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Gravidity (G)</span><div class="input-wrapper"><input type="text" value="' + (v.obsG || '') + '" placeholder="G3" oninput="updateVisitFieldData(' + v.visitId + ', \'obsG\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Parity (P)</span><div class="input-wrapper"><input type="text" value="' + (v.obsP || '') + '" placeholder="P2" oninput="updateVisitFieldData(' + v.visitId + ', \'obsP\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Abortions (A)</span><div class="input-wrapper"><input type="text" value="' + (v.obsA || '') + '" placeholder="A1" oninput="updateVisitFieldData(' + v.visitId + ', \'obsA\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات السونار والفحص</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'obsNotes\', this.value)" style="font-size:0.85rem;">' + (v.obsNotes || '') + '</textarea></div></div></div>' : '') +
 
-            ${cfg.obsGyn ? `
-            <div class="group-card" style="background:#fce7f3; border-color:#f472b6; margin-bottom:12px; padding:12px;">
-                <span style="font-weight:800; font-size:0.85rem; color:#be185d; display:block; margin-bottom:10px;"><i class="fa-solid fa-person-pregnant"></i> تفاصيل النسائية والتوليد (Obstetrics & Gynecology)</span>
-                <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">LMP (آخر دورة)</span><div class="input-wrapper"><input type="date" id="obsLmp-${v.visitId}" value="${v.obsLmp || ''}" oninput="handleLmpInput(${v.visitId}, this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">EDD (موعد الولادة التلقائي)</span><div class="input-wrapper"><input type="date" id="obsEdd-${v.visitId}" value="${v.obsEdd || ''}" oninput="updateVisitFieldData(${v.visitId}, 'obsEdd', this.value)" style="font-size:0.85rem;"></div></div>
-                </div>
-                <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Gravidity (عدد مرات الحمل - G)</span><div class="input-wrapper"><input type="text" value="${v.obsG || ''}" placeholder="مثال: G3" oninput="updateVisitFieldData(${v.visitId}, 'obsG', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Parity (الولادات - P)</span><div class="input-wrapper"><input type="text" value="${v.obsP || ''}" placeholder="مثال: P2" oninput="updateVisitFieldData(${v.visitId}, 'obsP', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Abortions (الإسقاطات - A)</span><div class="input-wrapper"><input type="text" value="${v.obsA || ''}" placeholder="مثال: A1" oninput="updateVisitFieldData(${v.visitId}, 'obsA', this.value)" style="font-size:0.85rem;"></div></div>
-                </div>
-                <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات السونار والفحص السريري للنسائية</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل السونار أو الفحص النسائي..." oninput="autoResizeTextarea(this); updateVisitFieldData(${v.visitId}, 'obsNotes', this.value)" style="font-size:0.85rem;">${v.obsNotes || ''}</textarea></div></div>
-            </div>
-            ` : ''}
+            (cfg.ortho ? 
+            '<div class="group-card" style="background:#fef3c7; border-color:#f59e0b; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#b45309; display:block; margin-bottom:10px;"><i class="fa-solid fa-bone"></i> العظام والمفاصل (Orthopedics)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">المفصل / الإصابة</span><div class="input-wrapper"><input type="text" value="' + (v.orthoJoint || '') + '" placeholder="الركبة اليمنى" oninput="updateVisitFieldData(' + v.visitId + ', \'orthoJoint\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">درجة الخشونة</span><div class="input-wrapper"><input type="text" value="' + (v.orthoGrade || '') + '" placeholder="Grade II" oninput="updateVisitFieldData(' + v.visitId + ', \'orthoGrade\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مدى الحركة</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات الحركة..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'orthoNotes\', this.value)" style="font-size:0.85rem;">' + (v.orthoNotes || '') + '</textarea></div></div></div>' : '') +
 
-            ${cfg.ortho ? `
-            <div class="group-card" style="background:#fef3c7; border-color:#f59e0b; margin-bottom:12px; padding:12px;">
-                <span style="font-weight:800; font-size:0.85rem; color:#b45309; display:block; margin-bottom:10px;"><i class="fa-solid fa-bone"></i> تقييم العظام والمفاصل والكسور (Orthopedics)</span>
-                <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">المفصل / الإصابة المتأثرة</span><div class="input-wrapper"><input type="text" value="${v.orthoJoint || ''}" placeholder="مثال: مفصل الركبة اليمنى" oninput="updateVisitFieldData(${v.visitId}, 'orthoJoint', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">درجة الخشونة / الإصابة</span><div class="input-wrapper"><input type="text" value="${v.orthoGrade || ''}" placeholder="مثال: Grade II / خشونة متوسطة" oninput="updateVisitFieldData(${v.visitId}, 'orthoGrade', this.value)" style="font-size:0.85rem;"></div></div>
-                </div>
-                <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مدى الحركة والفحص الفيزيائي (Range of Motion)</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب نتائج الفحص الحركي والفيزيائي..." oninput="autoResizeTextarea(this); updateVisitFieldData(${v.visitId}, 'orthoNotes', this.value)" style="font-size:0.85rem;">${v.orthoNotes || ''}</textarea></div></div>
-            </div>
-            ` : ''}
+            (cfg.neuro ? 
+            '<div class="group-card" style="background:#f3e8ff; border-color:#c084fc; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#7e22ce; display:block; margin-bottom:10px;"><i class="fa-solid fa-brain"></i> الجملة العصبية (Neurology)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">GCS</span><div class="input-wrapper"><input type="text" value="' + (v.neuroGcs || '') + '" placeholder="15/15" oninput="updateVisitFieldData(' + v.visitId + ', \'neuroGcs\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Cranial Nerves</span><div class="input-wrapper"><input type="text" value="' + (v.neuroNerves || '') + '" placeholder="Intact" oninput="updateVisitFieldData(' + v.visitId + ', \'neuroNerves\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الأعصاب</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'neuroNotes\', this.value)" style="font-size:0.85rem;">' + (v.neuroNotes || '') + '</textarea></div></div></div>' : '') +
 
-            ${cfg.neuro ? `
-            <div class="group-card" style="background:#f3e8ff; border-color:#c084fc; margin-bottom:12px; padding:12px;">
-                <span style="font-weight:800; font-size:0.85rem; color:#7e22ce; display:block; margin-bottom:10px;"><i class="fa-solid fa-brain"></i> فحص الجملة العصبية (Neurology)</span>
-                <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مقياس غلاسكو للوعي (GCS)</span><div class="input-wrapper"><input type="text" value="${v.neuroGcs || ''}" placeholder="مثال: 15/15" oninput="updateVisitFieldData(${v.visitId}, 'neuroGcs', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الأعصاب القحفية (Cranial Nerves)</span><div class="input-wrapper"><input type="text" value="${v.neuroNerves || ''}" placeholder="مثال: Intact / سليمة" oninput="updateVisitFieldData(${v.visitId}, 'neuroNerves', this.value)" style="font-size:0.85rem;"></div></div>
-                </div>
-                <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الفحص الحسي والحركي وملاحظات الأعصاب</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل الفحص العصبي..." oninput="autoResizeTextarea(this); updateVisitFieldData(${v.visitId}, 'neuroNotes', this.value)" style="font-size:0.85rem;">${v.neuroNotes || ''}</textarea></div></div>
-            </div>
-            ` : ''}
+            (cfg.peds ? 
+            '<div class="group-card" style="background:#e0f2fe; border-color:#38bdf8; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#0369a1; display:block; margin-bottom:10px;"><i class="fa-solid fa-child"></i> فحص الأطفال والنمو (WHO Pediatrics)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">العمر (أشهر)</span><div class="input-wrapper"><input type="number" id="pedsAgeMonths-' + v.visitId + '" value="' + (v.pedsAgeMonths || '') + '" placeholder="12" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsAgeMonths\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الوزن (كغ)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsWeight-' + v.visitId + '" value="' + (v.pedsWeight || '') + '" placeholder="9.5" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsWeight\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الطول (سم)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsHeight-' + v.visitId + '" value="' + (v.pedsHeight || '') + '" placeholder="75" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsHeight\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div>' +
+            '<button type="button" class="btn-main" onclick="calculateVisitChildGrowth(' + v.visitId + ')" style="background:#0284c7; padding:6px 12px; font-size:0.78rem; margin-top:4px; margin-bottom:8px;"><i class="fa-solid fa-calculator"></i> حساب وتقييم نمو الطفل (WHO)</button>' +
+            '<div id="pedsGrowthResult-' + v.visitId + '" style="display:' + (v.pedsGrowthResult ? 'block' : 'none') + '; background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:8px; font-size:0.78rem; color:#14532d; margin-bottom:8px;">' + (v.pedsGrowthResult || '') + '</div>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">اللقاحات</span><div class="input-wrapper"><input type="text" value="' + (v.pedsVaccine || '') + '" placeholder="مكتملة" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsVaccine\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">التغذية</span><div class="input-wrapper"><input type="text" value="' + (v.pedsFeeding || '') + '" placeholder="طبيعية" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsFeeding\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الأطفال</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'pedsNotes\', this.value)" style="font-size:0.85rem;">' + (v.pedsNotes || '') + '</textarea></div></div></div>' : '') +
 
-            ${cfg.peds ? `
-            <div class="group-card" style="background:#e0f2fe; border-color:#38bdf8; margin-bottom:12px; padding:12px;">
-                <span style="font-weight:800; font-size:0.85rem; color:#0369a1; display:block; margin-bottom:10px;"><i class="fa-solid fa-child"></i> فحص الأطفال ومنحنيات النمو البيومترية (WHO Pediatrics)</span>
-                
-                <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">العمر بالأشهر</span><div class="input-wrapper"><input type="number" id="pedsAgeMonths-${v.visitId}" value="${v.pedsAgeMonths || ''}" placeholder="مثال: 12" oninput="updateVisitFieldData(${v.visitId}, 'pedsAgeMonths', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الوزن الحالي (كغ)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsWeight-${v.visitId}" value="${v.pedsWeight || ''}" placeholder="مثال: 9.5" oninput="updateVisitFieldData(${v.visitId}, 'pedsWeight', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الطول الحالي (سم)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsHeight-${v.visitId}" value="${v.pedsHeight || ''}" placeholder="مثال: 75" oninput="updateVisitFieldData(${v.visitId}, 'pedsHeight', this.value)" style="font-size:0.85rem;"></div></div>
-                </div>
+            (cfg.derm ? 
+            '<div class="group-card" style="background:#ffedd5; border-color:#fb923c; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#c2410c; display:block; margin-bottom:10px;"><i class="fa-solid fa-hand-dots"></i> الجلدية والتناسلية (Dermatology)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع الآفة</span><div class="input-wrapper"><input type="text" value="' + (v.dermType || '') + '" placeholder="Plaque" oninput="updateVisitFieldData(' + v.visitId + ', \'dermType\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">المكان</span><div class="input-wrapper"><input type="text" value="' + (v.dermSite || '') + '" placeholder="الوجه" oninput="updateVisitFieldData(' + v.visitId + ', \'dermSite\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الجلدية</span><div class="input-wrapper"><textarea rows="2" placeholder="وصف الطفح..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'dermNotes\', this.value)" style="font-size:0.85rem;">' + (v.dermNotes || '') + '</textarea></div></div></div>' : '') +
 
-                <button type="button" class="btn-main" onclick="calculateVisitChildGrowth(${v.visitId})" style="background:#0284c7; padding:6px 12px; font-size:0.78rem; margin-top:4px; margin-bottom:8px;">
-                    <i class="fa-solid fa-calculator"></i> حساب وتقييم نمو الطفل (WHO)
-                </button>
+            (cfg.ent ? 
+            '<div class="group-card" style="background:#ecfdf5; border-color:#34d399; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#047857; display:block; margin-bottom:10px;"><i class="fa-solid fa-ear-deaf"></i> الأذن والأنف والحنجرة (ENT)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الأذن</span><div class="input-wrapper"><input type="text" value="' + (v.entEar || '') + '" placeholder="طبيعي" oninput="updateVisitFieldData(' + v.visitId + ', \'entEar\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الحلق واللوزتين</span><div class="input-wrapper"><input type="text" value="' + (v.entThroat || '') + '" placeholder="احمرار" oninput="updateVisitFieldData(' + v.visitId + ', \'entThroat\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات ENT</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'entNotes\', this.value)" style="font-size:0.85rem;">' + (v.entNotes || '') + '</textarea></div></div></div>' : '') +
 
-                <div id="pedsGrowthResult-${v.visitId}" style="display:${v.pedsGrowthResult ? 'block' : 'none'}; background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:8px; font-size:0.78rem; color:#14532d; margin-bottom:8px;">
-                    ${v.pedsGrowthResult || ''}
-                </div>
+            (cfg.ophthal ? 
+            '<div class="group-card" style="background:#e0e7ff; border-color:#818cf8; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#4338ca; display:block; margin-bottom:10px;"><i class="fa-solid fa-eye"></i> العيون (Ophthalmology)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (VA)</span><div class="input-wrapper"><input type="text" value="' + (v.ophthalVa || '') + '" placeholder="6/6" oninput="updateVisitFieldData(' + v.visitId + ', \'ophthalVa\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="' + (v.ophthalIop || '') + '" placeholder="15 mmHg" oninput="updateVisitFieldData(' + v.visitId + ', \'ophthalIop\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات العيون</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'ophthalNotes\', this.value)" style="font-size:0.85rem;">' + (v.ophthalNotes || '') + '</textarea></div></div></div>' : '') +
 
-                <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حالة اللقاحات والمطعوم</span><div class="input-wrapper"><input type="text" value="${v.pedsVaccine \vert{}\vert{} ''}" placeholder="مكتملة حسب العمر" oninput="updateVisitFieldData(${v.visitId}, 'pedsVaccine', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع التغذية</span><div class="input-wrapper"><input type="text" value="${v.pedsFeeding \vert{}\vert{} ''}" placeholder="طبيعية / صناعية" oninput="updateVisitFieldData(${v.visitId}, 'pedsFeeding', this.value)" style="font-size:0.85rem;"></div></div>
-                </div>
+            (cfg.cardio ? 
+            '<div class="group-card" style="background:#fee2e2; border-color:#f87171; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#b91c1c; display:block; margin-bottom:10px;"><i class="fa-solid fa-heart-pulse"></i> القلب والشرايين (Cardiology)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">تخطيط القلب (ECG)</span><div class="input-wrapper"><input type="text" value="' + (v.cardioEcg || '') + '" placeholder="Normal" oninput="updateVisitFieldData(' + v.visitId + ', \'cardioEcg\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">أصوات القلب</span><div class="input-wrapper"><input type="text" value="' + (v.cardioSounds || '') + '" placeholder="S1 S2 normal" oninput="updateVisitFieldData(' + v.visitId + ', \'cardioSounds\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات القلب</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'cardioNotes\', this.value)" style="font-size:0.85rem;">' + (v.cardioNotes || '') + '</textarea></div></div></div>' : '') +
 
-                <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات طب الأطفال والفحص السريري</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب ملاحظات الفحص..." oninput="autoResizeTextarea(this); updateVisitFieldData(${v.visitId}, 'pedsNotes', this.value)" style="font-size:0.85rem;">${v.pedsNotes || ''}</textarea></div></div>
-            </div>
-            ` : ''}
+            (cfg.labs ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Lab Tests</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vLabs-' + v.visitId + '" rows="1" placeholder="Request lab tests..." oninput="handleLiveInput(this, \'labs\', ' + v.visitId + ')" onblur="hideSuggestions(\'labs\', ' + v.visitId + ')">' + (v.labs || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-labs-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-labs-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-labs-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-labs-' + v.visitId + '" onmousedown="saveLineToDict(event, \'labs\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
 
-            ${cfg.derm ? `
-            <div class="group-card" style="background:#ffedd5; border-color:#fb923c; margin-bottom:12px; padding:12px;">
-                <span style="font-weight:800; font-size:0.85rem; color:#c2410c; display:block; margin-bottom:10px;"><i class="fa-solid fa-hand-dots"></i> فحص الجلدية والتناسلية (Dermatology)</span>
-                <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع الآفة الجلدية</span><div class="input-wrapper"><input type="text" value="${v.dermType \vert{}\vert{} ''}" placeholder="مثال: Plaque / Papules" oninput="updateVisitFieldData(${v.visitId}, 'dermType', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مكان التوزيع في الجسم</span><div class="input-wrapper"><input type="text" value="${v.dermSite \vert{}\vert{} ''}" placeholder="مثال: الوجه والذراعين" oninput="updateVisitFieldData(${v.visitId}, 'dermSite', this.value)" style="font-size:0.85rem;"></div></div>
-                </div>
-                <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الفحص الجلدي ومصباح وود</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب وصف الطفح والتشخيص..." oninput="autoResizeTextarea(this); updateVisitFieldData(${v.visitId}, 'dermNotes', this.value)" style="font-size:0.85rem;">${v.dermNotes || ''}</textarea></div></div>
-            </div>
-            ` : ''}
+            (cfg.scans ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Radiology & Scans</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vScans-' + v.visitId + '" rows="1" placeholder="Request radiology..." oninput="handleLiveInput(this, \'scans\', ' + v.visitId + ')" onblur="hideSuggestions(\'scans\', ' + v.visitId + ')">' + (v.scans || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-scans-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-scans-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-scans-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-scans-' + v.visitId + '" onmousedown="saveLineToDict(event, \'scans\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
 
-            ${cfg.ent ? `
-            <div class="group-card" style="background:#ecfdf5; border-color:#34d399; margin-bottom:12px; padding:12px;">
-                <span style="font-weight:800; font-size:0.85rem; color:#047857; display:block; margin-bottom:10px;"><i class="fa-solid fa-ear-deaf"></i> فحص الأذن والأنف والحنجرة (ENT)</span>
-                <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأذن (TM)</span><div class="input-wrapper"><input type="text" value="${v.entEar \vert{}\vert{} ''}" placeholder="مثال: غشاء الطبل طبيعي / احمرار" oninput="updateVisitFieldData(${v.visitId}, 'entEar', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الحلق واللوزتين</span><div class="input-wrapper"><input type="text" value="${v.entThroat || ''}" placeholder="مثال: احمرار اللوزتين Acute Tonsillitis" oninput="updateVisitFieldData(${v.visitId}, 'entThroat', this.value)" style="font-size:0.85rem;"></div></div>
-                </div>
-                <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأنف والجيوب وملاحظات ENT</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل فحص الأذن والأنف والحنجرة..." oninput="autoResizeTextarea(this); updateVisitFieldData(${v.visitId}, 'entNotes', this.value)" style="font-size:0.85rem;">${v.entNotes || ''}</textarea></div></div>
-            </div>
-            ` : ''}
+            (cfg.notes ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Diagnosis & Notes</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vNotes-' + v.visitId + '" rows="2" placeholder="Clinical notes & diagnosis..." oninput="handleLiveInput(this, \'notes\', ' + v.visitId + ')" onblur="hideSuggestions(\'notes\', ' + v.visitId + ')">' + (v.notes || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-notes-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-notes-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-notes-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-notes-' + v.visitId + '" onmousedown="saveLineToDict(event, \'notes\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
 
-            ${cfg.ophthal ? `
-            <div class="group-card" style="background:#e0e7ff; border-color:#818cf8; margin-bottom:12px; padding:12px;">
-                <span style="font-weight:800; font-size:0.85rem; color:#4338ca; display:block; margin-bottom:10px;"><i class="fa-solid fa-eye"></i> فحص العيون (Ophthalmology)</span>
-                <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (Visual Acuity)</span><div class="input-wrapper"><input type="text" value="${v.ophthalVa \vert{}\vert{} ''}" placeholder="RE: 6/6, LE: 6/9" oninput="updateVisitFieldData(${v.visitId}, 'ophthalVa', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalIop \vert{}\vert{} ''}" placeholder="مثال: 15 mmHg" oninput="updateVisitFieldData(${v.visitId}, 'ophthalIop', this.value)" style="font-size:0.85rem;"></div></div>
-                </div>
-                <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص قاع العين وملاحظات العيون</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل قاع العين والفحص..." oninput="autoResizeTextarea(this); updateVisitFieldData(${v.visitId}, 'ophthalNotes', this.value)" style="font-size:0.85rem;">${v.ophthalNotes || ''}</textarea></div></div>
-            </div>
-            ` : ''}
+            (cfg.rx ? 
+            '<div class="field-box">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">' +
+            '<span class="field-label" style="margin-bottom:0;">Prescribed Medications (RX)</span>' +
+            '<button type="button" onclick="openRxModal(' + v.visitId + ')" style="background:#fae8ff; color:#c084fc; border:none; border-radius:8px; padding:4px 10px; font-size:0.75rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-file-prescription"></i> Print RX Prescription</button>' +
+            '</div>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vDrugs-' + v.visitId + '" rows="3" placeholder="Write prescription drugs here..." oninput="handleDrugsInput(this, ' + v.visitId + ')" onkeydown="handleDrugsKeyDown(event, this, ' + v.visitId + ')" onblur="hideSuggestions(\'drugs\', ' + v.visitId + ')">' + (v.drugs || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-drugs-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-drugs-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-drugs-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-drugs-' + v.visitId + '" onmousedown="saveLineToDict(event, \'drugs\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
 
-            ${cfg.cardio ? `
-            <div class="group-card" style="background:#fee2e2; border-color:#f87171; margin-bottom:12px; padding:12px;">
-                <span style="font-weight:800; font-size:0.85rem; color:#b91c1c; display:block; margin-bottom:10px;"><i class="fa-solid fa-heart-pulse"></i> فحص القلب والشرايين (Cardiology)</span>
-                <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">تخطيط القلب (ECG)</span><div class="input-wrapper"><input type="text" value="${v.cardioEcg || ''}" placeholder="مثال: Normal Sinus Rhythm" oninput="updateVisitFieldData(${v.visitId}, 'cardioEcg', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">أصوات القلب (Heart Sounds)</span><div class="input-wrapper"><input type="text" value="${v.cardioSounds || ''}" placeholder="مثال: S1 S2 normal, no murmur" oninput="updateVisitFieldData(${v.visitId}, 'cardioSounds', this.value)" style="font-size:0.85rem;"></div></div>
-                </div>
-                <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الفحص القلبي الإضافية</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب نتائج الفحص القلبي..." oninput="autoResizeTextarea(this); updateVisitFieldData(${v.visitId}, 'cardioNotes', this.value)" style="font-size:0.85rem;">${v.cardioNotes || ''}</textarea></div></div>
-            </div>
-            ` : ''}
-
-            ${cfg.labs ? `
-            <div class="field-box">
-                <span class="field-label">Lab Tests</span>
-                <div class="input-wrapper" style="position: relative;">
-                    <textarea id="vLabs-${v.visitId}" rows="1" placeholder="Request lab tests..." oninput="handleLiveInput(this, 'labs', ${v.visitId})" onblur="hideSuggestions('labs', ${v.visitId})">${v.labs || ''}</textarea>
-                    <div class="suggestions-box" id="suggestions-labs-${v.visitId}"></div>
-                    <div class="live-save-bar" id="save-bar-labs-${v.visitId}">
-                        <span>Save: "<strong id="line-text-labs-${v.visitId}"></strong>"</span>
-                        <button type="button" class="btn-live-save" id="btn-save-labs-${v.visitId}" onmousedown="saveLineToDict(event, 'labs', ${v.visitId})">Save</button>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
-
-            ${cfg.scans ? `
-            <div class="field-box">
-                <span class="field-label">Radiology & Scans</span>
-                <div class="input-wrapper" style="position: relative;">
-                    <textarea id="vScans-${v.visitId}" rows="1" placeholder="Request radiology..." oninput="handleLiveInput(this, 'scans', ${v.visitId})" onblur="hideSuggestions('scans', ${v.visitId})">${v.scans || ''}</textarea>
-                    <div class="suggestions-box" id="suggestions-scans-${v.visitId}"></div>
-                    <div class="live-save-bar" id="save-bar-scans-${v.visitId}">
-                        <span>Save: "<strong id="line-text-scans-${v.visitId}"></strong>"</span>
-                        <button type="button" class="btn-live-save" id="btn-save-scans-${v.visitId}" onmousedown="saveLineToDict(event, 'scans', ${v.visitId})">Save</button>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
-
-            ${cfg.notes ? `
-            <div class="field-box">
-                <span class="field-label">Diagnosis & Notes</span>
-                <div class="input-wrapper" style="position: relative;">
-                    <textarea id="vNotes-${v.visitId}" rows="2" placeholder="Clinical notes & diagnosis..." oninput="handleLiveInput(this, 'notes', ${v.visitId})" onblur="hideSuggestions('notes', ${v.visitId})">${v.notes || ''}</textarea>
-                    <div class="suggestions-box" id="suggestions-notes-${v.visitId}"></div>
-                    <div class="live-save-bar" id="save-bar-notes-${v.visitId}">
-                        <span>Save: "<strong id="line-text-notes-${v.visitId}"></strong>"</span>
-                        <button type="button" class="btn-live-save" id="btn-save-notes-${v.visitId}" onmousedown="saveLineToDict(event, 'notes', ${v.visitId})">Save</button>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
-
-            ${cfg.rx ? `
-            <div class="field-box">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-                    <span class="field-label" style="margin-bottom:0;">Prescribed Medications (RX)</span>
-                    <button type="button" onclick="openRxModal(${v.visitId})" style="background:#fae8ff; color:#c084fc; border:none; border-radius:8px; padding:4px 10px; font-size:0.75rem; font-weight:700; cursor:pointer;">
-                        <i class="fa-solid fa-file-prescription"></i> Print RX Prescription
-                    </button>
-                </div>
-                <div class="input-wrapper" style="position: relative;">
-                    <textarea id="vDrugs-${v.visitId}" rows="3" placeholder="Write prescription drugs here..." oninput="handleDrugsInput(this, ${v.visitId})" onkeydown="handleDrugsKeyDown(event, this, ${v.visitId})" onblur="hideSuggestions('drugs', ${v.visitId})">${v.drugs || ''}</textarea>
-                    <div class="suggestions-box" id="suggestions-drugs-${v.visitId}"></div>
-                    <div class="live-save-bar" id="save-bar-drugs-${v.visitId}">
-                        <span>Save: "<strong id="line-text-drugs-${v.visitId}"></strong>"</span>
-                        <button type="button" class="btn-live-save" id="btn-save-drugs-${v.visitId}" onmousedown="saveLineToDict(event, 'drugs', ${v.visitId})">Save</button>
-                    </div>
-                </div>
-            </div>
-            ` : ''}
-
-            ${cfg.attachments ? `
-            <div class="field-box">
-                <span class="field-label">Attachments & Medical Reports</span>
-                <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <label style="flex:1; background:#f1f5f9; border:1px dashed #cbd5e1; border-radius:10px; padding:10px; text-align:center; font-size:0.8rem; font-weight:700; color:#475569; cursor:pointer;">
-                        <i class="fa-solid fa-cloud-arrow-up"></i> رفع صور متعددة / ملف
-                        <input type="file" accept="image/*,.pdf" multiple style="display:none;" onchange="handleFileUpload(this, ${v.visitId})">
-                    </label>
-                    <button type="button" onclick="scanFromDesktopScanner(${v.visitId})" style="flex:1; background:#f0fdfa; border:1px dashed #0d9488; border-radius:10px; padding:10px; font-size:0.8rem; font-weight:700; color:#0d9488; cursor:pointer;">
-                        <i class="fa-solid fa-print"></i> سحب من السكانر (حاسبة)
-                    </button>
-                </div>
-                <div style="display:flex; flex-wrap:wrap; gap:8px;" id="attachments-container-${v.visitId}">
-                    ${(v.attachments || []).map((att, aIdx) => {
-                        if (!att || !att.dataUrl || att.dataUrl.length < 50) {
-                            return `<div style="padding:6px 10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; font-size:0.7rem; color:#b91c1c;">⚠️ صورة تالفة أو قديمة</div>`;
-                        }
-                        return `
-                        <div style="position:relative; width:65px; height:65px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; cursor:pointer;" data-visit-id="${v.visitId}" data-attachment-index="${aIdx}" onclick="previewAttachmentByIndex(this)">
-                            <img src="${att.dataUrl}" style="width:100%; height:100%; object-fit:cover;">
-                        </div>
-                    `;
-                    }).join('')}
-                </div>
-            </div>
-            ` : ''}
-        </div>
-    `;
+            (cfg.attachments ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Attachments & Medical Reports</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<label style="flex:1; background:#f1f5f9; border:1px dashed #cbd5e1; border-radius:10px; padding:10px; text-align:center; font-size:0.8rem; font-weight:700; color:#475569; cursor:pointer;">' +
+            '<i class="fa-solid fa-cloud-arrow-up"></i> رفع صور متعددة / ملف' +
+            '<input type="file" accept="image/*,.pdf" multiple style="display:none;" onchange="handleFileUpload(this, ' + v.visitId + ')">' +
+            '</label>' +
+            '<button type="button" onclick="scanFromDesktopScanner(' + v.visitId + ')" style="flex:1; background:#f0fdfa; border:1px dashed #0d9488; border-radius:10px; padding:10px; font-size:0.8rem; font-weight:700; color:#0d9488; cursor:pointer;">' +
+            '<i class="fa-solid fa-print"></i> سحب من السكانر (حاسبة)' +
+            '</button>' +
+            '</div>' +
+            '<div style="display:flex; flex-wrap:wrap; gap:8px;" id="attachments-container-' + v.visitId + '">' +
+            (v.attachments || []).map((att, aIdx) => {
+                if (!att || !att.dataUrl || att.dataUrl.length < 50) {
+                    return '<div style="padding:6px 10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; font-size:0.7rem; color:#b91c1c;">⚠️ صورة تالفة</div>';
+                }
+                return '<div style="position:relative; width:65px; height:65px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; cursor:pointer;" data-visit-id="' + v.visitId + '" data-attachment-index="' + aIdx + '" onclick="previewAttachmentByIndex(this)">' +
+                    '<img src="' + att.dataUrl + '" style="width:100%; height:100%; object-fit:cover;">' +
+                    '</div>';
+            }).join('') +
+            '</div></div>' : '') +
+            '</div>';
     }).join('');
 
     visits.forEach(v => {
         ['notes', 'drugs', 'labs', 'scans', 'chiefComplaint', 'historyPresentIllness', 'reviewSystems'].forEach(field => {
-            const el = document.getElementById(`v${field.charAt(0).toUpperCase() + field.slice(1)}-${v.visitId}`);
+            const el = document.getElementById('v' + field.charAt(0).toUpperCase() + field.slice(1) + '-' + v.visitId);
             if (el) autoResizeTextarea(el);
         });
     });
