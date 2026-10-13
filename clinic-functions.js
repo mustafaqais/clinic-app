@@ -158,6 +158,10 @@ window.addEventListener('popstate', function(event) {
         closeSupportModal();
         return;
     }
+    if (document.getElementById('bulkAddDictModal').style.display === 'flex') {
+        closeBulkAddModal();
+        return;
+    }
     if (screenHistory.length > 1) {
         goBackScreen();
     } else {
@@ -1573,7 +1577,8 @@ function handleLiveInput(textarea, category, visitId) {
             document.getElementById('line-text-' + category + '-' + visitId).innerText = currentLine;
         }
         const terms = medicalDict[category] || [];
-        const matches = terms.filter(t => t.toLowerCase().includes(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
+        // مطابقة دقيقة لبداية الحروف المكتوبة (startsWith)
+        const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
             box.innerHTML = matches.map(m => '<div class="suggestion-item" onclick="selectSuggestionByClick(this)" data-category="' + category + '" data-visit-id="' + visitId + '" data-term="' + encodeURIComponent(m) + '">' + m + '</div>').join('');
@@ -1668,7 +1673,7 @@ function handleMhLiveInput(inputEl, inputKey) {
             document.getElementById('line-text-' + inputKey).innerText = currentLine;
         }
         const terms = medicalDict.mh_history || [];
-        const matches = terms.filter(t => t.toLowerCase().includes(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
+        const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
             box.innerHTML = matches.map(m => '<div class="suggestion-item" onclick="selectMhSuggestionByClick(this)" data-input-key="' + inputKey + '" data-term="' + encodeURIComponent(m) + '">' + m + '</div>').join('');
@@ -2315,6 +2320,50 @@ function removeDictTerm(category, index) {
         saveSettingsToCloudAndLocal();
         renderDictTerms();
     }
+}
+
+// دوال نافذة الإضافة الجماعية (Bulk Add)
+function openBulkAddModal() {
+    document.getElementById('bulkDictInput').value = '';
+    document.getElementById('bulkAddDictModal').style.display = 'flex';
+}
+
+function closeBulkAddModal() {
+    document.getElementById('bulkAddDictModal').style.display = 'none';
+}
+
+function processAndSaveBulkDict() {
+    const text = document.getElementById('bulkDictInput').value;
+    if (!text.trim()) {
+        alert('الرجاء إدخال القائمة أولاً.');
+        return;
+    }
+
+    const cat = document.getElementById('dictCategorySelect').value;
+    let dictKey = cat;
+    if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
+    else if (cat === 'historyPresentIllness') dictKey = 'history_present';
+    else if (cat === 'reviewSystems') dictKey = 'review_systems';
+
+    if (!medicalDict[dictKey]) {
+        medicalDict[dictKey] = [];
+    }
+
+    const lines = text.split('\n');
+    let addedCount = 0;
+
+    lines.forEach(line => {
+        const cleanLine = line.trim();
+        if (cleanLine && !medicalDict[dictKey].includes(cleanLine)) {
+            medicalDict[dictKey].push(cleanLine);
+            addedCount++;
+        }
+    });
+
+    saveSettingsToCloudAndLocal();
+    closeBulkAddModal();
+    renderDictTerms();
+    alert(`تمت إضافة وطحن (${addedCount}) عنصر جديد إلى القاموس بنجاح!`);
 }
 
 function saveNewPatient(e) {
