@@ -29,6 +29,9 @@ let targetNodeUidForNameEdit = null;
 
 let specialtyConfig = JSON.parse(localStorage.getItem('clinic_specialty_config')) || {
     medHistory: true,
+    chiefComplaint: true,
+    historyPresentIllness: true,
+    reviewSystems: true,
     vitals: true,
     labs: true,
     scans: true,
@@ -386,7 +389,10 @@ let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || {
     scans: ["Chest X-Ray", "Abdominal Ultrasound", "Brain MRI", "CT Scan"],
     drugs: ["Paracetamol 500mg 1x3", "Amoxicillin 500mg 1x3", "Metformin 500mg 1x2"],
     notes: ["Upper Respiratory Tract Infection", "Acute Gastroenteritis"],
-    mh_history: ["Appendectomy", "Cholecystectomy", "Penicillin Allergy", "Cesarean Section"]
+    mh_history: ["Appendectomy", "Cholecystectomy", "Penicillin Allergy", "Cesarean Section"],
+    chief_complaint: ["Cough and fever", "Severe headache", "Chest pain", "Abdominal pain", "Joint pain"],
+    history_present: ["Started 3 days ago, progressive", "Acute onset, moderate severity", "Intermittent episodes"],
+    review_systems: ["No fever, no shortness of breath", "Normal bowel habits, no vomiting"]
 };
 
 let secretaryAccount = JSON.parse(localStorage.getItem('clinic_sec_account')) || { email: "", password: "" };
