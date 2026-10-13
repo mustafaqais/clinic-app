@@ -849,11 +849,11 @@ function calculateVisitChildGrowth(visitId) {
 
     if (!isNaN(height)) {
         if (height < expectedHeight * 0.88) {
-            heightStatus = 'قصر قامة / تقزم محتمل (< P3)';
-            heightColor = '#b91c1c';
+            weightStatus = 'قصر قامة / تقزم محتمل (< P3)';
+            weightColor = '#b91c1c';
         } else if (height > expectedHeight * 1.12) {
-            heightStatus = 'طول أعلى من المعدل';
-            heightColor = '#0284c7';
+            weightStatus = 'طول أعلى من المعدل';
+            weightColor = '#0284c7';
         }
     }
 
@@ -2089,11 +2089,11 @@ function updateConfigModeUI() {
     const hint = document.getElementById('rxModeHint');
     const saveBtn = document.getElementById('rxSaveLayoutBtn');
     if (isConfigMode) {
-        hint.innerText = 'Config mode active';
-        saveBtn.style.display = 'block';
+        if (hint) hint.innerText = 'Config mode active';
+        if (saveBtn) saveBtn.style.display = 'block';
     } else {
-        hint.innerText = 'RX ready';
-        saveBtn.style.display = 'none';
+        if (hint) hint.innerText = 'RX ready';
+        if (saveBtn) saveBtn.style.display = 'none';
     }
 }
 
