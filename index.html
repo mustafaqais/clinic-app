@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.28</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.29</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -61,18 +61,31 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             border-radius: 12px;
         }
+        .rx-bg-img {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important;
+            pointer-events: none !important;
+        }
+        .draggable-box {
+            touch-action: none !important;
+            cursor: move !important;
+        }
         @media screen and (max-width: 600px) {
             .rx-canvas-container {
-                transform: scale(0.75) !important;
+                transform: scale(0.68) !important;
                 transform-origin: top center !important;
-                margin-bottom: -160px !important;
+                margin-bottom: -220px !important;
             }
         }
         #rxModal .modal-body {
             overflow-x: auto !important;
             overflow-y: auto !important;
             max-width: 100% !important;
-            max-height: 85vh !important;
+            max-height: 88vh !important;
             padding: 10px !important;
             text-align: center;
         }
@@ -702,7 +715,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.28</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.29</div>
     </div>
 </div>
 
@@ -1136,8 +1149,7 @@
     </div>
 </div>
 
-<!-- ربط ملفات الجافاسكريبت المنفصلة بالترتيب الصحيح -->
 <script src="config.js"></script>
-<script src="clinic-functions.js?v=17.28"></script>
+<script src="clinic-functions.js?v=17.29"></script>
 </body>
 </html>
