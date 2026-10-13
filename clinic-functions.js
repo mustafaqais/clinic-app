@@ -1,3 +1,141 @@
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+function updateOnlineStatus() {
+    const bar = document.getElementById('networkStatusBar');
+    if (!navigator.onLine) {
+        bar.classList.add('offline');
+        bar.innerText = "⚠ Offline Mode - Changes saved locally, will sync when online";
+    } else {
+        bar.classList.remove('offline');
+        bar.style.display = 'none';
+        syncLocalDataToCloud();
+    }
+}
+
+function syncLocalDataToCloud() {
+    if (!currentUserId || !navigator.onLine) return;
+    const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
+
+    patients.forEach(patient => {
+        db.collection('users_data').doc(ownerUid).collection('patients').doc(String(patient.id)).set(patient)
+            .catch(err => console.log("Sync error:", err));
+    });
+    
+    db.collection('users_data').doc(ownerUid).set({
+        rxImage: currentDoctorRxImage,
+        dictionary: medicalDict,
+        trashBin: trashBin,
+        secretaryAccount: secretaryAccount,
+        specialtyConfig: specialtyConfig,
+        updatedAt: new Date().toISOString()
+    }, { merge: true }).catch(err => console.log("Settings sync error:", err));
+}
+
+function generateKey(type) {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let code = type + "-";
+    for (let i = 0; i < 8; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+}
+
+async function generateNewKey(type) {
+    let prefix = "TRL";
+    let days = 14;
+    if (type === 'EXT') { prefix = "EXT"; days = 7; }
+    else if (type === 'ANNUAL') { prefix = "ANN"; days = 365; }
+
+    const newCode = generateKey(prefix);
+    const codeDocRef = db.collection('activation_keys').doc(newCode);
+
+    try {
+        await codeDocRef.set({
+            code: newCode,
+            type: type,
+            durationDays: days,
+            isUsed: false,
+            createdAt: new Date().toISOString()
+        });
+        document.getElementById('dynamicFounderCode').innerText = newCode;
+        document.getElementById('keyTypeHint').innerText = `Generated (${type}) valid for ${days} days.`;
+    } catch (e) {
+        alert('Error generating key: ' + e.message);
+    }
+}
+
+let screenHistory = ['mainScreen'];
+
+function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', saveState = true) {
+    if (!isSubscriptionExpired) {
+        autoSaveMedicalRecord();
+    }
+    hideAllScreensInner();
+    
+    const target = document.getElementById(screenId);
+    if (target) target.style.display = 'block';
+
+    const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
+    const headerTitleText = (screenId === 'mainScreen') ? customBrandName : (title || customBrandName);
+
+    document.getElementById('headerTitle').innerText = headerTitleText;
+    document.getElementById('headerSub').innerText = sub;
+
+    if (saveState) {
+        sessionStorage.setItem('current_screen', screenId);
+        sessionStorage.setItem('header_title', headerTitleText);
+        sessionStorage.setItem('header_sub', sub);
+        if (screenId !== 'medicalRecordScreen') {
+            sessionStorage.removeItem('current_patient_id');
+            currentPatientId = null;
+        }
+    }
+
+    if (screenId === 'mainScreen') {
+        document.getElementById('backBtn').style.display = 'none';
+        screenHistory = ['mainScreen'];
+    } else {
+        document.getElementById('backBtn').style.display = 'flex';
+        if (screenHistory[screenHistory.length - 1] !== screenId) {
+            screenHistory.push(screenId);
+        }
+    }
+}
+
+function goBackScreen() {
+    if (!isSubscriptionExpired) {
+        autoSaveMedicalRecord();
+    }
+    if (screenHistory.length > 1) {
+        screenHistory.pop();
+        const prevScreen = screenHistory[screenHistory.length - 1];
+        
+        hideAllScreensInner();
+        document.getElementById(prevScreen).style.display = 'block';
+        sessionStorage.setItem('current_screen', prevScreen);
+
+        const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
+
+        if (prevScreen === 'mainScreen') {
+            document.getElementById('backBtn').style.display = 'none';
+            document.getElementById('headerTitle').innerText = customBrandName;
+            document.getElementById('headerSub').innerText = translations[currentLang].headerSub;
+            sessionStorage.setItem('header_title', customBrandName);
+            sessionStorage.setItem('header_sub', translations[currentLang].headerSub);
+            sessionStorage.removeItem('current_patient_id');
+            currentPatientId = null;
+        } else if (prevScreen === 'archiveScreen') {
+            document.getElementById('headerTitle').innerText = translations[currentLang].archive;
+            document.getElementById('headerSub').innerText = 'Advanced search, filters & records';
+            sessionStorage.removeItem('current_patient_id');
+            currentPatientId = null;
+        }
+    } else {
+        showMainMenu();
+    }
+}
+
 window.addEventListener('popstate', function(event) {
     event.preventDefault();
     if (document.getElementById('medHistoryModal').style.display === 'flex') {
@@ -45,7 +183,7 @@ function hideAllScreensInner() {
     document.getElementById('permissionsScreen').style.display = 'none';
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", () => {
     const pDateEl = document.getElementById('pDate');
     if (pDateEl) pDateEl.value = getTodayFormatted();
     applyLanguage();
@@ -1928,7 +2066,17 @@ function loadSavedRxLayout() {
 }
 
 function printPrescriptionDirectly() {
+    const container = document.getElementById('rxCanvasContainer');
+    const controls = container.querySelectorAll('.box-font-controls');
+    controls.forEach(c => c.style.display = 'none');
+    
+    document.body.classList.add('is-printing-rx');
     window.print();
+    
+    setTimeout(() => {
+        document.body.classList.remove('is-printing-rx');
+        controls.forEach(c => c.style.display = '');
+    }, 1000);
 }
 
 function openPrescriptionPDF() {
@@ -2321,7 +2469,7 @@ function renderVisits(visits, forceFullRender = true) {
             <div class="group-card" style="background:#ecfdf5; border-color:#34d399; margin-bottom:12px; padding:12px;">
                 <span style="font-weight:800; font-size:0.85rem; color:#047857; display:block; margin-bottom:10px;"><i class="fa-solid fa-ear-deaf"></i> فحص الأذن والأنف والحنجرة (ENT)</span>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأذن (TM)</span><div class="input-wrapper"><input type="text" value="${v.entEar \vert{}\vert{} ''}" placeholder="مثال: غشاء الطبل طبيعي / احمرار" oninput="updateVisitFieldData(${v.visitId}, 'entEar', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأذن (TM)</span><div class="input-wrapper"><input type="text" value="${v.entEar || ''}" placeholder="مثال: غشاء الطبل طبيعي / احمرار" oninput="updateVisitFieldData(${v.visitId}, 'entEar', this.value)" style="font-size:0.85rem;"></div></div>
                     <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الحلق واللوزتين</span><div class="input-wrapper"><input type="text" value="${v.entThroat || ''}" placeholder="مثال: احمرار اللوزتين Acute Tonsillitis" oninput="updateVisitFieldData(${v.visitId}, 'entThroat', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
                 <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص الأنف والجيوب وملاحظات ENT</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل فحص الأذن والأنف والحنجرة..." oninput="updateVisitFieldData(${v.visitId}, 'entNotes', this.value)" style="font-size:0.85rem;">${v.entNotes || ''}</textarea></div></div>
@@ -2332,8 +2480,8 @@ function renderVisits(visits, forceFullRender = true) {
             <div class="group-card" style="background:#e0e7ff; border-color:#818cf8; margin-bottom:12px; padding:12px;">
                 <span style="font-weight:800; font-size:0.85rem; color:#4338ca; display:block; margin-bottom:10px;"><i class="fa-solid fa-eye"></i> فحص العيون (Ophthalmology)</span>
                 <div style="display:flex; gap:8px; margin-bottom:8px;">
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (Visual Acuity)</span><div class="input-wrapper"><input type="text" value="${v.ophthalVa \vert{}\vert{} ''}" placeholder="RE: 6/6, LE: 6/9" oninput="updateVisitFieldData(${v.visitId}, 'ophthalVa', this.value)" style="font-size:0.85rem;"></div></div>
-                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalIop \vert{}\vert{} ''}" placeholder="مثال: 15 mmHg" oninput="updateVisitFieldData(${v.visitId}, 'ophthalIop', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (Visual Acuity)</span><div class="input-wrapper"><input type="text" value="${v.ophthalVa || ''}" placeholder="RE: 6/6, LE: 6/9" oninput="updateVisitFieldData(${v.visitId}, 'ophthalVa', this.value)" style="font-size:0.85rem;"></div></div>
+                    <div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="${v.ophthalIop || ''}" placeholder="مثال: 15 mmHg" oninput="updateVisitFieldData(${v.visitId}, 'ophthalIop', this.value)" style="font-size:0.85rem;"></div></div>
                 </div>
                 <div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">فحص قاع العين وملاحظات العيون</span><div class="input-wrapper"><textarea rows="2" placeholder="اكتب تفاصيل قاع العين والفحص..." oninput="updateVisitFieldData(${v.visitId}, 'ophthalNotes', this.value)" style="font-size:0.85rem;">${v.ophthalNotes || ''}</textarea></div></div>
             </div>
