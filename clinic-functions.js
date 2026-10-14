@@ -1,6 +1,6 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.40
-// (مع إضافة ميزة التقرير الطبي المستقل والبوكسات المخصصة)
+// Clinic Master System - Cloud Ultimate Edition v17.41
+// (محدث بالكامل: حفظ التقرير الطبي، ظهور الترويسة، وبوكسات شفافة)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -8,6 +8,7 @@ window.addEventListener('offline', updateOnlineStatus);
 
 function updateOnlineStatus() {
     const bar = document.getElementById('networkStatusBar');
+    if (!bar) return;
     if (!navigator.onLine) {
         bar.classList.add('offline');
         bar.innerText = "⚠️ Offline Mode - Changes saved locally, will sync when online";
@@ -1045,7 +1046,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.40",
+        version: "17.41",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2205,7 +2206,7 @@ function initDraggableElements() {
 }
 
 // ==========================================
-// دوال تقرير الطبي المستقل والبوكسات والتحكم
+// دوال التقرير الطبي المستقل (محدثة بالكامل وثابتة الحفظ والشفافية)
 // ==========================================
 let repConfigModeActive = false;
 let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
@@ -2224,35 +2225,76 @@ function toggleMedicalReportInputs(visitId) {
     }
 }
 
+// دالة لحفظ حقول التقرير الطبي فور الكتابة داخل المراجعة
+function updateReportFieldData(visitId, fieldName, value) {
+    if (isSubscriptionExpired) return;
+    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+    if (!patient) return;
+    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+    if (!visit) return;
+
+    if (!visit.medicalReport) {
+        visit.medicalReport = { title: "تقرير طبي", to: "", details: "" };
+    }
+    visit.medicalReport[fieldName] = value;
+    savePatientToCloudAndLocal(patient);
+}
+
 function openMedicalReportModal(visitId) {
+    currentVisitIdForModal = visitId;
     const modal = document.getElementById('medicalReportModal');
     if (!modal) return;
     modal.style.display = 'flex';
 
-    let savedRxImg = localStorage.getItem('clinic_rx_image') || '';
-    const bgImg = document.getElementById('repBgImg');
-    if (savedRxImg) {
-        bgImg.src = savedRxImg;
-        bgImg.style.display = 'block';
-    } else {
-        bgImg.style.display = 'none';
+    // جلب ترويسة الروشتة المعتمدة بشكل صحيح
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    const container = document.getElementById('repCanvasContainer');
+    if (container) {
+        let bgImg = container.querySelector('.rep-bg-img');
+        if (!bgImg) {
+            bgImg = document.createElement('img');
+            bgImg.className = 'rep-bg-img';
+            bgImg.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 0; pointer-events: none; opacity: 0.95;';
+            container.insertBefore(bgImg, container.firstChild);
+        }
+        if (savedRxImg) {
+            bgImg.src = savedRxImg;
+            bgImg.style.display = 'block';
+        } else {
+            bgImg.style.display = 'none';
+        }
     }
 
-    let pName = (typeof currentPatient !== 'undefined' && currentPatient) ? currentPatient.name : (document.getElementById('recPatientName') ? document.getElementById('recPatientName').textContent : 'مريض');
-    let pAge = (typeof currentPatient !== 'undefined' && currentPatient) ? currentPatient.age : '';
-    let pGender = (typeof currentPatient !== 'undefined' && currentPatient) ? currentPatient.gender : '';
-    let visitDate = new Date().toISOString().split('T')[0];
+    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+    const visit = patient ? patient.visits.find(v => Number(v.visitId) === Number(visitId)) : null;
+
+    let pName = patient ? (patient.name + (patient.subName ? ' (' + patient.subName + ')' : '')) : 'مريض';
+    let pAge = patient ? patient.age : '';
+    let pGender = patient ? (patient.gender || '') : '';
+    let visitDate = visit ? (visit.date || getTodayFormatted()) : getTodayFormatted();
 
     let patDetailsStr = `الاسم: ${pName} | العمر: ${pAge} | الجنس: ${pGender} | التاريخ: ${visitDate}`;
-    document.getElementById('repPatientText').textContent = patDetailsStr;
+    const repPatText = document.getElementById('repPatientText');
+    if (repPatText) repPatText.textContent = patDetailsStr;
 
-    let titleVal = document.getElementById(`rep_title_${visitId}`) ? document.getElementById(`rep_title_${visitId}`).value : "تقرير طبي";
-    let toVal = document.getElementById(`rep_to_${visitId}`) ? document.getElementById(`rep_to_${visitId}`).value : "";
-    let detailsVal = document.getElementById(`rep_details_${visitId}`) ? document.getElementById(`rep_details_${visitId}`).value : "";
+    // استرجاع البيانات المحفوظة بدقة
+    const repData = (visit && visit.medicalReport) ? visit.medicalReport : {};
+    
+    let titleVal = repData.title || (document.getElementById(`rep_title_${visitId}`) ? document.getElementById(`rep_title_${visitId}`).value : "تقرير طبي");
+    let toVal = repData.to || (document.getElementById(`rep_to_${visitId}`) ? document.getElementById(`rep_to_${visitId}`).value : "");
+    let detailsVal = repData.details || (document.getElementById(`rep_details_${visitId}`) ? document.getElementById(`rep_details_${visitId}`).value : "");
 
-    document.getElementById('repTitleText').textContent = titleVal || "تقرير طبي";
-    document.getElementById('repToText').textContent = toVal ? `إلى ${toVal}` : "";
-    document.getElementById('repDetailsText').textContent = detailsVal;
+    if (document.getElementById(`rep_title_${visitId}`)) document.getElementById(`rep_title_${visitId}`).value = titleVal;
+    if (document.getElementById(`rep_to_${visitId}`)) document.getElementById(`rep_to_${visitId}`).value = toVal;
+    if (document.getElementById(`rep_details_${visitId}`)) document.getElementById(`rep_details_${visitId}`).value = detailsVal;
+
+    const repTitleText = document.getElementById('repTitleText');
+    const repToText = document.getElementById('repToText');
+    const repDetailsText = document.getElementById('repDetailsText');
+
+    if (repTitleText) repTitleText.textContent = titleVal || "تقرير طبي";
+    if (repToText) repToText.textContent = toVal ? `إلى ${toVal}` : "";
+    if (repDetailsText) repDetailsText.textContent = detailsVal;
 
     loadRepLayoutPositions();
 }
@@ -2655,6 +2697,7 @@ function renderVisits(visits, forceFullRender = true) {
         }
 
         const cfg = specialtyConfig;
+        const repData = v.medicalReport || {};
 
         return '<div class="visit-card" data-visit-id="' + v.visitId + '">' +
             '<div class="visit-header">' +
@@ -2863,27 +2906,27 @@ function renderVisits(visits, forceFullRender = true) {
             '</button>' +
             '</div>' +
             
-            // خيار تقرير طبي المستقل تحت المرفقات
+            // قسم التقرير الطبي المستقل المحفوظ تلقائياً
             '<div style="margin-top: 10px; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; background: #ffffff;">' +
             '<div onclick="toggleMedicalReportInputs(' + v.visitId + ')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 700; color: #0d9488; font-size: 0.9rem;">' +
-            '<span><i class="fa-solid fa-file-medical"></i> تقرير طبي (اختياري / وقت الحاجة)</span>' +
+            '<span><i class="fa-solid fa-file-medical"></i> تقرير طبي (محفوظ تلقائياً)</span>' +
             '<i class="fa-solid fa-chevron-down" id="repChevron_' + v.visitId + '"></i>' +
             '</div>' +
             '<div id="repContainer_' + v.visitId + '" style="display: none; margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">' +
             '<div class="field-box" style="margin-bottom: 8px;">' +
-            '<span class="field-label">عنوان التقرير (مثل: تقرير طبي، إجازة مرضية، أشعة...)</span>' +
-            '<div class="input-wrapper"><input type="text" id="rep_title_' + v.visitId + '" placeholder="اكتب عنوان التقرير..." value="تقرير طبي"></div>' +
+            '<span class="field-label">عنوان التقرير</span>' +
+            '<div class="input-wrapper"><input type="text" id="rep_title_' + v.visitId + '" value="' + (repData.title || 'تقرير طبي') + '" oninput="updateReportFieldData(' + v.visitId + ', \'title\', this.value)"></div>' +
             '</div>' +
             '<div class="field-box" style="margin-bottom: 8px;">' +
-            '<span class="field-label">الجهة الموجه لها التقرير (يُسبق تلقائياً بكلمة "إلى")</span>' +
-            '<div class="input-wrapper"><input type="text" id="rep_to_' + v.visitId + '" placeholder="مثال: مستشفى الحكيم التعليمي / د. محمد علي..."></div>' +
+            '<span class="field-label">الجهة الموجه لها التقرير</span>' +
+            '<div class="input-wrapper"><input type="text" id="rep_to_' + v.visitId + '" value="' + (repData.to || '') + '" placeholder="مثال: مستشفى الحكيم التعليمي..." oninput="updateReportFieldData(' + v.visitId + ', \'to\', this.value)"></div>' +
             '</div>' +
             '<div class="field-box" style="margin-bottom: 10px;">' +
             '<span class="field-label">تفاصيل التقرير والحالة السريرية</span>' +
-            '<div class="input-wrapper"><textarea id="rep_details_' + v.visitId + '" rows="3" placeholder="اكتب تفاصيل التقرير هنا..."></textarea></div>' +
+            '<div class="input-wrapper"><textarea id="rep_details_' + v.visitId + '" rows="3" placeholder="اكتب تفاصيل التقرير هنا..." oninput="updateReportFieldData(' + v.visitId + ', \'details\', this.value)">' + (repData.details || '') + '</textarea></div>' +
             '</div>' +
             '<button type="button" class="btn-main" onclick="openMedicalReportModal(' + v.visitId + ')" style="background: #0284c7; padding: 8px; font-size: 0.85rem;">' +
-            '<i class="fa-solid fa-print"></i> معاينة وطباعة التقرير الطبي (على صورة الروشتة)' +
+            '<i class="fa-solid fa-print"></i> معاينة وطباعة التقرير الطبي (بروية الترويسة)' +
             '</button>' +
             '</div></div>' +
 
