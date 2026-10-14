@@ -772,10 +772,92 @@
     </div>
 </div>
 
+<!-- نافذة الروشتة المخصصة (Modal) لزر Print RX Prescription -->
+<div id="rxModal" class="modal-overlay" style="display: none;">
+    <div class="modal-body" style="max-width: 580px; text-align: left; direction: ltr; background: #f8fafc; border-radius: 14px; padding: 15px;">
+        <div class="modal-header" style="direction: ltr; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="font-family: 'El Messiri', serif; margin:0; color:#0f172a;"><i class="fa-solid fa-file-prescription" style="color:#0d9488;"></i> Print RX Prescription</h3>
+            <button class="modal-close" onclick="closeRxModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-size: 0.72rem; color: #64748b;" id="rxModeHint">RX ready</span>
+            <div style="display:flex; gap:6px;">
+                <button type="button" onclick="setRxPaperSize('a4')" style="background:#e2e8f0; border:none; padding:2px 8px; border-radius:4px; font-size:0.7rem; cursor:pointer; font-weight:700;">A4</button>
+                <button type="button" onclick="setRxPaperSize('a5')" style="background:#e2e8f0; border:none; padding:2px 8px; border-radius:4px; font-size:0.7rem; cursor:pointer; font-weight:700;">A5</button>
+                <button type="button" id="rxConfigToggleBtn" onclick="toggleRxConfigMode()" style="background: #f0fdfa; color: #0d9488; border: 1px solid #0d9488; border-radius: 8px; padding: 4px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
+                    <i class="fa-solid fa-sliders"></i> ضبط الأماكن والخطوط
+                </button>
+            </div>
+        </div>
+
+        <div id="rxCanvasContainer" class="rx-canvas-container" style="background:#fff; position:relative; width:540px; height:765px; margin:0 auto; overflow:hidden;">
+            <!-- خلفية الروشتة -->
+            <img id="rxBgImg" class="rx-bg-img" src="" alt="RX Header" style="display: none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; pointer-events:none;">
+            
+            <div id="rxDragBoxPatient" class="draggable-box" style="top: 140px; left: 30px;">
+                <div class="box-font-controls">
+                    <span>خط المريض:</span>
+                    <div style="display:flex; gap:3px;">
+                        <button type="button" onclick="changeBoxFontSize('patientDetails', -1)">-</button>
+                        <button type="button" onclick="changeBoxFontSize('patientDetails', 1)">+</button>
+                    </div>
+                </div>
+                <div id="rxDragPatientDetailsText" class="rx-patient-details-text" style="font-size: 14px; font-weight: bold; color: #0f172a;"></div>
+            </div>
+
+            <div id="rxDragBoxDate" class="draggable-box" style="top: 140px; left: 400px;">
+                <div class="box-font-controls">
+                    <span>خط التاريخ:</span>
+                    <div style="display:flex; gap:3px;">
+                        <button type="button" onclick="changeBoxFontSize('date', -1)">-</button>
+                        <button type="button" onclick="changeBoxFontSize('date', 1)">+</button>
+                    </div>
+                </div>
+                <div id="rxDragDateText" class="rx-date-text" style="font-size: 13px; font-weight: bold; color: #334155;"></div>
+            </div>
+
+            <div id="rxDragBoxVitals" class="draggable-box" style="top: 180px; left: 30px;">
+                <div class="box-font-controls">
+                    <span>خط العلامات:</span>
+                    <div style="display:flex; gap:3px;">
+                        <button type="button" onclick="changeBoxFontSize('vitals', -1)">-</button>
+                        <button type="button" onclick="changeBoxFontSize('vitals', 1)">+</button>
+                    </div>
+                </div>
+                <div id="rxDragVitalsText" class="rx-vitals-text" style="font-size: 12px; font-weight: bold; color: #0284c7;"></div>
+            </div>
+
+            <div id="rxDragBoxTreatment" class="draggable-box" style="top: 240px; left: 30px; width: 480px;">
+                <div class="box-font-controls">
+                    <span>خط الأدوية:</span>
+                    <div style="display:flex; gap:3px;">
+                        <button type="button" onclick="changeBoxFontSize('treatment', -1)">-</button>
+                        <button type="button" onclick="changeBoxFontSize('treatment', 1)">+</button>
+                    </div>
+                </div>
+                <div id="rxDragTreatmentText" class="rx-treatment-text" style="font-size: 15px; color: #0f172a; white-space: pre-wrap; line-height: 1.8;"></div>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+            <button id="rxSaveLayoutBtn" class="btn-main" onclick="saveRxLayoutPositions()" style="display: none; background: #0284c7;">
+                <i class="fa-solid fa-floppy-disk"></i> حفظ مواقع الأجزاء والترتيب الثابت
+            </button>
+            <button type="button" class="btn-main" onclick="printPrescriptionDirectly()" style="font-family: 'El Messiri', sans-serif; background: #16a34a; width: 100%;">
+                <i class="fa-solid fa-print"></i> Print Prescription (Direct Print)
+            </button>
+            <button type="button" class="btn-main" onclick="openPrescriptionPDF()" style="font-family: 'El Messiri', sans-serif; background: #0284c7; width: 100%;">
+                <i class="fa-solid fa-file-pdf"></i> Save as PDF File
+            </button>
+        </div>
+    </div>
+</div>
+
 <script src="config.js"></script>
 <script src="clinic-functions.js?v=17.30"></script>
 
-<!-- أداة Eruda لفحص الأخطاء وتتبع مشاكل صفحة تسجيل الدخول -->
+<!-- أداة Eruda لفحص الأخطاء -->
 <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 <script>eruda.init();</script>
 
