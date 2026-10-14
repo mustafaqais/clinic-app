@@ -867,7 +867,24 @@
 <script>eruda.init();</script>
 
 <script>
-    // دالة تعديل بيانات المريض المصححة والمضمونة 100%
+    // 1. إصلاح زر القائمة الجانبية (3 خطوط)
+    window.toggleDropdownMenu = function(event) {
+        if (event) event.stopPropagation();
+        const menu = document.getElementById('headerDropdownMenu');
+        if (menu) {
+            menu.style.display = (menu.style.display === 'block') ? 'none' : 'block';
+        }
+    };
+
+    // إغلاق القائمة عند النقر في أي مكان خارجها
+    document.addEventListener('click', function() {
+        const menu = document.getElementById('headerDropdownMenu');
+        if (menu) {
+            menu.style.display = 'none';
+        }
+    });
+
+    // 2. إصلاح زر تعديل بيانات المريض (Edit)
     window.openEditPatientModal = function() {
         if (typeof currentPatient !== 'undefined' && currentPatient) {
             if (typeof navigateTo === 'function') {
@@ -884,7 +901,6 @@
                 if (document.getElementById('pDate')) document.getElementById('pDate').value = currentPatient.date || '';
             }, 100);
         } else {
-            // محاولة جلب الاسم من الشاشة مباشرة إذا كان الذاكرة فارغة
             const nameEl = document.getElementById('recPatientName');
             if (nameEl && nameEl.textContent && nameEl.textContent !== '—') {
                 if (typeof navigateTo === 'function') {
