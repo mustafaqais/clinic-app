@@ -829,16 +829,18 @@
                 <div id="rxDragVitalsText" class="rx-vitals-text" style="font-size: 12px; font-weight: bold; color: #0284c7;"></div>
             </div>
 
-            <div id="rxDragBoxTreatment" class="draggable-box" style="top: 240px; left: 30px; width: 480px;">
-                <div class="box-font-controls">
+            <!-- صندوق الأدوية مع علامة Rx المميزة من اليسار لليمين -->
+            <div id="rxDragBoxTreatment" class="draggable-box" style="top: 240px; left: 30px; width: 480px; direction: ltr; text-align: left;">
+                <div class="box-font-controls" style="direction: rtl;">
                     <span>خط الأدوية:</span>
                     <div style="display:flex; gap:3px;">
                         <button type="button" onclick="changeBoxFontSize('treatment', -1)">-</button>
                         <button type="button" onclick="changeBoxFontSize('treatment', 1)">+</button>
                     </div>
                 </div>
-                <!-- علامة RX باللون الأحمر الساطع -->
-                <div style="font-size: 22px; font-weight: 900; color: #dc2626; margin-bottom: 4px; font-family: sans-serif !important;">R<span style="font-size: 18px;">x</span></div>
+                <!-- رمز Rx من اليسار بخط طبي أنيق ومميز جداً -->
+                <div style="font-size: 26px; font-weight: 900; color: #dc2626; font-family: 'Times New Roman', serif; font-style: italic; margin-bottom: 6px; letter-spacing: 1px;">R<span style="font-size: 20px; font-style: normal;">x</span></div>
+                <!-- قائمة الأدوية من اليسار لليمين -->
                 <div id="rxDragTreatmentText" class="rx-treatment-text" style="font-size: 15px; color: #0f172a; white-space: pre-wrap; line-height: 1.8;"></div>
             </div>
         </div>
