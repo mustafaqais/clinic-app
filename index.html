@@ -31,6 +31,13 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700;800;900&display=swap');
+        
+        /* تعريف خط جيزة الحصري للتقرير الطبي فقط */
+        @font-face {
+            font-family: 'GizaFont';
+            src: local('Giza'), local('Giza-Regular'), url('https://fonts.gstatic.com/s/cairo/v28/SLXgc1nY6HMRslTJxMfcXg.woff2') format('woff2'); /* بديل آمن وواضح في حال عدم توفر الخط محليا */
+        }
+
         body, input, select, textarea, button, h1, h2, h3, h4, h5, h6, span, p, a, label, div, .menu-card, .auth-form {
             font-family: 'El Messiri', sans-serif !important;
         }
@@ -74,6 +81,22 @@
             touch-action: none !important;
             cursor: move !important;
         }
+        
+        /* تنسيق طبقة التقرير الجديد بخط جيزة حصرياً */
+        .rx-draggable-report-layer {
+            font-family: 'GizaFont', sans-serif !important;
+            position: absolute;
+            direction: rtl;
+            background: rgba(255, 255, 255, 0.98);
+            border: 2px dashed #0d9488;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: move;
+            z-index: 9999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            text-align: right;
+        }
+
         @media screen and (max-width: 600px) {
             .rx-canvas-container {
                 transform: scale(0.68) !important;
@@ -674,8 +697,9 @@
                     </div>
                     <p style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin-bottom: 10px;" id="recPatientMeta"></p>
                     
-                    <button type="button" class="btn-main" onclick="exportPatientMedicalReportPDF()" id="btnDownloadPDF" style="background: #0284c7; padding: 12px; font-size: 0.9rem;">
-                        <i class="fa-solid fa-file-pdf"></i> Download Comprehensive PDF Report
+                    <!-- زر إخراج التقرير الجديد (بدل الزر القديم) -->
+                    <button type="button" class="btn-main" onclick="openCustomReportModal()" id="btnGenerateReportModal" style="background: #0284c7; padding: 12px; font-size: 0.9rem;">
+                        <i class="fa-solid fa-file-lines"></i> إخراج تقرير
                     </button>
                 </div>
 
@@ -704,7 +728,6 @@
                         </div>
                     </div>
 
-                    <!-- زر إضافة قائمة كاملة دفعة واحدة -->
                     <button type="button" class="btn-main" onclick="openBulkAddModal()" style="background: #0d9488; margin-bottom: 12px;">
                         <i class="fa-solid fa-list-check"></i> 📋 إضافة قائمة كاملة دفعة واحدة (Bulk Add)
                     </button>
@@ -722,6 +745,83 @@
         </div>
 
         <div class="footer" id="footerText">Clinic Master Network v17.30</div>
+    </div>
+</div>
+
+<!-- نافذة إدخال بيانات التقرير الطبي الجديد -->
+<div id="customReportModal" class="modal-overlay">
+    <div class="modal-body" style="max-width: 500px; text-align: right; direction: rtl;">
+        <div class="modal-header" style="direction: rtl;">
+            <h3 style="font-family: 'El Messiri', serif;"><i class="fa-solid fa-file-medical" style="color:#0284c7;"></i> إعداد وتصدير التقرير الطبي</h3>
+            <button class="modal-close" onclick="closeCustomReportModal()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div class="field-box">
+            <span class="field-label">الاسم:</span>
+            <div class="input-wrapper"><input type="text" id="repInputName" placeholder="اسم المريض..."></div>
+        </div>
+        
+        <div style="display: flex; gap: 10px;">
+            <div class="field-box" style="flex: 1;">
+                <span class="field-label">الجنس:</span>
+                <div class="input-wrapper"><input type="text" id="repInputGender" placeholder="الجنس..."></div>
+            </div>
+            <div class="field-box" style="flex: 1;">
+                <span class="field-label">العمر:</span>
+                <div class="input-wrapper"><input type="text" id="repInputAge" placeholder="العمر..."></div>
+            </div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label">الجهة الموجه لها التقرير:</span>
+            <div class="input-wrapper"><input type="text" id="repInputTarget" placeholder="مثال: مستشفى، دكتور آخر، دائرة حكومية..."></div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label">نوع التقرير:</span>
+            <div class="input-wrapper"><input type="text" id="repInputType" placeholder="مثال: تقرير طبي، علاج طبيعي..."></div>
+        </div>
+
+        <div class="field-box">
+            <span class="field-label">شرح مفصل للحالة:</span>
+            <div class="input-wrapper">
+                <textarea id="repInputDesc" rows="4" placeholder="اكتب التشخيص أو الشرح المفصل الموجه للطجهة المعنية..."></textarea>
+            </div>
+        </div>
+
+        <button class="btn-main" onclick="generateReportOnRx()" style="background: #0284c7; margin-top: 10px;">
+            <i class="fa-solid fa-check"></i> عرض على الروشتة (والتحكم بالخطوط والسحب)
+        </button>
+    </div>
+</div>
+
+<!-- طبقة معاينة التقرير على الروشتة (بخط جيزة حصرياً وقابلة للتحريك والسحب) -->
+<div id="customReportPreviewLayer" class="rx-draggable-report-layer" style="display: none; top: 80px; left: 20px;">
+    <div style="text-align: center; border-bottom: 2px solid #0d9488; margin-bottom: 8px; padding-bottom: 4px;">
+        <h4 id="prevRepTypeDisplay" style="margin: 0; font-size: 18px; color: #0f766e;">نوع التقرير</h4>
+        <p style="margin: 2px 0; font-size: 13px; color: #475569;">الجهة: <span id="prevRepTargetDisplay"></span></p>
+    </div>
+    
+    <div id="prevRepContentArea">
+        <div style="font-size: 15px; margin-bottom: 4px; font-weight: bold;">
+            <span>الاسم: </span> <span id="prevRepNameDisplay"></span>
+        </div>
+        <div style="display: flex; gap: 12px; margin-bottom: 6px;">
+            <div style="font-size: 13px;"><span>الجنس: </span> <span id="prevRepGenderDisplay"></span></div>
+            <div style="font-size: 13px;"><span>العمر: </span> <span id="prevRepAgeDisplay"></span></div>
+        </div>
+        <div style="font-size: 14px; margin-top: 6px;">
+            <span style="font-weight: bold; display: block; margin-bottom: 2px;">شرح مفصل للحالة:</span>
+            <div id="prevRepDescDisplay" style="white-space: pre-wrap; background: #f8fafc; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0; min-height: 40px;"></div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; padding-top: 6px;">
+        <div style="display: flex; gap: 4px;">
+            <button type="button" onclick="adjustReportFontSize(-1)" style="padding: 2px 6px; font-size: 12px; cursor: pointer;">➖ تصغير</button>
+            <button type="button" onclick="adjustReportFontSize(1)" style="padding: 2px 6px; font-size: 12px; cursor: pointer;">➕ تكبير</button>
+        </div>
+        <button type="button" onclick="closeCustomReportPreview()" style="background: #ef4444; color: white; border: none; padding: 2px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">إغلاق</button>
     </div>
 </div>
 
@@ -1135,53 +1235,97 @@ Chest X-Ray" style="font-size: 0.85rem; direction: ltr; text-align: left;"></tex
     </div>
 </div>
 
-<div id="pdfReportExportContainer" style="position: absolute; left: -9999px; top: 0; width: 750px; background: #ffffff; padding: 40px; font-family: 'El Messiri', sans-serif; color: #0f172a; direction: ltr; text-align: left;">
-    <div style="text-align: center; border-bottom: 2.5px solid #0d9488; padding-bottom: 15px; margin-bottom: 20px;">
-        <div style="font-family: 'El Messiri', serif; font-size: 1.5rem; font-weight: 900; color: #0f172a; margin-bottom: 4px;">CLINIC MASTER MEDICAL RECORD</div>
-        <div style="font-size: 0.8rem; color: #0d9488; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Official Comprehensive Patient Clinical Report</div>
-        <div style="font-size: 0.72rem; color: #64748b; margin-top: 4px;" id="pdfRepDateLabel">Generated on: —</div>
-    </div>
-
-    <div style="background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px; margin-bottom: 20px;">
-        <div style="font-family: 'El Messiri', serif; font-size: 1rem; font-weight: 700; color: #0f766e; margin-bottom: 8px; border-bottom: 1px solid #cbd5e1; padding-bottom: 4px;"><i class="fa-solid fa-id-card"></i> Patient Profile</div>
-        <table style="width: 100%; font-size: 0.85rem; border-collapse: collapse;">
-            <tr>
-                <td style="padding: 4px 0; font-weight: 700; color: #475569; width: 22%;">Full Name:</td>
-                <td style="padding: 4px 0; font-weight: 700; color: #0f172a;" id="pdfRepName">—</td>
-                <td style="padding: 4px 0; font-weight: 700; color: #475569; width: 18%;">Age:</td>
-                <td style="padding: 4px 0; font-weight: 700; color: #0f172a;" id="pdfRepAge">—</td>
-            </tr>
-            <tr>
-                <td style="padding: 4px 0; font-weight: 700; color: #475569;">Gender:</td>
-                <td style="padding: 4px 0; font-weight: 700; color: #0f172a;" id="pdfRepGender">—</td>
-                <td style="padding: 4px 0; font-weight: 700; color: #0f172a; width: 18%;">Marital Status:</td>
-                <td style="padding: 4px 0; font-weight: 700; color: #0f172a;" id="pdfRepMarital">—</td>
-            </tr>
-            <tr>
-                <td style="padding: 4px 0; font-weight: 700; color: #475569;">Occupation:</td>
-                <td style="padding: 4px 0; font-weight: 700; color: #0f172a;" id="pdfRepJob">—</td>
-                <td style="padding: 4px 0; font-weight: 700; color: #475569;">Phone Number:</td>
-                <td style="padding: 4px 0; font-weight: 700; color: #0f172a;" id="pdfRepPhone">—</td>
-            </tr>
-        </table>
-    </div>
-
-    <div>
-        <div style="font-family: 'El Messiri', serif; font-size: 1.05rem; font-weight: 700; color: #0f172a; margin-bottom: 10px;"><i class="fa-solid fa-notes-medical"></i> Clinical Visits & Prescriptions Timeline</div>
-        <div id="pdfRepVisitsContainer" style="display: flex; flex-direction: column; gap: 14px;"></div>
-    </div>
-
-    <div style="margin-top: 30px; display: flex; justify-content: space-between; align-items: flex-end; border-top: 1.5px solid #cbd5e1; padding-top: 12px; font-size: 0.75rem;">
-        <div>
-            <span style="color: #64748b; font-weight: 700;">Clinic Master System — Certified Document</span>
-        </div>
-        <div style="text-align: right;">
-            <span style="font-family: 'El Messiri', serif; font-size: 0.95rem; font-weight: 900; color: #0f172a;">Attending Doctor Signature</span>
-        </div>
-    </div>
-</div>
-
 <script src="config.js"></script>
 <script src="clinic-functions.js?v=17.30"></script>
+<script>
+    // الدوال البرمجية الخاصة بنافذة إخراج التقرير الجديد وربطها بالروشتة ومعايرتها
+    function openCustomReportModal() {
+        if (typeof currentPatientName !== 'undefined') {
+            document.getElementById('repInputName').value = currentPatientName || '';
+        }
+        if (typeof currentPatientGender !== 'undefined') {
+            document.getElementById('repInputGender').value = currentPatientGender || '';
+        }
+        if (typeof currentPatientAge !== 'undefined') {
+            document.getElementById('repInputAge').value = currentPatientAge || '';
+        }
+        document.getElementById('customReportModal').style.display = 'flex';
+    }
+
+    function closeCustomReportModal() {
+        document.getElementById('customReportModal').style.display = 'none';
+    }
+
+    function generateReportOnRx() {
+        document.getElementById('prevRepNameDisplay').innerText = document.getElementById('repInputName').value;
+        document.getElementById('prevRepGenderDisplay').innerText = document.getElementById('repInputGender').value;
+        document.getElementById('prevRepAgeDisplay').innerText = document.getElementById('repInputAge').value;
+        document.getElementById('prevRepTargetDisplay').innerText = document.getElementById('repInputTarget').value;
+        document.getElementById('prevRepTypeDisplay').innerText = document.getElementById('repInputType').value;
+        document.getElementById('prevRepDescDisplay').innerText = document.getElementById('repInputDesc').value;
+
+        document.getElementById('customReportModal').style.display = 'none';
+        
+        // إظهار واجهة الروشتة أولاً إذا لم تكن مفتوحة، أو تفعيل طبقة التقرير داخلها
+        if (typeof openRxModal === 'function') {
+            openRxModal();
+        }
+        const layer = document.getElementById('customReportPreviewLayer');
+        layer.style.display = 'block';
+    }
+
+    function closeCustomReportPreview() {
+        document.getElementById('customReportPreviewLayer').style.display = 'none';
+    }
+
+    let reportFontSize = 15;
+    function adjustReportFontSize(delta) {
+        reportFontSize += delta;
+        if (reportFontSize < 10) reportFontSize = 10;
+        if (reportFontSize > 28) reportFontSize = 28;
+        
+        const layer = document.getElementById('customReportPreviewLayer');
+        const elements = layer.querySelectorAll('h4, p, div, span');
+        elements.forEach(el => {
+            if(!el.querySelector('button')) {
+                el.style.fontSize = reportFontSize + 'px';
+            }
+        });
+    }
+
+    // تفعيل سحب وإفلات طبقة التقرير بالماوس أو اللمس بحرية كاملة
+    const reportLayer = document.getElementById('customReportPreviewLayer');
+    let isRepDragging = false, repStartX, repStartY, repInitX, repInitY;
+
+    reportLayer.addEventListener('mousedown', startRepDrag);
+    document.addEventListener('mousemove', währendRepDrag);
+    document.addEventListener('mouseup', endRepDrag);
+
+    reportLayer.addEventListener('touchstart', startRepDrag);
+    document.addEventListener('touchmove', währendRepDrag);
+    document.addEventListener('touchend', endRepDrag);
+
+    function startRepDrag(e) {
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        isRepDragging = true;
+        repStartX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+        repStartY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+        repInitX = reportLayer.offsetLeft;
+        repInitY = reportLayer.offsetTop;
+    }
+
+    function währendRepDrag(e) {
+        if (!isRepDragging) return;
+        const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+        
+        reportLayer.style.left = (repInitX + (clientX - repStartX)) + 'px';
+        reportLayer.style.top = (repInitY + (clientY - repStartY)) + 'px';
+    }
+
+    function endRepDrag() {
+        isRepDragging = false;
+    }
+</script>
 </body>
 </html>
