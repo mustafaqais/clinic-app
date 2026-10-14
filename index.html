@@ -867,26 +867,37 @@
 <script>eruda.init();</script>
 
 <script>
-    // 1. تفعيل خيار تحويل اللغة (عربي / English)
+    // 1. تحويل اللغة بين العربية والإنجليزية بسلاسة
     window.toggleLanguage = function() {
-        if (typeof currentLang !== 'undefined') {
-            currentLang = (currentLang === 'ar') ? 'en' : 'ar';
-        } else {
-            window.currentLang = (window.currentLang === 'en') ? 'ar' : 'en';
-        }
-        if (typeof updateUILanguage === 'function') {
+        let lang = localStorage.getItem('clinic_lang') || 'en';
+        lang = (lang === 'ar') ? 'en' : 'ar';
+        localStorage.setItem('clinic_lang', lang);
+        
+        if (typeof switchLanguage === 'function') {
+            switchLanguage(lang);
+        } else if (typeof updateUILanguage === 'function') {
+            currentLang = lang;
             updateUILanguage();
         } else {
             location.reload();
         }
     };
 
-    // 2. تفعيل خيار الدعم الفني (Technical Support)
+    // 2. الدعم الفني المباشر (يفتح الواتساب والتليجرام مباشرة مع رقم الهاتف)
     window.openSupportModal = function() {
-        alert('مرحباً بك يا دكتور! للتواصل مع الدعم الفني والنظام السحابي، يراسلنا المبرمج عبر التليجرام أو الاتصال المباشر بالدعم الفني المعتمد لنظام عيادة ماستر.');
+        const phone = "9647752224455"; // رقم الهاتف الخاص بك
+        const message = encodeURIComponent("مرحباً دكتور قيس، أود التواصل مع الدعم الفني لنظام عيادة ماستر.");
+        
+        // خيار لاختيار طريقة التواصل (واتساب أو تليجرام)
+        const choice = confirm("اضغط (موافق) للتواصل عبر الواتساب، أو (إلغاء) للتواصل عبر التليجرام.");
+        if (choice) {
+            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+        } else {
+            window.open(`https://t.me/` + phone, '_blank'); // أو رابط معرف التليجرام الخاص بك
+        }
     };
 
-    // 3. تفعيل شاشة الاشتراك وتجديد الكود
+    // 3. إدارة واجهة الاشتراك وتجديد الكود
     window.openActivationScreenForRenewal = function() {
         const mainScreen = document.getElementById('mainScreen');
         const activScreen = document.getElementById('activationScreen');
@@ -901,7 +912,7 @@
         if (mainScreen) mainScreen.style.display = 'block';
     };
 
-    // 4. تفعيل القائمة الجانبية (3 خطوط)
+    // 4. القائمة الجانبية (3 خطوط)
     window.toggleDropdownMenu = function(event) {
         if (event) event.stopPropagation();
         const menu = document.getElementById('headerDropdownMenu');
@@ -917,7 +928,7 @@
         }
     });
 
-    // 5. تفعيل زر تعديل بيانات المريض (Edit)
+    // 5. تعديل بيانات المريض (Edit)
     window.openEditPatientModal = function() {
         if (typeof currentPatient !== 'undefined' && currentPatient) {
             if (typeof navigateTo === 'function') {
