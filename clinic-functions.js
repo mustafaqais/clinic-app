@@ -236,6 +236,7 @@
 
         <div class="content">
             <div id="mainScreen" style="display: none;">
+                
                 <div class="sub-status-banner" id="subStatusBanner" style="display: none;">
                     <div class="sub-status-info">
                         <h4 id="subBannerTitle"><i class="fa-solid fa-clock"></i> Active Subscription</h4>
@@ -362,9 +363,354 @@
                         </div>
                     </div>
                 </div>
+
             </div>
 
-            <!-- شاشة ملف المريض -->
+            <div id="specialtiesDashboardScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'El Messiri',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;">
+                        <i class="fa-solid fa-sliders" style="color:#6366f1;"></i> لوحة تحكم الاختصاصات والحقول الطبية
+                    </div>
+                    <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;">
+                        قم بتفعيل المربعات والأقسام التي تحتاجها في عيادتك لكي تظهر تلقائياً داخل سجل المريض لكل زيارة. يمكنك تفعيل الحقول الخاصة باختصاصك أو دمج عدة اختصاصات معاً بحرية تامة!
+                    </p>
+
+                    <div style="margin-bottom: 14px; font-weight: 800; font-size: 0.85rem; color: #0f766e;"><i class="fa-solid fa-check-double"></i> الحقول الأساسية المشتركة:</div>
+                    <div class="checkbox-grid" style="grid-template-columns: 1fr; gap: 8px; margin-bottom: 16px;">
+                        <label class="checkbox-item"><input type="checkbox" id="mod_medHistory" checked> <span>التاريخ المرضي والأمراض المزمنة (Medical History)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_chiefComplaint" checked> <span>الشكوى الرئيسية (Chief Complaint)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_historyPresentIllness" checked> <span>تاريخ المرض الحالي (History of Present Illness - HPI)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_reviewSystems" checked> <span>مراجعة الأنظمة والأجهزة الأخرى (Review of Other Systems - ROS)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_vitals" checked> <span>العلامات الحيوية وضغط الدم ومؤشر كتلة الجسم (Vitals & BMI)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_labs" checked> <span>تحاليل المختبر (Lab Tests)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_scans" checked> <span>الأشعة والرنين (Radiology & Scans)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_notes" checked> <span>التشخيص والملاحظات السريرية (Diagnosis & Notes)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_rx" checked> <span>الوصفة الطبية والعلاجية والروشتة (RX Medications)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_attachments" checked> <span>مرفقات الصور والتقارير والكاميرا (Attachments & Scanner)</span></label>
+                    </div>
+
+                    <div style="margin-bottom: 14px; font-weight: 800; font-size: 0.85rem; color: #0284c7;"><i class="fa-solid fa-stethoscope"></i> الحقول التخصصية المتقدمة:</div>
+                    <div class="checkbox-grid" style="grid-template-columns: 1fr; gap: 8px; margin-bottom: 16px;">
+                        <label class="checkbox-item"><input type="checkbox" id="mod_obsGyn"> <span><b>النسائية والتوليد:</b> (LMP, EDD, Gravidity/Parity, أسابيع الحمل)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_ortho"> <span><b>العظام والمفاصل والكسور:</b> (فحص مدى الحركة, درجة الخشونة, الفحص الفيزيائي)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_neuro"> <span><b>الجملة العصبية:</b> (فحص الأعصاب القحفية, مقياس غلاسكو للوعي, الفحص الحسي)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_peds"> <span><b>الأطفال:</b> (مخطط نمو الطفل البيومتري WHO، جدول اللقاحات، التغذية)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_derm"> <span><b>الجلدية والتناسلية:</b> (وصف الآفات الجلدية, خريطة توزيع الطفح, مصابيح وود)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_ent"> <span><b>الأنف والأذن والحنجرة (ENT):</b> (فحص الأذن بالمنظار, اللوزتين, الجيوب الأنفية)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_ophthal"> <span><b>العيون (Ophthalmology):</b> (حدة البصر Visual Acuity, ضغط العين IOP, قاع العين)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="mod_cardio"> <span><b>القلبية والتداخلية (Cardiology):</b> (تخطيط القلب ECG, أصوات القلب, فحص الإجهاد)</span></label>
+                    </div>
+
+                    <button class="btn-main" onclick="saveSpecialtiesDashboardConfig()" style="background: #6366f1;">
+                        <i class="fa-solid fa-floppy-disk"></i> حفظ إعدادات الاختصاصات والحقول
+                    </button>
+                </div>
+            </div>
+
+            <div id="permissionsScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'El Messiri',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="permHeadTitle">
+                        <i class="fa-solid fa-user-shield" style="color:#d946ef;"></i> Secretary Account & Permissions
+                    </div>
+                    <p style="font-size: 0.80rem; color: #64748b; margin-bottom: 14px; line-height: 1.5;" id="permHeadSub">
+                        Create or update the secretary login credentials, and select the specific features you wish to grant them.
+                    </p>
+
+                    <div class="field-box">
+                        <span class="field-label" id="lblSecEmail">Secretary Email Address</span>
+                        <div class="input-wrapper"><input type="email" id="secEmailInput" placeholder="secretary@clinic.com"></div>
+                    </div>
+                    <div class="field-box">
+                        <span class="field-label" id="lblSecPass">Secretary Password</span>
+                        <div class="input-wrapper"><input type="password" id="secPassInput" placeholder="••••••••"></div>
+                    </div>
+
+                    <div style="display: flex; gap: 8px; margin-bottom: 14px;">
+                        <button class="btn-main" onclick="saveSecretaryAccount()" id="btnSaveSec" style="flex: 1; background: #0d9488; padding: 10px; font-size: 0.85rem;">
+                            <i class="fa-solid fa-user-plus"></i> Save Secretary Account
+                        </button>
+                        <button class="btn-danger" onclick="deleteSecretaryAccount()" id="btnDelSec" style="flex: 1; margin-top: 0; padding: 10px; font-size: 0.85rem;">
+                            <i class="fa-solid fa-trash"></i> Delete Account
+                        </button>
+                    </div>
+
+                    <hr style="border:0; border-top:1px solid #cbd5e1; margin:14px 0;">
+
+                    <span style="font-size: 0.85rem; font-weight: 800; color: #0f172a; display: block; margin-bottom: 8px;" id="lblFeatPerm">Feature Permissions:</span>
+                    <div class="checkbox-grid" style="grid-template-columns: 1fr; gap: 8px; margin-bottom: 16px;">
+                        <label class="checkbox-item"><input type="checkbox" id="perm_newPatient" checked> <span id="pNewPat">🟢 Register New Patient & Personal Info</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_archive" checked> <span id="pArch">🟢 Patients Archive, Search & Attachments</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_vitals" checked> <span id="pVitals">🟢 Vital Signs & BMI Calculator</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_rxTemplate" disabled> <span id="pRx">🔴 RX Template Header (Doctor Only)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_dict" disabled> <span id="pDict">🔴 Medical Dictionary (Doctor Only)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_analytics" disabled> <span id="pAnalytics">🔴 Clinic Analytics (Doctor Only)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_backup" disabled> <span id="pBackup">🔴 Backup & Restore (Doctor Only)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_trash" disabled> <span id="pTrash">🔴 Trash Bin (Doctor Only)</span></label>
+                        <label class="checkbox-item"><input type="checkbox" id="perm_settings" disabled> <span id="pSettings">🔴 Account Settings (Doctor Only)</span></label>
+                    </div>
+
+                    <button class="btn-main" onclick="saveSecretaryPermissions()" id="btnSavePerms" style="background: #d946ef;">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Permissions
+                    </button>
+                </div>
+            </div>
+
+            <div id="backupScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'El Messiri',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="backupHeadTitle">
+                        <i class="fa-solid fa-database" style="color:#4f46e5;"></i> Direct Backup Manager
+                    </div>
+                    <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 16px; line-height: 1.5;" id="backupHeadSub">
+                        Export your full database backup or upload a backup file (`.json` or `.txt`) directly to restore all data instantly!
+                    </p>
+
+                    <button class="btn-main" onclick="exportJsonBackup()" id="btnExport" style="background: #4f46e5; margin-bottom: 16px;">
+                        <i class="fa-solid fa-download"></i> Export Backup File
+                    </button>
+
+                    <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
+
+                    <div class="field-box" style="text-align: left;">
+                        <span class="field-label" id="lblUploadBackup" style="color:#16a34a; font-weight:800;"><i class="fa-solid fa-file-arrow-up"></i> Upload Backup File Directly (Recommended)</span>
+                        <div class="input-wrapper" style="padding: 10px; border: 2px dashed #16a34a; background: #f0fdf4; text-align: center;">
+                            <input type="file" id="backupFileInput" accept=".json,.txt" style="font-size: 0.85rem; cursor: pointer;" onchange="restoreFromUploadedFile(this)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="settingsScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'El Messiri',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:14px;" id="settingsHeadTitle">
+                        <i class="fa-solid fa-user-shield" style="color:#0d9488;"></i> Security & Account Settings
+                    </div>
+
+                    <div class="field-box">
+                        <span class="field-label" id="lblCurrEmail">Current Email Address</span>
+                        <div class="input-wrapper"><input type="email" id="currentAccountEmail" readonly style="color:#64748b; background:#f1f5f9;"></div>
+                    </div>
+
+                    <div class="field-box">
+                        <span class="field-label" id="lblNewEmail">New Email Address</span>
+                        <div class="input-wrapper"><input type="email" id="newAccountEmail" placeholder="Enter new email..."></div>
+                    </div>
+                    <div class="field-box">
+                        <span class="field-label" id="lblConfirmPass">Current Password (To Confirm Email Change)</span>
+                        <div class="input-wrapper"><input type="password" id="confirmEmailPass" placeholder="••••••••"></div>
+                    </div>
+                    <button class="btn-main" onclick="updateAccountEmail()" id="btnUpdateEmail" style="margin-bottom: 16px; background:#0284c7;">
+                        <i class="fa-solid fa-envelope"></i> Update Email Address
+                    </button>
+
+                    <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
+
+                    <div class="field-box">
+                        <span class="field-label" id="lblNewPass">New Password</span>
+                        <div class="input-wrapper"><input type="password" id="newAccountPassword" placeholder="••••••••"></div>
+                    </div>
+                    <button class="btn-main" onclick="updateAccountPassword()" id="btnUpdatePass" style="margin-bottom: 16px;">
+                        <i class="fa-solid fa-key"></i> Change Password
+                    </button>
+
+                    <hr style="border:0; border-top:1px solid #cbd5e1; margin:16px 0;">
+
+                    <div style="text-align: center;">
+                        <p style="font-size:0.8rem; color:#64748b; margin-bottom:10px;" id="txtForgotReset">Forgot password and want to reset via email?</p>
+                        <button class="btn-main" onclick="sendPasswordResetEmailFromSettings()" id="btnSendReset" style="background: #d97706;">
+                            <i class="fa-solid fa-paper-plane"></i> Send Password Reset Link
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="analyticsScreen" style="display: none;">
+                <div class="analytics-grid">
+                    <div class="analytics-box">
+                        <span class="analytics-label" id="statTotLabel"><i class="fa-solid fa-users" style="color:#0d9488;"></i> Total Patients</span>
+                        <div class="analytics-num" id="statTotalPatients">0</div>
+                    </div>
+                    <div class="analytics-box">
+                        <span class="analytics-label" id="statTodayLabel"><i class="fa-solid fa-calendar-check" style="color:#0284c7;"></i> Today's Visits</span>
+                        <div class="analytics-num" id="statTodayVisits">0</div>
+                    </div>
+                    <div class="analytics-box">
+                        <span class="analytics-label" id="statMaleLabel"><i class="fa-solid fa-mars" style="color:#0369a1;"></i> Male Patients</span>
+                        <div class="analytics-num" id="statMaleCount">0</div>
+                    </div>
+                    <div class="analytics-box">
+                        <span class="analytics-label" id="statFemaleLabel"><i class="fa-solid fa-venus" style="color:#be185d;"></i> Female Patients</span>
+                        <div class="analytics-num" id="statFemaleCount">0</div>
+                    </div>
+                </div>
+
+                <div class="group-card">
+                    <div style="font-family:'El Messiri',serif; font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="statRatioTitle">
+                        <i class="fa-solid fa-chart-bar" style="color:#0d9488;"></i> Gender Distribution Ratio
+                    </div>
+                    <div style="background:#e2e8f0; height:12px; border-radius:6px; overflow:hidden; display:flex; margin-bottom:8px;">
+                        <div id="ratioMaleBar" style="background:#0284c7; width:50%; height:100%; transition:width 0.5s;"></div>
+                        <div id="ratioFemaleBar" style="background:#ec4899; width:50%; height:100%; transition:width 0.5s;"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:#64748b; font-weight:700;">
+                        <span id="ratioMaleText">Male: 0%</span>
+                        <span id="ratioFemaleText">Female: 0%</span>
+                    </div>
+                </div>
+
+                <div class="group-card">
+                    <div style="font-family:'El Messiri',serif; font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px;" id="statTopDrugsTitle">
+                        <i class="fa-solid fa-pills" style="color:#0d9488;"></i> Top Prescribed Medications
+                    </div>
+                    <div id="topDrugsList" style="display:flex; flex-direction:column; gap:6px;"></div>
+                </div>
+            </div>
+
+            <div id="addPatientScreen" style="display: none;">
+                <form id="patientForm" onsubmit="saveNewPatient(event)">
+                    <div class="group-card">
+                        <div class="group-title" style="font-family:'El Messiri',serif; font-size:1.1rem; font-weight:700; margin-bottom:12px; color:#0f172a;" id="patInfoTitle"><i class="fa-solid fa-id-card"></i> Personal Information</div>
+                        
+                        <div class="field-box">
+                            <span class="field-label" id="lblPatName">Full Name *</span>
+                            <div class="input-wrapper"><input type="text" id="pName" placeholder="Enter patient full name..." required></div>
+                        </div>
+
+                        <div class="field-box">
+                            <span class="field-label" id="lblPatSubName">Grandfather Name / Tribe / Note (Optional)</span>
+                            <div class="input-wrapper"><input type="text" id="pSubName" placeholder="e.g. محمد / العشيرة لتمييز الاسم التشابه"></div>
+                        </div>
+
+                        <div style="display: flex; gap: 10px;">
+                            <div class="field-box" style="flex: 1;">
+                                <span class="field-label" id="lblPatAge">Age *</span>
+                                <div class="input-wrapper"><input type="number" id="pAge" placeholder="Age..." required></div>
+                            </div>
+
+                            <div class="field-box" style="flex: 1;">
+                                <span class="field-label" id="lblPatGender">Gender</span>
+                                <div class="input-wrapper">
+                                    <select id="pGender">
+                                        <option value="" id="optSelGender">Select Gender</option>
+                                        <option value="Male" id="optMale">Male</option>
+                                        <option value="Female" id="optFemale">Female</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="field-box">
+                            <span class="field-label" id="lblPatMarital">Marital Status</span>
+                            <div class="input-wrapper">
+                                <select id="pMarital">
+                                    <option value="" id="optSelMarital">Select Status</option>
+                                    <option value="Single" id="optSingle">Single</option>
+                                    <option value="Married" id="optMarried">Married</option>
+                                    <option value="Divorced" id="optDivorced">Divorced</option>
+                                    <option value="Widow" id="optWidow">Widow</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="field-box">
+                            <span class="field-label" id="lblPatJob">Occupation</span>
+                            <div class="input-wrapper">
+                                <select id="pJob">
+                                    <option value="" id="optSelJob">Select Occupation</option>
+                                    <option value="Employee" id="optJobEmp">Employee</option>
+                                    <option value="Free Business" id="optJobFree">Free Business</option>
+                                    <option value="Housewife" id="optJobHouse">Housewife</option>
+                                    <option value="Student" id="optJobStud">Student</option>
+                                    <option value="Other" id="optJobOther">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="field-box">
+                            <span class="field-label" id="lblPatPhone">Phone Number</span>
+                            <div class="input-wrapper"><input type="tel" id="pPhone" placeholder="07XXXXXXXXX"></div>
+                        </div>
+
+                        <div class="field-box">
+                            <span class="field-label" id="lblPatDate">Initial Visit Date</span>
+                            <div class="input-wrapper"><input type="date" id="pDate"></div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-main" id="btnSavePatRec">
+                        <i class="fa-solid fa-floppy-disk"></i> Save & Open Medical Record
+                    </button>
+                </form>
+            </div>
+
+            <div id="rxTemplateScreen" style="display: none;">
+                <div class="group-card" style="text-align: center;">
+                    <div style="font-family:'El Messiri',serif; font-size:1.15rem; font-weight:700; color:#0f172a; margin-bottom:8px;" id="rxTemplHead">
+                        <i class="fa-solid fa-prescription-bottle-medical" style="color:#0d9488;"></i> Clinic Prescription Template
+                    </div>
+                    <p style="font-size: 0.8rem; color: #64748b; margin-bottom: 16px;" id="rxTemplSub">
+                        Upload or change your official prescription image header.
+                    </p>
+
+                    <div id="currentRxPreviewContainer" style="margin-bottom: 16px; border: 2px dashed #cbd5e1; border-radius: 16px; padding: 10px; background: #fff; min-height: 150px; display: flex; align-items: center; justify-content: center;">
+                        <span style="font-size: 0.82rem; color: #94a3b8;" id="noRxText">No custom RX header uploaded yet.</span>
+                        <img id="rxPreviewImg" src="" alt="RX Template" style="max-width: 100%; border-radius: 12px; display: none;">
+                    </div>
+
+                    <div class="field-box" style="text-align: left;">
+                        <span class="field-label" id="lblSelectRxImg">Select Prescription Image</span>
+                        <div class="input-wrapper" style="padding: 10px;">
+                            <input type="file" id="rxImageFileInput" accept="image/*" style="font-size: 0.85rem;">
+                        </div>
+                    </div>
+
+                    <button class="btn-main" onclick="saveRxTemplateImage()" id="btnSaveRxImg" style="margin-top: 10px;">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Save Compressed RX Image
+                    </button>
+                </div>
+            </div>
+
+            <div id="archiveScreen" style="display: none;">
+                <div class="filter-container">
+                    <div class="field-box" style="margin-bottom: 0;">
+                        <div class="input-wrapper">
+                            <input type="text" id="searchInput" placeholder="🔍 Search by Name or Phone Number..." oninput="filterPatients()">
+                        </div>
+                    </div>
+                    <div class="filter-row">
+                        <select id="filterGender" onchange="filterPatients()">
+                            <option value="" id="optAllGenders">All Genders</option>
+                            <option value="Male" id="optFilterMale">Male</option>
+                            <option value="Female" id="optFilterFemale">Female</option>
+                        </select>
+                        <select id="filterAgeGroup" onchange="filterPatients()">
+                            <option value="" id="optAllAges">All Age Groups</option>
+                            <option value="child" id="optChild">Children (&lt; 18)</option>
+                            <option value="adult" id="optAdult">Adults (18 - 50)</option>
+                            <option value="senior" id="optSenior">Seniors (&gt; 50)</option>
+                        </select>
+                        <select id="filterSort" onchange="filterPatients()">
+                            <option value="newest" id="optSortNewest">الأحدث أولاً</option>
+                            <option value="oldest" id="optSortOldest">الأقدم أولاً</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="patientsList"></div>
+            </div>
+
+            <div id="trashScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'El Messiri',serif; font-size:1.1rem; font-weight:700; margin-bottom:10px; color:#ef4444; display: flex; justify-content: space-between; align-items: center;">
+                        <span id="trashTitleText"><i class="fa-solid fa-trash-can"></i> Trash Bin</span>
+                        <button type="button" id="emptyTrashBtn" onclick="confirmEmptyTrash()" style="background: #ef4444; color: white; border: none; border-radius: 8px; padding: 6px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; display: none; align-items: center; gap: 4px;">
+                            <i class="fa-solid fa-trash-can-arrow-up"></i> <span id="txtEmptyTrash">Empty Trash</span>
+                        </button>
+                    </div>
+                    <p style="font-size:0.78rem; color:#64748b; margin-bottom:14px;" id="trashSubText">You can restore deleted patients or specific visits back to their original locations instantly, or empty the trash completely.</p>
+                    <div id="trashItemsContainer"></div>
+                </div>
+            </div>
+
             <div id="medicalRecordScreen" style="display: none;">
                 <div class="group-card" style="background: #f0fdfa; border-color: #99f6e4; position: relative;">
                     <div style="position: absolute; top: 14px; right: 14px; display: flex; gap: 6px; z-index: 5;" id="patientRecordHeaderActions">
@@ -380,7 +726,7 @@
                     </div>
                     <p style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin-bottom: 10px;" id="recPatientMeta"></p>
                     
-                    <!-- زر إخراج التقرير المستقل -->
+                    <!-- زر إخراج التقرير -->
                     <button type="button" class="btn-main" onclick="openCustomReportModal()" id="btnGenerateReportModal" style="background: #0284c7; padding: 12px; font-size: 0.9rem;">
                         <i class="fa-solid fa-file-lines"></i> إخراج تقرير طبي
                     </button>
@@ -393,154 +739,168 @@
                 <div id="visitsContainer"></div>
             </div>
 
-            <!-- باقي الشاشات الوظيفية المساعدة -->
-            <div id="specialtiesDashboardScreen" style="display: none;"></div>
-            <div id="permissionsScreen" style="display: none;"></div>
-            <div id="backupScreen" style="display: none;"></div>
-            <div id="settingsScreen" style="display: none;"></div>
-            <div id="analyticsScreen" style="display: none;"></div>
-            <div id="addPatientScreen" style="display: none;"></div>
-            <div id="rxTemplateScreen" style="display: none;"></div>
-            <div id="archiveScreen" style="display: none;"></div>
-            <div id="trashScreen" style="display: none;"></div>
-            <div id="dictScreen" style="display: none;"></div>
-            <div id="networkScreen" style="display: none;"></div>
+            <div id="dictScreen" style="display: none;">
+                <div class="group-card">
+                    <div class="field-box">
+                        <span class="field-label" id="lblDictCat">Category</span>
+                        <div class="input-wrapper">
+                            <select id="dictCategorySelect" onchange="renderDictTerms()">
+                                <option value="drugs" id="optCatDrugs">Medications & Doses</option>
+                                <option value="labs" id="optCatLabs">Lab Tests</option>
+                                <option value="scans" id="optCatScans">Radiology & Scans</option>
+                                <option value="notes" id="optCatNotes">Diagnosis & Notes</option>
+                                <option value="mh_history" id="optCatMh">Medical History Terms</option>
+                                <option value="chief_complaint">الشكوى الرئيسية (Chief Complaint)</option>
+                                <option value="history_present">تاريخ المرض الحالي (HPI)</option>
+                                <option value="review_systems">مراجعة الأنظمة (ROS)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-main" onclick="openBulkAddModal()" style="background: #0d9488; margin-bottom: 12px;">
+                        <i class="fa-solid fa-list-check"></i> 📋 إضافة قائمة كاملة دفعة واحدة (Bulk Add)
+                    </button>
+
+                    <div id="dictItemsList" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+
+            <div id="networkScreen" style="display: none;">
+                <div class="group-card">
+                    <div style="font-family:'El Messiri',serif; font-size:1.05rem; font-weight:700; margin-bottom:10px; color:#0f172a;" id="netTitle"><i class="fa-solid fa-sitemap" style="color:#9333ea;"></i> Registered Users & Passwords Database</div>
+                    <div id="networkTreeContainer"></div>
+                </div>
+            </div>
         </div>
 
         <div class="footer" id="footerText">Clinic Master Network v17.30</div>
     </div>
 </div>
 
-<!-- نافذة إدخال بيانات إخراج التقرير الطبي المستقل -->
-<div id="customReportModal" class="modal-overlay" style="display: none;">
+<!-- نافذة إدخال بيانات إخراج التقرير المستقلة -->
+<div id="customReportModal" class="modal-overlay">
     <div class="modal-body" style="max-width: 500px; text-align: right; direction: rtl;">
         <div class="modal-header" style="direction: rtl;">
             <h3 style="font-family: 'GizaFont', 'El Messiri', serif;"><i class="fa-solid fa-file-medical" style="color:#0284c7;"></i> إخراج تقرير طبي</h3>
             <button class="modal-close" onclick="closeCustomReportModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
         
-        <div class="field-box">
-            <span class="field-label">اسم المريض:</span>
-            <div class="input-wrapper"><input type="text" id="repInputName" placeholder="اسم المريض..."></div>
-        </div>
+        <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px;">تم سحب بيانات المريض من ملفه تلقائياً، يمكنك التعديل بحرية:</p>
+
         <div style="display: flex; gap: 10px;">
+            <div class="field-box" style="flex: 2;">
+                <span class="field-label">اسم المريض:</span>
+                <div class="input-wrapper"><input type="text" id="repInputName" placeholder="اسم المريض..."></div>
+            </div>
             <div class="field-box" style="flex: 1;">
                 <span class="field-label">العمر:</span>
                 <div class="input-wrapper"><input type="text" id="repInputAge" placeholder="العمر..."></div>
             </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
             <div class="field-box" style="flex: 1;">
                 <span class="field-label">الجنس:</span>
                 <div class="input-wrapper"><input type="text" id="repInputGender" placeholder="الجنس..."></div>
             </div>
+            <div class="field-box" style="flex: 1;">
+                <span class="field-label">تاريخ الزيارة:</span>
+                <div class="input-wrapper"><input type="text" id="repInputDate" placeholder="التاريخ..."></div>
+            </div>
         </div>
+
         <div class="field-box">
-            <span class="field-label">عنوان التقرير:</span>
-            <div class="input-wrapper"><input type="text" id="repInputTitle" placeholder="تقرير طبي / إجازة مرضية..."></div>
+            <span class="field-label">عنوان التقرير (مثل: تقرير طبي / إجازة مرضية / علاج طبيعي):</span>
+            <div class="input-wrapper"><input type="text" id="repInputTitle" placeholder="اكتب عنوان التقرير..."></div>
         </div>
+
         <div class="field-box">
             <span class="field-label">الجهة المراد توجيه التقرير إليها:</span>
-            <div class="input-wrapper"><input type="text" id="repInputTarget" placeholder="إلى الجهة المستفيدة..."></div>
+            <div class="input-wrapper"><input type="text" id="repInputTarget" placeholder="اكتب الجهة الموجّه لها..."></div>
         </div>
+
         <div class="field-box">
             <span class="field-label">تفاصيل وشرح حالة المريض:</span>
-            <div class="input-wrapper"><textarea id="repInputDesc" rows="4" placeholder="التفاصيل السريرية..."></textarea></div>
+            <div class="input-wrapper">
+                <textarea id="repInputDesc" rows="4" placeholder="اكتب تفاصيل وشرح حالة المريض..."></textarea>
+            </div>
         </div>
-        <button type="button" class="btn-main" onclick="generateReportOnRx()" style="background: #0284c7; margin-top: 10px;">
+
+        <button type="button" class="btn-main" onclick="generateReportOnRx()" style="background: #0284c7; margin-top: 10px; font-family: 'GizaFont', sans-serif;">
             <i class="fa-solid fa-check"></i> اظهار التقرير على الروشتة
         </button>
     </div>
 </div>
 
-<!-- نافذة معاينة وطباعة التقرير المستقل -->
-<div id="customReportPreviewModal" class="modal-overlay" style="display: none;">
-    <div class="modal-body" style="max-width: 540px; text-align: left; direction: ltr;">
-        <div class="modal-header" style="direction: ltr;">
-            <h3>معاينة وطباعة التقرير الطبي</h3>
-            <button class="modal-close" onclick="closeCustomReportPreview()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div id="reportCanvasContainer" class="rx-canvas-container" style="position: relative;">
-            <img class="rx-bg-img" src="" alt="RX BG">
-            <div id="customReportPreviewLayer" class="draggable-box" style="top: 40px; left: 20px; width: 90%;">
-                <div class="box-font-controls"><button onclick="adjustReportFontSize(-1)">-</button><button onclick="adjustReportFontSize(1)">+</button></div>
-                <h4 id="prevRepNameDisplay" style="font-size:15px; font-weight:bold;"></h4>
-                <p id="prevRepGenderDisplay" style="font-size:14px;"></p>
-                <p id="prevRepAgeDisplay" style="font-size:14px;"></p>
-                <h3 id="prevRepTypeDisplay" style="font-size:18px; color:#0d9488; margin: 10px 0;"></h3>
-                <p id="prevRepTargetDisplay" style="font-size:15px; font-weight:bold;"></p>
-                <div id="prevRepDescDisplay" style="font-size:15px; white-space:pre-wrap;"></div>
-            </div>
-        </div>
-        <button class="btn-main" onclick="window.print()" style="margin-top: 10px; background:#16a34a;"><i class="fa-solid fa-print"></i> طباعة التقرير مباشرة</button>
-    </div>
-</div>
-
-<!-- نافذة روشتة الأدوية العادية (Print RX Prescription) الأصلية والمنفصلة -->
-<div id="rxModal" class="modal-overlay" style="display: none;">
+<!-- نافذة عرض الروشتة المخصصة للتقرير الطبي -->
+<div id="rxModal" class="modal-overlay">
     <div class="modal-body" style="max-width: 480px; text-align: left; direction: ltr;">
         <div class="modal-header" style="direction: ltr;">
-            <h3 style="font-family: 'El Messiri', serif;"><i class="fa-solid fa-file-prescription" style="color:#0d9488;"></i> RX Prescription & Medications</h3>
+            <h3 style="font-family: 'El Messiri', serif;"><i class="fa-solid fa-file-prescription" style="color:#0d9488;"></i> RX Prescription & Report</h3>
             <button class="modal-close" onclick="closeRxModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <span style="font-size: 0.72rem; color: #64748b;" id="rxModeHint">RX ready</span>
+            <span style="font-size: 0.72rem; color: #64748b;" id="rxModeHint">الخلفية شفافة تماماً - اضغط ضبط لتحريك الأجزاء</span>
             <button type="button" id="rxConfigToggleBtn" onclick="toggleRxConfigMode()" style="background: #f0fdfa; color: #0d9488; border: 1px solid #0d9488; border-radius: 8px; padding: 4px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
-                <i class="fa-solid fa-sliders"></i> Config Mode
+                <i class="fa-solid fa-sliders"></i> ضبط الأماكن والخطوط
             </button>
         </div>
 
         <div id="rxCanvasContainer" class="rx-canvas-container">
-            <div id="rxPatientDetailsBox" class="draggable-box" style="top: 40px; left: 30px;">
+            <img id="rxBgImg" class="rx-bg-img" src="" alt="RX Header" style="display: none;">
+            
+            <div id="dragBoxRepPatient" class="draggable-box" style="top: 30px; left: 15px;">
                 <div class="box-font-controls">
-                    <span>Patient Details Font:</span>
+                    <span>خط معلومات المريض:</span>
                     <div style="display:flex; gap:3px;">
-                        <button type="button" onclick="changeBoxFontSize('patientDetails', -1)">-</button>
-                        <button type="button" onclick="changeBoxFontSize('patientDetails', 1)">+</button>
+                        <button type="button" onclick="changeReportPartFontSize('repPatient', -1)">-</button>
+                        <button type="button" onclick="changeReportPartFontSize('repPatient', 1)">+</button>
                     </div>
                 </div>
-                <div id="rxDragPatientDetailsText" class="rx-patient-details-text" style="font-size: 1rem; font-weight: 700; color: #0f172a;"></div>
+                <div id="rxRepPatientText" style="font-size: 15px; font-weight: bold; color: #0f172a; line-height: 1.6;"></div>
             </div>
 
-            <div id="rxDateBox" class="draggable-box" style="top: 40px; left: 380px;">
+            <div id="dragBoxRepTitle" class="draggable-box" style="top: 120px; left: 15px;">
                 <div class="box-font-controls">
-                    <span>Date Font:</span>
+                    <span>خط العنوان:</span>
                     <div style="display:flex; gap:3px;">
-                        <button type="button" onclick="changeBoxFontSize('date', -1)">-</button>
-                        <button type="button" onclick="changeBoxFontSize('date', 1)">+</button>
+                        <button type="button" onclick="changeReportPartFontSize('repTitle', -1)">-</button>
+                        <button type="button" onclick="changeReportPartFontSize('repTitle', 1)">+</button>
                     </div>
                 </div>
-                <div id="rxDragDateText" class="rx-date-text" style="font-size: 0.95rem; font-weight: 600; color: #334155;"></div>
+                <div id="rxRepTitleText" style="font-size: 18px; font-weight: bold; color: #0f766e; text-align: center;"></div>
             </div>
 
-            <div id="rxVitalsBox" class="draggable-box" style="top: 110px; left: 30px;">
+            <div id="dragBoxRepTarget" class="draggable-box" style="top: 175px; left: 15px;">
                 <div class="box-font-controls">
-                    <span>Vitals Font:</span>
+                    <span>خط الجهة:</span>
                     <div style="display:flex; gap:3px;">
-                        <button type="button" onclick="changeBoxFontSize('vitals', -1)">-</button>
-                        <button type="button" onclick="changeBoxFontSize('vitals', 1)">+</button>
+                        <button type="button" onclick="changeReportPartFontSize('repTarget', -1)">-</button>
+                        <button type="button" onclick="changeReportPartFontSize('repTarget', 1)">+</button>
                     </div>
                 </div>
-                <div id="rxDragVitalsText" class="rx-vitals-text" style="font-size: 0.9rem; font-weight: 600; color: #0f766e;"></div>
+                <div id="rxRepTargetText" style="font-size: 15px; font-weight: bold; color: #1e293b;"></div>
             </div>
 
-            <div id="rxTreatmentBox" class="draggable-box" style="top: 180px; left: 30px; width: 450px;">
+            <div id="dragBoxRepDesc" class="draggable-box" style="top: 230px; left: 15px; min-width: 240px;">
                 <div class="box-font-controls">
-                    <span>Treatment Font:</span>
+                    <span>خط التفاصيل:</span>
                     <div style="display:flex; gap:3px;">
-                        <button type="button" onclick="changeBoxFontSize('treatment', -1)">-</button>
-                        <button type="button" onclick="changeBoxFontSize('treatment', 1)">+</button>
+                        <button type="button" onclick="changeReportPartFontSize('repDesc', -1)">-</button>
+                        <button type="button" onclick="changeReportPartFontSize('repDesc', 1)">+</button>
                     </div>
                 </div>
-                <div id="rxDragTreatmentText" class="rx-treatment-text" style="font-size: 1.1rem; font-weight: 600; color: #0f172a; white-space: pre-wrap; line-height: 1.8;"></div>
+                <div id="rxRepDescText" style="font-size: 15px; color: #0f172a; white-space: pre-wrap; line-height: 1.6;"></div>
             </div>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-            <button id="rxSaveLayoutBtn" class="btn-main" onclick="saveRxLayoutPositions()" style="display: none; background: #0d9488;">
-                <i class="fa-solid fa-floppy-disk"></i> Save RX Layout Positions
+            <button id="rxSaveLayoutBtn" class="btn-main" onclick="saveReportLayoutPositions()" style="display: none; background: #0284c7;">
+                <i class="fa-solid fa-floppy-disk"></i> حفظ مواقع الأجزاء والترتيب الثابت
             </button>
-            <button type="button" class="btn-main" onclick="printPrescriptionDirectly()" id="btnPrintRxDirect" style="font-family: 'El Messiri', sans-serif; background: #16a34a; width: 100%;">
-                <i class="fa-solid fa-print"></i> Print RX Prescription
+            <button type="button" class="btn-main" onclick="printPrescriptionDirectlyActive()" id="btnPrintRxDirect" style="font-family: 'El Messiri', sans-serif; background: #16a34a; width: 100%;">
+                <i class="fa-solid fa-print"></i> طباعة التقرير (طباعة مباشرة / PDF)
             </button>
             <button type="button" class="btn-main" onclick="openPrescriptionPDF()" id="btnSaveRxPDF" style="font-family: 'El Messiri', sans-serif; background: #0284c7; width: 100%;">
                 <i class="fa-solid fa-file-pdf"></i> Save as PDF File
@@ -553,32 +913,225 @@
 <script src="clinic-functions.js?v=17.30"></script>
 <script>
     function openCustomReportModal() {
-        let patName = document.getElementById('recPatientName') ? document.getElementById('recPatientName').innerText : "";
+        let patName = "";
+        let patAge = "";
+        let patGender = "";
+
+        if (typeof currentPatientName !== 'undefined' && currentPatientName) {
+            patName = currentPatientName;
+        } else if (document.getElementById('recPatientName') && document.getElementById('recPatientName').innerText !== '—') {
+            patName = document.getElementById('recPatientName').innerText;
+        }
+
+        if (typeof currentPatientAge !== 'undefined' && currentPatientAge) {
+            patAge = currentPatientAge;
+        }
+
+        if (typeof currentPatientGender !== 'undefined' && currentPatientGender) {
+            patGender = currentPatientGender;
+        }
+
+        let todayDate = new Date().toISOString().split('T')[0].replace(/-/g, '/');
+
         document.getElementById('repInputName').value = patName;
+        document.getElementById('repInputAge').value = patAge;
+        document.getElementById('repInputGender').value = patGender;
+        document.getElementById('repInputDate').value = todayDate;
+        
+        if(!document.getElementById('repInputTitle').value) document.getElementById('repInputTitle').value = "";
+        if(!document.getElementById('repInputTarget').value) document.getElementById('repInputTarget').value = "";
+        if(!document.getElementById('repInputDesc').value) document.getElementById('repInputDesc').value = "";
+        
         document.getElementById('customReportModal').style.display = 'flex';
     }
+
     function closeCustomReportModal() {
         document.getElementById('customReportModal').style.display = 'none';
     }
-    function generateReportOnRx() {
-        document.getElementById('prevRepNameDisplay').innerText = document.getElementById('repInputName').value;
-        document.getElementById('prevRepGenderDisplay').innerText = document.getElementById('repInputGender').value;
-        document.getElementById('prevRepAgeDisplay').innerText = document.getElementById('repInputAge').value;
-        document.getElementById('prevRepTargetDisplay').innerText = document.getElementById('repInputTarget').value;
-        document.getElementById('prevRepTypeDisplay').innerText = document.getElementById('repInputTitle').value;
-        document.getElementById('prevRepDescDisplay').innerText = document.getElementById('repInputDesc').value;
 
-        document.getElementById('customReportModal').style.display = 'none';
-        document.getElementById('customReportPreviewModal').style.display = 'flex';
-        
-        let savedRxImg = localStorage.getItem('clinic_rx_template_img') || localStorage.getItem('rx_header_image');
-        if(savedRxImg) {
-            document.querySelector('#reportCanvasContainer .rx-bg-img').src = savedRxImg;
-            document.querySelector('#reportCanvasContainer .rx-bg-img').style.display = 'block';
+    function loadAndDisplayRxBackground() {
+        let savedRxImg = null;
+        try {
+            savedRxImg = localStorage.getItem('clinic_rx_template_img') || localStorage.getItem('rx_header_image');
+        } catch(e) {}
+
+        const bgImgElement = document.getElementById('rxBgImg');
+        if (savedRxImg && bgImgElement) {
+            bgImgElement.src = savedRxImg;
+            bgImgElement.style.display = 'block';
+        } else if (typeof rxTemplateImage !== 'undefined' && rxTemplateImage && bgImgElement) {
+            bgImgElement.src = rxTemplateImage;
+            bgImgElement.style.display = 'block';
+        } else {
+            const previewImg = document.getElementById('rxPreviewImg');
+            if (previewImg && previewImg.src && previewImg.src !== window.location.href && bgImgElement) {
+                bgImgElement.src = previewImg.src;
+                bgImgElement.style.display = 'block';
+            }
         }
     }
-    function closeCustomReportPreview() {
-        document.getElementById('customReportPreviewModal').style.display = 'none';
+
+    function generateReportOnRx() {
+        const nameVal = document.getElementById('repInputName').value;
+        const ageVal = document.getElementById('repInputAge').value;
+        const genderVal = document.getElementById('repInputGender').value;
+        const dateVal = document.getElementById('repInputDate').value;
+        
+        const titleVal = document.getElementById('repInputTitle').value;
+        const targetVal = document.getElementById('repInputTarget').value;
+        const descVal = document.getElementById('repInputDesc').value;
+
+        let patientBlockHTML = "";
+        if(nameVal) patientBlockHTML += `Name: ${nameVal}<br>`;
+        if(ageVal) patientBlockHTML += `Age: ${ageVal} Year<br>`;
+        if(genderVal) patientBlockHTML += `Gender: ${genderVal}<br>`;
+        if(dateVal) patientBlockHTML += `Date: ${dateVal}`;
+        document.getElementById('rxRepPatientText').innerHTML = patientBlockHTML;
+
+        document.getElementById('rxRepTitleText').innerText = titleVal;
+        document.getElementById('rxRepTargetText').innerText = targetVal ? `إلى: ${targetVal}` : "";
+        document.getElementById('rxRepDescText').innerText = descVal;
+
+        document.getElementById('customReportModal').style.display = 'none';
+        document.getElementById('rxModal').style.display = 'flex';
+
+        loadAndDisplayRxBackground();
+        loadReportLayoutPositions();
+    }
+
+    function printPrescriptionDirectlyActive() {
+        window.focus();
+        setTimeout(() => {
+            if (typeof printPrescriptionDirectly === 'function') {
+                printPrescriptionDirectly();
+            } else {
+                document.body.classList.add('is-printing-rx');
+                window.print();
+                setTimeout(() => {
+                    document.body.classList.remove('is-printing-rx');
+                }, 1000);
+            }
+        }, 300);
+    }
+
+    function openEditPatientModal() {
+        if (typeof openEditPatient === 'function') {
+            openEditPatient();
+        } else if (typeof editCurrentPatient === 'function') {
+            editCurrentPatient();
+        } else {
+            if (typeof navigateTo === 'function') {
+                navigateTo('addPatientScreen', 'تعديل بيانات المريض', 'تعديل وحفظ بيانات المريض');
+            }
+        }
+    }
+
+    let reportFontSizes = JSON.parse(localStorage.getItem('clinic_report_font_sizes')) || {
+        repPatient: 15,
+        repTitle: 18,
+        repTarget: 15,
+        repDesc: 15
+    };
+
+    function changeReportPartFontSize(partKey, delta) {
+        reportFontSizes[partKey] = (reportFontSizes[partKey] || 15) + delta;
+        if (reportFontSizes[partKey] < 10) reportFontSizes[partKey] = 10;
+        if (reportFontSizes[partKey] > 32) reportFontSizes[partKey] = 32;
+
+        applyReportFontSizes();
+        localStorage.setItem('clinic_report_font_sizes', JSON.stringify(reportFontSizes));
+    }
+
+    function applyReportFontSizes() {
+        if(document.getElementById('rxRepPatientText')) document.getElementById('rxRepPatientText').style.fontSize = reportFontSizes.repPatient + 'px';
+        if(document.getElementById('rxRepTitleText')) document.getElementById('rxRepTitleText').style.fontSize = reportFontSizes.repTitle + 'px';
+        if(document.getElementById('rxRepTargetText')) document.getElementById('rxRepTargetText').style.fontSize = reportFontSizes.repTarget + 'px';
+        if(document.getElementById('rxRepDescText')) document.getElementById('rxRepDescText').style.fontSize = reportFontSizes.repDesc + 'px';
+    }
+
+    let isReportConfigMode = false;
+    function toggleRxConfigMode() {
+        isReportConfigMode = !isReportConfigMode;
+        const boxes = document.querySelectorAll('.draggable-box');
+        boxes.forEach(box => {
+            if (isReportConfigMode) {
+                box.classList.add('config-mode');
+            } else {
+                box.classList.remove('config-mode');
+            }
+        });
+        const saveBtn = document.getElementById('rxSaveLayoutBtn');
+        if(saveBtn) saveBtn.style.display = isReportConfigMode ? 'block' : 'none';
+    }
+
+    function saveReportLayoutPositions() {
+        const positions = {
+            repPatient: { top: document.getElementById('dragBoxRepPatient').style.top, left: document.getElementById('dragBoxRepPatient').style.left },
+            repTitle: { top: document.getElementById('dragBoxRepTitle').style.top, left: document.getElementById('dragBoxRepTitle').style.left },
+            repTarget: { top: document.getElementById('dragBoxRepTarget').style.top, left: document.getElementById('dragBoxRepTarget').style.left },
+            repDesc: { top: document.getElementById('dragBoxRepDesc').style.top, left: document.getElementById('dragBoxRepDesc').style.left }
+        };
+        localStorage.setItem('clinic_report_layout_pos', JSON.stringify(positions));
+        alert('تم حفظ مواقع الأجزاء والترتيب الثابت بنجاح!');
+        toggleRxConfigMode();
+    }
+
+    function loadReportLayoutPositions() {
+        applyReportFontSizes();
+        loadAndDisplayRxBackground();
+        const saved = localStorage.getItem('clinic_report_layout_pos');
+        if (saved) {
+            try {
+                const pos = JSON.parse(saved);
+                if(pos.repPatient) { document.getElementById('dragBoxRepPatient').style.top = pos.repPatient.top; document.getElementById('dragBoxRepPatient').style.left = pos.repPatient.left; }
+                if(pos.repTitle) { document.getElementById('dragBoxRepTitle').style.top = pos.repTitle.top; document.getElementById('dragBoxRepTitle').style.left = pos.repTitle.left; }
+                if(pos.repTarget) { document.getElementById('dragBoxRepTarget').style.top = pos.repTarget.top; document.getElementById('dragBoxRepTarget').style.left = pos.repTarget.left; }
+                if(pos.repDesc) { document.getElementById('dragBoxRepDesc').style.top = pos.repDesc.top; document.getElementById('dragBoxRepDesc').style.left = pos.repDesc.left; }
+            } catch(e) {}
+        }
+    }
+
+    let activeDragBox = null, dragStartX = 0, dragStartY = 0, boxInitX = 0, boxInitY = 0;
+
+    document.querySelectorAll('.draggable-box').forEach(box => {
+        box.addEventListener('mousedown', startDrag);
+        box.addEventListener('touchstart', startDrag, {passive: false});
+    });
+
+    document.addEventListener('mousemove', onDrag);
+    document.addEventListener('touchmove', onDrag, {passive: false});
+
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
+
+    function startDrag(e) {
+        if (!isReportConfigMode) return;
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+        activeDragBox = this;
+        const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
+        dragStartX = clientX;
+        dragStartY = clientY;
+        boxInitX = activeDragBox.offsetLeft;
+        boxInitY = activeDragBox.offsetTop;
+        e.preventDefault();
+    }
+
+    function onDrag(e) {
+        if (!activeDragBox || !isReportConfigMode) return;
+        const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+        
+        const dx = clientX - dragStartX;
+        const dy = clientY - dragStartY;
+
+        activeDragBox.style.left = (boxInitX + dx) + 'px';
+        activeDragBox.style.top = (boxInitY + dy) + 'px';
+        e.preventDefault();
+    }
+
+    function endDrag() {
+        activeDragBox = null;
     }
 </script>
 </body>
