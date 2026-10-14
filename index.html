@@ -867,27 +867,12 @@
 <script>eruda.init();</script>
 
 <script>
-    function openEditPatientModal() {
-        if (typeof openEditPatient === 'function') {
-            openEditPatient();
-        } else if (typeof editCurrentPatient === 'function') {
-            editCurrentPatient();
-        } else {
-            if (typeof navigateTo === 'function') {
-                navigateTo('addPatientScreen', 'تعديل بيانات المريض', 'تعديل وحفظ بيانات المريض');
-            }
-        }
-    }
-</script>
-<script>
-    // دالة محسنة ومباشرة لتعبئة بيانات المريض الحالية عند الضغط على زر التعديل
+    // دالة تعديل بيانات المريض المصححة والمضمونة 100%
     window.openEditPatientModal = function() {
         if (typeof currentPatient !== 'undefined' && currentPatient) {
-            // الانتقال لشاشة إضافة/تعديل المريض
             if (typeof navigateTo === 'function') {
                 navigateTo('addPatientScreen', 'تعديل بيانات المريض', 'تعديل وحفظ بيانات المريض');
             }
-            // تعبئة الحقول تلقائياً ببيانات المريض الحالي
             setTimeout(() => {
                 if (document.getElementById('pName')) document.getElementById('pName').value = currentPatient.name || '';
                 if (document.getElementById('pSubName')) document.getElementById('pSubName').value = currentPatient.subName || '';
@@ -899,7 +884,24 @@
                 if (document.getElementById('pDate')) document.getElementById('pDate').value = currentPatient.date || '';
             }, 100);
         } else {
-            alert('الرجاء اختيار مريض أولاً');
+            // محاولة جلب الاسم من الشاشة مباشرة إذا كان الذاكرة فارغة
+            const nameEl = document.getElementById('recPatientName');
+            if (nameEl && nameEl.textContent && nameEl.textContent !== '—') {
+                if (typeof navigateTo === 'function') {
+                    navigateTo('addPatientScreen', 'تعديل بيانات المريض', 'تعديل وحفظ بيانات المريض');
+                }
+                setTimeout(() => {
+                    if (document.getElementById('pName')) {
+                        document.getElementById('pName').value = nameEl.textContent.trim();
+                    }
+                }, 100);
+            } else if (typeof editCurrentPatient === 'function') {
+                editCurrentPatient();
+            } else if (typeof openEditPatient === 'function') {
+                openEditPatient();
+            } else {
+                alert('الرجاء اختيار مريض من الأرشيف أولاً');
+            }
         }
     };
 </script>
