@@ -142,9 +142,9 @@
         @media print {
             @page { size: auto; margin: 0mm; }
             body.is-printing-rx * { visibility: hidden !important; }
-            body.is-printing-rx #rxCanvasContainer, body.is-printing-rx #rxCanvasContainer *, body.is-printing-rx #reportCanvasContainer, body.is-printing-rx #reportCanvasContainer * { visibility: visible !important; }
-            body.is-printing-rx #rxModal, body.is-printing-rx #customReportPreviewModal { position: fixed !important; left: 0 !important; top: 0 !important; width: 100% !important; height: 100% !important; background: white !important; display: block !important; z-index: 999999 !important; overflow: hidden !important; }
-            body.is-printing-rx #rxCanvasContainer, body.is-printing-rx #reportCanvasContainer { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; height: 100% !important; max-width: none !important; max-height: none !important; border: none !important; box-shadow: none !important; margin: 0 !important; transform: none !important; border-radius: 0 !important; }
+            body.is-printing-rx #rxCanvasContainer, body.is-printing-rx #rxCanvasContainer * { visibility: visible !important; }
+            body.is-printing-rx #rxModal { position: fixed !important; left: 0 !important; top: 0 !important; width: 100% !important; height: 100% !important; background: white !important; display: block !important; z-index: 999999 !important; overflow: hidden !important; }
+            body.is-printing-rx #rxCanvasContainer { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; height: 100% !important; max-width: none !important; max-height: none !important; border: none !important; box-shadow: none !important; margin: 0 !important; transform: none !important; border-radius: 0 !important; }
             .box-font-controls { display: none !important; }
             .draggable-box { border: none !important; background: transparent !important; box-shadow: none !important; }
         }
@@ -724,11 +724,7 @@
                     <div class="field-box" style="font-family:'El Messiri',serif; font-size:1.1rem; font-weight:700; color: #0f766e; margin-bottom:4px; padding-right: 125px;">
                         <i class="fa-solid fa-user-check"></i> <span id="recPatientName">—</span>
                     </div>
-                    <p style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin-bottom: 10px;" id="recPatientMeta"></p>
-                    
-                    <button type="button" class="btn-main" onclick="openCustomReportModal()" id="btnGenerateReportModal" style="background: #0284c7; padding: 12px; font-size: 0.9rem;">
-                        <i class="fa-solid fa-file-lines"></i> إخراج تقرير طبي
-                    </button>
+                    <p style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin-bottom: 0;" id="recPatientMeta"></p>
                 </div>
 
                 <button type="button" id="btnAddVisitMain" class="btn-main btn-secondary" onclick="addNewVisit()">
@@ -776,138 +772,6 @@
     </div>
 </div>
 
-<!-- نافذة إدخال بيانات إخراج التقرير المستقلة -->
-<div id="customReportModal" class="modal-overlay">
-    <div class="modal-body" style="max-width: 500px; text-align: right; direction: rtl;">
-        <div class="modal-header" style="direction: rtl;">
-            <h3 style="font-family: 'GizaFont', 'El Messiri', serif;"><i class="fa-solid fa-file-medical" style="color:#0284c7;"></i> إخراج تقرير طبي</h3>
-            <button class="modal-close" onclick="closeCustomReportModal()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        
-        <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px;">تم سحب بيانات المريض من ملفه تلقائياً، يمكنك التعديل بحرية:</p>
-
-        <div style="display: flex; gap: 10px;">
-            <div class="field-box" style="flex: 2;">
-                <span class="field-label">اسم المريض:</span>
-                <div class="input-wrapper"><input type="text" id="repInputName" placeholder="اسم المريض..."></div>
-            </div>
-            <div class="field-box" style="flex: 1;">
-                <span class="field-label">العمر:</span>
-                <div class="input-wrapper"><input type="text" id="repInputAge" placeholder="العمر..."></div>
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 10px;">
-            <div class="field-box" style="flex: 1;">
-                <span class="field-label">الجنس:</span>
-                <div class="input-wrapper"><input type="text" id="repInputGender" placeholder="الجنس..."></div>
-            </div>
-            <div class="field-box" style="flex: 1;">
-                <span class="field-label">تاريخ الزيارة:</span>
-                <div class="input-wrapper"><input type="text" id="repInputDate" placeholder="التاريخ..."></div>
-            </div>
-        </div>
-
-        <div class="field-box">
-            <span class="field-label">عنوان التقرير (مثل: تقرير طبي / إجازة مرضية / علاج طبيعي):</span>
-            <div class="input-wrapper"><input type="text" id="repInputTitle" placeholder="اكتب عنوان التقرير..."></div>
-        </div>
-
-        <div class="field-box">
-            <span class="field-label">الجهة المراد توجيه التقرير إليها:</span>
-            <div class="input-wrapper"><input type="text" id="repInputTarget" placeholder="اكتب الجهة الموجّه لها..."></div>
-        </div>
-
-        <div class="field-box">
-            <span class="field-label">تفاصيل وشرح حالة المريض:</span>
-            <div class="input-wrapper">
-                <textarea id="repInputDesc" rows="4" placeholder="اكتب تفاصيل وشرح حالة المريض..."></textarea>
-            </div>
-        </div>
-
-        <button type="button" class="btn-main" onclick="generateReportOnRx()" style="background: #0284c7; margin-top: 10px; font-family: 'GizaFont', sans-serif;">
-            <i class="fa-solid fa-check"></i> اظهار التقرير على الروشتة
-        </button>
-    </div>
-</div>
-
-<!-- نافذة عرض الروشتة المخصصة للتقرير الطبي -->
-<div id="rxModal" class="modal-overlay">
-    <div class="modal-body" style="max-width: 480px; text-align: left; direction: ltr;">
-        <div class="modal-header" style="direction: ltr;">
-            <h3 style="font-family: 'El Messiri', serif;"><i class="fa-solid fa-file-prescription" style="color:#0d9488;"></i> RX Prescription & Report</h3>
-            <button class="modal-close" onclick="closeRxModal()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <span style="font-size: 0.72rem; color: #64748b;" id="rxModeHint">الخلفية شفافة تماماً - اضغط ضبط لتحريك الأجزاء</span>
-            <button type="button" id="rxConfigToggleBtn" onclick="toggleRxConfigMode()" style="background: #f0fdfa; color: #0d9488; border: 1px solid #0d9488; border-radius: 8px; padding: 4px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
-                <i class="fa-solid fa-sliders"></i> ضبط الأماكن والخطوط
-            </button>
-        </div>
-
-        <div id="rxCanvasContainer" class="rx-canvas-container">
-            <img id="rxBgImg" class="rx-bg-img" src="" alt="RX Header" style="display: none;">
-            
-            <div id="dragBoxRepPatient" class="draggable-box" style="top: 30px; left: 15px;">
-                <div class="box-font-controls">
-                    <span>خط معلومات المريض:</span>
-                    <div style="display:flex; gap:3px;">
-                        <button type="button" onclick="changeReportPartFontSize('repPatient', -1)">-</button>
-                        <button type="button" onclick="changeReportPartFontSize('repPatient', 1)">+</button>
-                    </div>
-                </div>
-                <div id="rxRepPatientText" style="font-size: 15px; font-weight: bold; color: #0f172a; line-height: 1.6;"></div>
-            </div>
-
-            <div id="dragBoxRepTitle" class="draggable-box" style="top: 120px; left: 15px;">
-                <div class="box-font-controls">
-                    <span>خط العنوان:</span>
-                    <div style="display:flex; gap:3px;">
-                        <button type="button" onclick="changeReportPartFontSize('repTitle', -1)">-</button>
-                        <button type="button" onclick="changeReportPartFontSize('repTitle', 1)">+</button>
-                    </div>
-                </div>
-                <div id="rxRepTitleText" style="font-size: 18px; font-weight: bold; color: #0f766e; text-align: center;"></div>
-            </div>
-
-            <div id="dragBoxRepTarget" class="draggable-box" style="top: 175px; left: 15px;">
-                <div class="box-font-controls">
-                    <span>خط الجهة:</span>
-                    <div style="display:flex; gap:3px;">
-                        <button type="button" onclick="changeReportPartFontSize('repTarget', -1)">-</button>
-                        <button type="button" onclick="changeReportPartFontSize('repTarget', 1)">+</button>
-                    </div>
-                </div>
-                <div id="rxRepTargetText" style="font-size: 15px; font-weight: bold; color: #1e293b;"></div>
-            </div>
-
-            <div id="dragBoxRepDesc" class="draggable-box" style="top: 230px; left: 15px; min-width: 240px;">
-                <div class="box-font-controls">
-                    <span>خط التفاصيل:</span>
-                    <div style="display:flex; gap:3px;">
-                        <button type="button" onclick="changeReportPartFontSize('repDesc', -1)">-</button>
-                        <button type="button" onclick="changeReportPartFontSize('repDesc', 1)">+</button>
-                    </div>
-                </div>
-                <div id="rxRepDescText" style="font-size: 15px; color: #0f172a; white-space: pre-wrap; line-height: 1.6;"></div>
-            </div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-            <button id="rxSaveLayoutBtn" class="btn-main" onclick="saveReportLayoutPositions()" style="display: none; background: #0284c7;">
-                <i class="fa-solid fa-floppy-disk"></i> حفظ مواقع الأجزاء والترتيب الثابت
-            </button>
-            <button type="button" class="btn-main" onclick="printPrescriptionDirectlyActive()" id="btnPrintRxDirect" style="font-family: 'El Messiri', sans-serif; background: #16a34a; width: 100%;">
-                <i class="fa-solid fa-print"></i> طباعة التقرير (طباعة مباشرة / PDF)
-            </button>
-            <button type="button" class="btn-main" onclick="openPrescriptionPDF()" id="btnSaveRxPDF" style="font-family: 'El Messiri', sans-serif; background: #0284c7; width: 100%;">
-                <i class="fa-solid fa-file-pdf"></i> Save as PDF File
-            </button>
-        </div>
-    </div>
-</div>
-
 <script src="config.js"></script>
 <script src="clinic-functions.js?v=17.30"></script>
 
@@ -916,108 +780,6 @@
 <script>eruda.init();</script>
 
 <script>
-    function openCustomReportModal() {
-        let patName = "";
-        let patAge = "";
-        let patGender = "";
-
-        if (typeof currentPatientName !== 'undefined' && currentPatientName) {
-            patName = currentPatientName;
-        } else if (document.getElementById('recPatientName') && document.getElementById('recPatientName').innerText !== '—') {
-            patName = document.getElementById('recPatientName').innerText;
-        }
-
-        if (typeof currentPatientAge !== 'undefined' && currentPatientAge) {
-            patAge = currentPatientAge;
-        }
-
-        if (typeof currentPatientGender !== 'undefined' && currentPatientGender) {
-            patGender = currentPatientGender;
-        }
-
-        let todayDate = new Date().toISOString().split('T')[0].replace(/-/g, '/');
-
-        document.getElementById('repInputName').value = patName;
-        document.getElementById('repInputAge').value = patAge;
-        document.getElementById('repInputGender').value = patGender;
-        document.getElementById('repInputDate').value = todayDate;
-        
-        if(!document.getElementById('repInputTitle').value) document.getElementById('repInputTitle').value = "";
-        if(!document.getElementById('repInputTarget').value) document.getElementById('repInputTarget').value = "";
-        if(!document.getElementById('repInputDesc').value) document.getElementById('repInputDesc').value = "";
-        
-        document.getElementById('customReportModal').style.display = 'flex';
-    }
-
-    function closeCustomReportModal() {
-        document.getElementById('customReportModal').style.display = 'none';
-    }
-
-    function loadAndDisplayRxBackground() {
-        let savedRxImg = null;
-        try {
-            savedRxImg = localStorage.getItem('clinic_rx_template_img') || localStorage.getItem('rx_header_image');
-        } catch(e) {}
-
-        const bgImgElement = document.getElementById('rxBgImg');
-        if (savedRxImg && bgImgElement) {
-            bgImgElement.src = savedRxImg;
-            bgImgElement.style.display = 'block';
-        } else if (typeof rxTemplateImage !== 'undefined' && rxTemplateImage && bgImgElement) {
-            bgImgElement.src = rxTemplateImage;
-            bgImgElement.style.display = 'block';
-        } else {
-            const previewImg = document.getElementById('rxPreviewImg');
-            if (previewImg && previewImg.src && previewImg.src !== window.location.href && bgImgElement) {
-                bgImgElement.src = previewImg.src;
-                bgImgElement.style.display = 'block';
-            }
-        }
-    }
-
-    function generateReportOnRx() {
-        const nameVal = document.getElementById('repInputName').value;
-        const ageVal = document.getElementById('repInputAge').value;
-        const genderVal = document.getElementById('repInputGender').value;
-        const dateVal = document.getElementById('repInputDate').value;
-        
-        const titleVal = document.getElementById('repInputTitle').value;
-        const targetVal = document.getElementById('repInputTarget').value;
-        const descVal = document.getElementById('repInputDesc').value;
-
-        let patientBlockHTML = "";
-        if(nameVal) patientBlockHTML += `Name: ${nameVal}<br>`;
-        if(ageVal) patientBlockHTML += `Age: ${ageVal} Year<br>`;
-        if(genderVal) patientBlockHTML += `Gender: ${genderVal}<br>`;
-        if(dateVal) patientBlockHTML += `Date: ${dateVal}`;
-        document.getElementById('rxRepPatientText').innerHTML = patientBlockHTML;
-
-        document.getElementById('rxRepTitleText').innerText = titleVal;
-        document.getElementById('rxRepTargetText').innerText = targetVal ? `إلى: ${targetVal}` : "";
-        document.getElementById('rxRepDescText').innerText = descVal;
-
-        document.getElementById('customReportModal').style.display = 'none';
-        document.getElementById('rxModal').style.display = 'flex';
-
-        loadAndDisplayRxBackground();
-        loadReportLayoutPositions();
-    }
-
-    function printPrescriptionDirectlyActive() {
-        window.focus();
-        setTimeout(() => {
-            if (typeof printPrescriptionDirectly === 'function') {
-                printPrescriptionDirectly();
-            } else {
-                document.body.classList.add('is-printing-rx');
-                window.print();
-                setTimeout(() => {
-                    document.body.classList.remove('is-printing-rx');
-                }, 1000);
-            }
-        }, 300);
-    }
-
     function openEditPatientModal() {
         if (typeof openEditPatient === 'function') {
             openEditPatient();
@@ -1028,114 +790,6 @@
                 navigateTo('addPatientScreen', 'تعديل بيانات المريض', 'تعديل وحفظ بيانات المريض');
             }
         }
-    }
-
-    let reportFontSizes = JSON.parse(localStorage.getItem('clinic_report_font_sizes')) || {
-        repPatient: 15,
-        repTitle: 18,
-        repTarget: 15,
-        repDesc: 15
-    };
-
-    function changeReportPartFontSize(partKey, delta) {
-        reportFontSizes[partKey] = (reportFontSizes[partKey] || 15) + delta;
-        if (reportFontSizes[partKey] < 10) reportFontSizes[partKey] = 10;
-        if (reportFontSizes[partKey] > 32) reportFontSizes[partKey] = 32;
-
-        applyReportFontSizes();
-        localStorage.setItem('clinic_report_font_sizes', JSON.stringify(reportFontSizes));
-    }
-
-    function applyReportFontSizes() {
-        if(document.getElementById('rxRepPatientText')) document.getElementById('rxRepPatientText').style.fontSize = reportFontSizes.repPatient + 'px';
-        if(document.getElementById('rxRepTitleText')) document.getElementById('rxRepTitleText').style.fontSize = reportFontSizes.repTitle + 'px';
-        if(document.getElementById('rxRepTargetText')) document.getElementById('rxRepTargetText').style.fontSize = reportFontSizes.repTarget + 'px';
-        if(document.getElementById('rxRepDescText')) document.getElementById('rxRepDescText').style.fontSize = reportFontSizes.repDesc + 'px';
-    }
-
-    let isReportConfigMode = false;
-    function toggleRxConfigMode() {
-        isReportConfigMode = !isReportConfigMode;
-        const boxes = document.querySelectorAll('.draggable-box');
-        boxes.forEach(box => {
-            if (isReportConfigMode) {
-                box.classList.add('config-mode');
-            } else {
-                box.classList.remove('config-mode');
-            }
-        });
-        const saveBtn = document.getElementById('rxSaveLayoutBtn');
-        if(saveBtn) saveBtn.style.display = isReportConfigMode ? 'block' : 'none';
-    }
-
-    function saveReportLayoutPositions() {
-        const positions = {
-            repPatient: { top: document.getElementById('dragBoxRepPatient').style.top, left: document.getElementById('dragBoxRepPatient').style.left },
-            repTitle: { top: document.getElementById('dragBoxRepTitle').style.top, left: document.getElementById('dragBoxRepTitle').style.left },
-            repTarget: { top: document.getElementById('dragBoxRepTarget').style.top, left: document.getElementById('dragBoxRepTarget').style.left },
-            repDesc: { top: document.getElementById('dragBoxRepDesc').style.top, left: document.getElementById('dragBoxRepDesc').style.left }
-        };
-        localStorage.setItem('clinic_report_layout_pos', JSON.stringify(positions));
-        alert('تم حفظ مواقع الأجزاء والترتيب الثابت بنجاح!');
-        toggleRxConfigMode();
-    }
-
-    function loadReportLayoutPositions() {
-        applyReportFontSizes();
-        loadAndDisplayRxBackground();
-        const saved = localStorage.getItem('clinic_report_layout_pos');
-        if (saved) {
-            try {
-                const pos = JSON.parse(saved);
-                if(pos.repPatient) { document.getElementById('dragBoxRepPatient').style.top = pos.repPatient.top; document.getElementById('dragBoxRepPatient').style.left = pos.repPatient.left; }
-                if(pos.repTitle) { document.getElementById('dragBoxRepTitle').style.top = pos.repTitle.top; document.getElementById('dragBoxRepTitle').style.left = pos.repTitle.left; }
-                if(pos.repTarget) { document.getElementById('dragBoxRepTarget').style.top = pos.repTarget.top; document.getElementById('dragBoxRepTarget').style.left = pos.repTarget.left; }
-                if(pos.repDesc) { document.getElementById('dragBoxRepDesc').style.top = pos.repDesc.top; document.getElementById('dragBoxRepDesc').style.left = pos.repDesc.left; }
-            } catch(e) {}
-        }
-    }
-
-    let activeDragBox = null, dragStartX = 0, dragStartY = 0, boxInitX = 0, boxInitY = 0;
-
-    document.querySelectorAll('.draggable-box').forEach(box => {
-        box.addEventListener('mousedown', startDrag);
-        box.addEventListener('touchstart', startDrag, {passive: false});
-    });
-
-    document.addEventListener('mousemove', onDrag);
-    document.addEventListener('touchmove', onDrag, {passive: false});
-
-    document.addEventListener('mouseup', endDrag);
-    document.addEventListener('touchend', endDrag);
-
-    function startDrag(e) {
-        if (!isReportConfigMode) return;
-        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
-        activeDragBox = this;
-        const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-        const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-        dragStartX = clientX;
-        dragStartY = clientY;
-        boxInitX = activeDragBox.offsetLeft;
-        boxInitY = activeDragBox.offsetTop;
-        e.preventDefault();
-    }
-
-    function onDrag(e) {
-        if (!activeDragBox || !isReportConfigMenuMode && !isReportConfigMode) return;
-        const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-        const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-        
-        const dx = clientX - dragStartX;
-        const dy = clientY - dragStartY;
-
-        activeDragBox.style.left = (boxInitX + dx) + 'px';
-        activeDragBox.style.top = (boxInitY + dy) + 'px';
-        e.preventDefault();
-    }
-
-    function endDrag() {
-        activeDragBox = null;
     }
 </script>
 </body>
