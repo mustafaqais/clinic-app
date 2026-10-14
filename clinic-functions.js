@@ -220,7 +220,6 @@ function toggleDarkMode() {
     applyDarkModeState();
 }
 
-// تعديل دالة التحميل والمراقبة لتكون آمنة تماماً ولا تتسبب بأي تجميد للشاشة
 window.addEventListener("DOMContentLoaded", () => {
     const pDateEl = document.getElementById('pDate');
     if (pDateEl) pDateEl.value = getTodayFormatted();
@@ -350,7 +349,6 @@ window.addEventListener("DOMContentLoaded", () => {
             }
         } catch (authErr) {
             console.error("Auth state changed critical error:", authErr);
-            // ضمان عدم تجمد الشاشة أبداً حتى لو حدث استثناء
             const authScreen = document.getElementById('authScreen');
             if (authScreen) authScreen.style.display = 'flex';
         }
@@ -2144,6 +2142,50 @@ function closeRxModal() {
     document.getElementById('rxModal').style.display = 'none';
 }
 
+// ==========================================
+// دوال طباعة روشتة العلاج والتقرير الطبي المنفصلين تماماً
+// ==========================================
+function printPrescriptionOnly() {
+    const rxModal = document.getElementById('rxModal');
+    if (!rxModal) return;
+    
+    document.body.classList.add('is-printing-rx');
+    const reportLayer = document.getElementById('customReportPreviewLayer');
+    if (reportLayer) reportLayer.style.display = 'none';
+
+    window.print();
+    
+    setTimeout(() => {
+        document.body.classList.remove('is-printing-rx');
+        if (reportLayer) reportLayer.style.display = '';
+    }, 1000);
+}
+
+function printMedicalReportOnly() {
+    const reportLayer = document.getElementById('customReportPreviewLayer');
+    if (!reportLayer) {
+        alert('لا يوجد تقرير مفتوح حالياً للطباعة.');
+        return;
+    }
+
+    const rxModal = document.getElementById('rxModal');
+    let wasRxOpen = false;
+    if (rxModal && rxModal.style.display === 'flex') {
+        rxModal.style.display = 'none';
+        wasRxOpen = true;
+    }
+
+    document.body.classList.add('is-printing-report');
+    window.print();
+
+    setTimeout(() => {
+        document.body.classList.remove('is-printing-report');
+        if (wasRxOpen && rxModal) {
+            rxModal.style.display = 'flex';
+        }
+    }, 1000);
+}
+
 function toggleRxConfigMode() {
     isConfigMode = !isConfigMode;
     document.querySelectorAll('.draggable-box').forEach(box => {
@@ -2212,17 +2254,7 @@ function loadSavedRxLayout() {
 }
 
 function printPrescriptionDirectly() {
-    const container = document.getElementById('rxCanvasContainer');
-    const controls = container.querySelectorAll('.box-font-controls');
-    controls.forEach(c => c.style.display = 'none');
-    
-    document.body.classList.add('is-printing-rx');
-    window.print();
-    
-    setTimeout(() => {
-        document.body.classList.remove('is-printing-rx');
-        controls.forEach(c => c.style.display = '');
-    }, 1000);
+    printPrescriptionOnly();
 }
 
 function openPrescriptionPDF() {
@@ -2795,7 +2827,10 @@ function renderVisits(visits, forceFullRender = true) {
             '<div class="field-box">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">' +
             '<span class="field-label" style="margin-bottom:0;">Prescribed Medications (RX)</span>' +
-            '<button type="button" onclick="openRxModal(' + v.visitId + ')" style="background:#fae8ff; color:#c084fc; border:none; border-radius:8px; padding:4px 10px; font-size:0.75rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-file-prescription"></i> Print RX Prescription</button>' +
+            '<div style="display:flex; gap:6px;">' +
+            '<button type="button" onclick="openRxModal(' + v.visitId + ')" style="background:#fae8ff; color:#c084fc; border:none; border-radius:8px; padding:4px 10px; font-size:0.75rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-file-prescription"></i> طباعة الروشتة</button>' +
+            '<button type="button" onclick="printMedicalReportOnly()" style="background:#ccfbf1; color:#0f766e; border:none; border-radius:8px; padding:4px 10px; font-size:0.75rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-file-lines"></i> طباعة التقرير (جيزة)</button>' +
+            '</div>' +
             '</div>' +
             '<div class="input-wrapper" style="position: relative;">' +
             '<textarea id="vDrugs-' + v.visitId + '" rows="3" placeholder="Write prescription drugs here..." oninput="handleDrugsInput(this, ' + v.visitId + ')" onkeydown="handleDrugsKeyDown(event, this, ' + v.visitId + ')" onblur="hideSuggestions(\'drugs\', ' + v.visitId + ')">' + (v.drugs || '') + '</textarea>' +
