@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.40
-// (روشتة العلاج المعتمدة والمنفصلة - بدون تقرير طبي)
+// (مع إضافة ميزة التقرير الطبي المستقل والبوكسات المخصصة)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -153,6 +153,10 @@ window.addEventListener('popstate', function(event) {
     }
     if (document.getElementById('rxModal').style.display === 'flex') {
         closeRxModal();
+        return;
+    }
+    if (document.getElementById('medicalReportModal') && document.getElementById('medicalReportModal').style.display === 'flex') {
+        closeMedicalReportModal();
         return;
     }
     if (document.getElementById('editPatientModal').style.display === 'flex') {
@@ -657,7 +661,7 @@ function saveSettingsToCloudAndLocal() {
     localStorage.setItem('clinic_specialty_config', JSON.stringify(specialtyConfig));
 
     const rxLayoutData = {};
-    document.querySelectorAll('.draggable-box').forEach(box => {
+    document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
         rxLayoutData[box.id] = {
             top: box.style.top,
             left: box.style.left,
@@ -2055,7 +2059,7 @@ function printPrescriptionOnly(visitId) {
 
 function toggleRxConfigMode() {
     isConfigMode = !isConfigMode;
-    document.querySelectorAll('.draggable-box').forEach(box => {
+    document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
         if (isConfigMode) box.classList.add('config-mode');
         else box.classList.remove('config-mode');
     });
@@ -2097,7 +2101,7 @@ function setRxPaperSize(size) {
 
 function saveRxLayoutPositions() {
     isConfigMode = false;
-    document.querySelectorAll('.draggable-box').forEach(b => b.classList.remove('config-mode'));
+    document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
     updateConfigModeUI();
     saveSettingsToCloudAndLocal();
     alert('تم حفظ أماكن وأحجام الراجيتة بنجاح!');
@@ -2155,7 +2159,7 @@ function initDraggableElements() {
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
     const container = document.getElementById('rxCanvasContainer');
 
-    document.querySelectorAll('.draggable-box').forEach(box => {
+    document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
         box.style.touchAction = 'none';
 
         box.addEventListener('pointerdown', e => {
@@ -2199,6 +2203,180 @@ function initDraggableElements() {
         });
     });
 }
+
+// ==========================================
+// دوال تقرير الطبي المستقل والبوكسات والتحكم
+// ==========================================
+let repConfigModeActive = false;
+let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
+
+function toggleMedicalReportInputs(visitId) {
+    const container = document.getElementById(`repContainer_${visitId}`);
+    const chevron = document.getElementById(`repChevron_${visitId}`);
+    if (container) {
+        if (container.style.display === 'none') {
+            container.style.display = 'block';
+            if (chevron) chevron.className = 'fa-solid fa-chevron-up';
+        } else {
+            container.style.display = 'none';
+            if (chevron) chevron.className = 'fa-solid fa-chevron-down';
+        }
+    }
+}
+
+function openMedicalReportModal(visitId) {
+    const modal = document.getElementById('medicalReportModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    let savedRxImg = localStorage.getItem('clinic_rx_image') || '';
+    const bgImg = document.getElementById('repBgImg');
+    if (savedRxImg) {
+        bgImg.src = savedRxImg;
+        bgImg.style.display = 'block';
+    } else {
+        bgImg.style.display = 'none';
+    }
+
+    let pName = (typeof currentPatient !== 'undefined' && currentPatient) ? currentPatient.name : (document.getElementById('recPatientName') ? document.getElementById('recPatientName').textContent : 'مريض');
+    let pAge = (typeof currentPatient !== 'undefined' && currentPatient) ? currentPatient.age : '';
+    let pGender = (typeof currentPatient !== 'undefined' && currentPatient) ? currentPatient.gender : '';
+    let visitDate = new Date().toISOString().split('T')[0];
+
+    let patDetailsStr = `الاسم: ${pName} | العمر: ${pAge} | الجنس: ${pGender} | التاريخ: ${visitDate}`;
+    document.getElementById('repPatientText').textContent = patDetailsStr;
+
+    let titleVal = document.getElementById(`rep_title_${visitId}`) ? document.getElementById(`rep_title_${visitId}`).value : "تقرير طبي";
+    let toVal = document.getElementById(`rep_to_${visitId}`) ? document.getElementById(`rep_to_${visitId}`).value : "";
+    let detailsVal = document.getElementById(`rep_details_${visitId}`) ? document.getElementById(`rep_details_${visitId}`).value : "";
+
+    document.getElementById('repTitleText').textContent = titleVal || "تقرير طبي";
+    document.getElementById('repToText').textContent = toVal ? `إلى ${toVal}` : "";
+    document.getElementById('repDetailsText').textContent = detailsVal;
+
+    loadRepLayoutPositions();
+}
+
+function closeMedicalReportModal() {
+    const modal = document.getElementById('medicalReportModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function toggleRepConfigMode() {
+    repConfigModeActive = !repConfigModeActive;
+    const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
+    boxes.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (repConfigModeActive) el.classList.add('config-mode');
+            else el.classList.remove('config-mode');
+        }
+    });
+    const saveBtn = document.getElementById('repSaveLayoutBtn');
+    if (saveBtn) saveBtn.style.display = repConfigModeActive ? 'block' : 'none';
+    const toggleBtn = document.getElementById('repConfigToggleBtn');
+    if (toggleBtn) {
+        toggleBtn.style.background = repConfigModeActive ? '#0d9488' : '#f0fdfa';
+        toggleBtn.style.color = repConfigModeActive ? '#ffffff' : '#0d9488';
+    }
+}
+
+function changeRepBoxFontSize(boxKey, delta) {
+    repFontSizes[boxKey] = Math.max(10, Math.min(30, (repFontSizes[boxKey] || 14) + delta));
+    let targetId = '';
+    if (boxKey === 'patient') targetId = 'repPatientText';
+    else if (boxKey === 'title') targetId = 'repTitleText';
+    else if (boxKey === 'to') targetId = 'repToText';
+    else if (boxKey === 'details') targetId = 'repDetailsText';
+
+    const el = document.getElementById(targetId);
+    if (el) el.style.fontSize = repFontSizes[boxKey] + 'px';
+}
+
+function saveRepLayoutPositions() {
+    let positions = {};
+    const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
+    boxes.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            positions[id] = {
+                top: el.style.top,
+                left: el.style.left,
+                width: el.style.width,
+                fontSizes: repFontSizes
+            };
+        }
+    });
+    localStorage.setItem('clinic_rep_layout_v1', JSON.stringify(positions));
+    alert('تم حفظ أماكن التقرير الطبي والخطوط بنجاح لتكون ثابتة في المستقبل!');
+    toggleRepConfigMode();
+}
+
+function loadRepLayoutPositions() {
+    let saved = localStorage.getItem('clinic_rep_layout_v1');
+    if (saved) {
+        try {
+            let data = JSON.parse(saved);
+            for (let id in data) {
+                const el = document.getElementById(id);
+                if (el && data[id]) {
+                    if (data[id].top) el.style.top = data[id].top;
+                    if (data[id].left) el.style.left = data[id].left;
+                    if (data[id].width) el.style.width = data[id].width;
+                    if (data[id].fontSizes) repFontSizes = data[id].fontSizes;
+                }
+            }
+            if (document.getElementById('repPatientText')) document.getElementById('repPatientText').style.fontSize = (repFontSizes.patient || 14) + 'px';
+            if (document.getElementById('repTitleText')) document.getElementById('repTitleText').style.fontSize = (repFontSizes.title || 16) + 'px';
+            if (document.getElementById('repToText')) document.getElementById('repToText').style.fontSize = (repFontSizes.to || 15) + 'px';
+            if (document.getElementById('repDetailsText')) document.getElementById('repDetailsText').style.fontSize = (repFontSizes.details || 15) + 'px';
+        } catch(e) {}
+    }
+}
+
+function printMedicalReportDirectly() {
+    if (repConfigModeActive) toggleRepConfigMode();
+    document.body.classList.add('is-printing-rx');
+    window.print();
+    setTimeout(() => {
+        document.body.classList.remove('is-printing-rx');
+    }, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const draggableBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
+    let activeBox = null;
+    let startX = 0, startY = 0, initialX = 0, initialY = 0;
+
+    draggableBoxes.forEach(box => {
+        box.addEventListener('pointerdown', (e) => {
+            if (!repConfigModeActive) return;
+            if (e.target.tagName === 'BUTTON') return;
+            activeBox = box;
+            startX = e.clientX;
+            startY = e.clientY;
+            initialX = box.offsetLeft;
+            initialY = box.offsetTop;
+            box.setPointerCapture(e.pointerId);
+            e.stopPropagation();
+        });
+
+        box.addEventListener('pointermove', (e) => {
+            if (!activeBox || activeBox !== box) return;
+            let dx = e.clientX - startX;
+            let dy = e.clientY - startY;
+            box.style.left = (initialX + dx) + 'px';
+            box.style.top = (initialY + dy) + 'px';
+        });
+
+        box.addEventListener('pointerup', (e) => {
+            if (activeBox === box) {
+                box.releasePointerCapture(e.pointerId);
+                activeBox = null;
+            }
+        });
+    });
+});
 
 function autoSaveMedicalRecord() {}
 
@@ -2684,7 +2862,32 @@ function renderVisits(visits, forceFullRender = true) {
             '<i class="fa-solid fa-print"></i> سحب من السكانر (حاسبة)' +
             '</button>' +
             '</div>' +
-            '<div style="display:flex; flex-wrap:wrap; gap:8px;" id="attachments-container-' + v.visitId + '">' +
+            
+            // خيار تقرير طبي المستقل تحت المرفقات
+            '<div style="margin-top: 10px; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; background: #ffffff;">' +
+            '<div onclick="toggleMedicalReportInputs(' + v.visitId + ')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 700; color: #0d9488; font-size: 0.9rem;">' +
+            '<span><i class="fa-solid fa-file-medical"></i> تقرير طبي (اختياري / وقت الحاجة)</span>' +
+            '<i class="fa-solid fa-chevron-down" id="repChevron_' + v.visitId + '"></i>' +
+            '</div>' +
+            '<div id="repContainer_' + v.visitId + '" style="display: none; margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">' +
+            '<div class="field-box" style="margin-bottom: 8px;">' +
+            '<span class="field-label">عنوان التقرير (مثل: تقرير طبي، إجازة مرضية، أشعة...)</span>' +
+            '<div class="input-wrapper"><input type="text" id="rep_title_' + v.visitId + '" placeholder="اكتب عنوان التقرير..." value="تقرير طبي"></div>' +
+            '</div>' +
+            '<div class="field-box" style="margin-bottom: 8px;">' +
+            '<span class="field-label">الجهة الموجه لها التقرير (يُسبق تلقائياً بكلمة "إلى")</span>' +
+            '<div class="input-wrapper"><input type="text" id="rep_to_' + v.visitId + '" placeholder="مثال: مستشفى الحكيم التعليمي / د. محمد علي..."></div>' +
+            '</div>' +
+            '<div class="field-box" style="margin-bottom: 10px;">' +
+            '<span class="field-label">تفاصيل التقرير والحالة السريرية</span>' +
+            '<div class="input-wrapper"><textarea id="rep_details_' + v.visitId + '" rows="3" placeholder="اكتب تفاصيل التقرير هنا..."></textarea></div>' +
+            '</div>' +
+            '<button type="button" class="btn-main" onclick="openMedicalReportModal(' + v.visitId + ')" style="background: #0284c7; padding: 8px; font-size: 0.85rem;">' +
+            '<i class="fa-solid fa-print"></i> معاينة وطباعة التقرير الطبي (على صورة الروشتة)' +
+            '</button>' +
+            '</div></div>' +
+
+            '<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;" id="attachments-container-' + v.visitId + '">' +
             (v.attachments || []).map((att, aIdx) => {
                 if (!att || !att.dataUrl || att.dataUrl.length < 50) {
                     return '<div style="padding:6px 10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; font-size:0.7rem; color:#b91c1c;">⚠️ صورة تالفة</div>';
