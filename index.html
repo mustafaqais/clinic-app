@@ -82,20 +82,13 @@
             cursor: move !important;
         }
         
-        /* تنسيق طبقة التقرير الجديد بخط جيزة حصرياً */
-        .rx-draggable-report-layer {
+        /* تنسيق قسم التقرير الطبي المدمج الثابت داخل الروشتة بخط جيزة */
+        .rx-embedded-report-section {
             font-family: 'GizaFont', sans-serif !important;
-            position: absolute;
             direction: rtl;
-            background: rgba(255, 255, 255, 0.98);
-            border: 2px dashed #0d9488;
-            padding: 16px;
-            border-radius: 8px;
-            cursor: move;
-            z-index: 9999;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             text-align: right;
-            min-width: 300px;
+            padding: 10px 15px;
+            width: 100%;
         }
 
         @media screen and (max-width: 600px) {
@@ -698,9 +691,9 @@
                     </div>
                     <p style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin-bottom: 10px;" id="recPatientMeta"></p>
                     
-                    <!-- زر إخراج التقرير الطبي الجديد -->
+                    <!-- زر إخراج التقرير الطبي المدمج -->
                     <button type="button" class="btn-main" onclick="openCustomReportModal()" id="btnGenerateReportModal" style="background: #0284c7; padding: 12px; font-size: 0.9rem;">
-                        <i class="fa-solid fa-file-lines"></i> إخراج تقرير طبي
+                        <i class="fa-solid fa-file-lines"></i> إخراج تقرير طبي ثابت
                     </button>
                 </div>
 
@@ -749,11 +742,11 @@
     </div>
 </div>
 
-<!-- نافذة إدخال بيانات التقرير الطبي الجديد -->
+<!-- نافذة إدخال بيانات التقرير الطبي -->
 <div id="customReportModal" class="modal-overlay">
     <div class="modal-body" style="max-width: 500px; text-align: right; direction: rtl;">
         <div class="modal-header" style="direction: rtl;">
-            <h3 style="font-family: 'GizaFont', 'El Messiri', serif;"><i class="fa-solid fa-file-medical" style="color:#0284c7;"></i> إعداد وتصدير التقرير الطبي</h3>
+            <h3 style="font-family: 'GizaFont', 'El Messiri', serif;"><i class="fa-solid fa-file-medical" style="color:#0284c7;"></i> إعداد التقرير الطبي المدمج</h3>
             <button class="modal-close" onclick="closeCustomReportModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
         
@@ -774,8 +767,8 @@
         </div>
 
         <div class="field-box">
-            <span class="field-label">الجهة الموجه لها التقرير (بعد كلمة إلى):</span>
-            <div class="input-wrapper"><input type="text" id="repInputTarget" placeholder="مثال: شركة غاز الجنوب / مستشفى الحكيم / د. فلان..."></div>
+            <span class="field-label">الجهة الموجه لها التقرير (تكتب بعد كلمة إلى):</span>
+            <div class="input-wrapper"><input type="text" id="repInputTarget" placeholder="مثال: شركة غاز الجنوب / مستشفى الحكيم التعليمي..."></div>
         </div>
 
         <div class="field-box">
@@ -786,448 +779,38 @@
         <div class="field-box">
             <span class="field-label">شرح مفصل للحالة:</span>
             <div class="input-wrapper">
-                <textarea id="repInputDesc" rows="4" placeholder="اكتب التشخيص أو الشرح المفصل الموجه للجهة المعنية..."></textarea>
+                <textarea id="repInputDesc" rows="4" placeholder="اكتب التشخيص والشرح الموجه للجهة المعنية..."></textarea>
             </div>
         </div>
 
         <button class="btn-main" onclick="generateReportOnRx()" style="background: #0284c7; margin-top: 10px; font-family: 'GizaFont', sans-serif;">
-            <i class="fa-solid fa-check"></i> عرض التقرير حصرياً على الروشتة
+            <i class="fa-solid fa-check"></i> دمج التقرير داخل الروشتة بشكل ثابت
         </button>
     </div>
 </div>
 
-<!-- طبقة معاينة التقرير على الروشتة (بخط جيزة حصرياً وقابلة للتحريك والسحب) -->
-<div id="customReportPreviewLayer" class="rx-draggable-report-layer" style="display: none; top: 120px; left: 20px; font-family: 'GizaFont', sans-serif !important;">
-    <div style="text-align: center; border-bottom: 2px solid #0d9488; margin-bottom: 8px; padding-bottom: 6px;">
-        <h4 id="prevRepTypeDisplay" style="margin: 0; font-size: 20px; color: #0f766e; font-family: 'GizaFont', sans-serif;">نوع التقرير</h4>
-        <p style="margin: 6px 0; font-size: 15px; color: #1e293b; font-weight: bold; font-family: 'GizaFont', sans-serif;">
-            إلى: <span id="prevRepTargetDisplay" style="font-weight: normal;"></span>
-        </p>
-    </div>
-    
-    <div id="prevRepContentArea" style="font-family: 'GizaFont', sans-serif;">
-        <div style="font-size: 16px; margin-bottom: 8px; font-weight: bold; font-family: 'GizaFont', sans-serif;">
-            <span>الاسم: </span> <span id="prevRepNameDisplay" style="font-weight: normal;"></span>
-        </div>
-        <div style="display: flex; gap: 15px; margin-bottom: 8px; font-family: 'GizaFont', sans-serif;">
-            <div style="font-size: 15px;"><span>الجنس: </span> <span id="prevRepGenderDisplay"></span></div>
-            <div style="font-size: 15px;"><span>العمر: </span> <span id="prevRepAgeDisplay"></span></div>
-        </div>
-        <div style="font-size: 16px; margin-top: 8px; font-family: 'GizaFont', sans-serif;">
-            <span style="font-weight: bold; display: block; margin-bottom: 4px;">شرح مفصل للحالة:</span>
-            <div id="prevRepDescDisplay" style="white-space: pre-wrap; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; min-height: 55px; font-family: 'GizaFont', sans-serif; font-size: 15px; color: #0f172a; line-height: 1.6;"></div>
-        </div>
-    </div>
-    
-    <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; padding-top: 8px;">
-        <div style="display: flex; gap: 6px;">
-            <button type="button" onclick="adjustReportFontSize(-1)" style="padding: 4px 8px; font-size: 12px; cursor: pointer; font-family: 'GizaFont', sans-serif;">➖ تصغير</button>
-            <button type="button" onclick="adjustReportFontSize(1)" style="padding: 4px 8px; font-size: 12px; cursor: pointer; font-family: 'GizaFont', sans-serif;">➕ تكبير</button>
-        </div>
-        <button type="button" onclick="closeCustomReportPreview()" style="background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; font-family: 'GizaFont', sans-serif;">إغلاق المعاينة</button>
-    </div>
-</div>
-
-<!-- نافذة الإضافة الجماعية (Bulk Add Modal) -->
-<div id="bulkAddDictModal" class="modal-overlay">
-    <div class="modal-body" style="max-width: 480px; text-align: left; direction: ltr;">
-        <div class="modal-header" style="direction: ltr;">
-            <h3 style="font-family: 'El Messiri', serif;"><i class="fa-solid fa-list-check" style="color:#0d9488;"></i> Bulk Add to Dictionary</h3>
-            <button class="modal-close" onclick="closeBulkAddModal()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 10px;">
-            الصق قائمتك هنا (كل علاج أو فحص في سطر مستقل مع جرعته أو تفاصيله). سيقوم النظام بحفظها بالقاموس تلقائياً:
-        </p>
-        <div class="field-box">
-            <div class="input-wrapper">
-                <textarea id="bulkDictInput" rows="8" placeholder="مثال:
-Paracetamol 500mg - 1x3
-Amoxicillin 500mg - 1x2 after food
-CBC Test
-Chest X-Ray" style="font-size: 0.85rem; direction: ltr; text-align: left;"></textarea>
-            </div>
-        </div>
-        <button class="btn-main" onclick="processAndSaveBulkDict()" style="background: #0d9488; margin-top: 8px;">
-            <i class="fa-solid fa-floppy-disk"></i> معالجة وحفظ الكل في القاموس
-        </button>
-    </div>
-</div>
-
-<!-- بقية النوافذ التفاعلية -->
-<div id="mandatoryBackupModal" class="modal-overlay" style="z-index: 99999;">
-    <div class="modal-body" style="max-width: 420px; text-align: center;">
-        <div style="font-size: 45px; color: #4f46e5; margin-bottom: 4px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
-        <h3 style="font-family: 'El Messiri', serif; font-size: 1.2rem; color: #0f172a; margin-bottom: 6px;" id="mandBackupTitle">النسخ الاحتياطي الشهري الإجباري</h3>
-        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 14px; line-height: 1.5;" id="mandBackupSub">
-            اليوم هو الأول من الشهر! حرصاً منا على عدم فقدان أي بيانات للعيادة، يرجى تحميل نسخة احتياطية جديدة لحفظ ملفات المرضى قبل المتابعة.
-        </p>
-        <button class="btn-main" onclick="executeMandatoryBackup()" id="btnMandatoryBackup" style="background: #4f46e5; margin-bottom: 10px;">
-            <i class="fa-solid fa-download"></i> تحميل نسخة الاحتياط الآن ومتابعة العمل
-        </button>
-    </div>
-</div>
-
-<div id="supportModal" class="modal-overlay">
-    <div class="modal-body" style="max-width: 400px; text-align: center;">
-        <div class="modal-header">
-            <h3 id="suppHeaderTitle"><i class="fa-solid fa-headset" style="color:#0d9488;"></i> Technical Support & Renewal</h3>
-            <button class="modal-close" onclick="closeSupportModal()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;" id="suppSubText">
-            Contact us directly via WhatsApp or Telegram at: <br><strong style="color: #0f172a; direction: ltr; display: inline-block;">+964 773 911 4548</strong>
-        </p>
-
-        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 5px;">
-            <a href="https://wa.me/9647739114548?text=Hello,%20I%20want%20to%20renew%20my%20Clinic%20Master%20subscription" target="_blank" style="background: #25d366; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.25);">
-                <i class="fa-brands fa-whatsapp" style="font-size: 1.3rem;"></i> WhatsApp Chat
-            </a>
-
-            <a href="https://t.me/+9647739114548" target="_blank" style="background: #0088cc; color: white; text-decoration: none; padding: 14px; border-radius: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1rem; box-shadow: 0 4px 10px rgba(0, 136, 204, 0.25);">
-                <i class="fa-brands fa-telegram" style="font-size: 1.3rem;"></i> Telegram Chat
-            </a>
-        </div>
-    </div>
-</div>
-
-<div id="founderDeleteModal" class="modal-overlay">
-    <div class="modal-body" style="max-width: 400px; text-align: center;">
-        <div class="modal-header">
-            <h3><i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;"></i> Confirm Account Deletion</h3>
-            <button class="modal-close" onclick="closeFounderDeleteModal()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 10px;">
-            To delete this account (<strong id="delTargetEmailDisplay" style="color:#0f172a;"></strong>), please enter your Founder password:
-        </p>
-        <div class="field-box" style="text-align: left;">
-            <span class="field-label">Founder Password *</span>
-            <div class="input-wrapper"><input type="password" id="founderConfirmPassInput" placeholder="Enter founder password..."></div>
-        </div>
-        <button class="btn-main" onclick="executeFounderDeleteAccount()" style="background: #ef4444; margin-top: 5px;">
-            <i class="fa-solid fa-trash"></i> Confirm & Delete Account
-        </button>
-    </div>
-</div>
-
-<div id="founderEditNameModal" class="modal-overlay">
-    <div class="modal-body" style="max-width: 400px; text-align: center;">
-        <div class="modal-header">
-            <h3><i class="fa-solid fa-pen-to-square" style="color:#0d9488;"></i> تعديل اسم الطبيب أو العيادة</h3>
-            <button class="modal-close" onclick="closeFounderEditNameModal()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 10px;">
-            أدخل الاسم المخصص الذي سيظهر في واجهة الطبيب (<strong id="editNameTargetEmail" style="color:#0f172a;"></strong>):
-        </p>
-        <div class="field-box" style="text-align: left;">
-            <span class="field-label">اسم العيادة / الطبيب البارز *</span>
-            <div class="input-wrapper"><input type="text" id="founderInputDoctorName" placeholder="مثال: د. قيس قاسم - عيادة ميسان"></div>
-        </div>
-        <button class="btn-main" onclick="executeFounderUpdateDoctorName()" style="background: #0d9488; margin-top: 5px;">
-            <i class="fa-solid fa-floppy-disk"></i> حفظ التعديل وتحديث الواجهة
-        </button>
-    </div>
-</div>
-
-<div id="bmiCalculatorModal" class="modal-overlay">
-    <div class="modal-body">
-        <div class="modal-header">
-            <h3 id="bmiTitleText"><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> BMI Calculator</h3>
-            <button class="modal-close" onclick="closeBmiModal()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-
-        <div style="display: flex; gap: 10px;">
-            <div class="field-box" style="flex: 1;">
-                <span class="field-label" id="lblBmiWeight">Weight (kg)</span>
-                <div class="input-wrapper"><input type="number" id="bmiWeight" placeholder="e.g. 70" oninput="calculateBmiLive()"></div>
-            </div>
-            <div class="field-box" style="flex: 1;">
-                <span class="field-label" id="lblBmiHeight">Height (cm)</span>
-                <div class="input-wrapper"><input type="number" id="bmiHeight" placeholder="e.g. 175" oninput="calculateBmiLive()"></div>
-            </div>
-        </div>
-
-        <div class="bmi-result-card">
-            <span style="font-size: 0.78rem; font-weight: 700; color: #64748b;" id="lblBmiScore">Body Mass Index (BMI Score):</span>
-            <div class="bmi-value" id="bmiScoreDisplay">—</div>
-            <div id="bmiBadgeContainer">
-                <span class="bmi-badge" id="bmiBadgeInitial" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span>
-            </div>
-        </div>
-
-        <button class="btn-main" onclick="closeBmiModal()" id="btnBmiAgree" style="background: #0284c7; margin-top: 6px;">
-            <i class="fa-solid fa-check"></i> Agree & Save
-        </button>
-    </div>
-</div>
-
-<div id="editPatientModal" class="modal-overlay">
-    <div class="modal-body">
-        <div class="modal-header">
-            <h3 id="editPatHeader"><i class="fa-solid fa-user-pen" style="color:#0d9488;"></i> Edit Patient Information</h3>
-            <button class="modal-close" onclick="closeEditPatientModal()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-
-        <div class="field-box">
-            <span class="field-label" id="editLblName">Full Name *</span>
-            <div class="input-wrapper"><input type="text" id="editPName" placeholder="Enter patient full name..." required></div>
-        </div>
-
-        <div class="field-box">
-            <span class="field-label" id="editLblSubName">Grandfather Name / Tribe / Note (Optional)</span>
-            <div class="input-wrapper"><input type="text" id="editPSubName" placeholder="e.g. محمد / العشيرة"></div>
-        </div>
-
-        <div style="display: flex; gap: 10px;">
-            <div class="field-box" style="flex: 1;">
-                <span class="field-label" id="editLblAge">Age *</span>
-                <div class="input-wrapper"><input type="number" id="editPAge" placeholder="Age..." required></div>
-            </div>
-
-            <div class="field-box" style="flex: 1;">
-                <span class="field-label" id="editLblGender">Gender</span>
-                <div class="input-wrapper">
-                    <select id="editPGender">
-                        <option value="" id="editOptGender">Select Gender</option>
-                        <option value="Male" id="editOptMale">Male</option>
-                        <option value="Female" id="editOptFemale">Female</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <div class="field-box">
-            <span class="field-label" id="editLblMarital">Marital Status</span>
-            <div class="input-wrapper">
-                <select id="editPMarital">
-                    <option value="" id="editOptMarital">Select Status</option>
-                    <option value="Single" id="editOptSingle">Single</option>
-                    <option value="Married" id="editOptMarried">Married</option>
-                    <option value="Divorced" id="editOptDivorced">Divorced</option>
-                    <option value="Widow" id="editOptWidow">Widow</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="field-box">
-            <span class="field-label" id="editLblJob">Occupation</span>
-            <div class="input-wrapper">
-                <select id="editPJob">
-                    <option value="" id="editOptJob">Select Occupation</option>
-                    <option value="Employee" id="editJobEmp">Employee</option>
-                    <option value="Free Business" id="editJobFree">Free Business</option>
-                    <option value="Housewife" id="editJobHouse">Housewife</option>
-                    <option value="Student" id="editJobStud">Student</option>
-                    <option value="Other" id="editJobOther">Other</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="field-box">
-            <span class="field-label" id="editLblPhone">Phone Number</span>
-            <div class="input-wrapper"><input type="tel" id="editPPhone" placeholder="07XXXXXXXXX"></div>
-        </div>
-
-        <button class="btn-main" onclick="saveEditedPatient()" id="btnSaveEdit" style="margin-top: 10px;">
-            <i class="fa-solid fa-check"></i> Save Changes
-        </button>
-    </div>
-</div>
-
-<div id="medHistoryModal" class="modal-overlay">
-    <div class="modal-body">
-        <div class="modal-header">
-            <h3 id="mhHeaderTitle"><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History Details</h3>
-            <button class="modal-close" onclick="closeMedHistoryModal()"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-
-        <div class="field-box">
-            <span class="field-label" id="mhLblChronic">Chronic Diseases</span>
-            <div class="checkbox-grid">
-                <label class="checkbox-item"><input type="checkbox" value="Hypertension" class="mh-cd"> <span class="mh-cond-text" data-cond="Hypertension">Hypertension</span></label>
-                <label class="checkbox-item"><input type="checkbox" value="Diabetes" class="mh-cd"> <span class="mh-cond-text" data-cond="Diabetes">Diabetes</span></label>
-                <label class="checkbox-item"><input type="checkbox" value="Asthma" class="mh-cd"> <span class="mh-cond-text" data-cond="Asthma">Asthma</span></label>
-                <label class="checkbox-item"><input type="checkbox" value="Epilepsy" class="mh-cd"> <span class="mh-cond-text" data-cond="Epilepsy">Epilepsy</span></label>
-                <label class="checkbox-item"><input type="checkbox" value="Arthritis" class="mh-cd"> <span class="mh-cond-text" data-cond="Arthritis">Arthritis</span></label>
-                <label class="checkbox-item"><input type="checkbox" value="Malignancy" class="mh-cd"> <span class="mh-cond-text" data-cond="Malignancy">Malignancy</span></label>
-                <label class="checkbox-item"><input type="checkbox" value="Hepatitis" class="mh-cd"> <span class="mh-cond-text" data-cond="Hepatitis">Hepatitis</span></label>
-                <label class="checkbox-item"><input type="checkbox" value="Chronic kidney dis" class="mh-cd"> <span class="mh-cond-text" data-cond="Chronic kidney dis">Chronic kidney dis</span></label>
-                <label class="checkbox-item"><input type="checkbox" value="IHD" class="mh-cd"> <span class="mh-cond-text" data-cond="IHD">IHD</span></label>
-                <label class="checkbox-item" style="grid-column: span 2;">
-                    <input type="checkbox" id="mh-other-check" onchange="toggleOtherInput()"> <span id="mhOtherText">Other</span>
-                </label>
-            </div>
-            <div class="input-wrapper" id="mh-other-box" style="display:none; margin-top: 8px; position: relative;">
-                <input type="text" id="mh-cd-other" placeholder="Specify other chronic conditions..." oninput="handleMhLiveInput(this, 'mh_other')" onblur="hideMhSuggestions('mh_other')">
-                <div class="suggestions-box" id="suggestions-mh_other"></div>
-                <div class="live-save-bar" id="save-bar-mh_other">
-                    <span>Save: "<strong id="line-text-mh_other"></strong>"</span>
-                    <button type="button" class="btn-live-save" id="btn-save-mh_other" onmousedown="saveMhLineToDict(event, 'mh_other')">Save</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="field-box">
-            <span class="field-label" id="mhLblAdmission">Previous admission to hospital</span>
-            <div class="input-wrapper" style="position: relative;">
-                <textarea id="mh-prev-admission" rows="1" placeholder="Details & dates..." oninput="handleMhLiveInput(this, 'mh_admission')" onblur="hideMhSuggestions('mh_admission')"></textarea>
-                <div class="suggestions-box" id="suggestions-mh_admission"></div>
-                <div class="live-save-bar" id="save-bar-mh_admission">
-                    <span>Save: "<strong id="line-text-mh_admission"></strong>"</span>
-                    <button type="button" class="btn-live-save" id="btn-save-mh_admission" onmousedown="saveMhLineToDict(event, 'mh_admission')">Save</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="field-box">
-            <span class="field-label" id="mhLblSurgery">Past surgery</span>
-            <div class="input-wrapper" style="position: relative;">
-                <textarea id="mh-past-surgery" rows="1" placeholder="Surgical history..." oninput="handleMhLiveInput(this, 'mh_surgery')" onblur="hideMhSuggestions('mh_surgery')"></textarea>
-                <div class="suggestions-box" id="suggestions-mh_surgery"></div>
-                <div class="live-save-bar" id="save-bar-mh_surgery">
-                    <span>Save: "<strong id="line-text-mh_surgery"></strong>"</span>
-                    <button type="button" class="btn-live-save" id="btn-save-mh_surgery" onmousedown="saveMhLineToDict(event, 'mh_surgery')">Save</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="field-box">
-            <span class="field-label" id="mhLblFamily">Family history</span>
-            <div class="input-wrapper" style="position: relative;">
-                <textarea id="mh-family-history" rows="1" placeholder="Hereditary diseases..." oninput="handleMhLiveInput(this, 'mh_family')" onblur="hideMhSuggestions('mh_family')"></textarea>
-                <div class="suggestions-box" id="suggestions-mh_family"></div>
-                <div class="live-save-bar" id="save-bar-mh_family">
-                    <span>Save: "<strong id="line-text-mh_family"></strong>"</span>
-                    <button type="button" class="btn-live-save" id="btn-save-mh_family" onmousedown="saveMhLineToDict(event, 'mh_family')">Save</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="field-box">
-            <span class="field-label" id="mhLblAllergy">Drugs allergy</span>
-            <div class="input-wrapper" style="position: relative;">
-                <textarea id="mh-drug-allergy" rows="1" placeholder="Known drug allergies..." oninput="handleMhLiveInput(this, 'mh_allergy')" onblur="hideMhSuggestions('mh_allergy')"></textarea>
-                <div class="suggestions-box" id="suggestions-mh_allergy"></div>
-                <div class="live-save-bar" id="save-bar-mh_allergy">
-                    <span>Save: "<strong id="line-text-mh_allergy"></strong>"</span>
-                    <button type="button" class="btn-live-save" id="btn-save-mh_allergy" onmousedown="saveMhLineToDict(event, 'mh_allergy')">Save</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="field-box">
-            <span class="field-label" id="mhLblChronicDrugs">Chronic use of drugs</span>
-            <div class="input-wrapper" style="position: relative;">
-                <textarea id="mh-chronic-drugs" rows="1" placeholder="Long-term medications..." oninput="handleMhLiveInput(this, 'mh_chronic_drugs')" onblur="hideMhSuggestions('mh_chronic_drugs')"></textarea>
-                <div class="suggestions-box" id="suggestions-mh_chronic_drugs"></div>
-                <div class="live-save-bar" id="save-bar-mh_chronic_drugs">
-                    <span>Save: "<strong id="line-text-mh_chronic_drugs"></strong>"</span>
-                    <button type="button" class="btn-live-save" id="btn-save-mh_chronic_drugs" onmousedown="saveMhLineToDict(event, 'mh_chronic_drugs')">Save</button>
-                </div>
-            </div>
-        </div>
-
-        <div style="display:flex; gap:10px;">
-            <div class="field-box" style="flex:1;">
-                <span class="field-label" id="mhLblSmoking">Smoking status</span>
-                <div class="input-wrapper"><select id="mh-smoking"><option value="Non-smoker" id="optSmok1">Non-smoker</option><option value="Smoker" id="optSmok2">Smoker</option><option value="Passive smoker" id="optSmok3">Passive smoker</option></select></div>
-            </div>
-            <div class="field-box" style="flex:1;">
-                <span class="field-label" id="mhLblAlcohol">Drinking Alcohol</span>
-                <div class="input-wrapper"><select id="mh-alcohol"><option value="Non-drinker" id="optAlc1">Non-drinker</option><option value="Alcohol drinker" id="optAlc2">Alcohol drinker</option><option value="Social drinker" id="optAlc3">Social drinker</option></select></div>
-            </div>
-        </div>
-
-        <div class="field-box">
-            <span class="field-label" id="mhLblNotes">Notes</span>
-            <div class="input-wrapper" style="position: relative;">
-                <textarea id="mh-notes" rows="2" placeholder="Additional clinical notes..." oninput="handleMhLiveInput(this, 'mh_notes')" onblur="hideMhSuggestions('mh_notes')"></textarea>
-                <div class="suggestions-box" id="suggestions-mh_notes"></div>
-                <div class="live-save-bar" id="save-bar-mh_notes">
-                    <span>Save: "<strong id="line-text-mh_notes"></strong>"</span>
-                    <button type="button" class="btn-live-save" id="btn-save-mh_notes" onmousedown="saveMhLineToDict(event, 'mh_notes')">Save</button>
-                </div>
-            </div>
-        </div>
-
-        <button class="btn-main" onclick="closeMedHistoryModal()" id="btnMhDone" style="margin-top: 10px;">
-            <i class="fa-solid fa-check"></i> Done & Save
-        </button>
-    </div>
-</div>
-
-<div id="imagePreviewModal" onclick="closeImagePreview()">
-    <div class="modal-body" onclick="event.stopPropagation()">
-        <button class="modal-close" style="position: absolute; top: 15px; right: 15px; background: #fff; z-index: 10;" onclick="closeImagePreview()"><i class="fa-solid fa-xmark"></i></button>
-        <img id="previewModalImg" src="" alt="Preview">
-    </div>
-</div>
-
+<!-- نافذة عرض الروشتة وفيها التقرير الطبي المدمج الثابت (بخط جيزة حصرياً) -->
 <div id="rxModal" class="modal-overlay">
     <div class="modal-body" style="max-width: 480px; text-align: left; direction: ltr;">
         <div class="modal-header" style="direction: ltr;">
-            <h3 style="font-family: 'El Messiri', serif;"><i class="fa-solid fa-file-prescription" style="color:#0d9488;"></i> RX Prescription</h3>
+            <h3 style="font-family: 'El Messiri', serif;"><i class="fa-solid fa-file-prescription" style="color:#0d9488;"></i> RX Prescription & Report</h3>
             <button class="modal-close" onclick="closeRxModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <span style="font-size: 0.72rem; color: #64748b;" id="rxModeHint">RX ready. (Click Configure Layout to edit)</span>
-            <button id="rxConfigToggleBtn" onclick="toggleRxConfigMode()" style="background: #f0fdfa; color: #0d9488; border: 1px solid #0d9488; border-radius: 8px; padding: 4px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
-                <i class="fa-solid fa-sliders"></i> Configure Layout
-            </button>
+            <span style="font-size: 0.72rem; color: #64748b;">التقرير الطبي مدمج وثابت داخل الروشتة بخط جيزة</span>
         </div>
 
         <div id="rxCanvasContainer" class="rx-canvas-container">
-            <div id="dragBoxPatientDetails" class="draggable-box" style="top: 20px; left: 15px;">
-                <div class="box-font-controls">
-                    <span>Name Font:</span>
-                    <div style="display:flex; gap:3px;">
-                        <button type="button" onclick="changeBoxFontSize('patientDetails', -1)">-</button>
-                        <button type="button" onclick="changeBoxFontSize('patientDetails', 1)">+</button>
-                    </div>
-                </div>
-                <div id="rxDragPatientDetailsText" class="rx-patient-details-text">-</div>
-            </div>
-
-            <div id="dragBoxDate" class="draggable-box" style="top: 20px; left: 250px;">
-                <div class="box-font-controls">
-                    <span>Date Font:</span>
-                    <div style="display:flex; gap:3px;">
-                        <button type="button" onclick="changeBoxFontSize('date', -1)">-</button>
-                        <button type="button" onclick="changeBoxFontSize('date', 1)">+</button>
-                    </div>
-                </div>
-                <div id="rxDragDateText" class="rx-date-text">-</div>
-            </div>
-
-            <div id="dragBoxVitals" class="draggable-box" style="top: 80px; left: 15px;">
-                <div class="box-font-controls">
-                    <span>Vitals Font:</span>
-                    <div style="display:flex; gap:3px;">
-                        <button type="button" onclick="changeBoxFontSize('vitals', -1)">-</button>
-                        <button type="button" onclick="changeBoxFontSize('vitals', 1)">+</button>
-                    </div>
-                </div>
-                <div id="rxDragVitalsText" class="rx-vitals-text">-</div>
-            </div>
-
-            <div id="dragBoxTreatment" class="draggable-box" style="top: 150px; left: 15px; min-width: 220px;">
-                <div class="box-font-controls">
-                    <span>Drugs Font:</span>
-                    <div style="display:flex; gap:3px;">
-                        <button type="button" onclick="changeBoxFontSize('treatment', -1)">-</button>
-                        <button type="button" onclick="changeBoxFontSize('treatment', 1)">+</button>
-                    </div>
-                </div>
-                <div class="rx-treatment-wrapper">
-                    <div class="rx-rx-title"></div>
-                    <div id="rxDragTreatmentText" class="rx-treatment-text"></div>
+            <!-- صندوق معلومات المريض والتاريخ والتقرير مدمجة معاً بثبات -->
+            <div id="dragBoxPatientDetails" class="draggable-box" style="top: 25px; left: 15px; width: 93%;">
+                <div id="rxEmbeddedReportContent" class="rx-embedded-report-section">
+                    <!-- سيتم حقن بيانات التقرير هنا تلقائياً لتظهر مثل الصورة المرفقة بالضبط -->
                 </div>
             </div>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-            <button id="rxSaveLayoutBtn" class="btn-main" onclick="saveRxLayoutPositions()" style="display: none; background: #0284c7;">
-                <i class="fa-solid fa-floppy-disk"></i> Save RX Layout & Fonts
-            </button>
             <button class="btn-main" onclick="printPrescriptionDirectly()" id="btnPrintRxDirect" style="font-family: 'El Messiri', sans-serif; background: #16a34a; width: 100%;">
                 <i class="fa-solid fa-print"></i> طباعة الروشتة (PDF / طباعة مباشرة)
             </button>
@@ -1241,7 +824,7 @@ Chest X-Ray" style="font-size: 0.85rem; direction: ltr; text-align: left;"></tex
 <script src="config.js"></script>
 <script src="clinic-functions.js?v=17.30"></script>
 <script>
-    // الدوال البرمجية الخاصة بنافذة إخراج التقرير الجديد وربطها بالروشتة ومعايرتها بخط جيزة
+    // فتح نافذة إدخال بيانات التقرير الطبي
     function openCustomReportModal() {
         if (typeof currentPatientName !== 'undefined') {
             document.getElementById('repInputName').value = currentPatientName || '';
@@ -1259,91 +842,43 @@ Chest X-Ray" style="font-size: 0.85rem; direction: ltr; text-align: left;"></tex
         document.getElementById('customReportModal').style.display = 'none';
     }
 
+    // دمج التقرير الطبي داخل الروشتة بشكل ثابت تماماً مثل الصورة المطلوبة وبخط جيزة
     function generateReportOnRx() {
-        document.getElementById('prevRepNameDisplay').innerText = document.getElementById('repInputName').value;
-        document.getElementById('prevRepGenderDisplay').innerText = document.getElementById('repInputGender').value;
-        document.getElementById('prevRepAgeDisplay').innerText = document.getElementById('repInputAge').value;
-        document.getElementById('prevRepTargetDisplay').innerText = document.getElementById('repInputTarget').value;
-        document.getElementById('prevRepTypeDisplay').innerText = document.getElementById('repInputType').value;
-        document.getElementById('prevRepDescDisplay').innerText = document.getElementById('repInputDesc').value;
+        const name = document.getElementById('repInputName').value;
+        const gender = document.getElementById('repInputGender').value;
+        const age = document.getElementById('repInputAge').value;
+        const target = document.getElementById('repInputTarget').value;
+        const type = document.getElementById('repInputType').value;
+        const desc = document.getElementById('repInputDesc').value;
+
+        // الحصول على تاريخ اليوم بالتنسيق المطلوب
+        const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
+
+        // بناء محتوى التقرير الثابت والمدمج داخل الروشتة بخط جيزة
+        const reportHTML = `
+            <div style="text-align: center; margin-bottom: 15px; border-bottom: 2px solid #0d9488; padding-bottom: 8px;">
+                <h3 style="margin: 0; font-size: 20px; color: #0f766e; font-family: 'GizaFont', sans-serif; font-weight: bold;">${type || 'تقرير طبي'}</h3>
+            </div>
+            <div style="font-size: 16px; line-height: 1.8; color: #0f172a; font-family: 'GizaFont', sans-serif;">
+                <div style="margin-bottom: 4px;"><strong>Name:</strong> ${name}</div>
+                <div style="margin-bottom: 4px;"><strong>Age:</strong> ${age} Year</div>
+                <div style="margin-bottom: 4px;"><strong>Date:</strong> ${today}</div>
+                <div style="margin-bottom: 8px;"><strong>To:</strong> ${target}</div>
+                <div style="margin-top: 12px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; min-height: 80px; white-space: pre-wrap;">${desc}</div>
+            </div>
+        `;
+
+        const embeddedContainer = document.getElementById('rxEmbeddedReportContent');
+        if (embeddedContainer) {
+            embeddedContainer.innerHTML = reportHTML;
+        }
 
         document.getElementById('customReportModal').style.display = 'none';
         
-        // فتح نافذة الروشتة أولاً
+        // فتح نافذة الروشتة لتظهر فارغة ونظيفة وفيها التقرير مدمج وثابت
         if (typeof openRxModal === 'function') {
             openRxModal();
         }
-        
-        // تفريغ خانة العلاج تماماً لكي تكون الروشتة نظيفة وفارغة للتقرير فقط
-        const treatmentTextEl = document.getElementById('rxDragTreatmentText');
-        if (treatmentTextEl) {
-            treatmentTextEl.innerText = "";
-        }
-        const rxTitleEl = document.querySelector('.rx-rx-title');
-        if (rxTitleEl) {
-            rxTitleEl.innerText = "";
-        }
-
-        // إظهار طبقة التقرير الطبي بخط جيزة
-        const layer = document.getElementById('customReportPreviewLayer');
-        if (layer) {
-            layer.style.display = 'block';
-        }
-    }
-
-    function closeCustomReportPreview() {
-        document.getElementById('customReportPreviewLayer').style.display = 'none';
-    }
-
-    let reportFontSize = 15;
-    function adjustReportFontSize(delta) {
-        reportFontSize += delta;
-        if (reportFontSize < 11) reportFontSize = 11;
-        if (reportFontSize > 28) reportFontSize = 28;
-        
-        const layer = document.getElementById('customReportPreviewLayer');
-        const elements = layer.querySelectorAll('h4, p, div, span');
-        elements.forEach(el => {
-            if(!el.querySelector('button')) {
-                el.style.fontSize = reportFontSize + 'px';
-            }
-        });
-    }
-
-    // تفعيل سحب وإفلات طبقة التقرير بالماوس أو اللمس بحرية كاملة
-    const reportLayer = document.getElementById('customReportPreviewLayer');
-    let isRepDragging = false, repStartX, repStartY, repInitX, repInitY;
-
-    if (reportLayer) {
-        reportLayer.addEventListener('mousedown', startRepDrag);
-        document.addEventListener('mousemove', währendRepDrag);
-        document.addEventListener('mouseup', endRepDrag);
-
-        reportLayer.addEventListener('touchstart', startRepDrag);
-        document.addEventListener('touchmove', währendRepDrag);
-        document.addEventListener('touchend', endRepDrag);
-    }
-
-    function startRepDrag(e) {
-        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-        isRepDragging = true;
-        repStartX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
-        repStartY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
-        repInitX = reportLayer.offsetLeft;
-        repInitY = reportLayer.offsetTop;
-    }
-
-    function währendRepDrag(e) {
-        if (!isRepDragging) return;
-        const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
-        const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
-        
-        reportLayer.style.left = (repInitX + (clientX - repStartX)) + 'px';
-        reportLayer.style.top = (repInitY + (clientY - repStartY)) + 'px';
-    }
-
-    function endRepDrag() {
-        isRepDragging = false;
     }
 </script>
 </body>
