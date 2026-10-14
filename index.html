@@ -32,7 +32,6 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700;800;900&display=swap');
         
-        /* تعريف خط جيزة الحصري للتقرير الطبي والنصوص */
         @font-face {
             font-family: 'GizaFont';
             src: local('Giza'), local('Giza-Regular'), url('https://fonts.gstatic.com/s/cairo/v28/SLXgc1nY6HMRslTJxMfcXg.woff2') format('woff2'); 
@@ -77,18 +76,27 @@
             object-fit: contain !important;
             pointer-events: none !important;
         }
+        
+        /* جعل الصناديق شفافة تماماً ولا يظهر سوى الإطار عند وضع الضبط فقط */
         .draggable-box {
             touch-action: none !important;
             cursor: move !important;
             position: absolute !important;
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px dashed #0d9488;
-            padding: 8px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            background: transparent !important;
+            border: none !important;
+            padding: 4px;
+            box-shadow: none !important;
             font-family: 'GizaFont', sans-serif !important;
             direction: rtl;
             text-align: right;
+        }
+        /* يظهر إطار خفيف فقط عند تفعيل وضع الضبط لتتمكن من رؤية حدود الصندوق وسحبه */
+        .config-mode.draggable-box {
+            background: rgba(255, 255, 255, 0.85) !important;
+            border: 1px dashed #0d9488 !important;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+            padding: 8px !important;
+            border-radius: 6px;
         }
         
         .box-font-controls {
@@ -720,9 +728,9 @@
                     </div>
                     <p style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin-bottom: 10px;" id="recPatientMeta"></p>
                     
-                    <!-- زر إخراج التقرير الطبي المرن -->
+                    <!-- زر إخراج التقرير -->
                     <button type="button" class="btn-main" onclick="openCustomReportModal()" id="btnGenerateReportModal" style="background: #0284c7; padding: 12px; font-size: 0.9rem;">
-                        <i class="fa-solid fa-file-lines"></i> إخراج تقرير طبي مرن
+                        <i class="fa-solid fa-file-lines"></i> إخراج تقرير طبي
                     </button>
                 </div>
 
@@ -771,45 +779,62 @@
     </div>
 </div>
 
-<!-- نافذة إدخال بيانات التقرير الطبي المرن -->
+<!-- نافذة إدخال بيانات إخراج التقرير -->
 <div id="customReportModal" class="modal-overlay">
     <div class="modal-body" style="max-width: 500px; text-align: right; direction: rtl;">
         <div class="modal-header" style="direction: rtl;">
-            <h3 style="font-family: 'GizaFont', 'El Messiri', serif;"><i class="fa-solid fa-file-medical" style="color:#0284c7;"></i> إعداد التقرير الطبي المرن</h3>
+            <h3 style="font-family: 'GizaFont', 'El Messiri', serif;"><i class="fa-solid fa-file-medical" style="color:#0284c7;"></i> إخراج تقرير طبي</h3>
             <button class="modal-close" onclick="closeCustomReportModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
         
-        <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px;">يمكنك ترك أي حقل فارغاً بحرية تامة:</p>
+        <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px;">تم سحب معلومات المريض تلقائياً، ويمكنك تعديل أي حقل بحرية تامة:</p>
 
-        <div class="field-box">
-            <span class="field-label">معلومات المريض (الاسم، العمر، والجنس):</span>
-            <div class="input-wrapper"><input type="text" id="repInputPatient" placeholder="مثال: Name: علي راضي | Age: 28 | Gender: Male"></div>
+        <div style="display: flex; gap: 10px;">
+            <div class="field-box" style="flex: 2;">
+                <span class="field-label">اسم المريض:</span>
+                <div class="input-wrapper"><input type="text" id="repInputName" placeholder="اسم المريض..."></div>
+            </div>
+            <div class="field-box" style="flex: 1;">
+                <span class="field-label">العمر:</span>
+                <div class="input-wrapper"><input type="text" id="repInputAge" placeholder="العمر..."></div>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <div class="field-box" style="flex: 1;">
+                <span class="field-label">الجنس:</span>
+                <div class="input-wrapper"><input type="text" id="repInputGender" placeholder="الجنس..."></div>
+            </div>
+            <div class="field-box" style="flex: 1;">
+                <span class="field-label">تاريخ الزيارة:</span>
+                <div class="input-wrapper"><input type="text" id="repInputDate" placeholder="التاريخ..."></div>
+            </div>
         </div>
 
         <div class="field-box">
-            <span class="field-label">عنوان التقرير:</span>
-            <div class="input-wrapper"><input type="text" id="repInputTitle" placeholder="مثال: تقرير طبي / إجازة مرضية"></div>
+            <span class="field-label">عنوان التقرير (مثل: تقرير طبي / إجازة مرضية / علاج طبيعي):</span>
+            <div class="input-wrapper"><input type="text" id="repInputTitle" placeholder="اكتب عنوان التقرير..."></div>
         </div>
 
         <div class="field-box">
-            <span class="field-label">الجهة (تكتب بعد كلمة إلى):</span>
-            <div class="input-wrapper"><input type="text" id="repInputTarget" placeholder="مثال: شركة غاز الجنوب / مستشفى الحكيم التعليمي"></div>
+            <span class="field-label">الجهة المراد توجيه التقرير إليها:</span>
+            <div class="input-wrapper"><input type="text" id="repInputTarget" placeholder="اكتب الجهة الموجّه لها..."></div>
         </div>
 
         <div class="field-box">
-            <span class="field-label">تفاصيل وشرح الحالة:</span>
+            <span class="field-label">تفاصيل وشرح حالة المريض:</span>
             <div class="input-wrapper">
-                <textarea id="repInputDesc" rows="4" placeholder="اكتب التشخيص أو الشرح التفصيلي..."></textarea>
+                <textarea id="repInputDesc" rows="4" placeholder="اكتب تفاصيل وشرح حالة المريض..."></textarea>
             </div>
         </div>
 
         <button class="btn-main" onclick="generateReportOnRx()" style="background: #0284c7; margin-top: 10px; font-family: 'GizaFont', sans-serif;">
-            <i class="fa-solid fa-check"></i> عرض وعرض على الروشتة مع حرية التحريك
+            <i class="fa-solid fa-check"></i> اظهار التقرير على الروشتة
         </button>
     </div>
 </div>
 
-<!-- نافذة عرض الروشتة وتتضمن الأجزاء الأربعة المستقلة والقابلة للتحريك والسحب وحفظ مواقعها -->
+<!-- نافذة عرض الروشتة ذات الصناديق الشفافة تماماً -->
 <div id="rxModal" class="modal-overlay">
     <div class="modal-body" style="max-width: 480px; text-align: left; direction: ltr;">
         <div class="modal-header" style="direction: ltr;">
@@ -818,27 +843,29 @@
         </div>
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-            <span style="font-size: 0.72rem; color: #64748b;" id="rxModeHint">اسحب كل جزء للمكان المناسب وكبر/صغر خطه</span>
+            <span style="font-size: 0.72rem; color: #64748b;" id="rxModeHint">الخلفية شفافة تماماً - اضغط ضبط لتحريك الأجزاء</span>
             <button id="rxConfigToggleBtn" onclick="toggleRxConfigMode()" style="background: #f0fdfa; color: #0d9488; border: 1px solid #0d9488; border-radius: 8px; padding: 4px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
                 <i class="fa-solid fa-sliders"></i> ضبط الأماكن والخطوط
             </button>
         </div>
 
         <div id="rxCanvasContainer" class="rx-canvas-container">
-            <!-- الجزء الأول: معلومات المريض -->
-            <div id="dragBoxRepPatient" class="draggable-box" style="top: 20px; left: 15px;">
+            <img id="rxBgImg" class="rx-bg-img" src="" alt="RX Header" style="display: none;">
+            
+            <!-- الجزء الأول: معلومات المريض (شفاف تماماً) -->
+            <div id="dragBoxRepPatient" class="draggable-box" style="top: 30px; left: 15px;">
                 <div class="box-font-controls">
-                    <span>خط المريض:</span>
+                    <span>خط معلومات المريض:</span>
                     <div style="display:flex; gap:3px;">
                         <button type="button" onclick="changeReportPartFontSize('repPatient', -1)">-</button>
                         <button type="button" onclick="changeReportPartFontSize('repPatient', 1)">+</button>
                     </div>
                 </div>
-                <div id="rxRepPatientText" style="font-size: 15px; font-weight: bold; color: #0f172a;"></div>
+                <div id="rxRepPatientText" style="font-size: 15px; font-weight: bold; color: #0f172a; line-height: 1.6;"></div>
             </div>
 
-            <!-- الجزء الثاني: عنوان التقرير -->
-            <div id="dragBoxRepTitle" class="draggable-box" style="top: 80px; left: 15px;">
+            <!-- الجزء الثاني: عنوان التقرير (شفاف تماماً) -->
+            <div id="dragBoxRepTitle" class="draggable-box" style="top: 120px; left: 15px;">
                 <div class="box-font-controls">
                     <span>خط العنوان:</span>
                     <div style="display:flex; gap:3px;">
@@ -849,8 +876,8 @@
                 <div id="rxRepTitleText" style="font-size: 18px; font-weight: bold; color: #0f766e; text-align: center;"></div>
             </div>
 
-            <!-- الجزء الثالث: الجهة -->
-            <div id="dragBoxRepTarget" class="draggable-box" style="top: 130px; left: 15px;">
+            <!-- الجزء الثالث: الجهة (شفاف تماماً) -->
+            <div id="dragBoxRepTarget" class="draggable-box" style="top: 175px; left: 15px;">
                 <div class="box-font-controls">
                     <span>خط الجهة:</span>
                     <div style="display:flex; gap:3px;">
@@ -861,8 +888,8 @@
                 <div id="rxRepTargetText" style="font-size: 15px; font-weight: bold; color: #1e293b;"></div>
             </div>
 
-            <!-- الجزء الرابع: تفاصيل الحالة -->
-            <div id="dragBoxRepDesc" class="draggable-box" style="top: 180px; left: 15px; min-width: 240px;">
+            <!-- الجزء الرابع: تفاصيل وشرح الحالة (شفاف تماماً) -->
+            <div id="dragBoxRepDesc" class="draggable-box" style="top: 230px; left: 15px; min-width: 240px;">
                 <div class="box-font-controls">
                     <span>خط التفاصيل:</span>
                     <div style="display:flex; gap:3px;">
@@ -870,7 +897,7 @@
                         <button type="button" onclick="changeReportPartFontSize('repDesc', 1)">+</button>
                     </div>
                 </div>
-                <div id="rxRepDescText" style="font-size: 15px; color: #0f172a; white-space: pre-wrap; line-height: 1.5;"></div>
+                <div id="rxRepDescText" style="font-size: 15px; color: #0f172a; white-space: pre-wrap; line-height: 1.6;"></div>
             </div>
         </div>
 
@@ -879,7 +906,7 @@
                 <i class="fa-solid fa-floppy-disk"></i> حفظ مواقع الأجزاء والترتيب الثابت
             </button>
             <button class="btn-main" onclick="printPrescriptionDirectly()" id="btnPrintRxDirect" style="font-family: 'El Messiri', sans-serif; background: #16a34a; width: 100%;">
-                <i class="fa-solid fa-print"></i> طباعة الروشتة (PDF / طباعة مباشرة)
+                <i class="fa-solid fa-print"></i> طباعة التقرير (طباعة مباشرة / PDF)
             </button>
             <button class="btn-main" onclick="openPrescriptionPDF()" id="btnSaveRxPDF" style="font-family: 'El Messiri', sans-serif; background: #0284c7; width: 100%;">
                 <i class="fa-solid fa-file-pdf"></i> Save as PDF File
@@ -891,19 +918,16 @@
 <script src="config.js"></script>
 <script src="clinic-functions.js?v=17.30"></script>
 <script>
-    // فتح نافذة إدخال بيانات التقرير مع سحب المعلومات الأساسية للمريض تلقائياً
     function openCustomReportModal() {
-        let defaultPatientInfo = "";
-        if (typeof currentPatientName !== 'undefined' && currentPatientName) {
-            defaultPatientInfo += `Name: ${currentPatientName}`;
-        }
-        if (typeof currentPatientAge !== 'undefined' && currentPatientAge) {
-            defaultPatientInfo += ` | Age: ${currentPatientAge}`;
-        }
-        if (typeof currentPatientGender !== 'undefined' && currentPatientGender) {
-            defaultPatientInfo += ` | Gender: ${currentPatientGender}`;
-        }
-        document.getElementById('repInputPatient').value = defaultPatientInfo;
+        let patName = (typeof currentPatientName !== 'undefined' && currentPatientName) ? currentPatientName : "";
+        let patAge = (typeof currentPatientAge !== 'undefined' && currentPatientAge) ? currentPatientAge : "";
+        let patGender = (typeof currentPatientGender !== 'undefined' && currentPatientGender) ? currentPatientGender : "";
+        let todayDate = new Date().toISOString().split('T')[0].replace(/-/g, '/');
+
+        document.getElementById('repInputName').value = patName;
+        document.getElementById('repInputAge').value = patAge;
+        document.getElementById('repInputGender').value = patGender;
+        document.getElementById('repInputDate').value = todayDate;
         document.getElementById('repInputTitle').value = "";
         document.getElementById('repInputTarget').value = "";
         document.getElementById('repInputDesc').value = "";
@@ -915,30 +939,38 @@
         document.getElementById('customReportModal').style.display = 'none';
     }
 
-    // توليد وعرض الأجزاء المستقلة داخل الروشتة وتطبيق الحفظ التلقائي لمواقعها
     function generateReportOnRx() {
-        const patientVal = document.getElementById('repInputPatient').value;
+        const nameVal = document.getElementById('repInputName').value;
+        const ageVal = document.getElementById('repInputAge').value;
+        const genderVal = document.getElementById('repInputGender').value;
+        const dateVal = document.getElementById('repInputDate').value;
+        
         const titleVal = document.getElementById('repInputTitle').value;
         const targetVal = document.getElementById('repInputTarget').value;
         const descVal = document.getElementById('repInputDesc').value;
 
-        document.getElementById('rxRepPatientText').innerText = patientVal;
+        let patientBlockHTML = "";
+        if(nameVal) patientBlockHTML += `Name: ${nameVal}<br>`;
+        if(ageVal) patientBlockHTML += `Age: ${ageVal} Year<br>`;
+        if(genderVal) patientBlockHTML += `Gender: ${genderVal}<br>`;
+        if(dateVal) patientBlockHTML += `Date: ${dateVal}`;
+        document.getElementById('rxRepPatientText').innerHTML = patientBlockHTML;
+
         document.getElementById('rxRepTitleText').innerText = titleVal;
         document.getElementById('rxRepTargetText').innerText = targetVal ? `إلى: ${targetVal}` : "";
         document.getElementById('rxRepDescText').innerText = descVal;
 
         document.getElementById('customReportModal').style.display = 'none';
         
-        // استدعاء دالة فتح الروشتة الأساسية
         if (typeof openRxModal === 'function') {
             openRxModal();
+        } else {
+            document.getElementById('rxModal').style.display = 'flex';
         }
 
-        // تحميل مواقع وسزات الأجزاء المحفوظة مسبقاً إن وجدت لتبقى ثابتة
         loadReportLayoutPositions();
     }
 
-    // التحكم المستقل بحجم الخط لكل جزء من أجزاء التقرير
     let reportFontSizes = JSON.parse(localStorage.getItem('clinic_report_font_sizes')) || {
         repPatient: 15,
         repTitle: 18,
@@ -962,7 +994,6 @@
         if(document.getElementById('rxRepDescText')) document.getElementById('rxRepDescText').style.fontSize = reportFontSizes.repDesc + 'px';
     }
 
-    // تفعيل وضع التعديل والضبط للأجزاء
     let isReportConfigMode = false;
     function toggleRxConfigMode() {
         isReportConfigMode = !isReportConfigMode;
@@ -1004,7 +1035,6 @@
         }
     }
 
-    // تفعيل السحب والإفلات (Drag & Drop) لكافة الأجزاء بحرية تامة وبدون تعارض
     let activeDragBox = null, dragStartX = 0, dragStartY = 0, boxInitX = 0, boxInitY = 0;
 
     document.querySelectorAll('.draggable-box').forEach(box => {
