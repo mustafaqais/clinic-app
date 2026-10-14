@@ -32,10 +32,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=El+Messiri:wght@400;500;600;700;800;900&display=swap');
         
-        /* تعريف خط جيزة الحصري للتقرير الطبي فقط */
+        /* تعريف خط جيزة الحصري للتقرير الطبي والنصوص */
         @font-face {
             font-family: 'GizaFont';
-            src: local('Giza'), local('Giza-Regular'), url('https://fonts.gstatic.com/s/cairo/v28/SLXgc1nY6HMRslTJxMfcXg.woff2') format('woff2'); /* بديل آمن وواضح في حال عدم توفر الخط محليا */
+            src: local('Giza'), local('Giza-Regular'), url('https://fonts.gstatic.com/s/cairo/v28/SLXgc1nY6HMRslTJxMfcXg.woff2') format('woff2'); 
         }
 
         body, input, select, textarea, button, h1, h2, h3, h4, h5, h6, span, p, a, label, div, .menu-card, .auth-form {
@@ -89,12 +89,13 @@
             direction: rtl;
             background: rgba(255, 255, 255, 0.98);
             border: 2px dashed #0d9488;
-            padding: 15px;
+            padding: 16px;
             border-radius: 8px;
             cursor: move;
             z-index: 9999;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             text-align: right;
+            min-width: 300px;
         }
 
         @media screen and (max-width: 600px) {
@@ -697,9 +698,9 @@
                     </div>
                     <p style="font-size: 0.8rem; color: #334155; line-height: 1.5; margin-bottom: 10px;" id="recPatientMeta"></p>
                     
-                    <!-- زر إخراج التقرير الجديد (بدل الزر القديم) -->
+                    <!-- زر إخراج التقرير الطبي الجديد -->
                     <button type="button" class="btn-main" onclick="openCustomReportModal()" id="btnGenerateReportModal" style="background: #0284c7; padding: 12px; font-size: 0.9rem;">
-                        <i class="fa-solid fa-file-lines"></i> إخراج تقرير
+                        <i class="fa-solid fa-file-lines"></i> إخراج تقرير طبي
                     </button>
                 </div>
 
@@ -752,12 +753,12 @@
 <div id="customReportModal" class="modal-overlay">
     <div class="modal-body" style="max-width: 500px; text-align: right; direction: rtl;">
         <div class="modal-header" style="direction: rtl;">
-            <h3 style="font-family: 'El Messiri', serif;"><i class="fa-solid fa-file-medical" style="color:#0284c7;"></i> إعداد وتصدير التقرير الطبي</h3>
+            <h3 style="font-family: 'GizaFont', 'El Messiri', serif;"><i class="fa-solid fa-file-medical" style="color:#0284c7;"></i> إعداد وتصدير التقرير الطبي</h3>
             <button class="modal-close" onclick="closeCustomReportModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
         
         <div class="field-box">
-            <span class="field-label">الاسم:</span>
+            <span class="field-label">اسم المريض:</span>
             <div class="input-wrapper"><input type="text" id="repInputName" placeholder="اسم المريض..."></div>
         </div>
         
@@ -773,55 +774,57 @@
         </div>
 
         <div class="field-box">
-            <span class="field-label">الجهة الموجه لها التقرير:</span>
-            <div class="input-wrapper"><input type="text" id="repInputTarget" placeholder="مثال: مستشفى، دكتور آخر، دائرة حكومية..."></div>
+            <span class="field-label">الجهة الموجه لها التقرير (بعد كلمة إلى):</span>
+            <div class="input-wrapper"><input type="text" id="repInputTarget" placeholder="مثال: شركة غاز الجنوب / مستشفى الحكيم / د. فلان..."></div>
         </div>
 
         <div class="field-box">
             <span class="field-label">نوع التقرير:</span>
-            <div class="input-wrapper"><input type="text" id="repInputType" placeholder="مثال: تقرير طبي، علاج طبيعي..."></div>
+            <div class="input-wrapper"><input type="text" id="repInputType" placeholder="مثال: تقرير طبي / إجازة مرضية..."></div>
         </div>
 
         <div class="field-box">
             <span class="field-label">شرح مفصل للحالة:</span>
             <div class="input-wrapper">
-                <textarea id="repInputDesc" rows="4" placeholder="اكتب التشخيص أو الشرح المفصل الموجه للطجهة المعنية..."></textarea>
+                <textarea id="repInputDesc" rows="4" placeholder="اكتب التشخيص أو الشرح المفصل الموجه للجهة المعنية..."></textarea>
             </div>
         </div>
 
-        <button class="btn-main" onclick="generateReportOnRx()" style="background: #0284c7; margin-top: 10px;">
-            <i class="fa-solid fa-check"></i> عرض على الروشتة (والتحكم بالخطوط والسحب)
+        <button class="btn-main" onclick="generateReportOnRx()" style="background: #0284c7; margin-top: 10px; font-family: 'GizaFont', sans-serif;">
+            <i class="fa-solid fa-check"></i> عرض التقرير حصرياً على الروشتة
         </button>
     </div>
 </div>
 
 <!-- طبقة معاينة التقرير على الروشتة (بخط جيزة حصرياً وقابلة للتحريك والسحب) -->
-<div id="customReportPreviewLayer" class="rx-draggable-report-layer" style="display: none; top: 80px; left: 20px;">
-    <div style="text-align: center; border-bottom: 2px solid #0d9488; margin-bottom: 8px; padding-bottom: 4px;">
-        <h4 id="prevRepTypeDisplay" style="margin: 0; font-size: 18px; color: #0f766e;">نوع التقرير</h4>
-        <p style="margin: 2px 0; font-size: 13px; color: #475569;">الجهة: <span id="prevRepTargetDisplay"></span></p>
+<div id="customReportPreviewLayer" class="rx-draggable-report-layer" style="display: none; top: 120px; left: 20px; font-family: 'GizaFont', sans-serif !important;">
+    <div style="text-align: center; border-bottom: 2px solid #0d9488; margin-bottom: 8px; padding-bottom: 6px;">
+        <h4 id="prevRepTypeDisplay" style="margin: 0; font-size: 20px; color: #0f766e; font-family: 'GizaFont', sans-serif;">نوع التقرير</h4>
+        <p style="margin: 6px 0; font-size: 15px; color: #1e293b; font-weight: bold; font-family: 'GizaFont', sans-serif;">
+            إلى: <span id="prevRepTargetDisplay" style="font-weight: normal;"></span>
+        </p>
     </div>
     
-    <div id="prevRepContentArea">
-        <div style="font-size: 15px; margin-bottom: 4px; font-weight: bold;">
-            <span>الاسم: </span> <span id="prevRepNameDisplay"></span>
+    <div id="prevRepContentArea" style="font-family: 'GizaFont', sans-serif;">
+        <div style="font-size: 16px; margin-bottom: 8px; font-weight: bold; font-family: 'GizaFont', sans-serif;">
+            <span>الاسم: </span> <span id="prevRepNameDisplay" style="font-weight: normal;"></span>
         </div>
-        <div style="display: flex; gap: 12px; margin-bottom: 6px;">
-            <div style="font-size: 13px;"><span>الجنس: </span> <span id="prevRepGenderDisplay"></span></div>
-            <div style="font-size: 13px;"><span>العمر: </span> <span id="prevRepAgeDisplay"></span></div>
+        <div style="display: flex; gap: 15px; margin-bottom: 8px; font-family: 'GizaFont', sans-serif;">
+            <div style="font-size: 15px;"><span>الجنس: </span> <span id="prevRepGenderDisplay"></span></div>
+            <div style="font-size: 15px;"><span>العمر: </span> <span id="prevRepAgeDisplay"></span></div>
         </div>
-        <div style="font-size: 14px; margin-top: 6px;">
-            <span style="font-weight: bold; display: block; margin-bottom: 2px;">شرح مفصل للحالة:</span>
-            <div id="prevRepDescDisplay" style="white-space: pre-wrap; background: #f8fafc; padding: 6px; border-radius: 4px; border: 1px solid #e2e8f0; min-height: 40px;"></div>
+        <div style="font-size: 16px; margin-top: 8px; font-family: 'GizaFont', sans-serif;">
+            <span style="font-weight: bold; display: block; margin-bottom: 4px;">شرح مفصل للحالة:</span>
+            <div id="prevRepDescDisplay" style="white-space: pre-wrap; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; min-height: 55px; font-family: 'GizaFont', sans-serif; font-size: 15px; color: #0f172a; line-height: 1.6;"></div>
         </div>
     </div>
     
-    <div style="margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; padding-top: 6px;">
-        <div style="display: flex; gap: 4px;">
-            <button type="button" onclick="adjustReportFontSize(-1)" style="padding: 2px 6px; font-size: 12px; cursor: pointer;">➖ تصغير</button>
-            <button type="button" onclick="adjustReportFontSize(1)" style="padding: 2px 6px; font-size: 12px; cursor: pointer;">➕ تكبير</button>
+    <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; padding-top: 8px;">
+        <div style="display: flex; gap: 6px;">
+            <button type="button" onclick="adjustReportFontSize(-1)" style="padding: 4px 8px; font-size: 12px; cursor: pointer; font-family: 'GizaFont', sans-serif;">➖ تصغير</button>
+            <button type="button" onclick="adjustReportFontSize(1)" style="padding: 4px 8px; font-size: 12px; cursor: pointer; font-family: 'GizaFont', sans-serif;">➕ تكبير</button>
         </div>
-        <button type="button" onclick="closeCustomReportPreview()" style="background: #ef4444; color: white; border: none; padding: 2px 8px; border-radius: 4px; font-size: 12px; cursor: pointer;">إغلاق</button>
+        <button type="button" onclick="closeCustomReportPreview()" style="background: #ef4444; color: white; border: none; padding: 4px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; font-family: 'GizaFont', sans-serif;">إغلاق المعاينة</button>
     </div>
 </div>
 
@@ -1215,8 +1218,8 @@ Chest X-Ray" style="font-size: 0.85rem; direction: ltr; text-align: left;"></tex
                     </div>
                 </div>
                 <div class="rx-treatment-wrapper">
-                    <div class="rx-rx-title">RX</div>
-                    <div id="rxDragTreatmentText" class="rx-treatment-text">-</div>
+                    <div class="rx-rx-title"></div>
+                    <div id="rxDragTreatmentText" class="rx-treatment-text"></div>
                 </div>
             </div>
         </div>
@@ -1238,7 +1241,7 @@ Chest X-Ray" style="font-size: 0.85rem; direction: ltr; text-align: left;"></tex
 <script src="config.js"></script>
 <script src="clinic-functions.js?v=17.30"></script>
 <script>
-    // الدوال البرمجية الخاصة بنافذة إخراج التقرير الجديد وربطها بالروشتة ومعايرتها
+    // الدوال البرمجية الخاصة بنافذة إخراج التقرير الجديد وربطها بالروشتة ومعايرتها بخط جيزة
     function openCustomReportModal() {
         if (typeof currentPatientName !== 'undefined') {
             document.getElementById('repInputName').value = currentPatientName || '';
@@ -1266,12 +1269,26 @@ Chest X-Ray" style="font-size: 0.85rem; direction: ltr; text-align: left;"></tex
 
         document.getElementById('customReportModal').style.display = 'none';
         
-        // إظهار واجهة الروشتة أولاً إذا لم تكن مفتوحة، أو تفعيل طبقة التقرير داخلها
+        // فتح نافذة الروشتة أولاً
         if (typeof openRxModal === 'function') {
             openRxModal();
         }
+        
+        // تفريغ خانة العلاج تماماً لكي تكون الروشتة نظيفة وفارغة للتقرير فقط
+        const treatmentTextEl = document.getElementById('rxDragTreatmentText');
+        if (treatmentTextEl) {
+            treatmentTextEl.innerText = "";
+        }
+        const rxTitleEl = document.querySelector('.rx-rx-title');
+        if (rxTitleEl) {
+            rxTitleEl.innerText = "";
+        }
+
+        // إظهار طبقة التقرير الطبي بخط جيزة
         const layer = document.getElementById('customReportPreviewLayer');
-        layer.style.display = 'block';
+        if (layer) {
+            layer.style.display = 'block';
+        }
     }
 
     function closeCustomReportPreview() {
@@ -1281,7 +1298,7 @@ Chest X-Ray" style="font-size: 0.85rem; direction: ltr; text-align: left;"></tex
     let reportFontSize = 15;
     function adjustReportFontSize(delta) {
         reportFontSize += delta;
-        if (reportFontSize < 10) reportFontSize = 10;
+        if (reportFontSize < 11) reportFontSize = 11;
         if (reportFontSize > 28) reportFontSize = 28;
         
         const layer = document.getElementById('customReportPreviewLayer');
@@ -1297,13 +1314,15 @@ Chest X-Ray" style="font-size: 0.85rem; direction: ltr; text-align: left;"></tex
     const reportLayer = document.getElementById('customReportPreviewLayer');
     let isRepDragging = false, repStartX, repStartY, repInitX, repInitY;
 
-    reportLayer.addEventListener('mousedown', startRepDrag);
-    document.addEventListener('mousemove', währendRepDrag);
-    document.addEventListener('mouseup', endRepDrag);
+    if (reportLayer) {
+        reportLayer.addEventListener('mousedown', startRepDrag);
+        document.addEventListener('mousemove', währendRepDrag);
+        document.addEventListener('mouseup', endRepDrag);
 
-    reportLayer.addEventListener('touchstart', startRepDrag);
-    document.addEventListener('touchmove', währendRepDrag);
-    document.addEventListener('touchend', endRepDrag);
+        reportLayer.addEventListener('touchstart', startRepDrag);
+        document.addEventListener('touchmove', währendRepDrag);
+        document.addEventListener('touchend', endRepDrag);
+    }
 
     function startRepDrag(e) {
         if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
