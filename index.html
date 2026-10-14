@@ -883,17 +883,17 @@
         }
     };
 
-    // 2. الدعم الفني المباشر (يفتح الواتساب والتليجرام مباشرة مع رقم الهاتف)
+    // 2. الدعم الفني المباشر بالرقم والمعرف والرسالة المحددة
     window.openSupportModal = function() {
-        const phone = "9647752224455"; // رقم الهاتف الخاص بك
-        const message = encodeURIComponent("مرحباً دكتور قيس، أود التواصل مع الدعم الفني لنظام عيادة ماستر.");
+        const whatsappPhone = "9647739114548";
+        const telegramUsername = "AAAAMQ";
+        const customMessage = encodeURIComponent("السلام عليكم ورحمة الله مصطفى قيس هل يمكن التواصل معك بخصوص تطبيق عيادتي");
         
-        // خيار لاختيار طريقة التواصل (واتساب أو تليجرام)
         const choice = confirm("اضغط (موافق) للتواصل عبر الواتساب، أو (إلغاء) للتواصل عبر التليجرام.");
         if (choice) {
-            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+            window.open(`https://wa.me/${whatsappPhone}?text=${customMessage}`, '_blank');
         } else {
-            window.open(`https://t.me/` + phone, '_blank'); // أو رابط معرف التليجرام الخاص بك
+            window.open(`https://t.me/${telegramUsername}?text=${customMessage}`, '_blank');
         }
     };
 
