@@ -867,7 +867,41 @@
 <script>eruda.init();</script>
 
 <script>
-    // 1. إصلاح زر القائمة الجانبية (3 خطوط)
+    // 1. تفعيل خيار تحويل اللغة (عربي / English)
+    window.toggleLanguage = function() {
+        if (typeof currentLang !== 'undefined') {
+            currentLang = (currentLang === 'ar') ? 'en' : 'ar';
+        } else {
+            window.currentLang = (window.currentLang === 'en') ? 'ar' : 'en';
+        }
+        if (typeof updateUILanguage === 'function') {
+            updateUILanguage();
+        } else {
+            location.reload();
+        }
+    };
+
+    // 2. تفعيل خيار الدعم الفني (Technical Support)
+    window.openSupportModal = function() {
+        alert('مرحباً بك يا دكتور! للتواصل مع الدعم الفني والنظام السحابي، يراسلنا المبرمج عبر التليجرام أو الاتصال المباشر بالدعم الفني المعتمد لنظام عيادة ماستر.');
+    };
+
+    // 3. تفعيل شاشة الاشتراك وتجديد الكود
+    window.openActivationScreenForRenewal = function() {
+        const mainScreen = document.getElementById('mainScreen');
+        const activScreen = document.getElementById('activationScreen');
+        if (mainScreen) mainScreen.style.display = 'none';
+        if (activScreen) activScreen.style.display = 'flex';
+    };
+
+    window.cancelRenewal = function() {
+        const activScreen = document.getElementById('activationScreen');
+        const mainScreen = document.getElementById('mainScreen');
+        if (activScreen) activScreen.style.display = 'none';
+        if (mainScreen) mainScreen.style.display = 'block';
+    };
+
+    // 4. تفعيل القائمة الجانبية (3 خطوط)
     window.toggleDropdownMenu = function(event) {
         if (event) event.stopPropagation();
         const menu = document.getElementById('headerDropdownMenu');
@@ -876,7 +910,6 @@
         }
     };
 
-    // إغلاق القائمة عند النقر في أي مكان خارجها
     document.addEventListener('click', function() {
         const menu = document.getElementById('headerDropdownMenu');
         if (menu) {
@@ -884,7 +917,7 @@
         }
     });
 
-    // 2. إصلاح زر تعديل بيانات المريض (Edit)
+    // 5. تفعيل زر تعديل بيانات المريض (Edit)
     window.openEditPatientModal = function() {
         if (typeof currentPatient !== 'undefined' && currentPatient) {
             if (typeof navigateTo === 'function') {
