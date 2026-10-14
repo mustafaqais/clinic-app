@@ -304,3 +304,19 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 .rx-treatment-text { color: #000000; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.05rem; white-space: pre-wrap; text-align: left; direction: ltr; line-height: 1.6; } 
 
 .footer { text-align: center; padding: 16px; color: #334155; font-size: 0.85rem; font-weight: 700; margin-top: auto; border-top: 1px solid #e2e8f0; background: #f8fafc; flex-shrink: 0; }
+
+/* تنسيق طبقة التقرير الطبي الجديد القابلة للتحريك والسحب (بخط جيزة حصرياً) */
+.rx-draggable-report-layer {
+    font-family: 'GizaFont', sans-serif !important;
+    position: absolute;
+    direction: rtl;
+    background: rgba(255, 255, 255, 0.98);
+    border: 2px dashed #0d9488;
+    padding: 15px;
+    border-radius: 8px;
+    cursor: move;
+    z-index: 9999;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    text-align: right;
+    min-width: 280px;
+}
