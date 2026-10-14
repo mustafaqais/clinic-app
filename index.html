@@ -879,5 +879,29 @@
         }
     }
 </script>
+<script>
+    // دالة محسنة ومباشرة لتعبئة بيانات المريض الحالية عند الضغط على زر التعديل
+    window.openEditPatientModal = function() {
+        if (typeof currentPatient !== 'undefined' && currentPatient) {
+            // الانتقال لشاشة إضافة/تعديل المريض
+            if (typeof navigateTo === 'function') {
+                navigateTo('addPatientScreen', 'تعديل بيانات المريض', 'تعديل وحفظ بيانات المريض');
+            }
+            // تعبئة الحقول تلقائياً ببيانات المريض الحالي
+            setTimeout(() => {
+                if (document.getElementById('pName')) document.getElementById('pName').value = currentPatient.name || '';
+                if (document.getElementById('pSubName')) document.getElementById('pSubName').value = currentPatient.subName || '';
+                if (document.getElementById('pAge')) document.getElementById('pAge').value = currentPatient.age || '';
+                if (document.getElementById('pGender')) document.getElementById('pGender').value = currentPatient.gender || '';
+                if (document.getElementById('pMarital')) document.getElementById('pMarital').value = currentPatient.marital || '';
+                if (document.getElementById('pJob')) document.getElementById('pJob').value = currentPatient.job || '';
+                if (document.getElementById('pPhone')) document.getElementById('pPhone').value = currentPatient.phone || '';
+                if (document.getElementById('pDate')) document.getElementById('pDate').value = currentPatient.date || '';
+            }, 100);
+        } else {
+            alert('الرجاء اختيار مريض أولاً');
+        }
+    };
+</script>
 </body>
 </html>
