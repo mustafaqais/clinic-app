@@ -1,3 +1,7 @@
+// ==========================================
+// Clinic Master System - Cloud Ultimate Edition v17.30
+// ==========================================
+
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 
@@ -1848,28 +1852,64 @@ function closeImagePreview() {
     document.getElementById('imagePreviewModal').style.display = 'none';
 }
 
+// ==========================================
+// التعديل 1: إصلاح زر Edit لجلب بيانات المريض الحالي بدقة وتعديلها
+// ==========================================
 function openEditPatientModal() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
-    document.getElementById('editPName').value = patient.name || '';
-    document.getElementById('editPSubName').value = patient.subName || '';
-    document.getElementById('editPAge').value = patient.age || '';
-    document.getElementById('editPGender').value = patient.gender || '';
-    document.getElementById('editPMarital').value = patient.marital || '';
-    document.getElementById('editPJob').value = patient.job || '';
-    document.getElementById('editPPhone').value = patient.phone || '';
-    document.getElementById('editPatientModal').style.display = 'flex';
+    
+    const nameEl = document.getElementById('editPName');
+    const subNameEl = document.getElementById('editPSubName');
+    const ageEl = document.getElementById('editPAge');
+    const genderEl = document.getElementById('editPGender');
+    const maritalEl = document.getElementById('editPMarital');
+    const jobEl = document.getElementById('editPJob');
+    const phoneEl = document.getElementById('editPPhone');
+
+    if(nameEl) nameEl.value = patient.name || '';
+    if(subNameEl) subNameEl.value = patient.subName || '';
+    if(ageEl) ageEl.value = patient.age || '';
+    if(genderEl) genderEl.value = patient.gender || '';
+    if(maritalEl) maritalEl.value = patient.marital || '';
+    if(jobEl) jobEl.value = patient.job || '';
+    if(phoneEl) phoneEl.value = patient.phone || '';
+
+    const modal = document.getElementById('editPatientModal');
+    if(modal) {
+        modal.style.display = 'flex';
+    } else {
+        navigateTo('addPatientScreen', 'تعديل بيانات المريض', 'تعديل وحفظ بيانات المريض');
+        setTimeout(() => {
+            if(document.getElementById('pName')) document.getElementById('pName').value = patient.name || '';
+            if(document.getElementById('pSubName')) document.getElementById('pSubName').value = patient.subName || '';
+            if(document.getElementById('pAge')) document.getElementById('pAge').value = patient.age || '';
+            if(document.getElementById('pGender')) document.getElementById('pGender').value = patient.gender || '';
+            if(document.getElementById('pMarital')) document.getElementById('pMarital').value = patient.marital || '';
+            if(document.getElementById('pJob')) document.getElementById('pJob').value = patient.job || '';
+            if(document.getElementById('pPhone')) document.getElementById('pPhone').value = patient.phone || '';
+        }, 100);
+    }
 }
 
 function closeEditPatientModal() {
-    document.getElementById('editPatientModal').style.display = 'none';
+    const modal = document.getElementById('editPatientModal');
+    if(modal) modal.style.display = 'none';
 }
 
 function saveEditedPatient() {
-    const name = document.getElementById('editPName').value.trim();
-    const subName = document.getElementById('editPSubName').value.trim();
-    const age = Number(document.getElementById('editPAge').value);
-    if (!name || !age) return;
+    const nameInput = document.getElementById('editPName') || document.getElementById('pName');
+    const subNameInput = document.getElementById('editPSubName') || document.getElementById('pSubName');
+    const ageInput = document.getElementById('editPAge') || document.getElementById('pAge');
+    
+    const name = nameInput ? nameInput.value.trim() : '';
+    const subName = subNameInput ? subNameInput.value.trim() : '';
+    const age = ageInput ? Number(ageInput.value) : 0;
+    
+    if (!name || !age) {
+        alert('الرجاء إدخال الاسم والعمر على الأقل.');
+        return;
+    }
 
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
@@ -1877,15 +1917,27 @@ function saveEditedPatient() {
     patient.name = name;
     patient.subName = subName;
     patient.age = age;
-    patient.gender = document.getElementById('editPGender').value || 'Unspecified';
-    patient.marital = document.getElementById('editPMarital').value || 'Single';
-    patient.job = document.getElementById('editPJob').value || 'Unspecified';
-    patient.phone = document.getElementById('editPPhone').value || 'N/A';
+    
+    const genderEl = document.getElementById('editPGender') || document.getElementById('pGender');
+    const maritalEl = document.getElementById('editPMarital') || document.getElementById('pMarital');
+    const jobEl = document.getElementById('editPJob') || document.getElementById('pJob');
+    const phoneEl = document.getElementById('editPPhone') || document.getElementById('pPhone');
+
+    patient.gender = genderEl ? genderEl.value : (patient.gender || 'Unspecified');
+    patient.marital = maritalEl ? maritalEl.value : (patient.marital || 'Single');
+    patient.job = jobEl ? jobEl.value : (patient.job || 'Unspecified');
+    patient.phone = phoneEl ? phoneEl.value : (patient.phone || 'N/A');
 
     savePatientToCloudAndLocal(patient);
     closeEditPatientModal();
-    document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ' (' + patient.subName + ')' : '');
-    document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + patient.gender + ' | Marital: ' + patient.marital + ' | Job: ' + patient.job + ' | Phone: ' + patient.phone;
+    
+    if(document.getElementById('recPatientName')) {
+        document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ' (' + patient.subName + ')' : '');
+    }
+    if(document.getElementById('recPatientMeta')) {
+        document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + patient.gender + ' | Marital: ' + patient.marital + ' | Job: ' + patient.job + ' | Phone: ' + patient.phone;
+    }
+    alert('تم تحديث بيانات المريض بنجاح!');
 }
 
 function confirmDeletePatientRecord() {
@@ -2012,6 +2064,43 @@ function closeMedHistoryModal() {
     document.getElementById('medHistoryModal').style.display = 'none';
 }
 
+// ==========================================
+// التعديل 2: جلب صورة الروشتة الخلفية بوضوح تام ومنع الخلفية البيضاء
+// ==========================================
+function loadAndDisplayRxBackground(containerElementId = 'rxCanvasContainer') {
+    let savedRxImg = null;
+    try {
+        savedRxImg = localStorage.getItem('clinic_rx_template_img') || 
+                     localStorage.getItem('rx_header_image') || 
+                     localStorage.getItem('doctor_rx_template') || 
+                     currentDoctorRxImage;
+    } catch(e) {}
+
+    const container = document.getElementById(containerElementId);
+    if (!container) return;
+
+    const oldImgs = container.querySelectorAll('.rx-bg-img');
+    oldImgs.forEach(img => img.remove());
+
+    if (savedRxImg) {
+        const bgImg = document.createElement('img');
+        bgImg.src = savedRxImg;
+        bgImg.className = 'rx-bg-img';
+        bgImg.style.position = 'absolute';
+        bgImg.style.left = '0';
+        bgImg.style.top = '0';
+        bgImg.style.width = '100%';
+        bgImg.style.height = '100%';
+        bgImg.style.objectFit = 'contain';
+        bgImg.style.pointerEvents = 'none';
+        bgImg.style.zIndex = '0';
+        container.insertBefore(bgImg, container.firstChild);
+    }
+}
+
+// ==========================================
+// التعديل 3: إعادة تفعيل زر Print RX Prescription للروشتة العادية بالكامل
+// ==========================================
 function openRxModal(visitId) {
     currentVisitIdForModal = visitId;
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
@@ -2019,30 +2108,36 @@ function openRxModal(visitId) {
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
 
-    document.getElementById('rxDragPatientDetailsText').innerText = 'Name: ' + (patient.name + (patient.subName ? ' (' + patient.subName + ')' : '')) + ' | Age: ' + patient.age + ' | ' + (patient.gender || '');
-    document.getElementById('rxDragDateText').innerText = visit.date || getTodayFormatted();
+    const patDetailsEl = document.getElementById('rxDragPatientDetailsText');
+    if(patDetailsEl) {
+        patDetailsEl.innerText = 'Name: ' + (patient.name + (patient.subName ? ' (' + patient.subName + ')' : '')) + ' | Age: ' + patient.age + ' | ' + (patient.gender || '');
+    }
+    
+    const dateEl = document.getElementById('rxDragDateText');
+    if(dateEl) {
+        dateEl.innerText = visit.date || getTodayFormatted();
+    }
     
     const bpVal = visit.bp ? 'BP: ' + visit.bp : 'BP: _____ / _____ mmHg';
     const hrVal = visit.hr ? 'HR: ' + visit.hr + ' bpm' : 'HR: _____ bpm';
     const tempVal = visit.temp ? 'Temp: ' + visit.temp + ' °C' : 'Temp: _____ °C';
     const bmiVal = visit.bmiScore ? 'BMI: ' + visit.bmiScore : 'BMI: _____';
 
-    document.getElementById('rxDragVitalsText').innerText = bpVal + ' | ' + hrVal + ' | ' + tempVal + ' | ' + bmiVal;
-    document.getElementById('rxDragTreatmentText').innerText = visit.drugs || 'No medications prescribed.';
-
-    const container = document.getElementById('rxCanvasContainer');
-    const oldImg = container.querySelector('.rx-bg-img');
-    if (oldImg) oldImg.remove();
-
-    if (currentDoctorRxImage) {
-        const img = document.createElement('img');
-        img.src = currentDoctorRxImage;
-        img.className = 'rx-bg-img';
-        container.insertBefore(img, container.firstChild);
+    const vitalsEl = document.getElementById('rxDragVitalsText');
+    if(vitalsEl) {
+        vitalsEl.innerText = bpVal + ' | ' + hrVal + ' | ' + tempVal + ' | ' + bmiVal;
+    }
+    
+    const treatmentEl = document.getElementById('rxDragTreatmentText');
+    if(treatmentEl) {
+        treatmentEl.innerText = visit.drugs || 'No medications prescribed.';
     }
 
+    loadAndDisplayRxBackground('rxCanvasContainer');
     loadSavedRxLayout();
-    document.getElementById('rxModal').style.display = 'flex';
+
+    const rxModal = document.getElementById('rxModal');
+    if(rxModal) rxModal.style.display = 'flex';
 }
 
 function closeRxModal() {
@@ -2196,7 +2291,6 @@ function initDraggableElements() {
     });
 }
 
-// دوال تفعيل السحب والتحريك لطبقة التقرير الجديد (Draggable Report Layer)
 function initReportDraggableElements() {
     const reportLayer = document.getElementById('customReportPreviewLayer');
     if (!reportLayer) return;
@@ -2236,7 +2330,6 @@ function initReportDraggableElements() {
     });
 }
 
-// دوال التحكم بنافذة التقرير الطبي الجديد ومعاينته وتكبير/تصغير الخط
 function openCustomReportModal() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (patient) {
@@ -2261,9 +2354,8 @@ function generateReportOnRx() {
 
     document.getElementById('customReportModal').style.display = 'none';
     
-    // فتح واجهة الروشتة وعرض طبقة التقرير فوقها
     if (typeof openRxModal === 'function' && currentPatientId) {
-        openRxModal(currentPatientId); // أو تمرير معرف الزيارة النشطة حسب الحاجة
+        openRxModal(currentPatientId);
     }
     const layer = document.getElementById('customReportPreviewLayer');
     if (layer) {
@@ -2386,7 +2478,6 @@ function removeDictTerm(category, index) {
     }
 }
 
-// دوال نافذة الإضافة الجماعية (Bulk Add)
 function openBulkAddModal() {
     document.getElementById('bulkDictInput').value = '';
     document.getElementById('bulkAddDictModal').style.display = 'flex';
