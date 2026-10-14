@@ -1,5 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.30
+// ملف الدوال البرمجية الشامل (روشتة منفصلة + تقرير منفصل)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1852,9 +1853,7 @@ function closeImagePreview() {
     document.getElementById('imagePreviewModal').style.display = 'none';
 }
 
-// ==========================================
-// التعديل 1: إصلاح زر Edit لجلب بيانات المريض الحالي بدقة وتعديلها
-// ==========================================
+// دالة إصلاح زر Edit لجلب بيانات المريض الحالي بدقة وتعديلها
 function openEditPatientModal() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
@@ -2064,9 +2063,7 @@ function closeMedHistoryModal() {
     document.getElementById('medHistoryModal').style.display = 'none';
 }
 
-// ==========================================
-// التعديل 2: جلب صورة الروشتة الخلفية بوضوح تام ومنع الخلفية البيضاء
-// ==========================================
+// دالة جلب صورة الروشتة الخلفية بوضوح تام ومنع الخلفية البيضاء
 function loadAndDisplayRxBackground(containerElementId = 'rxCanvasContainer') {
     let savedRxImg = null;
     try {
@@ -2098,9 +2095,7 @@ function loadAndDisplayRxBackground(containerElementId = 'rxCanvasContainer') {
     }
 }
 
-// ==========================================
-// التعديل 3: إعادة تفعيل زر Print RX Prescription للروشتة العادية بالكامل
-// ==========================================
+// دالة روشتة الأدوية العادية (Print RX Prescription) المستقلة تماماً
 function openRxModal(visitId) {
     currentVisitIdForModal = visitId;
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
@@ -2326,60 +2321,6 @@ function initReportDraggableElements() {
             if (reportLayer.hasPointerCapture(e.pointerId)) {
                 reportLayer.releasePointerCapture(e.pointerId);
             }
-        }
-    });
-}
-
-function openCustomReportModal() {
-    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-    if (patient) {
-        document.getElementById('repInputName').value = patient.name + (patient.subName ? ' (' + patient.subName + ')' : '') || '';
-        document.getElementById('repInputGender').value = patient.gender || '';
-        document.getElementById('repInputAge').value = patient.age || '';
-    }
-    document.getElementById('customReportModal').style.display = 'flex';
-}
-
-function closeCustomReportModal() {
-    document.getElementById('customReportModal').style.display = 'none';
-}
-
-function generateReportOnRx() {
-    document.getElementById('prevRepNameDisplay').innerText = document.getElementById('repInputName').value;
-    document.getElementById('prevRepGenderDisplay').innerText = document.getElementById('repInputGender').value;
-    document.getElementById('prevRepAgeDisplay').innerText = document.getElementById('repInputAge').value;
-    document.getElementById('prevRepTargetDisplay').innerText = document.getElementById('repInputTarget').value;
-    document.getElementById('prevRepTypeDisplay').innerText = document.getElementById('repInputType').value;
-    document.getElementById('prevRepDescDisplay').innerText = document.getElementById('repInputDesc').value;
-
-    document.getElementById('customReportModal').style.display = 'none';
-    
-    if (typeof openRxModal === 'function' && currentPatientId) {
-        openRxModal(currentPatientId);
-    }
-    const layer = document.getElementById('customReportPreviewLayer');
-    if (layer) {
-        layer.style.display = 'block';
-    }
-}
-
-function closeCustomReportPreview() {
-    const layer = document.getElementById('customReportPreviewLayer');
-    if (layer) layer.style.display = 'none';
-}
-
-let reportFontSize = 15;
-function adjustReportFontSize(delta) {
-    reportFontSize += delta;
-    if (reportFontSize < 10) reportFontSize = 10;
-    if (reportFontSize > 28) reportFontSize = 28;
-    
-    const layer = document.getElementById('customReportPreviewLayer');
-    if (!layer) return;
-    const elements = layer.querySelectorAll('h4, p, div, span');
-    elements.forEach(el => {
-        if(!el.querySelector('button')) {
-            el.style.fontSize = reportFontSize + 'px';
         }
     });
 }
