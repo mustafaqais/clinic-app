@@ -1,6 +1,6 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.41
-// (محدث بالكامل: حفظ التقرير الطبي، ظهور الترويسة، وبوكسات شفافة)
+// Clinic Master System - Cloud Ultimate Edition v17.42
+// (الملف الشامل والكامل - مطابق لطباعة الروشتة والحفظ التلقائي)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1046,7 +1046,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.41",
+        version: "17.42",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2206,7 +2206,7 @@ function initDraggableElements() {
 }
 
 // ==========================================
-// دوال التقرير الطبي المستقل (محدثة بالكامل وثابتة الحفظ والشفافية)
+// دوال التقرير الطبي المستقل (محدثة، محفوظة، وذات طباعة احترافية)
 // ==========================================
 let repConfigModeActive = false;
 let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
@@ -2368,7 +2368,7 @@ function loadRepLayoutPositions() {
                     if (data[id].fontSizes) repFontSizes = data[id].fontSizes;
                 }
             }
-            if (document.getElementById('repPatientText')) document.getElementById('repPatientText').style.fontSize = (repFontSizes.patient || 14) + 'px';
+            if (document.getElementById('repPatientText')) document.getElementById('repPatientText'].style.fontSize = (repFontSizes.patient || 14) + 'px';
             if (document.getElementById('repTitleText')) document.getElementById('repTitleText').style.fontSize = (repFontSizes.title || 16) + 'px';
             if (document.getElementById('repToText')) document.getElementById('repToText').style.fontSize = (repFontSizes.to || 15) + 'px';
             if (document.getElementById('repDetailsText')) document.getElementById('repDetailsText').style.fontSize = (repFontSizes.details || 15) + 'px';
@@ -2376,13 +2376,29 @@ function loadRepLayoutPositions() {
     }
 }
 
+// دالة الطباعة الاحترافية للتقرير الطبي المطابقة لطباعة الروشتة تماماً
 function printMedicalReportDirectly() {
-    if (repConfigModeActive) toggleRepConfigMode();
+    if (repConfigModeActive) {
+        toggleRepConfigMode();
+    }
+    const container = document.getElementById('repCanvasContainer');
+    const controls = container ? container.querySelectorAll('.box-font-controls') : [];
+    controls.forEach(c => c.style.display = 'none');
+
     document.body.classList.add('is-printing-rx');
     window.print();
+    
     setTimeout(() => {
         document.body.classList.remove('is-printing-rx');
+        controls.forEach(c => c.style.display = '');
     }, 1000);
+}
+
+function printMedicalReportOnly(visitId) {
+    openMedicalReportModal(visitId);
+    setTimeout(() => {
+        printMedicalReportDirectly();
+    }, 300);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
