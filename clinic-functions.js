@@ -1,4 +1,4 @@
-window.addEventListener('online', updateOnlineStatus);
+Window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
 
 function updateOnlineStatus() {
@@ -160,6 +160,10 @@ window.addEventListener('popstate', function(event) {
     }
     if (document.getElementById('bulkAddDictModal').style.display === 'flex') {
         closeBulkAddModal();
+        return;
+    }
+    if (document.getElementById('customReportModal').style.display === 'flex') {
+        closeCustomReportModal();
         return;
     }
     if (screenHistory.length > 1) {
@@ -338,6 +342,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     initDraggableElements();
+    initReportDraggableElements();
     loadSavedRxLayout();
 });
 
@@ -1422,42 +1427,6 @@ function openAnalyticsDashboard() {
         ).join('');
 }
 
-function exportPatientMedicalReportPDF() {
-    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-    if (!patient) return;
-
-    document.getElementById('pdfRepName').innerText = patient.name + (patient.subName ? ' (' + patient.subName + ')' : '');
-    document.getElementById('pdfRepAge').innerText = patient.age;
-    document.getElementById('pdfRepGender').innerText = patient.gender || 'N/A';
-    document.getElementById('pdfRepMarital').innerText = patient.marital || 'N/A';
-    document.getElementById('pdfRepJob').innerText = patient.job || 'N/A';
-    document.getElementById('pdfRepPhone').innerText = patient.phone || 'N/A';
-    document.getElementById('pdfRepDateLabel').innerText = 'Generated on: ' + new Date().toLocaleString();
-
-    const visitsContainer = document.getElementById('pdfRepVisitsContainer');
-    const visits = patient.visits || [];
-
-    visitsContainer.innerHTML = visits.length === 0 
-        ? '<p style="font-size:0.85rem; color:#64748b;">No visits.</p>'
-        : visits.map((v, idx) => 
-            '<div style="background: #ffffff; border: 1.5px solid #94a3b8; border-radius: 12px; padding: 14px; margin-bottom: 12px;">' +
-            '<div style="background: #0f172a; color: #ffffff; padding: 6px 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; display: flex; justify-content: space-between;">' +
-            '<span>Visit #' + (visits.length - idx) + '</span><span>Date: ' + (v.date || 'N/A') + '</span></div>' +
-            '<div style="font-size: 0.8rem; margin-top: 6px;"><strong>Diagnosis & Notes:</strong> ' + (v.notes || 'None') + '</div>' +
-            (v.drugs ? '<div style="font-size: 0.8rem; margin-top: 4px;"><strong>Medications:</strong> ' + v.drugs + '</div>' : '') +
-            '</div>'
-        ).join('');
-
-    html2canvas(document.getElementById('pdfReportExportContainer'), { scale: 2, useCORS: true }).then(canvas => {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('portrait', 'mm', 'a4');
-        const imgWidth = 210;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
-        pdf.save('Medical_Report_' + patient.name.replace(/\s+/g, '_') + '.pdf');
-    });
-}
-
 function openBmiCalculator(visitId) {
     currentVisitIdForModal = visitId;
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
@@ -1577,7 +1546,6 @@ function handleLiveInput(textarea, category, visitId) {
             document.getElementById('line-text-' + category + '-' + visitId).innerText = currentLine;
         }
         const terms = medicalDict[category] || [];
-        // مطابقة دقيقة لبداية الحروف المكتوبة (startsWith)
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
@@ -2225,6 +2193,102 @@ function initDraggableElements() {
                 }
             }
         });
+    });
+}
+
+// دوال تفعيل السحب والتحريك لطبقة التقرير الجديد (Draggable Report Layer)
+function initReportDraggableElements() {
+    const reportLayer = document.getElementById('customReportPreviewLayer');
+    if (!reportLayer) return;
+    
+    let isRepDragging = false, repStartX = 0, repStartY = 0, repInitX = 0, repInitY = 0;
+
+    reportLayer.style.touchAction = 'none';
+
+    reportLayer.addEventListener('pointerdown', e => {
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.closest('button')) return;
+        isRepDragging = true;
+        repStartX = e.clientX;
+        repStartY = e.clientY;
+        repInitX = reportLayer.offsetLeft;
+        repInitY = reportLayer.offsetTop;
+        
+        reportLayer.setPointerCapture(e.pointerId);
+        e.stopPropagation();
+    });
+
+    reportLayer.addEventListener('pointermove', e => {
+        if (!isRepDragging) return;
+        const dx = e.clientX - repStartX;
+        const dy = e.clientY - repStartY;
+
+        reportLayer.style.left = (repInitX + dx) + 'px';
+        reportLayer.style.top = (repInitY + dy) + 'px';
+    });
+
+    reportLayer.addEventListener('pointerup', e => {
+        if (isRepDragging) {
+            isRepDragging = false;
+            if (reportLayer.hasPointerCapture(e.pointerId)) {
+                reportLayer.releasePointerCapture(e.pointerId);
+            }
+        }
+    });
+}
+
+// دوال التحكم بنافذة التقرير الطبي الجديد ومعاينته وتكبير/تصغير الخط
+function openCustomReportModal() {
+    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+    if (patient) {
+        document.getElementById('repInputName').value = patient.name + (patient.subName ? ' (' + patient.subName + ')' : '') || '';
+        document.getElementById('repInputGender').value = patient.gender || '';
+        document.getElementById('repInputAge').value = patient.age || '';
+    }
+    document.getElementById('customReportModal').style.display = 'flex';
+}
+
+function closeCustomReportModal() {
+    document.getElementById('customReportModal').style.display = 'none';
+}
+
+function generateReportOnRx() {
+    document.getElementById('prevRepNameDisplay').innerText = document.getElementById('repInputName').value;
+    document.getElementById('prevRepGenderDisplay').innerText = document.getElementById('repInputGender').value;
+    document.getElementById('prevRepAgeDisplay').innerText = document.getElementById('repInputAge').value;
+    document.getElementById('prevRepTargetDisplay').innerText = document.getElementById('repInputTarget').value;
+    document.getElementById('prevRepTypeDisplay').innerText = document.getElementById('repInputType').value;
+    document.getElementById('prevRepDescDisplay').innerText = document.getElementById('repInputDesc').value;
+
+    document.getElementById('customReportModal').style.display = 'none';
+    
+    // فتح واجهة الروشتة وعرض طبقة التقرير فوقها
+    if (typeof openRxModal === 'function' && currentPatientId) {
+        openRxModal(currentPatientId); // أو تمرير معرف الزيارة النشطة حسب الحاجة
+    }
+    const layer = document.getElementById('customReportPreviewLayer');
+    if (layer) {
+        layer.style.display = 'block';
+    }
+}
+
+function closeCustomReportPreview() {
+    const layer = document.getElementById('customReportPreviewLayer');
+    if (layer) layer.style.display = 'none';
+}
+
+let reportFontSize = 15;
+function adjustReportFontSize(delta) {
+    reportFontSize += delta;
+    if (reportFontSize < 10) reportFontSize = 10;
+    if (reportFontSize > 28) reportFontSize = 28;
+    
+    const layer = document.getElementById('customReportPreviewLayer');
+    if (!layer) return;
+    const elements = layer.querySelectorAll('h4, p, div, span');
+    elements.forEach(el => {
+        if(!el.querySelector('button')) {
+            el.style.fontSize = reportFontSize + 'px';
+        }
     });
 }
 
