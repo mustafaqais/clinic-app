@@ -77,7 +77,7 @@
             pointer-events: none !important;
         }
         
-        /* جعل الصناديق شفافة تماماً ولا يظهر سوى الإطار عند وضع الضبط فقط */
+        /* الصناديق شفافة تماماً ولا يظهر سوى الإطار عند تفعيل وضع الضبط */
         .draggable-box {
             touch-action: none !important;
             cursor: move !important;
@@ -90,9 +90,8 @@
             direction: rtl;
             text-align: right;
         }
-        /* يظهر إطار خفيف فقط عند تفعيل وضع الضبط لتتمكن من رؤية حدود الصندوق وسحبه */
         .config-mode.draggable-box {
-            background: rgba(255, 255, 255, 0.85) !important;
+            background: rgba(255, 255, 255, 0.9) !important;
             border: 1px dashed #0d9488 !important;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
             padding: 8px !important;
@@ -779,7 +778,7 @@
     </div>
 </div>
 
-<!-- نافذة إدخال بيانات إخراج التقرير -->
+<!-- نافذة إدخال بيانات إخراج التقرير (مع الجلب التلقائي الفعال) -->
 <div id="customReportModal" class="modal-overlay">
     <div class="modal-body" style="max-width: 500px; text-align: right; direction: rtl;">
         <div class="modal-header" style="direction: rtl;">
@@ -787,7 +786,7 @@
             <button class="modal-close" onclick="closeCustomReportModal()"><i class="fa-solid fa-xmark"></i></button>
         </div>
         
-        <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px;">تم سحب معلومات المريض تلقائياً، ويمكنك تعديل أي حقل بحرية تامة:</p>
+        <p style="font-size: 0.78rem; color: #64748b; margin-bottom: 8px;">تم سحب بيانات المريض من ملفه تلقائياً، يمكنك التعديل بحرية:</p>
 
         <div style="display: flex; gap: 10px;">
             <div class="field-box" style="flex: 2;">
@@ -828,13 +827,13 @@
             </div>
         </div>
 
-        <button class="btn-main" onclick="generateReportOnRx()" style="background: #0284c7; margin-top: 10px; font-family: 'GizaFont', sans-serif;">
+        <button type="button" class="btn-main" onclick="generateReportOnRx()" style="background: #0284c7; margin-top: 10px; font-family: 'GizaFont', sans-serif;">
             <i class="fa-solid fa-check"></i> اظهار التقرير على الروشتة
         </button>
     </div>
 </div>
 
-<!-- نافذة عرض الروشتة ذات الصناديق الشفافة تماماً -->
+<!-- نافذة عرض الروشتة ذات الصناديق الشفافة -->
 <div id="rxModal" class="modal-overlay">
     <div class="modal-body" style="max-width: 480px; text-align: left; direction: ltr;">
         <div class="modal-header" style="direction: ltr;">
@@ -844,7 +843,7 @@
         
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
             <span style="font-size: 0.72rem; color: #64748b;" id="rxModeHint">الخلفية شفافة تماماً - اضغط ضبط لتحريك الأجزاء</span>
-            <button id="rxConfigToggleBtn" onclick="toggleRxConfigMode()" style="background: #f0fdfa; color: #0d9488; border: 1px solid #0d9488; border-radius: 8px; padding: 4px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
+            <button type="button" id="rxConfigToggleBtn" onclick="toggleRxConfigMode()" style="background: #f0fdfa; color: #0d9488; border: 1px solid #0d9488; border-radius: 8px; padding: 4px 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer;">
                 <i class="fa-solid fa-sliders"></i> ضبط الأماكن والخطوط
             </button>
         </div>
@@ -905,10 +904,10 @@
             <button id="rxSaveLayoutBtn" class="btn-main" onclick="saveReportLayoutPositions()" style="display: none; background: #0284c7;">
                 <i class="fa-solid fa-floppy-disk"></i> حفظ مواقع الأجزاء والترتيب الثابت
             </button>
-            <button class="btn-main" onclick="printPrescriptionDirectly()" id="btnPrintRxDirect" style="font-family: 'El Messiri', sans-serif; background: #16a34a; width: 100%;">
+            <button type="button" class="btn-main" onclick="printPrescriptionDirectly()" id="btnPrintRxDirect" style="font-family: 'El Messiri', sans-serif; background: #16a34a; width: 100%;">
                 <i class="fa-solid fa-print"></i> طباعة التقرير (طباعة مباشرة / PDF)
             </button>
-            <button class="btn-main" onclick="openPrescriptionPDF()" id="btnSaveRxPDF" style="font-family: 'El Messiri', sans-serif; background: #0284c7; width: 100%;">
+            <button type="button" class="btn-main" onclick="openPrescriptionPDF()" id="btnSaveRxPDF" style="font-family: 'El Messiri', sans-serif; background: #0284c7; width: 100%;">
                 <i class="fa-solid fa-file-pdf"></i> Save as PDF File
             </button>
         </div>
@@ -918,19 +917,39 @@
 <script src="config.js"></script>
 <script src="clinic-functions.js?v=17.30"></script>
 <script>
+    // فتح نافذة إخراج التقرير وسحب البيانات الحقيقية للمريض من مختلف مصادر النظام
     function openCustomReportModal() {
-        let patName = (typeof currentPatientName !== 'undefined' && currentPatientName) ? currentPatientName : "";
-        let patAge = (typeof currentPatientAge !== 'undefined' && currentPatientAge) ? currentPatientAge : "";
-        let patGender = (typeof currentPatientGender !== 'undefined' && currentPatientGender) ? currentPatientGender : "";
+        let patName = "";
+        let patAge = "";
+        let patGender = "";
+
+        // المحاولة الأولى: السحب من المتغيرات العامة أو العناصر المعروضة في الشاشة
+        if (typeof currentPatientName !== 'undefined' && currentPatientName) {
+            patName = currentPatientName;
+        } else if (document.getElementById('recPatientName') && document.getElementById('recPatientName').innerText !== '—') {
+            patName = document.getElementById('recPatientName').innerText;
+        }
+
+        if (typeof currentPatientAge !== 'undefined' && currentPatientAge) {
+            patAge = currentPatientAge;
+        }
+
+        if (typeof currentPatientGender !== 'undefined' && currentPatientGender) {
+            patGender = currentPatientGender;
+        }
+
+        // تاريخ اليوم بصيغة مرتبة
         let todayDate = new Date().toISOString().split('T')[0].replace(/-/g, '/');
 
         document.getElementById('repInputName').value = patName;
         document.getElementById('repInputAge').value = patAge;
         document.getElementById('repInputGender').value = patGender;
         document.getElementById('repInputDate').value = todayDate;
-        document.getElementById('repInputTitle').value = "";
-        document.getElementById('repInputTarget').value = "";
-        document.getElementById('repInputDesc').value = "";
+        
+        // إبقاء الحقول الأخرى جاهزة
+        if(!document.getElementById('repInputTitle').value) document.getElementById('repInputTitle').value = "";
+        if(!document.getElementById('repInputTarget').value) document.getElementById('repInputTarget').value = "";
+        if(!document.getElementById('repInputDesc').value) document.getElementById('repInputDesc').value = "";
         
         document.getElementById('customReportModal').style.display = 'flex';
     }
@@ -939,6 +958,7 @@
         document.getElementById('customReportModal').style.display = 'none';
     }
 
+    // زر "اظهار التقرير على الروشتة" (يعمل بسلاسة دون مسح البيانات أو الرجوع للخلف)
     function generateReportOnRx() {
         const nameVal = document.getElementById('repInputName').value;
         const ageVal = document.getElementById('repInputAge').value;
@@ -949,6 +969,7 @@
         const targetVal = document.getElementById('repInputTarget').value;
         const descVal = document.getElementById('repInputDesc').value;
 
+        // وضع معلومات المريض في الصندوق الأول
         let patientBlockHTML = "";
         if(nameVal) patientBlockHTML += `Name: ${nameVal}<br>`;
         if(ageVal) patientBlockHTML += `Age: ${ageVal} Year<br>`;
@@ -956,16 +977,22 @@
         if(dateVal) patientBlockHTML += `Date: ${dateVal}`;
         document.getElementById('rxRepPatientText').innerHTML = patientBlockHTML;
 
+        // العنوان
         document.getElementById('rxRepTitleText').innerText = titleVal;
+
+        // الجهة مسبوقة بكلمة إلى
         document.getElementById('rxRepTargetText').innerText = targetVal ? `إلى: ${targetVal}` : "";
+
+        // التفاصيل
         document.getElementById('rxRepDescText').innerText = descVal;
 
+        // إخفاء نافذة الإدخال فقط وإظهار نافذة الروشتة فوقها لضمان عدم ضياع أي بيانات
         document.getElementById('customReportModal').style.display = 'none';
-        
-        if (typeof openRxModal === 'function') {
-            openRxModal();
-        } else {
-            document.getElementById('rxModal').style.display = 'flex';
+        document.getElementById('rxModal').style.display = 'flex';
+
+        // محاولة تحميل صورة الروشتة الخلفية إن وجدت في الدوال الأصلية
+        if (typeof loadRxTemplateHeader === 'function') {
+            try { loadRxTemplateHeader(); } catch(e) {}
         }
 
         loadReportLayoutPositions();
