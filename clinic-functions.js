@@ -9,11 +9,15 @@ window.addEventListener('offline', updateOnlineStatus);
 function updateOnlineStatus() {
     const bar = document.getElementById('networkStatusBar');
     if (!navigator.onLine) {
-        bar.classList.add('offline');
-        bar.innerText = "⚠️ Offline Mode - Changes saved locally, will sync when online";
+        if(bar) {
+            bar.classList.add('offline');
+            bar.innerText = "⚠️ Offline Mode - Changes saved locally, will sync when online";
+        }
     } else {
-        bar.classList.remove('offline');
-        bar.style.display = 'none';
+        if(bar) {
+            bar.classList.remove('offline');
+            bar.style.display = 'none';
+        }
         syncLocalDataToCloud();
     }
 }
@@ -84,8 +88,10 @@ function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', save
     const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
     const headerTitleText = (screenId === 'mainScreen') ? customBrandName : (title || customBrandName);
 
-    document.getElementById('headerTitle').innerText = headerTitleText;
-    document.getElementById('headerSub').innerText = sub;
+    const titleEl = document.getElementById('headerTitle');
+    const subEl = document.getElementById('headerSub');
+    if(titleEl) titleEl.innerText = headerTitleText;
+    if(subEl) subEl.innerText = sub;
 
     if (saveState) {
         sessionStorage.setItem('current_screen', screenId);
@@ -97,11 +103,12 @@ function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', save
         }
     }
 
+    const backBtn = document.getElementById('backBtn');
     if (screenId === 'mainScreen') {
-        document.getElementById('backBtn').style.display = 'none';
+        if(backBtn) backBtn.style.display = 'none';
         screenHistory = ['mainScreen'];
     } else {
-        document.getElementById('backBtn').style.display = 'flex';
+        if(backBtn) backBtn.style.display = 'flex';
         if (screenHistory[screenHistory.length - 1] !== screenId) {
             screenHistory.push(screenId);
         }
@@ -117,7 +124,8 @@ function goBackScreen() {
         const prevScreen = screenHistory[screenHistory.length - 1];
         
         hideAllScreensInner();
-        document.getElementById(prevScreen).style.display = 'block';
+        const targetScreen = document.getElementById(prevScreen);
+        if(targetScreen) targetScreen.style.display = 'block';
         sessionStorage.setItem('current_screen', prevScreen);
 
         const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
@@ -181,19 +189,11 @@ window.addEventListener('popstate', function(event) {
 history.pushState(null, '', window.location.href);
 
 function hideAllScreensInner() {
-    document.getElementById('mainScreen').style.display = 'none';
-    document.getElementById('addPatientScreen').style.display = 'none';
-    document.getElementById('rxTemplateScreen').style.display = 'none';
-    document.getElementById('specialtiesDashboardScreen').style.display = 'none';
-    document.getElementById('archiveScreen').style.display = 'none';
-    document.getElementById('trashScreen').style.display = 'none';
-    document.getElementById('medicalRecordScreen').style.display = 'none';
-    document.getElementById('dictScreen').style.display = 'none';
-    document.getElementById('networkScreen').style.display = 'none';
-    document.getElementById('analyticsScreen').style.display = 'none';
-    document.getElementById('settingsScreen').style.display = 'none';
-    document.getElementById('backupScreen').style.display = 'none';
-    document.getElementById('permissionsScreen').style.display = 'none';
+    const screens = ['mainScreen', 'addPatientScreen', 'rxTemplateScreen', 'specialtiesDashboardScreen', 'archiveScreen', 'trashScreen', 'medicalRecordScreen', 'dictScreen', 'networkScreen', 'analyticsScreen', 'settingsScreen', 'backupScreen', 'permissionsScreen'];
+    screens.forEach(s => {
+        const el = document.getElementById(s);
+        if(el) el.style.display = 'none';
+    });
 }
 
 function applyLanguage() {
@@ -220,6 +220,7 @@ function toggleDarkMode() {
     applyDarkModeState();
 }
 
+// تعديل دالة التحميل والمراقبة لتكون آمنة تماماً ولا تتسبب بأي تجميد للشاشة
 window.addEventListener("DOMContentLoaded", () => {
     const pDateEl = document.getElementById('pDate');
     if (pDateEl) pDateEl.value = getTodayFormatted();
@@ -235,113 +236,122 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     auth.onAuthStateChanged(async user => {
-        if (user) {
-            currentUserId = user.uid;
-            let dataOwnerUid = user.uid;
-            isUserSecretary = false;
+        try {
+            if (user) {
+                currentUserId = user.uid;
+                let dataOwnerUid = user.uid;
+                isUserSecretary = false;
 
-            try {
-                const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', user.email.toLowerCase()).get();
-                if (!secQuery.empty) {
-                    const doctorDoc = secQuery.docs[0];
-                    dataOwnerUid = doctorDoc.id;
-                    sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
-                    isUserSecretary = true;
-                } else {
-                    const directDoc = await db.collection('network_hierarchy').doc(user.uid).get();
-                    if (directDoc.exists && directDoc.data().doctorUid) {
-                        dataOwnerUid = directDoc.data().doctorUid;
+                try {
+                    const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', user.email.toLowerCase()).get();
+                    if (!secQuery.empty) {
+                        const doctorDoc = secQuery.docs[0];
+                        dataOwnerUid = doctorDoc.id;
                         sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
                         isUserSecretary = true;
+                    } else {
+                        const directDoc = await db.collection('network_hierarchy').doc(user.uid).get();
+                        if (directDoc.exists && directDoc.data().doctorUid) {
+                            dataOwnerUid = directDoc.data().doctorUid;
+                            sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
+                            isUserSecretary = true;
+                        }
                     }
+                } catch (e) {
+                    console.log("Secretary query error (Non-blocking):", e);
                 }
-            } catch (e) {
-                console.log("Secretary query error:", e);
-            }
 
-            await loadDoctorBranding(dataOwnerUid);
+                loadDoctorBranding(dataOwnerUid).catch(err => console.log(err));
 
-            patients = JSON.parse(localStorage.getItem('clinic_patients_' + dataOwnerUid)) || patients;
-            trashBin = JSON.parse(localStorage.getItem('clinic_trash_' + dataOwnerUid)) || trashBin;
+                patients = JSON.parse(localStorage.getItem('clinic_patients_' + dataOwnerUid)) || patients;
+                trashBin = JSON.parse(localStorage.getItem('clinic_trash_' + dataOwnerUid)) || trashBin;
 
-            if (patientsListenerUnsubscribe) {
-                patientsListenerUnsubscribe();
-            }
+                if (patientsListenerUnsubscribe) {
+                    patientsListenerUnsubscribe();
+                }
 
-            if (navigator.onLine) {
-                db.collection('users_data').doc(dataOwnerUid).get().then(doc => {
-                    if (doc.exists) {
-                        const data = doc.data();
-                        if (data.rxImage) {
-                            currentDoctorRxImage = data.rxImage;
-                            localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
-                        }
-                        if (data.rxLayout) {
-                            localStorage.setItem('doctor_rx_layout', JSON.stringify(data.rxLayout));
-                        }
-                        if (data.dictionary) {
-                            medicalDict = data.dictionary;
-                            if (!medicalDict.mh_history) medicalDict.mh_history = ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"];
-                            if (!medicalDict.chief_complaint) medicalDict.chief_complaint = ["Cough and fever", "Severe headache", "Chest pain"];
-                            if (!medicalDict.history_present) medicalDict.history_present = ["Started 3 days ago, progressive"];
-                            if (!medicalDict.review_systems) medicalDict.review_systems = ["No fever, no shortness of breath"];
-                            localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
-                        }
-                        if (data.trashBin) {
-                            trashBin = data.trashBin;
-                            localStorage.setItem('clinic_trash_' + dataOwnerUid, JSON.stringify(trashBin));
-                        }
-                        if (data.secretaryAccount) {
-                            secretaryAccount = data.secretaryAccount;
-                            localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
-                        }
-                        if (data.specialtyConfig) {
-                            specialtyConfig = data.specialtyConfig;
-                            localStorage.setItem('clinic_specialty_config', JSON.stringify(specialtyConfig));
-                        }
-                    }
-                }).catch(err => console.log(err));
-
-                patientsListenerUnsubscribe = db.collection('users_data').doc(dataOwnerUid).collection('patients')
-                    .onSnapshot(snapshot => {
-                        let cloudPatients = [];
-                        snapshot.forEach(doc => {
-                            cloudPatients.push(doc.data());
-                        });
-                        patients = cloudPatients;
-                        localStorage.setItem('clinic_patients_' + dataOwnerUid, JSON.stringify(patients));
-                        localStorage.setItem('clinic_patients', JSON.stringify(patients));
-
-                        if (document.getElementById('archiveScreen').style.display === 'block') {
-                            filterPatients();
-                        } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
-                            const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
-                            if (pat) {
-                                if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) return;
-                                renderVisits(pat.visits || [], false);
-                            } else {
-                                showMainMenu();
+                if (navigator.onLine) {
+                    db.collection('users_data').doc(dataOwnerUid).get().then(doc => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            if (data.rxImage) {
+                                currentDoctorRxImage = data.rxImage;
+                                localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
+                            }
+                            if (data.rxLayout) {
+                                localStorage.setItem('doctor_rx_layout', JSON.stringify(data.rxLayout));
+                            }
+                            if (data.dictionary) {
+                                medicalDict = data.dictionary;
+                                if (!medicalDict.mh_history) medicalDict.mh_history = ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"];
+                                if (!medicalDict.chief_complaint) medicalDict.chief_complaint = ["Cough and fever", "Severe headache", "Chest pain"];
+                                if (!medicalDict.history_present) medicalDict.history_present = ["Started 3 days ago, progressive"];
+                                if (!medicalDict.review_systems) medicalDict.review_systems = ["No fever, no shortness of breath"];
+                                localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
+                            }
+                            if (data.trashBin) {
+                                trashBin = data.trashBin;
+                                localStorage.setItem('clinic_trash_' + dataOwnerUid, JSON.stringify(trashBin));
+                            }
+                            if (data.secretaryAccount) {
+                                secretaryAccount = data.secretaryAccount;
+                                localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
+                            }
+                            if (data.specialtyConfig) {
+                                specialtyConfig = data.specialtyConfig;
+                                localStorage.setItem('clinic_specialty_config', JSON.stringify(specialtyConfig));
                             }
                         }
-                    }, err => console.log("Real-time listener error:", err));
-            }
+                    }).catch(err => console.log("Cloud settings load error:", err));
 
-            if (user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
-                setupFounderInterfaceAfterAuth();
+                    patientsListenerUnsubscribe = db.collection('users_data').doc(dataOwnerUid).collection('patients')
+                        .onSnapshot(snapshot => {
+                            let cloudPatients = [];
+                            snapshot.forEach(doc => {
+                                cloudPatients.push(doc.data());
+                            });
+                            patients = cloudPatients;
+                            localStorage.setItem('clinic_patients_' + dataOwnerUid, JSON.stringify(patients));
+                            localStorage.setItem('clinic_patients', JSON.stringify(patients));
+
+                            const archiveScreen = document.getElementById('archiveScreen');
+                            const medScreen = document.getElementById('medicalRecordScreen');
+                            if (archiveScreen && archiveScreen.style.display === 'block') {
+                                filterPatients();
+                            } else if (medScreen && medScreen.style.display === 'block' && currentPatientId) {
+                                const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
+                                if (pat) {
+                                    if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) return;
+                                    renderVisits(pat.visits || [], false);
+                                } else {
+                                    showMainMenu();
+                                }
+                            }
+                        }, err => console.log("Real-time listener error:", err));
+                }
+
+                if (user.email && user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
+                    setupFounderInterfaceAfterAuth();
+                } else {
+                    checkUserSubscriptionStatus(user.uid, isUserSecretary);
+                }
             } else {
-                checkUserSubscriptionStatus(user.uid, isUserSecretary);
+                if (patientsListenerUnsubscribe) patientsListenerUnsubscribe();
+                currentUserId = null;
+                isUserSecretary = false;
+                isSubscriptionExpired = false;
+                sessionStorage.removeItem('target_doctor_uid');
+                const activScreen = document.getElementById('activationScreen');
+                const appCont = document.getElementById('appContainer');
+                const authScreen = document.getElementById('authScreen');
+                if (activScreen) activScreen.style.display = 'none';
+                if (appCont) appCont.style.display = 'none';
+                if (authScreen) authScreen.style.display = 'flex';
             }
-        } else {
-            if (patientsListenerUnsubscribe) patientsListenerUnsubscribe();
-            currentUserId = null;
-            isUserSecretary = false;
-            isSubscriptionExpired = false;
-            sessionStorage.removeItem('target_doctor_uid');
-            const activScreen = document.getElementById('activationScreen');
-            const appCont = document.getElementById('appContainer');
+        } catch (authErr) {
+            console.error("Auth state changed critical error:", authErr);
+            // ضمان عدم تجمد الشاشة أبداً حتى لو حدث استثناء
             const authScreen = document.getElementById('authScreen');
-            if (activScreen) activScreen.style.display = 'none';
-            if (appCont) appCont.style.display = 'none';
             if (authScreen) authScreen.style.display = 'flex';
         }
     });
@@ -506,7 +516,8 @@ function checkMandatoryMonthlyBackup() {
     const lastMandatoryBackupDate = localStorage.getItem('last_mandatory_backup_date');
 
     if (dayOfMonth === 1 && lastMandatoryBackupDate !== todayDateStr) {
-        document.getElementById('mandatoryBackupModal').style.display = 'flex';
+        const modal = document.getElementById('mandatoryBackupModal');
+        if(modal) modal.style.display = 'flex';
     }
 }
 
@@ -514,7 +525,8 @@ function executeMandatoryBackup() {
     exportJsonBackup();
     const todayDateStr = getTodayFormatted();
     localStorage.setItem('last_mandatory_backup_date', todayDateStr);
-    document.getElementById('mandatoryBackupModal').style.display = 'none';
+    const modal = document.getElementById('mandatoryBackupModal');
+    if(modal) modal.style.display = 'none';
     alert('تم حفظ النسخة الاحتياطية بنجاح!');
 }
 
@@ -690,7 +702,8 @@ function getTodayFormatted() {
 
 function toggleAuthMode() {
     isRegisterMode = !isRegisterMode;
-    document.getElementById('registerPhoneBox').style.display = isRegisterMode ? 'block' : 'none';
+    const phoneBox = document.getElementById('registerPhoneBox');
+    if(phoneBox) phoneBox.style.display = isRegisterMode ? 'block' : 'none';
 }
 
 function togglePasswordVisibility() {
@@ -803,16 +816,11 @@ async function handleAuthSubmit(e) {
 }
 
 function showAllCardsForDoctor() {
-    document.getElementById('cardNewPatient').style.display = 'flex';
-    document.getElementById('cardArchive').style.display = 'flex';
-    document.getElementById('cardRxTemplate').style.display = 'flex';
-    document.getElementById('cardSpecialtiesDashboard').style.display = 'flex';
-    document.getElementById('cardDict').style.display = 'flex';
-    document.getElementById('cardAnalytics').style.display = 'flex';
-    document.getElementById('cardBackup').style.display = 'flex';
-    document.getElementById('cardTrash').style.display = 'flex';
-    document.getElementById('cardSettings').style.display = 'flex';
-    document.getElementById('cardPermissions').style.display = 'flex';
+    const cards = ['cardNewPatient', 'cardArchive', 'cardRxTemplate', 'cardSpecialtiesDashboard', 'cardDict', 'cardAnalytics', 'cardBackup', 'cardTrash', 'cardSettings', 'cardPermissions'];
+    cards.forEach(c => {
+        const el = document.getElementById(c);
+        if(el) el.style.display = 'flex';
+    });
 }
 
 function applySecretaryUIVisibility() {
@@ -1853,7 +1861,6 @@ function closeImagePreview() {
     document.getElementById('imagePreviewModal').style.display = 'none';
 }
 
-// دالة إصلاح زر Edit لجلب بيانات المريض الحالي بدقة وتعديلها
 function openEditPatientModal() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
@@ -2063,7 +2070,6 @@ function closeMedHistoryModal() {
     document.getElementById('medHistoryModal').style.display = 'none';
 }
 
-// دالة جلب صورة الروشتة الخلفية بوضوح تام ومنع الخلفية البيضاء
 function loadAndDisplayRxBackground(containerElementId = 'rxCanvasContainer') {
     let savedRxImg = null;
     try {
@@ -2095,7 +2101,6 @@ function loadAndDisplayRxBackground(containerElementId = 'rxCanvasContainer') {
     }
 }
 
-// دالة روشتة الأدوية العادية (Print RX Prescription) المستقلة تماماً
 function openRxModal(visitId) {
     currentVisitIdForModal = visitId;
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
@@ -2240,6 +2245,7 @@ function initDraggableElements() {
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
     const container = document.getElementById('rxCanvasContainer');
+    if(!container) return;
 
     document.querySelectorAll('.draggable-box').forEach(box => {
         box.style.touchAction = 'none';
@@ -2492,6 +2498,7 @@ function saveNewPatient(e) {
 
 function renderPatientsList(list) {
     const container = document.getElementById('patientsList');
+    if(!container) return;
     container.innerHTML = list.length === 0 
         ? '<p style="text-align:center; color:#64748b;">No matching patients found.</p>'
         : list.map(p => 
@@ -2572,6 +2579,7 @@ function addNewVisit() {
 
 function renderVisits(visits, forceFullRender = true) {
     const container = document.getElementById('visitsContainer');
+    if(!container) return;
     container.innerHTML = visits.map((v, index) => {
         const mh = v.medHistory || {};
         let mhSummaryParts = [];
