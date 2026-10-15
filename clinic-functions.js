@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.50
-// (محدث: معالجة شاملة لطباعة الروشتة ومنع تداخلها مع التقرير الطبي على جميع الأجهزة)
+// (محدث: إصلاح طباعة الروشتة ومنع الورقة البيضاء وتأكيد تحميل ترويسة الصورة على جميع الأجهزة)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -2056,9 +2056,10 @@ function openRxModal(visitId) {
     const oldImg = container.querySelector('.rx-bg-img');
     if (oldImg) oldImg.remove();
 
-    if (currentDoctorRxImage) {
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    if (savedRxImg) {
         const img = document.createElement('img');
-        img.src = currentDoctorRxImage;
+        img.src = savedRxImg;
         img.className = 'rx-bg-img';
         container.insertBefore(img, container.firstChild);
     }
@@ -2187,7 +2188,7 @@ function loadSavedRxLayout() {
     setRxPaperSize(savedSize);
 }
 
-// دالة الطباعة المحدثة لمنع التداخل تماماً على جميع الأجهزة (الحاسبة، الموبايل، والآيباد)
+// دالة طباعة الروشتة المُصححة والمُحسنة لمنع الورقة البيضاء وتأكيد جلب صورة الترويسة على جميع الأجهزة
 function printPrescriptionDirectly() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
@@ -2197,11 +2198,15 @@ function printPrescriptionDirectly() {
     if (!container) return;
 
     let bgImg = container.querySelector('.rx-bg-img');
-    if (!bgImg && currentDoctorRxImage) {
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    
+    if (!bgImg && savedRxImg) {
         bgImg = document.createElement('img');
-        bgImg.src = currentDoctorRxImage;
+        bgImg.src = savedRxImg;
         bgImg.className = 'rx-bg-img';
         container.insertBefore(bgImg, container.firstChild);
+    } else if (bgImg && savedRxImg && !bgImg.src) {
+        bgImg.src = savedRxImg;
     }
 
     const controls = container.querySelectorAll('.box-font-controls');
@@ -2217,9 +2222,10 @@ function printPrescriptionDirectly() {
         reportWasOpen = true;
     }
 
+    // إعطاء مهلة 300 ملي ثانية لتثبيت ورسم الصورة والعناصر بدقة في المتصفح قبل إطلاق أمر الطباعة
     setTimeout(() => {
         window.print();
-    }, 100);
+    }, 300);
 
     setTimeout(() => {
         document.body.classList.remove('is-printing-rx-only');
@@ -2227,7 +2233,7 @@ function printPrescriptionDirectly() {
         if (reportWasOpen && reportModal) {
             reportModal.style.display = 'flex';
         }
-    }, 1000);
+    }, 1200);
 }
 
 function printMedicalReportDirectly() {
