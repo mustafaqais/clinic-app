@@ -1,6 +1,6 @@
 /* ==========================================
    Clinic Master System - Cloud Ultimate Edition
-   الملف الشامل لتنسيقات الـ CSS (ضبط صعود الصورة وإزالة الفراغ العلوي)
+   الملف الشامل لتنسيقات الـ CSS (الطباعة القياسية المطابقة لورقة A4/A5 تماماً)
    ========================================== */
 
 * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
@@ -214,7 +214,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 .btn-main:hover { background: #0f766e; }
 .btn-secondary { background: #0284c7; margin-bottom: 14px; }
 .btn-danger { background: #ef4444; color: white; border: none; border-radius: 10px; padding: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; margin-top: 10px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
-.btn-restore { background: #16a34a; color: white; border: none; border-radius: 10px; padding: 8px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: gap; gap: 4px; }
+.btn-restore { background: #16a34a; color: white; border: none; border-radius: 10px; padding: 8px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; }
 
 .bmi-result-card { background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 12px; padding: 14px; text-align: center; margin-top: 10px; }
 .bmi-value { font-size: 1.8rem; font-weight: 900; color: #0f172a; margin: 4px 0; }
@@ -326,16 +326,16 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 }
 
 /* ==========================================
-   إعدادات الطباعة النهائية المفصولة تماماً (موبايل وحاسبة - صعود الصورة للأعلى لتغطية الورقة بالكامل)
+   إعدادات الطباعة القياسية المطابقة لورقة A4/A5 بالكامل (مفصولة تماماً)
    ========================================== */
 @media print {
-    /* تصفير الهوامش تماماً لإلغاء أي فراغ علوي ورفع الصورة للاعلى */
+    /* فرض مقاسات الهوامش الصفرية على مستوى الصفحة لإلغاء أي فراغ تظهر فيه كتابة المتصفح */
     @page {
         size: auto;
         margin: 0mm;
     }
 
-    /* --- 1. إعدادات طباعة الموبايل (منفصلة ومحدّثة لصعود الصورة للأعلى) --- */
+    /* --- 1. طباعة الموبايل: مطابقة لقياس الورقة تماماً وصعود الصورة للأعلى لتغطية المساحة بالكامل --- */
     @media (max-width: 1023px) {
         body * {
             visibility: hidden !important;
@@ -400,7 +400,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
             top: 0 !important;
             width: 100% !important;
             height: 100% !important;
-            object-fit: fill !important; /* تمدد الصورة لتملاء الورقة من الأعلى للأسفل وبدون أي مساحة فارغة */
+            object-fit: fill !important; /* تغطية مساحة ورقة A5 أو A4 بالكامل من الأعلى للأسفل وبدون أي مساحة فارغة */
         }
 
         button,
@@ -413,7 +413,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         }
     }
 
-    /* --- 2. إعدادات طباعة الحاسبة (منفصلة تماماً وتملأ ورقة A4/A5 بدون أي فراغ علوي) --- */
+    /* --- 2. طباعة الحاسبة (Desktop): تغطية ورقة A4/A5 بالكامل بدون أي فراغ علوي أو سفلي --- */
     @media (min-width: 1024px) {
         body > *:not(#rxModal) {
             display: none !important;
@@ -470,7 +470,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
             top: 0 !important;
             width: 100% !important;
             height: 100% !important;
-            object-fit: fill !important;
+            object-fit: fill !important; /* ملء ورقة الـ A4 أو A5 بالكامل تماماً واختفاء أي عبارات في أعلى الصفحة */
             z-index: 1 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
