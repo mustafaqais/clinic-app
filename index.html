@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.40</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.42</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -142,7 +142,7 @@
         @media print {
             @page { size: auto; margin: 0mm; }
             body.is-printing-rx * { visibility: hidden !important; }
-            body.is-printing-rx #rxCanvasContainer, body.is-printing-rx #rxCanvasContainer * { visibility: visible !important; }
+            body.is-printing-rx #rxCanvasContainer, body.is-printing-rx #rxCanvasContainer *, body.is-printing-rx #repCanvasContainer, body.is-printing-rx #repCanvasContainer * { visibility: visible !important; }
             body.is-printing-rx #rxModal, body.is-printing-rx #medicalReportModal { position: fixed !important; left: 0 !important; top: 0 !important; width: 100% !important; height: 100% !important; background: white !important; display: block !important; z-index: 999999 !important; overflow: hidden !important; }
             body.is-printing-rx #rxCanvasContainer, body.is-printing-rx #repCanvasContainer { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; height: 100% !important; max-width: none !important; max-height: none !important; border: none !important; box-shadow: none !important; margin: 0 !important; transform: none !important; border-radius: 0 !important; }
             .box-font-controls { display: none !important; }
@@ -768,7 +768,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.40</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.42</div>
     </div>
 </div>
 
@@ -854,7 +854,7 @@
     </div>
 </div>
 
-<!-- نافذة معاينة وطباعة التقرير الطبي المستقل (الجديدة كلياً) -->
+<!-- نافذة معاينة وطباعة التقرير الطبي المستقل -->
 <div id="medicalReportModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 580px; text-align: left; direction: ltr; background: #f8fafc; border-radius: 14px; padding: 15px;">
         <div class="modal-header" style="direction: ltr; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -874,7 +874,6 @@
         <div id="repCanvasContainer" class="rx-canvas-container" style="background:#fff; position:relative; width:540px; height:765px; margin:0 auto; overflow:hidden;">
             <img id="repBgImg" class="rx-bg-img" src="" alt="RX Template" style="display: none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain; pointer-events:none;">
             
-            <!-- 1. بيانات المريض الأساسية: بوكس ذو خلفية شفافة وباللون الأحمر -->
             <div id="repDragBoxPatient" class="draggable-box" style="top: 140px; left: 30px; background: transparent;">
                 <div class="box-font-controls">
                     <span>خط المريض:</span>
@@ -886,7 +885,6 @@
                 <div id="repPatientText" style="font-size: 14px; font-weight: bold; color: #b91c1c; direction: rtl; text-align: right;"></div>
             </div>
 
-            <!-- 2. عنوان التقرير: بوكس ذو خلفية بيضاء -->
             <div id="repDragBoxTitle" class="draggable-box" style="top: 200px; left: 30px; width: 480px; background: rgba(255,255,255,0.95); border: 1px solid #e2e8f0; padding: 6px; border-radius: 6px;">
                 <div class="box-font-controls" style="direction: rtl;">
                     <span>خط العنوان:</span>
@@ -898,7 +896,6 @@
                 <div id="repTitleText" style="font-size: 16px; font-weight: 800; color: #0f172a; direction: rtl; text-align: right; font-family: 'GizaFont', sans-serif;"></div>
             </div>
 
-            <!-- 3. الجهة الموجه لها التقرير (متبوعة بكلمة "إلى"): بوكس ذو خلفية بيضاء -->
             <div id="repDragBoxTo" class="draggable-box" style="top: 260px; left: 30px; width: 480px; background: rgba(255,255,255,0.95); border: 1px solid #e2e8f0; padding: 6px; border-radius: 6px;">
                 <div class="box-font-controls" style="direction: rtl;">
                     <span>خط الجهة الموجهة:</span>
@@ -910,7 +907,6 @@
                 <div id="repToText" style="font-size: 15px; font-weight: 700; color: #0284c7; direction: rtl; text-align: right; font-family: 'GizaFont', sans-serif;"></div>
             </div>
 
-            <!-- 4. تفاصيل التقرير: بوكس ذو خلفية بيضاء -->
             <div id="repDragBoxDetails" class="draggable-box" style="top: 340px; left: 30px; width: 480px; background: rgba(255,255,255,0.95); border: 1px solid #e2e8f0; padding: 8px; border-radius: 6px;">
                 <div class="box-font-controls" style="direction: rtl;">
                     <span>خط التفاصيل:</span>
@@ -934,31 +930,22 @@
     </div>
 </div>
 
+<!-- تحميل السكريبتات الأساسية بالترتيب الصحيح -->
 <script src="config.js"></script>
-<script src="clinic-functions.js?v=17.40"></script>
+<script src="clinic-functions.js?v=17.42"></script>
 
 <!-- أداة Eruda لفحص الأخطاء -->
 <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 <script>eruda.init();</script>
 
 <script>
-    // 1. تحويل اللغة بين العربية والإنجليزية بسلاسة
     window.toggleLanguage = function() {
         let lang = localStorage.getItem('clinic_lang') || 'en';
         lang = (lang === 'ar') ? 'en' : 'ar';
         localStorage.setItem('clinic_lang', lang);
-        
-        if (typeof switchLanguage === 'function') {
-            switchLanguage(lang);
-        } else if (typeof updateUILanguage === 'function') {
-            currentLang = lang;
-            updateUILanguage();
-        } else {
-            location.reload();
-        }
+        location.reload();
     };
 
-    // 2. الدعم الفني المباشر عبر نافذة منسدلة أنيقة (Modal)
     window.openSupportModal = function() {
         const whatsappPhone = "9647739114548";
         const telegramUsername = "AAAAMQ";
@@ -980,7 +967,7 @@
                     <i class="fa-brands fa-whatsapp" style="font-size:1.2rem;"></i> مراسلة عبر الواتساب
                 </a>
                 
-                <a href="https://t.me/${telegramUsername}?text=${customMessage}" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:#229ed9; color:white; padding:10px; border-radius:10px; text-decoration:none; font-weight:700; margin-bottom:14px; font-size:0.9rem;">
+                <a href="https://t.me/${telegramUsername}?text=${customMessage}" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background://229ed9; color:white; padding:10px; border-radius:10px; text-decoration:none; font-weight:700; margin-bottom:14px; font-size:0.9rem;">
                     <i class="fa-brands fa-telegram" style="font-size:1.2rem;"></i> مراسلة عبر التليجرام
                 </a>
                 
@@ -991,17 +978,13 @@
     };
 
     window.openActivationScreenForRenewal = function() {
-        const mainScreen = document.getElementById('mainScreen');
-        const activScreen = document.getElementById('activationScreen');
-        if (mainScreen) mainScreen.style.display = 'none';
-        if (activScreen) activScreen.style.display = 'flex';
+        document.getElementById('mainScreen').style.display = 'none';
+        document.getElementById('activationScreen').style.display = 'flex';
     };
 
     window.cancelRenewal = function() {
-        const activScreen = document.getElementById('activationScreen');
-        const mainScreen = document.getElementById('mainScreen');
-        if (activScreen) activScreen.style.display = 'none';
-        if (mainScreen) mainScreen.style.display = 'block';
+        document.getElementById('activationScreen').style.display = 'none';
+        document.getElementById('mainScreen').style.display = 'block';
     };
 
     window.toggleDropdownMenu = function(event) {
@@ -1014,208 +997,7 @@
 
     document.addEventListener('click', function() {
         const menu = document.getElementById('headerDropdownMenu');
-        if (menu) {
-            menu.style.display = 'none';
-        }
-    });
-
-    window.openEditPatientModal = function() {
-        if (typeof currentPatient !== 'undefined' && currentPatient) {
-            if (typeof navigateTo === 'function') {
-                navigateTo('addPatientScreen', 'تعديل بيانات المريض', 'تعديل وحفظ بيانات المريض');
-            }
-            setTimeout(() => {
-                if (document.getElementById('pName')) document.getElementById('pName').value = currentPatient.name || '';
-                if (document.getElementById('pSubName')) document.getElementById('pSubName').value = currentPatient.subName || '';
-                if (document.getElementById('pAge')) document.getElementById('pAge').value = currentPatient.age || '';
-                if (document.getElementById('pGender')) document.getElementById('pGender').value = currentPatient.gender || '';
-                if (document.getElementById('pMarital')) document.getElementById('pMarital').value = currentPatient.marital || '';
-                if (document.getElementById('pJob')) document.getElementById('pJob').value = currentPatient.job || '';
-                if (document.getElementById('pPhone')) document.getElementById('pPhone').value = currentPatient.phone || '';
-                if (document.getElementById('pDate')) document.getElementById('pDate').value = currentPatient.date || '';
-            }, 100);
-        } else {
-            const nameEl = document.getElementById('recPatientName');
-            if (nameEl && nameEl.textContent && nameEl.textContent !== '—') {
-                if (typeof navigateTo === 'function') {
-                    navigateTo('addPatientScreen', 'تعديل بيانات المريض', 'تعديل وحفظ بيانات المريض');
-                }
-                setTimeout(() => {
-                    if (document.getElementById('pName')) {
-                        document.getElementById('pName').value = nameEl.textContent.trim();
-                    }
-                }, 100);
-            } else {
-                alert('الرجاء اختيار مريض من الأرشيف أولاً');
-            }
-        }
-    };
-
-    // ==========================================
-    // دوال تقرير الطبي المستقل والبوكسات والتحكم
-    // ==========================================
-    let repConfigModeActive = false;
-    let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
-
-    window.openMedicalReportModal = function(visitId) {
-        const modal = document.getElementById('medicalReportModal');
-        if (!modal) return;
-        modal.style.display = 'flex';
-
-        // جلب صورة الروشتة المخزنة
-        let savedRxImg = localStorage.getItem('clinic_rx_image') || '';
-        const bgImg = document.getElementById('repBgImg');
-        if (savedRxImg) {
-            bgImg.src = savedRxImg;
-            bgImg.style.display = 'block';
-        } else {
-            bgImg.style.display = 'none';
-        }
-
-        // استرجاع تفاصيل المريض والزيارة
-        let pName = (typeof currentPatient !== 'undefined' && currentPatient) ? currentPatient.name : (document.getElementById('recPatientName') ? document.getElementById('recPatientName').textContent : 'مريض');
-        let pAge = (typeof currentPatient !== 'undefined' && currentPatient) ? currentPatient.age : '';
-        let pGender = (typeof currentPatient !== 'undefined' && currentPatient) ? currentPatient.gender : '';
-        let visitDate = new Date().toISOString().split('T')[0];
-
-        // تعبئة بيانات المريض الشفافة باللون الأحمر
-        let patDetailsStr = `الاسم: ${pName} | العمر: ${pAge} | الجنس: ${pGender} | التاريخ: ${visitDate}`;
-        document.getElementById('repPatientText').textContent = patDetailsStr;
-
-        // جلب القيم المدخلة في حقول التقرير الطبي الثلاثة لهذه الزيارة
-        let titleVal = document.getElementById(`rep_title_${visitId}`) ? document.getElementById(`rep_title_${visitId}`).value : "تقرير طبي";
-        let toVal = document.getElementById(`rep_to_${visitId}`) ? document.getElementById(`rep_to_${visitId}`).value : "";
-        let detailsVal = document.getElementById(`rep_details_${visitId}`) ? document.getElementById(`rep_details_${visitId}`).value : "";
-
-        document.getElementById('repTitleText').textContent = titleVal || "تقرير طبي";
-        document.getElementById('repToText').textContent = toVal ? `إلى ${toVal}` : "";
-        document.getElementById('repDetailsText').textContent = detailsVal;
-
-        // تحميل أماكن البوكسات المحفوظة إن وجدت
-        loadRepLayoutPositions();
-    };
-
-    window.closeMedicalReportModal = function() {
-        const modal = document.getElementById('medicalReportModal');
-        if (modal) modal.style.display = 'none';
-    };
-
-    window.toggleRepConfigMode = function() {
-        repConfigModeActive = !repConfigModeActive;
-        const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
-        boxes.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                if (repConfigModeActive) el.classList.add('config-mode');
-                else el.classList.remove('config-mode');
-            }
-        });
-        const saveBtn = document.getElementById('repSaveLayoutBtn');
-        if (saveBtn) saveBtn.style.display = repConfigModeActive ? 'block' : 'none';
-        const toggleBtn = document.getElementById('repConfigToggleBtn');
-        if (toggleBtn) {
-            toggleBtn.style.background = repConfigModeActive ? '#0d9488' : '#f0fdfa';
-            toggleBtn.style.color = repConfigModeActive ? '#ffffff' : '#0d9488';
-        }
-    };
-
-    window.changeRepBoxFontSize = function(boxKey, delta) {
-        repFontSizes[boxKey] = Math.max(10, Math.min(30, (repFontSizes[boxKey] || 14) + delta));
-        let targetId = '';
-        if (boxKey === 'patient') targetId = 'repPatientText';
-        else if (boxKey === 'title') targetId = 'repTitleText';
-        else if (boxKey === 'to') targetId = 'repToText';
-        else if (boxKey === 'details') targetId = 'repDetailsText';
-
-        const el = document.getElementById(targetId);
-        if (el) el.style.fontSize = repFontSizes[boxKey] + 'px';
-    };
-
-    window.saveRepLayoutPositions = function() {
-        let positions = {};
-        const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
-        boxes.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                positions[id] = {
-                    top: el.style.top,
-                    left: el.style.left,
-                    width: el.style.width,
-                    fontSizes: repFontSizes
-                };
-            }
-        });
-        localStorage.setItem('clinic_rep_layout_v1', JSON.stringify(positions));
-        alert('تم حفظ أماكن التقرير الطبي والخطوط بنجاح لتكون ثابتة في المستقبل!');
-        toggleRepConfigMode();
-    };
-
-    function loadRepLayoutPositions() {
-        let saved = localStorage.getItem('clinic_rep_layout_v1');
-        if (saved) {
-            try {
-                let data = JSON.parse(saved);
-                for (let id in data) {
-                    const el = document.getElementById(id);
-                    if (el && data[id]) {
-                        if (data[id].top) el.style.top = data[id].top;
-                        if (data[id].left) el.style.left = data[id].left;
-                        if (data[id].width) el.style.width = data[id].width;
-                        if (data[id].fontSizes) repFontSizes = data[id].fontSizes;
-                    }
-                }
-                // تطبيق الأحجام
-                if (document.getElementById('repPatientText')) document.getElementById('repPatientText').style.fontSize = (repFontSizes.patient || 14) + 'px';
-                if (document.getElementById('repTitleText')) document.getElementById('repTitleText').style.fontSize = (repFontSizes.title || 16) + 'px';
-                if (document.getElementById('repToText')) document.getElementById('repToText').style.fontSize = (repFontSizes.to || 15) + 'px';
-                if (document.getElementById('repDetailsText')) document.getElementById('repDetailsText').style.fontSize = (repFontSizes.details || 15) + 'px';
-            } catch(e) {}
-        }
-    }
-
-    window.printMedicalReportDirectly = function() {
-        if (repConfigModeActive) toggleRepConfigMode();
-        document.body.classList.add('is-printing-rx');
-        window.print();
-        setTimeout(() => {
-            document.body.classList.remove('is-printing-rx');
-        }, 1000);
-    };
-
-    // تفعيل السحب والإفلات للبوكسات
-    document.addEventListener('DOMContentLoaded', () => {
-        const draggableBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
-        let activeBox = null;
-        let startX = 0, startY = 0, initialX = 0, initialY = 0;
-
-        draggableBoxes.forEach(box => {
-            box.addEventListener('pointerdown', (e) => {
-                if (!repConfigModeActive) return;
-                if (e.target.tagName === 'BUTTON') return;
-                activeBox = box;
-                startX = e.clientX;
-                startY = e.clientY;
-                initialX = box.offsetLeft;
-                initialY = box.offsetTop;
-                box.setPointerCapture(e.pointerId);
-                e.stopPropagation();
-            });
-
-            box.addEventListener('pointermove', (e) => {
-                if (!activeBox || activeBox !== box) return;
-                let dx = e.clientX - startX;
-                let dy = e.clientY - startY;
-                box.style.left = (initialX + dx) + 'px';
-                box.style.top = (initialY + dy) + 'px';
-            });
-
-            box.addEventListener('pointerup', (e) => {
-                if (activeBox === box) {
-                    box.releasePointerCapture(e.pointerId);
-                    activeBox = null;
-                }
-            });
-        });
+        if (menu) menu.style.display = 'none';
     });
 </script>
 </body>
