@@ -1,6 +1,5 @@
 // ==========================================
-// Clinic Master - Desktop Print & Drag (print-desktop.js)
-// خاص بالحاسبات المكتبية والشاشات الكبيرة (محدث لمنع القص وملء الورقة)
+// Clinic Master - Desktop Print (print-desktop.js)
 // ==========================================
 
 let isConfigMode = false;
@@ -71,12 +70,19 @@ function printPrescriptionDirectly() {
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
     updateDesktopConfigModeUI();
 
-    prepareRxBackground();
     const container = document.getElementById('rxCanvasContainer');
+    if (container) {
+        let bgImg = container.querySelector('.rx-bg-img');
+        let savedRxImg = localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+        if (bgImg && savedRxImg) {
+            bgImg.src = savedRxImg;
+            bgImg.style.display = 'block';
+        }
+    }
+
     const controls = container ? container.querySelectorAll('.box-font-controls') : [];
     controls.forEach(c => c.style.display = 'none');
 
-    // إخفاء رمز Rx البرمجي نهائياً أثناء الطباعة لضمان نظافة الورقة
     const rxSymbol = container ? container.querySelector('#rxDragBoxTreatment div:nth-child(2)') : null;
     if (rxSymbol) rxSymbol.style.display = 'none';
 
@@ -94,6 +100,15 @@ function printPrescriptionDirectly() {
 
 function printMedicalReportDirectly() {
     const container = document.getElementById('repCanvasContainer');
+    if (container) {
+        let bgImg = container.querySelector('.rx-bg-img');
+        let savedRxImg = localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+        if (bgImg && savedRxImg) {
+            bgImg.src = savedRxImg;
+            bgImg.style.display = 'block';
+        }
+    }
+
     const controls = container ? container.querySelectorAll('.box-font-controls') : [];
     controls.forEach(c => c.style.display = 'none');
 
@@ -108,7 +123,6 @@ function printMedicalReportDirectly() {
     }, 1500);
 }
 
-// تهيئة السحب بالفأرة للحاسبة
 document.addEventListener('DOMContentLoaded', () => {
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
