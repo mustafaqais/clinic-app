@@ -1,6 +1,6 @@
 /* ==========================================
    Clinic Master System - Cloud Ultimate Edition
-   تنسيقات الـ CSS (النسخة النهائية لإصلاح الأزرار والطباعة والشاشة بالكامل)
+   تنسيقات الـ CSS (النسخة النهائية - توحيد البوكسات، تعديل Rx أفقياً، والطباعة الشاملة)
    ========================================== */
 
 * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
@@ -242,7 +242,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 .filter-row select { flex: 1; padding: 6px 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.78rem; font-weight: 600; outline: none; background: #fff; color: #0f172a; }
 
 /* ==========================================
-   توسيع مساحة العمل والشاشات (عرض واسع ومريح للتحكم والسحب)
+   حاوية الروشتة ومساحة العمل الشاملة
    ========================================== */
 .rx-canvas-container {
     position: relative;
@@ -263,19 +263,25 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
     pointer-events: none;
 }
 
-/* المربعات شفافة وتسمح بالرؤية مع الحفاظ على ظهور أزرار التحكم بوضوح */
+/* ==========================================
+   توحيد شكل جميع البوكسات (الاسم، التاريخ، العلامات، العلاج) بنفس الإطار المنظم
+   ========================================== */
 .draggable-box {
     position: absolute;
     background-color: transparent !important;
     border: 1px dashed transparent;
-    padding: 2px 4px;
+    padding: 6px 10px;
     cursor: move;
     touch-action: none;
     z-index: 10;
+    border-radius: 8px;
 }
+
+/* عندما يكون في وضع التعديل (config-mode)، تظهر إطارات البوكسات بوضوح مثل بوكس العلاج */
 .draggable-box.config-mode {
-    border: 1px dashed #0d9488;
-    background: rgba(255, 255, 255, 0.9) !important;
+    border: 1.5px solid #cbd5e1 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 /* إظهار أزرار التكبير والتصغير (+) و (-) بوضوح تام */
@@ -310,11 +316,27 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
     justify-content: center;
 }
 
+/* تنسيقات النصوص الداخلية واتجاهها من اليسار لليمين (LTR) */
 .rx-patient-details-text { color: #b91c1c; font-family: 'Amiri', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; background: transparent !important; } 
 .rx-date-text { color: #1e293b; font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; background: transparent !important; border: none !important; padding: 0 !important; }
 .rx-vitals-text { color: #0284c7; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.85rem; line-height: 1.6; direction: ltr; text-align: left; background: transparent !important; } 
+
 .rx-treatment-wrapper { direction: ltr; text-align: left; width: 100%; background: transparent !important; }
-.rx-rx-title { color: #b91c1c; font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-align: left; margin-bottom: 2px; direction: ltr; background: transparent !important; } 
+
+/* جعل رمز Rx متلاصقاً وبشكل أفقي (Rx بجانب بعضها وليست عمودية) */
+.rx-rx-title { 
+    color: #b91c1c; 
+    font-family: 'Playfair Display', serif; 
+    font-weight: 900; 
+    font-size: 1.3rem; 
+    letter-spacing: 1px; 
+    text-align: left; 
+    margin-bottom: 4px; 
+    direction: ltr; 
+    unicode-bidi: embed;
+    background: transparent !important; 
+} 
+
 .rx-treatment-text { color: #000000; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.05rem; white-space: pre-wrap; text-align: left; direction: ltr; line-height: 1.6; background: transparent !important; } 
 
 .footer { text-align: center; padding: 16px; color: #334155; font-size: 0.85rem; font-weight: 700; margin-top: auto; border-top: 1px solid #e2e8f0; background: #f8fafc; flex-shrink: 0; }
@@ -336,7 +358,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 }
 
 /* ==========================================
-   إعدادات الطباعة المطلقة (ملء ورقة الطباعة A4 / A5 تماماً من الحافة للحافة بدون فراغات)
+   إعدادات الطباعة المطلقة (ملء ورقة الطباعة A4 / A5 تماماً من الحافة للحافة)
    ========================================== */
 @media print {
     @page {
