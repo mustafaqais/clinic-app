@@ -241,15 +241,20 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 .filter-row { display: flex; gap: 8px; }
 .filter-row select { flex: 1; padding: 6px 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.78rem; font-weight: 600; outline: none; background: #fff; color: #0f172a; }
 
+/* تعديل حاوية الروشتة لتملأ الشاشة والطباعة بالكامل بدون فراغات */
 .rx-canvas-container {
     position: relative;
     width: 100%;
+    max-width: 100%;
     background: #ffffff;
-    border: 2px solid #cbd5e1;
-    border-radius: 14px;
+    border: none;
+    border-radius: 0;
     overflow: hidden;
     user-select: none;
-    min-height: 480px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 .rx-bg-img {
     width: 100%;
@@ -325,205 +330,129 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
     min-width: 280px;
 }
 
+#rxModal {
+    padding: 0 !important;
+    background: #ffffff !important;
+}
+
+#rxModal .modal-body {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+}
+
 /* ==========================================
-   إعدادات الطباعة المطلقة (فصل تام بين الموبايل والحاسبة وتغطية ورقة A4/A5 بالكامل بدون فراغ علوي)
+   إعدادات الطباعة المطلقة (تغطية ورقة A4/A5 بالكامل بدون فراغ علوي أو جانبي)
    ========================================== */
 @media print {
-    /* تصفير هوامش الصفحة بالكامل لإلغاء أي مساحة يظهر فيها رابط المتصفح أو كلمة RX ready */
     @page {
         size: auto;
         margin: 0 !important;
     }
 
-    /* --- 1. إعدادات طباعة الموبايل (منفصلة تماماً وتملأ ورقة A4/A5 بدون هوامش) --- */
-    @media (max-width: 1023px) {
-        body > *:not(#rxModal) {
-            display: none !important;
-            visibility: hidden !important;
-        }
-
-        body * {
-            visibility: hidden !important;
-        }
-
-        #rxModal,
-        #rxModal *,
-        .rx-canvas-container,
-        .rx-canvas-container *,
-        .rx-bg-img,
-        .draggable-box,
-        .rx-patient-details-text,
-        .rx-date-text,
-        .rx-vitals-text,
-        .rx-treatment-wrapper,
-        .rx-rx-title,
-        .rx-treatment-text {
-            visibility: visible !important;
-            display: block !important;
-            opacity: 1 !important;
-        }
-
-        html, body {
-            background: #ffffff !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            overflow: hidden !important;
-        }
-
-        #rxModal {
-            position: fixed !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            max-width: 100% !important;
-            max-height: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: #ffffff !important;
-            z-index: 999999 !important;
-            border: none !important;
-            box-shadow: none !important;
-            overflow: hidden !important;
-        }
-
-        .rx-canvas-container {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            border: none !important;
-            background: #ffffff !important;
-            overflow: hidden !important;
-        }
-
-        .rx-bg-img {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: fill !important; /* ملء ورقة الـ A4/A5 تماماً من الحافة للحافة وصعود الصورة للأعلى */
-            z-index: 1 !important;
-        }
-
-        button,
-        .box-font-controls,
-        .modal-header,
-        .modal-close,
-        .modal-footer {
-            display: none !important;
-            visibility: hidden !important;
-        }
+    body > *:not(#rxModal) {
+        display: none !important;
+        visibility: hidden !important;
     }
 
-    /* --- 2. إعدادات طباعة الحاسبة (Desktop منفصلة تماماً وتملأ ورقة A4/A5 بالكامل بدون قص علوي) --- */
-    @media (min-width: 1024px) {
-        body > *:not(#rxModal) {
-            display: none !important;
-            visibility: hidden !important;
-        }
+    body * {
+        visibility: hidden !important;
+    }
 
-        body * {
-            visibility: hidden !important;
-        }
+    #rxModal,
+    #rxModal *,
+    .rx-canvas-container,
+    .rx-canvas-container *,
+    .rx-bg-img,
+    .draggable-box,
+    .rx-patient-details-text,
+    .rx-date-text,
+    .rx-vitals-text,
+    .rx-treatment-wrapper,
+    .rx-rx-title,
+    .rx-treatment-text {
+        visibility: visible !important;
+        display: block !important;
+        opacity: 1 !important;
+    }
 
-        #rxModal,
-        #rxModal *,
-        .rx-canvas-container,
-        .rx-canvas-container *,
-        .rx-bg-img,
-        .draggable-box,
-        .rx-patient-details-text,
-        .rx-date-text,
-        .rx-vitals-text,
-        .rx-treatment-wrapper,
-        .rx-rx-title,
-        .rx-treatment-text {
-            visibility: visible !important;
-            display: block !important;
-            opacity: 1 !important;
-        }
+    html, body {
+        background: #ffffff !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        overflow: hidden !important;
+    }
 
-        html, body {
-            background: #ffffff !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            overflow: hidden !important;
-        }
+    #rxModal {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        z-index: 999999 !important;
+        border: none !important;
+        box-shadow: none !important;
+        overflow: hidden !important;
+    }
 
-        #rxModal {
-            position: fixed !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            max-width: 100vw !important;
-            max-height: 100vh !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: #ffffff !important;
-            z-index: 999999 !important;
-            border: none !important;
-            box-shadow: none !important;
-            overflow: hidden !important;
-        }
+    .rx-canvas-container {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        background: #ffffff !important;
+        overflow: hidden !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
 
-        .rx-canvas-container {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            border: none !important;
-            box-shadow: none !important;
-            background: #ffffff !important;
-            overflow: hidden !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
+    .rx-bg-img {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: fill !important;
+        z-index: 1 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
 
-        .rx-bg-img {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: fill !important; /* ملء الشاشة والورقة بالكامل من الحافة للحافة وبدون أي فراغ علوي */
-            z-index: 1 !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
+    .draggable-box {
+        position: absolute !important;
+        z-index: 10 !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
 
-        .draggable-box {
-            position: absolute !important;
-            z-index: 10 !important;
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-
-        button,
-        .box-font-controls,
-        .modal-header,
-        .modal-footer,
-        #rxSaveLayoutBtn,
-        #rxModeHint,
-        .btn-main,
-        .print-prescription-btn,
-        button[onclick*="print"],
-        .modal-close {
-            display: none !important;
-            visibility: hidden !important;
-        }
+    button,
+    .box-font-controls,
+    .modal-header,
+    .modal-footer,
+    #rxSaveLayoutBtn,
+    #rxModeHint,
+    .btn-main,
+    .print-prescription-btn,
+    button[onclick*="print"],
+    .modal-close {
+        display: none !important;
+        visibility: hidden !important;
     }
 }
