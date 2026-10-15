@@ -2187,7 +2187,7 @@ function loadSavedRxLayout() {
     setRxPaperSize(savedSize);
 }
 
-// دالة الطباعة المحدثة لضمان تحميل الخلفية وعدم ظهور صفحة بيضاء
+// دالة الطباعة المحدثة لمنع التداخل مع التقرير الطبي
 function printPrescriptionDirectly() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
@@ -2210,6 +2210,13 @@ function printPrescriptionDirectly() {
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
     
+    const reportModal = document.getElementById('medicalReportModal');
+    let reportWasOpen = false;
+    if (reportModal && reportModal.style.display === 'flex') {
+        reportModal.style.display = 'none';
+        reportWasOpen = true;
+    }
+
     setTimeout(() => {
         window.print();
     }, 50);
@@ -2217,6 +2224,9 @@ function printPrescriptionDirectly() {
     setTimeout(() => {
         document.body.classList.remove('is-printing-rx-only');
         controls.forEach(c => c.style.display = '');
+        if (reportWasOpen && reportModal) {
+            reportModal.style.display = 'flex';
+        }
     }, 1000);
 }
 
