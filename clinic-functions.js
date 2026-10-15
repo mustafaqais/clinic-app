@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.50
-// (الكود الشامل والكامل - ضبط الطباعة للتوافق التام مع A4 و A5 للحاسبة والموبايل)
+// (الكود الشامل والكامل - ضبط الطباعة والتوافق التام مع A4 و A5 للحاسبة والموبايل)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -413,7 +413,7 @@ function setupReadOnlyModeAfterExpiration(expiryDateIso) {
     const cardNewPat = document.getElementById('cardNewPatient');
     cardNewPat.classList.add('disabled-card');
     cardNewPat.onclick = function() {
-        alert('⚠ انتهت صلاحية الاشتراك. التطبيق يعمل في وضع القراءة فقط.');
+        alert('⚠️ انتهت صلاحية الاشتراك. التطبيق يعمل في وضع القراءة فقط.');
         openSupportModal();
     };
 
@@ -2086,7 +2086,7 @@ function updateConfigModeUI() {
         if (hint) hint.innerText = 'Config mode active';
         if (saveBtn) saveBtn.style.display = 'block';
     } else {
-        if (hint) hint.innerText = 'RX ready';
+        if (hint) hint.innerText = '';
         if (saveBtn) saveBtn.style.display = 'none';
     }
 }
@@ -2183,7 +2183,7 @@ function loadSavedRxLayout() {
 }
 
 // ==========================================
-// دوال الطباعة المعزولة والمتوافقة مع مقاسات A4 و A5
+// دوال الطباعة المعزولة والمتوافقة مع مقاسات A4 و A5 (معدلة لتجنب أي هوامش أو نصوص علوية)
 // ==========================================
 function printPrescriptionDirectly() {
     isConfigMode = false;
@@ -2330,7 +2330,7 @@ function initDraggableElements() {
 }
 
 // ==========================================
-// التقرير الطبي المطوّر (التفاف النصوص، خط واضح، وكلمة "إلى:")
+// التقرير الطبي المطوّر
 // ==========================================
 let repConfigModeActive = false;
 let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
