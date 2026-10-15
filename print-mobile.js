@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master - Mobile Print & Touch (print-mobile.js)
-// خاص بالهواتف المحمولة (آيفون وجلاكسي)
+// خاص بالهواتف المحمولة (محدث لمنع الصفحات الزائدة وملء ورقة الطباعة بدقة)
 // ==========================================
 
 let isMobileConfigMode = false;
@@ -51,20 +51,35 @@ function saveRxLayoutPositions() {
 
 function printPrescriptionDirectly() {
     prepareRxBackground();
+    
+    // إخفاء رمز Rx البرمجي لضمان نظافة الطباعة على الموبايل
+    const container = document.getElementById('rxCanvasContainer');
+    const rxSymbol = container ? container.querySelector('#rxDragBoxTreatment div:nth-child(2)') : null;
+    if (rxSymbol) rxSymbol.style.display = 'none';
+
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
+    
     setTimeout(() => { window.print(); }, 600);
-    setTimeout(() => { document.body.classList.remove('is-printing-rx-only'); }, 1800);
+    
+    setTimeout(() => { 
+        document.body.classList.remove('is-printing-rx-only'); 
+        if (rxSymbol) rxSymbol.style.display = '';
+    }, 1800);
 }
 
 function printMedicalReportDirectly() {
     document.body.classList.add('is-printing-report-only');
     document.body.classList.remove('is-printing-rx-only');
+    
     setTimeout(() => { window.print(); }, 600);
-    setTimeout(() => { document.body.classList.remove('is-printing-report-only'); }, 1800);
+    
+    setTimeout(() => { 
+        document.body.classList.remove('is-printing-report-only'); 
+    }, 1800);
 }
 
-// دعم اللمس السريع للهواتف الذكية
+// دعم اللمس السريع للهواتف الذكية لتحريك الصناديق في وضع الضبط
 document.addEventListener('DOMContentLoaded', () => {
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
@@ -87,8 +102,8 @@ document.addEventListener('DOMContentLoaded', () => {
         box.addEventListener('touchmove', e => {
             if (!activeBox || activeBox !== box || !container) return;
             if (e.touches.length === 1) {
-                let dx = e.touches.length > 0 ? e.touches[0].clientX - startX : 0;
-                let dy = e.touches.length > 0 ? e.touches[0].clientY - startY : 0;
+                let dx = e.touches[0].clientX - startX;
+                let dy = e.touches[0].clientY - startY;
                 const cWidth = container.clientWidth;
                 const cHeight = container.clientHeight;
                 let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
