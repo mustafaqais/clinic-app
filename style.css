@@ -1,6 +1,6 @@
 /* ==========================================
    Clinic Master System - Cloud Ultimate Edition
-   تنسيقات الـ CSS (النسخة النهائية - معالجة الطباعة الشاملة ووضوح النصوص)
+   تنسيقات الـ CSS (النسخة النهائية والمحدثة - توحيد تام بين المتصفحات والطباعة)
    ========================================== */
 
 * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
@@ -351,7 +351,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 }
 
 /* ==========================================
-   إعدادات الطباعة الشاملة والدقيقة (ملء الورقة بالكامل من الحافة للحافة بدون هوامش)
+   إعدادات الطباعة الموحدة الشاملة (لضمان التطابق التام بين Chrome, Firefox, و Edge)
    ========================================== */
 @media print {
     @page {
@@ -379,6 +379,9 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         width: 100vw !important;
         height: 100vh !important;
         overflow: hidden !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
     }
 
     #rxModal, #medicalReportModal {
@@ -404,9 +407,10 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         max-width: none !important;
         max-height: none !important;
         display: block !important;
+        overflow: visible !important;
     }
 
-    /* جعل الحاوية تملأ الشاشة والورقة بالكامل 100% */
+    /* تثبيت مساحة العرض لجميع المتصفحات دون فرق في الرندر */
     #rxCanvasContainer, #repCanvasContainer {
         position: absolute !important;
         left: 0 !important;
@@ -422,9 +426,10 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         background: #ffffff !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+        color-adjust: exact !important;
     }
 
-    /* تمدد صورة الخلفية لتمتلئ بها ورقة الطباعة والـ PDF تماماً من الحافة للحافة */
+    /* توحيد مطابقة خلفية الورقة عبر محركات المتصفحات المختلفة (Gecko / Blink) */
     .rx-bg-img, .rep-bg-img {
         position: absolute !important;
         left: 0 !important;
@@ -435,6 +440,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         z-index: 1 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+        color-adjust: exact !important;
     }
 
     .draggable-box {
@@ -442,15 +448,32 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         z-index: 10 !important;
         background: transparent !important;
         border: none !important;
+        box-shadow: none !important;
     }
 
-    /* وضوح وثبات النصوص الحبرية تماماً */
-    .rx-patient-details-text, #repPatientText { color: #b91c1c !important; font-weight: 800 !important; -webkit-text-fill-color: #b91c1c !important; }
-    .rx-date-text { color: #1e293b !important; font-weight: 800 !important; -webkit-text-fill-color: #1e293b !important; }
-    .rx-vitals-text { color: #0284c7 !important; font-weight: 800 !important; -webkit-text-fill-color: #0284c7 !important; }
-    .rx-treatment-text, #repDetailsText, #repTitleText, #repToText { color: #000000 !important; font-weight: 700 !important; -webkit-text-fill-color: #000000 !important; }
+    /* تثبيت دقة ألوان الحبر والنصوص لكي لا تختلف باختلاف المتصفح */
+    .rx-patient-details-text, #repPatientText { 
+        color: #b91c1c !important; 
+        font-weight: 800 !important; 
+        -webkit-text-fill-color: #b91c1c !important; 
+    }
+    .rx-date-text { 
+        color: #1e293b !important; 
+        font-weight: 800 !important; 
+        -webkit-text-fill-color: #1e293b !important; 
+    }
+    .rx-vitals-text { 
+        color: #0284c7 !important; 
+        font-weight: 800 !important; 
+        -webkit-text-fill-color: #0284c7 !important; 
+    }
+    .rx-treatment-text, #repDetailsText, #repTitleText, #repToText { 
+        color: #000000 !important; 
+        font-weight: 700 !important; 
+        -webkit-text-fill-color: #000000 !important; 
+    }
 
-    /* إخفاء الأزرار وأدوات التحكم تماماً وقت الطباعة */
+    /* إخفاء الأزرار وأدوات التحكم تماماً وقت الطباعة في أي متصفح */
     .box-font-controls, 
     button, 
     .modal-header, 
