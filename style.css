@@ -1,6 +1,6 @@
 /* ==========================================
    Clinic Master System - Cloud Ultimate Edition
-   الملف الشامل لتنسيقات الـ CSS والطباعة المعزولة
+   الملف الشامل لتنسيقات الـ CSS (مع تعديل الطباعة الشامل)
    ========================================== */
 
 * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
@@ -326,7 +326,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 }
 
 /* ==========================================
-   إعدادات الطباعة النهائية والمعزولة (للحاسبة والموبايل - A4 و A5)
+   إعدادات الطباعة النهائية والمعزولة (للحاسبة والموبايل - ملء ورقة A4 / A5 بالكامل بدون قص)
    ========================================== */
 @media print {
     /* إخفاء كافة محتويات التطبيق افتراضياً وجعلها مخفية تماماً */
@@ -370,14 +370,14 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         opacity: 1 !important;
     }
 
-    /* تثبيت صفحة بيضاء نظيفة وبدون هوامش أو أشرطة */
+    /* تثبيت صفحة بيضاء نظيفة تغطي ورقة الطباعة بالكامل بدون أي هوامش */
     body {
         background: #ffffff !important;
         margin: 0 !important;
         padding: 0 !important;
         width: 100% !important;
         height: 100% !important;
-        overflow: visible !important;
+        overflow: hidden !important;
     }
 
     #rxModal {
@@ -386,6 +386,10 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         top: 0 !important;
         width: 100vw !important;
         height: 100vh !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
         background: #ffffff !important;
         z-index: 999999 !important;
         display: flex !important;
@@ -393,28 +397,44 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         justify-content: center !important;
         border: none !important;
         box-shadow: none !important;
+        overflow: hidden !important;
     }
 
     .rx-canvas-container {
-        position: relative !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
         width: 100% !important;
         height: 100% !important;
-        max-width: 100% !important;
-        max-height: 100% !important;
-        margin: 0 auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
         border: none !important;
         box-shadow: none !important;
         background: #ffffff !important;
+        overflow: hidden !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
 
+    /* استخدام fill لضمان تمدد صورة الراشيتة لتملأ الورقة بالكامل بدون قص من الأعلى أو الأسفل */
     .rx-bg-img {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
         width: 100% !important;
         height: 100% !important;
-        object-fit: contain !important;
+        object-fit: fill !important;
+        z-index: 1 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+    }
+
+    .draggable-box {
+        position: absolute !important;
+        z-index: 10 !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
     }
 
     /* إخفاء تام وصريح لكل الأزرار، أدوات التحكم، ومربعات الحوار أثناء الطباعة */
