@@ -1045,20 +1045,28 @@
 <script src="config.js"></script>
 <script src="clinic-functions.js?v=17.52"></script>
 
-<!-- تحميل ملفات الطباعة والتحكم المستقلة بحسب نوع الجهاز (استدعاء ذكي) -->
+<!-- تحميل ملفات الطباعة الستة المستقلة بحسب نوع الجهاز (استدعاء ذكي مزدوج) -->
 <script src="print-core.js"></script>
 <script>
     const screenWidth = window.innerWidth;
-    const printScript = document.createElement('script');
+    const script1 = document.createElement('script');
+    const script2 = document.createElement('script');
 
     if (screenWidth <= 768) {
-        printScript.src = "print-mobile.js"; // للهواتف الذكية (آيفون وأندرويد)
+        // الهواتف الذكية (آيفون وأندرويد)
+        script1.src = "print-mobile-rx.js";
+        script2.src = "print-mobile-report.js";
     } else if (screenWidth > 768 && screenWidth <= 1024) {
-        printScript.src = "print-tablet.js"; // لأجهزة الآيباد والتابلت
+        // أجهزة الآيباد والتابلت
+        script1.src = "print-tablet-rx.js";
+        script2.src = "print-tablet-report.js";
     } else {
-        printScript.src = "print-desktop.js"; // للحاسبة المكتبية
+        // الحاسبة المكتبية
+        script1.src = "print-desktop-rx.js";
+        script2.src = "print-desktop-report.js";
     }
-    document.body.appendChild(printScript);
+    document.body.appendChild(script1);
+    document.body.appendChild(script2);
 </script>
 
 <!-- أداة Eruda لفحص الأخطاء -->
