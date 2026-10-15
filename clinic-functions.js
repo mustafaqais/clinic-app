@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.50
-// (محدث: فصل إعدادات الروشتة والخطوط والمواقع بالكامل بين الموبايل، الآيباد، والحاسبة)
+// (محدث: معالجة شاملة لطباعة الروشتة ومنع تداخلها مع التقرير الطبي على جميع الأجهزة)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -2187,7 +2187,7 @@ function loadSavedRxLayout() {
     setRxPaperSize(savedSize);
 }
 
-// دالة الطباعة المحدثة لمنع التداخل مع التقرير الطبي
+// دالة الطباعة المحدثة لمنع التداخل تماماً على جميع الأجهزة (الحاسبة، الموبايل، والآيباد)
 function printPrescriptionDirectly() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
@@ -2212,14 +2212,14 @@ function printPrescriptionDirectly() {
     
     const reportModal = document.getElementById('medicalReportModal');
     let reportWasOpen = false;
-    if (reportModal && reportModal.style.display === 'flex') {
+    if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
         reportModal.style.display = 'none';
         reportWasOpen = true;
     }
 
     setTimeout(() => {
         window.print();
-    }, 50);
+    }, 100);
 
     setTimeout(() => {
         document.body.classList.remove('is-printing-rx-only');
