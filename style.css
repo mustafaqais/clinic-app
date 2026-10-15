@@ -1,6 +1,6 @@
 /* ==========================================
    Clinic Master System - Cloud Ultimate Edition
-   تنسيقات الـ CSS (النسخة النهائية - الشفافية المطلقة والضبط الكامل للطباعة)
+   تنسيقات الـ CSS (النسخة النهائية لإصلاح الأزرار والطباعة والشاشة بالكامل)
    ========================================== */
 
 * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
@@ -263,13 +263,10 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
     pointer-events: none;
 }
 
-/* ==========================================
-   القاعدة القوية: إجبار جميع المربعات والحقول على الشفافية التامة بنسبة 100%
-   ========================================== */
+/* المربعات شفافة وتسمح بالرؤية مع الحفاظ على ظهور أزرار التحكم بوضوح */
 .draggable-box {
     position: absolute;
     background-color: transparent !important;
-    background: transparent !important;
     border: 1px dashed transparent;
     padding: 2px 4px;
     cursor: move;
@@ -278,55 +275,47 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 }
 .draggable-box.config-mode {
     border: 1px dashed #0d9488;
-    background: rgba(255, 255, 255, 0.85) !important; /* خلفية خفيفة فقط أثناء وضع الضبط لترتيب الأماكن */
+    background: rgba(255, 255, 255, 0.9) !important;
 }
 
-/* إجبار كافة النصوص والعناصر الداخلية على الشفافية المطلقة */
-#rxModal *,
-.rx-canvas-container *,
-.rx-patient-details-text,
-.rx-date-text,
-.rx-vitals-text,
-.rx-treatment-wrapper,
-.rx-rx-title,
-.rx-treatment-text {
-    background-color: transparent !important;
-    background: transparent !important;
-}
-
+/* إظهار أزرار التكبير والتصغير (+) و (-) بوضوح تام */
 .box-font-controls {
     display: none;
     gap: 4px;
     margin-bottom: 4px;
     background: #f1f5f9 !important;
-    padding: 2px 6px;
+    padding: 3px 8px;
     border-radius: 6px;
     align-items: center;
     justify-content: space-between;
-    font-size: 0.7rem;
-    color: #0f172a;
+    font-size: 0.75rem;
+    color: #0f172a !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
 .config-mode .box-font-controls {
-    display: flex;
+    display: flex !important;
 }
 .box-font-controls button {
     background: #0d9488 !important;
-    color: white;
+    color: #ffffff !important;
     border: none;
     border-radius: 4px;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     font-weight: bold;
     cursor: pointer;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
-.rx-patient-details-text { color: #b91c1c; font-family: 'Amiri', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; } 
-.rx-date-text { color: #1e293b; font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; border: none !important; padding: 0 !important; }
-.rx-vitals-text { color: #0284c7; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.85rem; line-height: 1.6; direction: ltr; text-align: left; } 
-.rx-treatment-wrapper { direction: ltr; text-align: left; width: 100%; }
-.rx-rx-title { color: #b91c1c; font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-align: left; margin-bottom: 2px; direction: ltr; } 
-.rx-treatment-text { color: #000000; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.05rem; white-space: pre-wrap; text-align: left; direction: ltr; line-height: 1.6; } 
+.rx-patient-details-text { color: #b91c1c; font-family: 'Amiri', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; background: transparent !important; } 
+.rx-date-text { color: #1e293b; font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; background: transparent !important; border: none !important; padding: 0 !important; }
+.rx-vitals-text { color: #0284c7; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.85rem; line-height: 1.6; direction: ltr; text-align: left; background: transparent !important; } 
+.rx-treatment-wrapper { direction: ltr; text-align: left; width: 100%; background: transparent !important; }
+.rx-rx-title { color: #b91c1c; font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.3rem; letter-spacing: 1px; text-align: left; margin-bottom: 2px; direction: ltr; background: transparent !important; } 
+.rx-treatment-text { color: #000000; font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.05rem; white-space: pre-wrap; text-align: left; direction: ltr; line-height: 1.6; background: transparent !important; } 
 
 .footer { text-align: center; padding: 16px; color: #334155; font-size: 0.85rem; font-weight: 700; margin-top: auto; border-top: 1px solid #e2e8f0; background: #f8fafc; flex-shrink: 0; }
 
@@ -347,7 +336,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 }
 
 /* ==========================================
-   إعدادات الطباعة المطلقة (ملء ورقة الطباعة تماماً مثل الـ PDF بدون هوامش)
+   إعدادات الطباعة المطلقة (ملء ورقة الطباعة A4 / A5 تماماً من الحافة للحافة بدون فراغات)
    ========================================== */
 @media print {
     @page {
@@ -430,7 +419,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         top: 0 !important;
         width: 100vw !important;
         height: 100vh !important;
-        object-fit: fill !important;
+        object-fit: fill !important; /* ملء ورقة الطباعة والـ PDF تماماً من الحافة للحافة */
         z-index: 1 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
