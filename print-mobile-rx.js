@@ -1,15 +1,22 @@
 // ==========================================
-// Clinic Master - Mobile RX Print (print-mobile-rx.js)
+// Clinic Master - Mobile RX Print (print-mobile-rx.js) - Fixed Version
 // ==========================================
 
 function printPrescriptionDirectly() {
     const container = document.getElementById('rxCanvasContainer');
     if (container) {
-        let bgImg = container.querySelector('.rx-bg-img');
+        // جلب صورة الترويسة المحفوظة من الـ localStorage وتطبيقها مباشرة على الـ img الخلفية
+        let bgImg = container.querySelector('#rxBgImg') || container.querySelector('.rx-bg-img');
         let savedRxImg = localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
-        if (bgImg && savedRxImg) {
-            bgImg.src = savedRxImg;
-            bgImg.style.display = 'block';
+        
+        if (bgImg) {
+            if (savedRxImg) {
+                bgImg.src = savedRxImg;
+                bgImg.style.display = 'block';
+                bgImg.style.visibility = 'visible';
+            } else {
+                bgImg.style.display = 'none';
+            }
         }
     }
 
