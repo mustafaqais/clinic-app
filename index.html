@@ -139,14 +139,78 @@
             padding: 10px !important;
             text-align: center;
         }
+
+        /* تنسيق الطباعة الصارم لإلغاء أي تشويه في الموبايل والحاسبة */
         @media print {
-            @page { size: auto; margin: 0mm; }
-            body.is-printing-rx * { visibility: hidden !important; }
-            body.is-printing-rx #rxCanvasContainer, body.is-printing-rx #rxCanvasContainer *, body.is-printing-rx #repCanvasContainer, body.is-printing-rx #repCanvasContainer * { visibility: visible !important; }
-            body.is-printing-rx #rxModal, body.is-printing-rx #medicalReportModal { position: fixed !important; left: 0 !important; top: 0 !important; width: 100% !important; height: 100% !important; background: white !important; display: block !important; z-index: 999999 !important; overflow: hidden !important; }
-            body.is-printing-rx #rxCanvasContainer, body.is-printing-rx #repCanvasContainer { position: absolute !important; left: 0 !important; top: 0 !important; width: 100% !important; height: 100% !important; max-width: none !important; max-height: none !important; border: none !important; box-shadow: none !important; margin: 0 !important; transform: none !important; border-radius: 0 !important; }
-            .box-font-controls { display: none !important; }
-            .draggable-box { border: none !important; background: transparent !important; box-shadow: none !important; }
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+            html, body {
+                width: 100% !important;
+                height: 100% !important;
+                background: #ffffff !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+            }
+            body * {
+                visibility: hidden !important;
+            }
+            #rxModal, #rxModal *, #repCanvasContainer, #repCanvasContainer *, #rxCanvasContainer, #rxCanvasContainer * {
+                visibility: visible !important;
+            }
+            #rxModal {
+                position: fixed !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                background: #ffffff !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                z-index: 999999 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+            }
+            #rxModal .modal-body {
+                background: #ffffff !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                max-width: none !important;
+                max-height: none !important;
+                width: 100% !important;
+                height: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }
+            #rxCanvasContainer {
+                position: absolute !important;
+                left: 50% !important;
+                top: 50% !important;
+                transform: translate(-50%, -50%) scale(1) !important;
+                width: 100% !important;
+                max-width: 210mm !important;
+                height: 100% !important;
+                max-height: 297mm !important;
+                border: none !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                border-radius: 0 !important;
+                background: #ffffff !important;
+            }
+            .box-font-controls, button, .modal-header, #rxModeHint, .modal-overlay > div > div:first-child, div[style*="display: flex; justify-content: space-between"] {
+                display: none !important;
+            }
+            .draggable-box {
+                border: none !important;
+                background: transparent !important;
+                box-shadow: none !important;
+            }
         }
     </style>
 </head>
@@ -967,7 +1031,7 @@
                     <i class="fa-brands fa-whatsapp" style="font-size:1.2rem;"></i> مراسلة عبر الواتساب
                 </a>
                 
-                <a href="https://t.me/${telegramUsername}?text=${customMessage}" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background://229ed9; color:white; padding:10px; border-radius:10px; text-decoration:none; font-weight:700; margin-bottom:14px; font-size:0.9rem;">
+                <a href="https://t.me/${telegramUsername}?text=${customMessage}" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:#229ed9; color:white; padding:10px; border-radius:10px; text-decoration:none; font-weight:700; margin-bottom:14px; font-size:0.9rem;">
                     <i class="fa-brands fa-telegram" style="font-size:1.2rem;"></i> مراسلة عبر التليجرام
                 </a>
                 
