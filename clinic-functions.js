@@ -680,7 +680,6 @@ function saveSettingsToCloudAndLocal() {
         };
     });
     
-    // حفظ مفتاح الروشتة الخاص بالجهاز الحالي حصراً
     const rxStorageKey = getRxDeviceStorageKey();
     localStorage.setItem(rxStorageKey, JSON.stringify(rxLayoutData));
     localStorage.setItem('doctor_rx_layout', JSON.stringify(rxLayoutData));
@@ -800,8 +799,10 @@ async function handleAuthSubmit(e) {
                 await loadDoctorBranding(dataOwnerUid);
 
                 document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('activationScreen').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'flex';
+
                 if (isSec) {
-                    document.getElementById('appContainer').style.display = 'flex';
                     document.getElementById('cardPermissions').style.display = 'none';
                     document.getElementById('subStatusBanner').style.display = 'none';
                     isUserSecretary = true;
@@ -813,7 +814,7 @@ async function handleAuthSubmit(e) {
                     checkUserSubscriptionStatus(res.user.uid, false);
                 }
             })
-            .catch(err => alert('خطأ: ' + err.message));
+            .catch(err => alert('خطأ في تسجيل الدخول: ' + err.message));
     }
 }
 
@@ -2116,9 +2117,6 @@ function setRxPaperSize(size) {
     localStorage.setItem('clinic_rx_paper_size', size);
 }
 
-// ==========================================
-// دالة تحديد الجهاز بدقة (موبايل، تابلت/آيباد، أو حاسبة PC) وفصل الذاكرة حصراً
-// ==========================================
 function getRxDeviceStorageKey() {
     const width = window.innerWidth;
     if (width <= 768) {
@@ -2189,23 +2187,33 @@ function loadSavedRxLayout() {
     setRxPaperSize(savedSize);
 }
 
-// ==========================================
-// دوال الطباعة المعزولة والمتوافقة مع مقاسات A4 و A5 (معدلة لتجنب أي هوامش أو نصوص علوية)
-// ==========================================
+// دالة الطباعة المحدثة لضمان تحميل الخلفية وعدم ظهور صفحة بيضاء
 function printPrescriptionDirectly() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
     updateConfigModeUI();
 
     const container = document.getElementById('rxCanvasContainer');
-    const controls = container ? container.querySelectorAll('.box-font-controls') : [];
+    if (!container) return;
+
+    let bgImg = container.querySelector('.rx-bg-img');
+    if (!bgImg && currentDoctorRxImage) {
+        bgImg = document.createElement('img');
+        bgImg.src = currentDoctorRxImage;
+        bgImg.className = 'rx-bg-img';
+        container.insertBefore(bgImg, container.firstChild);
+    }
+
+    const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
     
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
     
-    window.print();
-    
+    setTimeout(() => {
+        window.print();
+    }, 50);
+
     setTimeout(() => {
         document.body.classList.remove('is-printing-rx-only');
         controls.forEach(c => c.style.display = '');
@@ -2336,9 +2344,6 @@ function initDraggableElements() {
     });
 }
 
-// ==========================================
-// التقرير الطبي المطوّر
-// ==========================================
 let repConfigModeActive = false;
 let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
 
