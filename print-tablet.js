@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master - Tablet Print & Touch (print-tablet.js)
-// خاص بأجهزة الآيباد والتابلت
+// خاص بأجهزة الآيباد والتابلت (محدث لمنع القص وضبط الطباعة بدقة)
 // ==========================================
 
 let isTabletConfigMode = false;
@@ -51,20 +51,35 @@ function saveRxLayoutPositions() {
 
 function printPrescriptionDirectly() {
     prepareRxBackground();
+    
+    // إخفاء رمز Rx البرمجي لضمان نظافة الطباعة على التابلت
+    const container = document.getElementById('rxCanvasContainer');
+    const rxSymbol = container ? container.querySelector('#rxDragBoxTreatment div:nth-child(2)') : null;
+    if (rxSymbol) rxSymbol.style.display = 'none';
+
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
+    
     setTimeout(() => { window.print(); }, 500);
-    setTimeout(() => { document.body.classList.remove('is-printing-rx-only'); }, 1500);
+    
+    setTimeout(() => { 
+        document.body.classList.remove('is-printing-rx-only'); 
+        if (rxSymbol) rxSymbol.style.display = '';
+    }, 1500);
 }
 
 function printMedicalReportDirectly() {
     document.body.classList.add('is-printing-report-only');
     document.body.classList.remove('is-printing-rx-only');
+    
     setTimeout(() => { window.print(); }, 500);
-    setTimeout(() => { document.body.classList.remove('is-printing-report-only'); }, 1500);
+    
+    setTimeout(() => { 
+        document.body.classList.remove('is-printing-report-only'); 
+    }, 1500);
 }
 
-// دعم اللمس للآيباد
+// دعم اللمس للآيباد والتابلت لتحريك الصناديق في وضع الضبط
 document.addEventListener('DOMContentLoaded', () => {
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
