@@ -1,3 +1,7 @@
+// ==========================================
+// Clinic Master System - Cloud Ultimate Edition v17.42
+// ==========================================
+
 const firebaseConfig = {
     apiKey: "AIzaSyCgS-TYiCiVIjUrPSkf_z4U837v8LoRUMY",
     authDomain: "mustafaqais-31e2c.firebaseapp.com",
@@ -8,7 +12,11 @@ const firebaseConfig = {
     measurementId: "G-DL042BQE94"
 };
 
-firebase.initializeApp(firebaseConfig);
+// التأكد من عدم تهيئة Firebase أكثر من مرة لمنع توقف التطبيق
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
 const auth = firebase.auth();
 const db = firebase.firestore();
 
@@ -110,7 +118,7 @@ const translations = {
         networkDb: "قاعدة بيانات الشبكة",
         networkDbSub: "المستخدمين وبيانات الدخول",
 
-        footer: "نظام عيادة ماستر المتقدم v17.28",
+        footer: "نظام عيادة ماستر المتقدم v17.42",
 
         patInfoTitle: "المعلومات الشخصية",
         lblPatName: "الاسم الكامل *",
@@ -274,7 +282,7 @@ const translations = {
         networkDb: "Network Database",
         networkDbSub: "Users & credentials",
 
-        footer: "Clinic Master Network v17.28",
+        footer: "Clinic Master Network v17.42",
 
         patInfoTitle: "Personal Information",
         lblPatName: "Full Name *",
