@@ -1,6 +1,6 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.44
-// (الملف الشامل والكامل - مدعوم باللمس للموبايل والأيباد والحاسبة)
+// Clinic Master System - Cloud Ultimate Edition v17.46
+// (الملف الشامل والكامل - تخطيط مستقل ومخصص بالكامل للروشتة والتقرير لكل جهاز: حاسبة، أيباد، موبايل)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1048,7 +1048,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.44",
+        version: "17.46",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2103,16 +2103,53 @@ function setRxPaperSize(size) {
     localStorage.setItem('clinic_rx_paper_size', size);
 }
 
+// دالة تحديد مفتاح تخزين الروشتة لكل جهاز على حدة
+function getRxDeviceStorageKey() {
+    const width = window.innerWidth;
+    if (width <= 768) {
+        return 'doctor_rx_layout_mobile';
+    } else if (width > 768 && width <= 1024) {
+        return 'doctor_rx_layout_tablet';
+    } else {
+        return 'doctor_rx_layout_desktop';
+    }
+}
+
 function saveRxLayoutPositions() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
     updateConfigModeUI();
-    saveSettingsToCloudAndLocal();
-    alert('تم حفظ أماكن وأحجام الراجيتة بنجاح!');
+
+    const rxLayoutData = {};
+    document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
+        rxLayoutData[box.id] = {
+            top: box.style.top,
+            left: box.style.left,
+            fontSize: box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text') ? window.getComputedStyle(box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text')).fontSize : '1rem'
+        };
+    });
+
+    // حفظ تخطيط الروشتة حصرياً للجهاز الحالي
+    const storageKey = getRxDeviceStorageKey();
+    localStorage.setItem(storageKey, JSON.stringify(rxLayoutData));
+    localStorage.setItem('doctor_rx_layout', JSON.stringify(rxLayoutData));
+
+    if (typeof saveSettingsToCloudAndLocal === 'function') {
+        saveSettingsToCloudAndLocal();
+    }
+
+    alert('تم حفظ أماكن وأحجام الروشتة الخاصة بهذا الجهاز (وحده) بنجاح!');
 }
 
 function loadSavedRxLayout() {
-    const savedLayout = JSON.parse(localStorage.getItem('doctor_rx_layout') || '{}');
+    const storageKey = getRxDeviceStorageKey();
+    let savedJson = localStorage.getItem(storageKey);
+    
+    if (!savedJson) {
+        savedJson = localStorage.getItem('doctor_rx_layout');
+    }
+
+    const savedLayout = JSON.parse(savedJson || '{}');
     for (const [boxId, data] of Object.entries(savedLayout)) {
         const box = document.getElementById(boxId);
         if (box && data) {
@@ -2158,6 +2195,7 @@ function openPrescriptionPDF() {
     });
 }
 
+// تفعيل السحب والإفلات الشامل (يدعم الموبايل باللمس والأجهزة الأخرى بالفأرة) للروشتة
 function initDraggableElements() {
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
@@ -2166,6 +2204,7 @@ function initDraggableElements() {
     document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
         box.style.touchAction = 'none';
 
+        // دعم الماوس / Pointer Events
         box.addEventListener('pointerdown', e => {
             if (!isConfigMode || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             activeBox = box;
@@ -2205,14 +2244,61 @@ function initDraggableElements() {
                 }
             }
         });
+
+        // دعم اللمس المباشر Touch Events للروشتة على الموبايل
+        box.addEventListener('touchstart', (e) => {
+            if (!isConfigMode || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            if (e.touches.length === 1 && container) {
+                activeBox = box;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                const cWidth = container.clientWidth;
+                const cHeight = container.clientHeight;
+                initialLeftPct = (box.offsetLeft / cWidth) * 100;
+                initialTopPct = (box.offsetTop / cHeight) * 100;
+                e.stopPropagation();
+            }
+        }, { passive: true });
+
+        box.addEventListener('touchmove', (e) => {
+            if (!activeBox || activeBox !== box || !container) return;
+            if (e.touches.length === 1) {
+                let dx = e.touches[0].clientX - startX;
+                let dy = e.touches[0].clientY - startY;
+                const cWidth = container.clientWidth;
+                const cHeight = container.clientHeight;
+                let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
+                let newTopPct = initialTopPct + (dy / cHeight) * 100;
+                box.style.left = newLeftPct + '%';
+                box.style.top = newTopPct + '%';
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        box.addEventListener('touchend', (e) => {
+            if (activeBox === box) {
+                activeBox = null;
+            }
+        });
     });
 }
 
 // ==========================================
-// دوال التقرير الطبي المستقل والمدعومة باللمس والفأرة بالكامل
+// دوال التقرير الطبي المستقل والمخصص لكل جهاز على حدة (حاسبة، أيباد، موبايل)
 // ==========================================
 let repConfigModeActive = false;
 let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
+
+function getDeviceTypeKey() {
+    const width = window.innerWidth;
+    if (width <= 768) {
+        return 'clinic_rep_layout_mobile'; // للموبايل
+    } else if (width > 768 && width <= 1024) {
+        return 'clinic_rep_layout_tablet'; // للأيباد والتابلت
+    } else {
+        return 'clinic_rep_layout_desktop'; // للحاسبة
+    }
+}
 
 function toggleMedicalReportInputs(visitId) {
     const container = document.getElementById(`repContainer_${visitId}`);
@@ -2353,10 +2439,13 @@ function saveRepLayoutPositions() {
         }
     });
     positions.fontSizes = repFontSizes;
-    localStorage.setItem('clinic_rep_layout_v1', JSON.stringify(positions));
+    
+    // حفظ التخطيط حصرياً في مفتاح هذا الجهاز فقط
+    const storageKey = getDeviceTypeKey();
+    localStorage.setItem(storageKey, JSON.stringify(positions));
     
     loadRepLayoutPositions();
-    alert('تم حفظ أماكن التقرير الطبي والخطوط بنجاح لتكون ثابتة تماماً في المستقبل!');
+    alert('تم حفظ أماكن التقرير الطبي والخطوط الخاصة بهذا الجهاز (وحده) بنجاح!');
     
     if (repConfigModeActive) {
         toggleRepConfigMode();
@@ -2364,7 +2453,13 @@ function saveRepLayoutPositions() {
 }
 
 function loadRepLayoutPositions() {
-    let saved = localStorage.getItem('clinic_rep_layout_v1');
+    const storageKey = getDeviceTypeKey();
+    let saved = localStorage.getItem(storageKey);
+    
+    if (!saved) {
+        saved = localStorage.getItem('clinic_rep_layout_v1');
+    }
+
     if (saved) {
         try {
             let data = JSON.parse(saved);
@@ -2422,7 +2517,7 @@ function printMedicalReportOnly(visitId) {
     }, 300);
 }
 
-// تفعيل السحب والإفلات الشامل (يدعم الموبايل، الأيباد، والحاسبة باللمس والفأرة)
+// تفعيل السحب والإفلات الشامل للتقرير الطبي (يدعم الموبايل، الأيباد، والحاسبة باللمس والفأرة)
 document.addEventListener('DOMContentLoaded', () => {
     const draggableBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
     let activeBox = null;
@@ -2431,7 +2526,6 @@ document.addEventListener('DOMContentLoaded', () => {
     draggableBoxes.forEach(box => {
         box.style.touchAction = 'none';
 
-        // دعم الماوس (Pointer Events)
         box.addEventListener('pointerdown', (e) => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             activeBox = box;
@@ -2460,7 +2554,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // دعم اللمس المباشر للموبايل والأيباد (Touch Events)
         box.addEventListener('touchstart', (e) => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             if (e.touches.length === 1) {
