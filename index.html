@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.42</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.43</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -57,7 +57,7 @@
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
         }
         
-        /* الحاوية القياسية الموحدة للروشتة */
+        /* الحاوية القياسية الموحدة للروشتة والتقرير */
         .rx-canvas-container {
             position: relative !important;
             width: 540px !important;
@@ -126,7 +126,6 @@
             font-size: 0.75rem;
         }
 
-        /* تحجيم شاشة الموبايل فقط لعرض المعاينة بدون التأثير على الحفظ أو الطباعة */
         @media screen and (max-width: 600px) {
             .rx-canvas-container {
                 transform: scale(0.65) !important;
@@ -143,27 +142,45 @@
             text-align: center;
         }
 
-        /* تنسيق الطباعة الصارم والمستقل للحاسبة والموبايل */
+        /* ==========================================================================
+           إعدادات الطباعة المفصولة بالكامل (لكل جهاز ونظام وحاسبة وموبايل وآيباد)
+           ========================================================================== */
         @media print {
             @page {
-                size: A4 portrait;
-                margin: 0;
+                size: portrait;
+                margin: 0mm;
             }
             html, body {
-                width: 100% !important;
-                height: 100% !important;
+                width: 100vw !important;
+                height: 100vh !important;
                 background: #ffffff !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 overflow: hidden !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
             body * {
                 visibility: hidden !important;
             }
-            #rxModal, #rxModal *, #repCanvasContainer, #repCanvasContainer *, #rxCanvasContainer, #rxCanvasContainer * {
+
+            /* حالة طباعة الروشتة فقط */
+            body.is-printing-rx-only #rxModal,
+            body.is-printing-rx-only #rxModal *,
+            body.is-printing-rx-only #rxCanvasContainer,
+            body.is-printing-rx-only #rxCanvasContainer * {
                 visibility: visible !important;
             }
-            #rxModal {
+
+            /* حالة طباعة التقرير الطبي فقط */
+            body.is-printing-report-only #medicalReportModal,
+            body.is-printing-report-only #medicalReportModal *,
+            body.is-printing-report-only #repCanvasContainer,
+            body.is-printing-report-only #repCanvasContainer * {
+                visibility: visible !important;
+            }
+
+            #rxModal, #medicalReportModal {
                 position: fixed !important;
                 left: 0 !important;
                 top: 0 !important;
@@ -178,20 +195,22 @@
                 padding: 0 !important;
                 overflow: hidden !important;
             }
-            #rxModal .modal-body {
+
+            #rxModal .modal-body, #medicalReportModal .modal-body {
                 background: #ffffff !important;
                 box-shadow: none !important;
                 padding: 0 !important;
                 margin: 0 !important;
                 max-width: none !important;
                 max-height: none !important;
-                width: 100% !important;
-                height: 100% !important;
+                width: 100vw !important;
+                height: 100vh !important;
                 display: flex !important;
                 align-items: center !important;
                 justify-content: center !important;
             }
-            #rxCanvasContainer {
+
+            #rxCanvasContainer, #repCanvasContainer {
                 position: absolute !important;
                 left: 50% !important;
                 top: 50% !important;
@@ -204,21 +223,44 @@
                 margin: 0 !important;
                 border-radius: 0 !important;
                 background: #ffffff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
-            /* إخفاء أدوات التحكم نهائياً وجعل البوكسات شفافة ونقية تماماً عند الطباعة */
+
+            /* إجبار ظهور صور الترويسة والخلفية تماماً ودون إخفاء */
+            .rx-bg-img, img.rx-bg-img {
+                display: block !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: fill !important;
+                z-index: 1 !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            .draggable-box {
+                position: absolute !important;
+                z-index: 10 !important;
+                visibility: visible !important;
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 4px !important;
+            }
+
+            /* إخفاء الأزرار وأدوات التحكم تماماً أثناء الطباعة */
             .box-font-controls, 
             button, 
             .modal-header, 
             #rxModeHint, 
-            .modal-overlay > div > div:first-child, 
-            div[style*="display: flex; justify-content: space-between"] {
+            #repModeHint,
+            .modal-overlay > div > div:first-child {
                 display: none !important;
-            }
-            .draggable-box, .config-mode.draggable-box {
-                border: none !important;
-                background: transparent !important;
-                box-shadow: none !important;
-                padding: 4px !important;
             }
         }
     </style>
@@ -841,7 +883,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.42</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.43</div>
     </div>
 </div>
 
@@ -908,7 +950,6 @@
                         <button type="button" onclick="changeBoxFontSize('treatment', 1)">+</button>
                     </div>
                 </div>
-                <!-- رمز Rx أفقي ومتلاصق تماماً -->
                 <div style="font-size: 26px; font-weight: 900; color: #dc2626; font-family: 'Times New Roman', serif; font-style: italic; margin-bottom: 6px; letter-spacing: 0px; display: inline-block;">Rx</div>
                 <div id="rxDragTreatmentText" class="rx-treatment-text" style="font-size: 15px; color: #0f172a; white-space: pre-wrap; line-height: 1.8;"></div>
             </div>
@@ -1006,7 +1047,7 @@
 
 <!-- تحميل السكريبتات الأساسية بالترتيب الصحيح -->
 <script src="config.js"></script>
-<script src="clinic-functions.js?v=17.42"></script>
+<script src="clinic-functions.js?v=17.43"></script>
 
 <!-- أداة Eruda لفحص الأخطاء -->
 <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
