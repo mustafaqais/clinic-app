@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.50
-// (الكود الشامل والكامل - ضبط الطباعة والتوافق التام مع A4 و A5 للحاسبة والموبايل)
+// (محدث: فصل إعدادات الروشتة والخطوط والمواقع بالكامل بين الموبايل، الآيباد، والحاسبة)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -679,6 +679,10 @@ function saveSettingsToCloudAndLocal() {
             fontSize: box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text') ? window.getComputedStyle(box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text')).fontSize : '1rem'
         };
     });
+    
+    // حفظ مفتاح الروشتة الخاص بالجهاز الحالي حصراً
+    const rxStorageKey = getRxDeviceStorageKey();
+    localStorage.setItem(rxStorageKey, JSON.stringify(rxLayoutData));
     localStorage.setItem('doctor_rx_layout', JSON.stringify(rxLayoutData));
 
     if (navigator.onLine) {
@@ -2112,6 +2116,9 @@ function setRxPaperSize(size) {
     localStorage.setItem('clinic_rx_paper_size', size);
 }
 
+// ==========================================
+// دالة تحديد الجهاز بدقة (موبايل، تابلت/آيباد، أو حاسبة PC) وفصل الذاكرة حصراً
+// ==========================================
 function getRxDeviceStorageKey() {
     const width = window.innerWidth;
     if (width <= 768) {
@@ -2154,7 +2161,7 @@ function saveRxLayoutPositions() {
         saveSettingsToCloudAndLocal();
     }
 
-    alert('تم حفظ أماكن وأحجام الروشتة الخاصة بهذا الجهاز بنسب مئوية دقيقة بنجاح!');
+    alert('تم حفظ أماكن وأحجام الروشتة الخاصة بهذا الجهاز فقط وبشكل مستقل بنجاح!');
 }
 
 function loadSavedRxLayout() {
@@ -2335,7 +2342,7 @@ function initDraggableElements() {
 let repConfigModeActive = false;
 let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
 
-function getDeviceTypeKey() {
+function getReportDeviceStorageKey() {
     const width = window.innerWidth;
     if (width <= 768) {
         return 'clinic_rep_layout_mobile';
@@ -2511,11 +2518,11 @@ function saveRepLayoutPositions() {
     });
     positions.fontSizes = repFontSizes;
     
-    const storageKey = getDeviceTypeKey();
+    const storageKey = getReportDeviceStorageKey();
     localStorage.setItem(storageKey, JSON.stringify(positions));
     
     loadRepLayoutPositions();
-    alert('تم حفظ أماكن التقرير الطبي بنسب مئوية دقيقة بنجاح!');
+    alert('تم حفظ أماكن التقرير الطبي الخاصة بهذا الجهاز فقط بنجاح!');
     
     if (repConfigModeActive) {
         toggleRepConfigMode();
@@ -2523,7 +2530,7 @@ function saveRepLayoutPositions() {
 }
 
 function loadRepLayoutPositions() {
-    const storageKey = getDeviceTypeKey();
+    const storageKey = getReportDeviceStorageKey();
     let saved = localStorage.getItem(storageKey);
     
     if (!saved) {
