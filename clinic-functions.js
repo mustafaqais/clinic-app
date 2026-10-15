@@ -1,6 +1,6 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.43
-// (الملف الشامل والكامل - مطبق مع ثبات التقرير الطبي والروشتة)
+// Clinic Master System - Cloud Ultimate Edition v17.44
+// (الملف الشامل والكامل - مدعوم باللمس للموبايل والأيباد والحاسبة)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1048,7 +1048,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.43",
+        version: "17.44",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2209,7 +2209,7 @@ function initDraggableElements() {
 }
 
 // ==========================================
-// دوال التقرير الطبي المستقل والمصححة نهائياً
+// دوال التقرير الطبي المستقل والمدعومة باللمس والفأرة بالكامل
 // ==========================================
 let repConfigModeActive = false;
 let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
@@ -2422,15 +2422,18 @@ function printMedicalReportOnly(visitId) {
     }, 300);
 }
 
+// تفعيل السحب والإفلات الشامل (يدعم الموبايل، الأيباد، والحاسبة باللمس والفأرة)
 document.addEventListener('DOMContentLoaded', () => {
     const draggableBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
     let activeBox = null;
     let startX = 0, startY = 0, initialX = 0, initialY = 0;
 
     draggableBoxes.forEach(box => {
+        box.style.touchAction = 'none';
+
+        // دعم الماوس (Pointer Events)
         box.addEventListener('pointerdown', (e) => {
-            if (!repConfigModeActive) return;
-            if (e.target.tagName === 'BUTTON') return;
+            if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             activeBox = box;
             startX = e.clientX;
             startY = e.clientY;
@@ -2450,7 +2453,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
         box.addEventListener('pointerup', (e) => {
             if (activeBox === box) {
-                box.releasePointerCapture(e.pointerId);
+                if (box.hasPointerCapture(e.pointerId)) {
+                    box.releasePointerCapture(e.pointerId);
+                }
+                activeBox = null;
+            }
+        });
+
+        // دعم اللمس المباشر للموبايل والأيباد (Touch Events)
+        box.addEventListener('touchstart', (e) => {
+            if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            if (e.touches.length === 1) {
+                activeBox = box;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                initialX = box.offsetLeft;
+                initialY = box.offsetTop;
+                e.stopPropagation();
+            }
+        }, { passive: true });
+
+        box.addEventListener('touchmove', (e) => {
+            if (!activeBox || activeBox !== box) return;
+            if (e.touches.length === 1) {
+                let dx = e.touches[0].clientX - startX;
+                let dy = e.touches[0].clientY - startY;
+                box.style.left = (initialX + dx) + 'px';
+                box.style.top = (initialY + dy) + 'px';
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        box.addEventListener('touchend', (e) => {
+            if (activeBox === box) {
                 activeBox = null;
             }
         });
