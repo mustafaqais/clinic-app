@@ -1,6 +1,6 @@
 /* ==========================================
    Clinic Master System - Cloud Ultimate Edition
-   style.css (نسخة نهائية متوازنة: موبايل مرتب جنباً إلى جنب + حاسبة واسعة + روشطة من الحافة للحافة)
+   style.css (نسخة شاملة: حاسبة واسعة + موبايل مرتب جنباً إلى جنب + طباعة التقرير والروشتة 100% من الحافة للحافة)
    ========================================== */
 
 * {
@@ -23,7 +23,7 @@ body {
     padding: 0;
 }
 
-/* الحاوية: تملأ شاشة الحاسبة بالكامل، وتأخذ شكل الموبايل المنظم على الشاشات الصغيره */
+/* الحاوية: تملأ شاشة الحاسبة بالكامل، وتأخذ شكل الموبايل المنظم على الشاشات الصغيرة */
 .mobile-container {
     width: 100% !important;
     max-width: 100% !important;
@@ -330,7 +330,7 @@ body {
     gap: 6px;
 }
 
-/* شبكة الأيقونات والبطاقات: 3 أعمدة على الحاسبة، وتعود عمودين (جنب لجنب) على الموبايل */
+/* شبكة الأيقونات والبطاقات: 3 أعمدة على الحاسبة، وعمودين جنباً إلى جنب على الموبايل */
 .menu-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -339,7 +339,7 @@ body {
 
 @media (max-width: 900px) {
     .menu-grid {
-        grid-template-columns: repeat(2, 1fr); /* عمودين جنباً إلى جنب على الشاشات المتوسطة والموبايل */
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
@@ -841,7 +841,7 @@ body.dark-mode .input-wrapper textarea {
 }
 
 /* ==========================================
-   إعدادات الطباعة المطلقة (ملء ورقة A4 / A5 تماماً 100% من الحافة للحافة)
+   إعدادات الطباعة الشاملة للروشتة والتقرير الطبي المستقل (ملء الورقة 100% من الحافة للحافة)
    ========================================== */
 @media print {
     @page {
@@ -858,7 +858,8 @@ body.dark-mode .input-wrapper textarea {
         overflow: hidden !important;
     }
 
-    body > *:not(#rxModal) {
+    /* إخفاء كل أجزاء التطبيق ما عدا نافذة الروشتة أو التقرير الطبي المفتوحة حالياً */
+    body > *:not(#rxModal):not(#medicalReportModal) {
         display: none !important;
     }
 
@@ -866,6 +867,7 @@ body.dark-mode .input-wrapper textarea {
         visibility: hidden !important;
     }
 
+    /* إظهار محتويات الروشتة إذا كانت هي المفعلة */
     #rxModal,
     #rxModal *,
     .rx-canvas-container,
@@ -879,7 +881,20 @@ body.dark-mode .input-wrapper textarea {
         visibility: visible !important;
     }
 
-    #rxModal {
+    /* إظهار محتويات التقرير الطبي المستقل إذا كان هو المفعل */
+    #medicalReportModal,
+    #medicalReportModal *,
+    #repCanvasContainer,
+    #repCanvasContainer *,
+    #repBgImg,
+    #repPatientText,
+    #repTitleText,
+    #repToText,
+    #repDetailsText {
+        visibility: visible !important;
+    }
+
+    #rxModal, #medicalReportModal {
         position: fixed !important;
         left: 0 !important;
         top: 0 !important;
@@ -896,7 +911,7 @@ body.dark-mode .input-wrapper textarea {
         display: block !important;
     }
 
-    #rxModal .modal-body {
+    #rxModal .modal-body, #medicalReportModal .modal-body {
         position: absolute !important;
         left: 0 !important;
         top: 0 !important;
@@ -935,7 +950,7 @@ body.dark-mode .input-wrapper textarea {
         height: 100vh !important;
         max-width: none !important;
         max-height: none !important;
-        object-fit: fill !important; /* تغطية كامل الورقة من الحافة للحافة */
+        object-fit: fill !important; /* ملء ورقة الطباعة بنسبة 100% من الحافة للحافة */
         z-index: 1 !important;
         display: block !important;
         -webkit-print-color-adjust: exact !important;
@@ -954,7 +969,9 @@ body.dark-mode .input-wrapper textarea {
     .box-font-controls,
     .modal-header,
     #rxSaveLayoutBtn,
+    #repSaveLayoutBtn,
     #rxModeHint,
+    #repModeHint,
     .btn-main,
     .modal-close,
     div[style*="display: flex; justify-content: space-between"] {
