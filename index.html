@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.43</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.51</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -57,7 +57,6 @@
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
         }
         
-        /* الحاوية القياسية الموحدة للروشتة والتقرير */
         .rx-canvas-container {
             position: relative !important;
             width: 540px !important;
@@ -143,7 +142,7 @@
         }
 
         /* ==========================================================================
-           إعدادات الطباعة المفصولة بالكامل (لكل جهاز ونظام وحاسبة وموبايل وآيباد)
+           إعدادات الطباعة المفصولة بالكامل (حاسبة، آيباد، وموبايل)
            ========================================================================== */
         @media print {
             @page {
@@ -164,7 +163,6 @@
                 visibility: hidden !important;
             }
 
-            /* حالة طباعة الروشتة فقط */
             body.is-printing-rx-only #rxModal,
             body.is-printing-rx-only #rxModal *,
             body.is-printing-rx-only #rxCanvasContainer,
@@ -172,7 +170,6 @@
                 visibility: visible !important;
             }
 
-            /* حالة طباعة التقرير الطبي فقط */
             body.is-printing-report-only #medicalReportModal,
             body.is-printing-report-only #medicalReportModal *,
             body.is-printing-report-only #repCanvasContainer,
@@ -227,7 +224,6 @@
                 print-color-adjust: exact !important;
             }
 
-            /* إجبار ظهور صور الترويسة والخلفية تماماً ودون إخفاء */
             .rx-bg-img, img.rx-bg-img {
                 display: block !important;
                 position: absolute !important;
@@ -253,7 +249,6 @@
                 padding: 4px !important;
             }
 
-            /* إخفاء الأزرار وأدوات التحكم تماماً أثناء الطباعة */
             .box-font-controls, 
             button, 
             .modal-header, 
@@ -883,7 +878,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.43</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.51</div>
     </div>
 </div>
 
@@ -1047,7 +1042,23 @@
 
 <!-- تحميل السكريبتات الأساسية بالترتيب الصحيح -->
 <script src="config.js"></script>
-<script src="clinic-functions.js?v=17.43"></script>
+<script src="clinic-functions.js?v=17.51"></script>
+
+<!-- تحميل ملفات الطباعة والتحكم المستقلة بحسب نوع الجهاز (استدعاء ذكي) -->
+<script src="print-core.js"></script>
+<script>
+    const screenWidth = window.innerWidth;
+    const printScript = document.createElement('script');
+
+    if (screenWidth <= 768) {
+        printScript.src = "print-mobile.js"; // للهواتف الذكية (آيفون وأندرويد)
+    } else if (screenWidth > 768 && screenWidth <= 1024) {
+        printScript.src = "print-tablet.js"; // لأجهزة الآيباد والتابلت
+    } else {
+        printScript.src = "print-desktop.js"; // للحاسبة المكتبية
+    }
+    document.body.appendChild(printScript);
+</script>
 
 <!-- أداة Eruda لفحص الأخطاء -->
 <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
