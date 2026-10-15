@@ -1,6 +1,6 @@
 /* ==========================================
    Clinic Master System - Cloud Ultimate Edition
-   الملف الشامل لتنسيقات الـ CSS (مع تعديل الطباعة الشامل)
+   الملف الشامل لتنسيقات الـ CSS والطباعة المعزولة
    ========================================== */
 
 * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
@@ -156,7 +156,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 .btn-med-history { width: 100%; background: #f0fdfa; color: #0d9488; border: 1.5px dashed #0d9488; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .btn-bmi-trigger { width: 100%; background: #f0f9ff; color: #0284c7; border: 1.5px dashed #0284c7; border-radius: 12px; padding: 10px 14px; font-size: 0.88rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 
-.medical-history-preview-card { background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 12px; padding: 12px; margin-bottom: 12px; font-size: 0.82rem; color: #0f766e; line-height: 1.5; }
+.medical-history-preview-card { background: #f0fdfa; border: 1.5px solid #99f6e4; border-radius: 12px; padding: 12px; margin-bottom: 12px; font-size: 0.82rem; color: #0f766e; line-height: 1.5; }
 .medical-history-preview-card strong { color: #0f172a; }
 
 .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
@@ -326,10 +326,10 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 }
 
 /* ==========================================
-   إعدادات الطباعة النهائية والمعزولة (للحاسبة والموبايل - ملء ورقة A4 / A5 بالكامل بدون قص)
+   إعدادات الطباعة النهائية والمعزولة (للحاسبة والموبايل - ملء صفحة A4 / A5 تماماً وبدون أشرطة تمرير)
    ========================================== */
 @media print {
-    /* إخفاء كافة محتويات التطبيق افتراضياً وجعلها مخفية تماماً */
+    /* إلغاء واختفاء كافة عناصر الصفحة افتراضياً */
     body > *:not(#rxModal) {
         display: none !important;
         visibility: hidden !important;
@@ -339,7 +339,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         visibility: hidden !important;
     }
 
-    /* إظهار نافذة الراشيتة وحاويتها الداخلية وعناصرها بالكامل فقط */
+    /* إظهار نافذة الراشيتة ومحتوياتها بالكامل فقط */
     #rxModal,
     #rxModal *,
     .rx-canvas-container,
@@ -353,30 +353,22 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
     .rx-rx-title,
     .rx-treatment-text {
         visibility: visible !important;
-    }
-
-    /* إلغاء الـ display: none عن حاوية الراشيتة وعناصرها لضمان طباعتها */
-    #rxModal,
-    .rx-canvas-container,
-    .rx-bg-img,
-    .draggable-box,
-    .rx-patient-details-text,
-    .rx-date-text,
-    .rx-vitals-text,
-    .rx-treatment-wrapper,
-    .rx-rx-title,
-    .rx-treatment-text {
         display: block !important;
         opacity: 1 !important;
     }
 
-    /* تثبيت صفحة بيضاء نظيفة تغطي ورقة الطباعة بالكامل بدون أي هوامش */
-    body {
+    /* تثبيت الصفحة بالكامل وملء ورقة الطباعة تماماً بدون هوامش أو أشرطة تمرير */
+    @page {
+        size: auto;
+        margin: 0mm;
+    }
+
+    html, body {
         background: #ffffff !important;
         margin: 0 !important;
         padding: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
+        width: 100vw !important;
+        height: 100vh !important;
         overflow: hidden !important;
     }
 
@@ -386,8 +378,8 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         top: 0 !important;
         width: 100vw !important;
         height: 100vh !important;
-        max-width: 100% !important;
-        max-height: 100% !important;
+        max-width: 100vw !important;
+        max-height: 100vh !important;
         margin: 0 !important;
         padding: 0 !important;
         background: #ffffff !important;
@@ -404,8 +396,10 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         position: absolute !important;
         left: 0 !important;
         top: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        max-width: 100% !important;
+        max-height: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
         border: none !important;
@@ -416,7 +410,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         print-color-adjust: exact !important;
     }
 
-    /* استخدام fill لضمان تمدد صورة الراشيتة لتملأ الورقة بالكامل بدون قص من الأعلى أو الأسفل */
+    /* جعل الصورة تملأ الصفحة بالكامل 100% عرضاً وارتفاعاً بدون أي قص أو أشرطة */
     .rx-bg-img {
         position: absolute !important;
         left: 0 !important;
@@ -437,7 +431,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         box-shadow: none !important;
     }
 
-    /* إخفاء تام وصريح لكل الأزرار، أدوات التحكم، ومربعات الحوار أثناء الطباعة */
+    /* إخفاء الأزرار وأدوات التحكم تماماً */
     button,
     .box-font-controls,
     .modal-header,
