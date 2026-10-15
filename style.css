@@ -1,6 +1,6 @@
 /* ==========================================
    Clinic Master System - Cloud Ultimate Edition
-   تنسيقات الـ CSS (النسخة النهائية - معالجة الطباعة الشاملة، وضوح النصوص، والتوسيط)
+   تنسيقات الـ CSS (النسخة النهائية - معالجة الطباعة الشاملة ووضوح النصوص)
    ========================================== */
 
 * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
@@ -263,9 +263,6 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
     pointer-events: none;
 }
 
-/* ==========================================
-   توحيد شكل جميع البوكسات (الاسم، التاريخ، العلامات، العلاج)
-   ========================================== */
 .draggable-box {
     position: absolute;
     background-color: transparent !important;
@@ -354,11 +351,11 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 }
 
 /* ==========================================
-   إعدادات الطباعة الشاملة والدقيقة (معالجة صفحة بيضاء، التوسيط، ووضوح النصوص الحبرية)
+   إعدادات الطباعة الشاملة والدقيقة (ملء الورقة بالكامل من الحافة للحافة بدون هوامش)
    ========================================== */
 @media print {
     @page {
-        size: portrait;
+        size: auto;
         margin: 0 !important;
     }
 
@@ -371,7 +368,6 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         visibility: hidden !important;
     }
 
-    /* إظهار نافذة الروشتة أو نافذة التقرير الطبي حصراً ومحتوياتها بالكامل دون إخفاء */
     #rxModal, #rxModal *, #medicalReportModal, #medicalReportModal * {
         visibility: visible !important;
     }
@@ -385,7 +381,6 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         overflow: hidden !important;
     }
 
-    /* تثبيت المودال والـ Container في منتصف ورقة الطابعة تماماً */
     #rxModal, #medicalReportModal {
         position: fixed !important;
         left: 0 !important;
@@ -393,13 +388,10 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         width: 100vw !important;
         height: 100vh !important;
         background: #ffffff !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
         z-index: 999999 !important;
         margin: 0 !important;
         padding: 0 !important;
-        overflow: hidden !important;
+        display: block !important;
     }
 
     #rxModal .modal-body, #medicalReportModal .modal-body {
@@ -407,23 +399,22 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         box-shadow: none !important;
         padding: 0 !important;
         margin: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
+        width: 100vw !important;
+        height: 100vh !important;
         max-width: none !important;
         max-height: none !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
+        display: block !important;
     }
 
+    /* جعل الحاوية تملأ الشاشة والورقة بالكامل 100% */
     #rxCanvasContainer, #repCanvasContainer {
         position: absolute !important;
-        left: 50% !important;
-        top: 50% !important;
-        transform: translate(-50%, -50%) scale(1) !important;
-        width: 540px !important;
-        height: 765px !important;
-        min-height: 765px !important;
+        left: 0 !important;
+        top: 0 !important;
+        transform: none !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        min-height: 100vh !important;
         border: none !important;
         box-shadow: none !important;
         margin: 0 !important;
@@ -433,34 +424,39 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         print-color-adjust: exact !important;
     }
 
+    /* تمدد صورة الخلفية لتمتلئ بها ورقة الطباعة والـ PDF تماماً من الحافة للحافة */
     .rx-bg-img, .rep-bg-img {
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        object-fit: fill !important;
+        z-index: 1 !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
     }
 
-    /* إجبار المتصفح على طباعة النصوص بداكن حبري كامل (غير شفافة وغير رصاصية) */
-    .draggable-box, .config-mode.draggable-box {
-        border: none !important;
+    .draggable-box {
+        position: absolute !important;
+        z-index: 10 !important;
         background: transparent !important;
-        box-shadow: none !important;
-        padding: 4px !important;
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
+        border: none !important;
     }
 
-    .rx-patient-details-text, #repPatientText { color: #b91c1c !important; font-weight: 800 !important; opacity: 1 !important; -webkit-text-fill-color: #b91c1c !important; }
-    .rx-date-text { color: #1e293b !important; font-weight: 800 !important; opacity: 1 !important; -webkit-text-fill-color: #1e293b !important; }
-    .rx-vitals-text { color: #0284c7 !important; font-weight: 800 !important; opacity: 1 !important; -webkit-text-fill-color: #0284c7 !important; }
-    .rx-treatment-text, #repDetailsText, #repTitleText, #repToText { color: #000000 !important; font-weight: 700 !important; opacity: 1 !important; -webkit-text-fill-color: #000000 !important; }
+    /* وضوح وثبات النصوص الحبرية تماماً */
+    .rx-patient-details-text, #repPatientText { color: #b91c1c !important; font-weight: 800 !important; -webkit-text-fill-color: #b91c1c !important; }
+    .rx-date-text { color: #1e293b !important; font-weight: 800 !important; -webkit-text-fill-color: #1e293b !important; }
+    .rx-vitals-text { color: #0284c7 !important; font-weight: 800 !important; -webkit-text-fill-color: #0284c7 !important; }
+    .rx-treatment-text, #repDetailsText, #repTitleText, #repToText { color: #000000 !important; font-weight: 700 !important; -webkit-text-fill-color: #000000 !important; }
 
-    /* إخفاء أدوات التحكم والأزرار تماماً وقت الطباعة */
+    /* إخفاء الأزرار وأدوات التحكم تماماً وقت الطباعة */
     .box-font-controls, 
     button, 
     .modal-header, 
     #rxModeHint, 
     #repModeHint,
-    .modal-overlay > div > div:first-child, 
-    div[style*="display: flex; justify-content: space-between"] {
+    .modal-overlay {
         display: none !important;
         visibility: hidden !important;
     }
