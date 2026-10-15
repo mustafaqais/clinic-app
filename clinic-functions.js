@@ -2362,6 +2362,7 @@ function loadRepLayoutPositions() {
             for (let id in data) {
                 const el = document.getElementById(id);
                 if (el && data[id]) {
+                    // استعادة الإحداثيات المحفوظة بدقة تامة للصناديق
                     if (data[id].top) el.style.top = data[id].top;
                     if (data[id].left) el.style.left = data[id].left;
                     if (data[id].width) el.style.width = data[id].width;
@@ -2372,7 +2373,9 @@ function loadRepLayoutPositions() {
             if (document.getElementById('repTitleText')) document.getElementById('repTitleText').style.fontSize = (repFontSizes.title || 16) + 'px';
             if (document.getElementById('repToText')) document.getElementById('repToText').style.fontSize = (repFontSizes.to || 15) + 'px';
             if (document.getElementById('repDetailsText')) document.getElementById('repDetailsText').style.fontSize = (repFontSizes.details || 15) + 'px';
-        } catch(e) {}
+        } catch(e) {
+            console.log("Error loading rep layout:", e);
+        }
     }
 }
 
