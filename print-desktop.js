@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master - Desktop Print & Drag (print-desktop.js)
-// خاص بالحاسبات المكتبية والشاشات الكبيرة
+// خاص بالحاسبات المكتبية والشاشات الكبيرة (محدث لمنع القص وملء الورقة)
 // ==========================================
 
 let isConfigMode = false;
@@ -76,6 +76,10 @@ function printPrescriptionDirectly() {
     const controls = container ? container.querySelectorAll('.box-font-controls') : [];
     controls.forEach(c => c.style.display = 'none');
 
+    // إخفاء رمز Rx البرمجي نهائياً أثناء الطباعة لضمان نظافة الورقة
+    const rxSymbol = container ? container.querySelector('#rxDragBoxTreatment div:nth-child(2)') : null;
+    if (rxSymbol) rxSymbol.style.display = 'none';
+
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
 
@@ -84,6 +88,7 @@ function printPrescriptionDirectly() {
     setTimeout(() => {
         document.body.classList.remove('is-printing-rx-only');
         controls.forEach(c => c.style.display = '');
+        if (rxSymbol) rxSymbol.style.display = '';
     }, 1500);
 }
 
