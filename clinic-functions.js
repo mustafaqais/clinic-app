@@ -1,6 +1,6 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.46
-// (الملف الشامل والكامل - تخطيط مستقل ومخصص بالكامل للروشتة والتقرير لكل جهاز: حاسبة، أيباد، موبايل)
+// Clinic Master System - Cloud Ultimate Edition v17.47
+// (الملف الشامل والكامل - استقلالية تامة ونسب مئوية دقيقة لكل جهاز: حاسبة، أيباد، موبايل على كافة المتصفحات)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -662,11 +662,20 @@ function saveSettingsToCloudAndLocal() {
     localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
     localStorage.setItem('clinic_specialty_config', JSON.stringify(specialtyConfig));
 
+    const container = document.getElementById('rxCanvasContainer');
+    const cWidth = container ? container.clientWidth : 1;
+    const cHeight = container ? container.clientHeight : 1;
+
     const rxLayoutData = {};
     document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
+        const leftPct = (box.offsetLeft / cWidth) * 100;
+        const topPct = (box.offsetTop / cHeight) * 100;
+        const widthPct = (box.offsetWidth / cWidth) * 100;
+
         rxLayoutData[box.id] = {
-            top: box.style.top,
-            left: box.style.left,
+            top: topPct + '%',
+            left: leftPct + '%',
+            width: widthPct + '%',
             fontSize: box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text') ? window.getComputedStyle(box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text')).fontSize : '1rem'
         };
     });
@@ -1048,7 +1057,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.46",
+        version: "17.47",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2103,7 +2112,7 @@ function setRxPaperSize(size) {
     localStorage.setItem('clinic_rx_paper_size', size);
 }
 
-// دالة تحديد مفتاح تخزين الروشتة لكل جهاز على حدة
+// دالة تحديد مفتاح تخزين الروشتة لكل جهاز على حدة (متطابقة على كافة المتصفحات)
 function getRxDeviceStorageKey() {
     const width = window.innerWidth;
     if (width <= 768) {
@@ -2120,16 +2129,24 @@ function saveRxLayoutPositions() {
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
     updateConfigModeUI();
 
+    const container = document.getElementById('rxCanvasContainer');
+    const cWidth = container ? container.clientWidth : 1;
+    const cHeight = container ? container.clientHeight : 1;
+
     const rxLayoutData = {};
     document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
+        const leftPct = (box.offsetLeft / cWidth) * 100;
+        const topPct = (box.offsetTop / cHeight) * 100;
+        const widthPct = (box.offsetWidth / cWidth) * 100;
+
         rxLayoutData[box.id] = {
-            top: box.style.top,
-            left: box.style.left,
+            top: topPct + '%',
+            left: leftPct + '%',
+            width: widthPct + '%',
             fontSize: box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text') ? window.getComputedStyle(box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text')).fontSize : '1rem'
         };
     });
 
-    // حفظ تخطيط الروشتة حصرياً للجهاز الحالي
     const storageKey = getRxDeviceStorageKey();
     localStorage.setItem(storageKey, JSON.stringify(rxLayoutData));
     localStorage.setItem('doctor_rx_layout', JSON.stringify(rxLayoutData));
@@ -2138,7 +2155,7 @@ function saveRxLayoutPositions() {
         saveSettingsToCloudAndLocal();
     }
 
-    alert('تم حفظ أماكن وأحجام الروشتة الخاصة بهذا الجهاز (وحده) بنجاح!');
+    alert('تم حفظ أماكن وأحجام الروشتة الخاصة بهذا الجهاز بنسب مئوية دقيقة بنجاح!');
 }
 
 function loadSavedRxLayout() {
@@ -2155,6 +2172,7 @@ function loadSavedRxLayout() {
         if (box && data) {
             if (data.top) box.style.top = data.top;
             if (data.left) box.style.left = data.left;
+            if (data.width) box.style.width = data.width;
             if (data.fontSize) {
                 const textEl = box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text');
                 if (textEl) textEl.style.fontSize = data.fontSize;
@@ -2166,6 +2184,10 @@ function loadSavedRxLayout() {
 }
 
 function printPrescriptionDirectly() {
+    isConfigMode = false;
+    document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
+    updateConfigModeUI();
+
     const container = document.getElementById('rxCanvasContainer');
     const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
@@ -2180,6 +2202,10 @@ function printPrescriptionDirectly() {
 }
 
 function openPrescriptionPDF() {
+    isConfigMode = false;
+    document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
+    updateConfigModeUI();
+
     const container = document.getElementById('rxCanvasContainer');
     const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
@@ -2204,7 +2230,6 @@ function initDraggableElements() {
     document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
         box.style.touchAction = 'none';
 
-        // دعم الماوس / Pointer Events
         box.addEventListener('pointerdown', e => {
             if (!isConfigMode || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             activeBox = box;
@@ -2245,7 +2270,6 @@ function initDraggableElements() {
             }
         });
 
-        // دعم اللمس المباشر Touch Events للروشتة على الموبايل
         box.addEventListener('touchstart', (e) => {
             if (!isConfigMode || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             if (e.touches.length === 1 && container) {
@@ -2284,7 +2308,7 @@ function initDraggableElements() {
 }
 
 // ==========================================
-// دوال التقرير الطبي المستقل والمخصص لكل جهاز على حدة (حاسبة، أيباد، موبايل)
+// دوال التقرير الطبي المستقل والمخصص لكل جهاز على حدة (نسب مئوية متطابقة)
 // ==========================================
 let repConfigModeActive = false;
 let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
@@ -2292,11 +2316,11 @@ let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
 function getDeviceTypeKey() {
     const width = window.innerWidth;
     if (width <= 768) {
-        return 'clinic_rep_layout_mobile'; // للموبايل
+        return 'clinic_rep_layout_mobile';
     } else if (width > 768 && width <= 1024) {
-        return 'clinic_rep_layout_tablet'; // للأيباد والتابلت
+        return 'clinic_rep_layout_tablet';
     } else {
-        return 'clinic_rep_layout_desktop'; // للحاسبة
+        return 'clinic_rep_layout_desktop';
     }
 }
 
@@ -2427,25 +2451,32 @@ function changeRepBoxFontSize(boxKey, delta) {
 
 function saveRepLayoutPositions() {
     let positions = {};
+    const container = document.getElementById('repCanvasContainer');
+    const cWidth = container ? container.clientWidth : 1;
+    const cHeight = container ? container.clientHeight : 1;
+
     const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
     boxes.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
+            const leftPct = (el.offsetLeft / cWidth) * 100;
+            const topPct = (el.offsetTop / cHeight) * 100;
+            const widthPct = (el.offsetWidth / cWidth) * 100;
+
             positions[id] = {
-                top: el.style.top || (el.offsetTop + 'px'),
-                left: el.style.left || (el.offsetLeft + 'px'),
-                width: el.style.width || (el.offsetWidth + 'px')
+                top: topPct + '%',
+                left: leftPct + '%',
+                width: widthPct + '%'
             };
         }
     });
     positions.fontSizes = repFontSizes;
     
-    // حفظ التخطيط حصرياً في مفتاح هذا الجهاز فقط
     const storageKey = getDeviceTypeKey();
     localStorage.setItem(storageKey, JSON.stringify(positions));
     
     loadRepLayoutPositions();
-    alert('تم حفظ أماكن التقرير الطبي والخطوط الخاصة بهذا الجهاز (وحده) بنجاح!');
+    alert('تم حفظ أماكن التقرير الطبي بنسب مئوية دقيقة بنجاح!');
     
     if (repConfigModeActive) {
         toggleRepConfigMode();
@@ -2467,17 +2498,9 @@ function loadRepLayoutPositions() {
             boxes.forEach(id => {
                 const el = document.getElementById(id);
                 if (el && data[id]) {
-                    if (data[id].top) {
-                        el.style.top = data[id].top;
-                        if (!data[id].top.includes('px') && !data[id].top.includes('%')) el.style.top += 'px';
-                    }
-                    if (data[id].left) {
-                        el.style.left = data[id].left;
-                        if (!data[id].left.includes('px') && !data[id].left.includes('%')) el.style.left += 'px';
-                    }
-                    if (data[id].width) {
-                        el.style.width = data[id].width;
-                    }
+                    if (data[id].top) el.style.top = data[id].top;
+                    if (data[id].left) el.style.left = data[id].left;
+                    if (data[id].width) el.style.width = data[id].width;
                 }
             });
             if (data.fontSizes) {
@@ -2517,11 +2540,12 @@ function printMedicalReportOnly(visitId) {
     }, 300);
 }
 
-// تفعيل السحب والإفلات الشامل للتقرير الطبي (يدعم الموبايل، الأيباد، والحاسبة باللمس والفأرة)
+// تفعيل السحب والإفلات الشامل للتقرير الطبي
 document.addEventListener('DOMContentLoaded', () => {
     const draggableBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
     let activeBox = null;
     let startX = 0, startY = 0, initialX = 0, initialY = 0;
+    const container = document.getElementById('repCanvasContainer');
 
     draggableBoxes.forEach(box => {
         box.style.touchAction = 'none';
@@ -2538,11 +2562,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         box.addEventListener('pointermove', (e) => {
-            if (!activeBox || activeBox !== box) return;
+            if (!activeBox || activeBox !== box || !container) return;
             let dx = e.clientX - startX;
             let dy = e.clientY - startY;
-            box.style.left = (initialX + dx) + 'px';
-            box.style.top = (initialY + dy) + 'px';
+            const cWidth = container.clientWidth;
+            const cHeight = container.clientHeight;
+            let newLeftPct = ((initialX + dx) / cWidth) * 100;
+            let newTopPct = ((initialY + dy) / cHeight) * 100;
+            box.style.left = newLeftPct + '%';
+            box.style.top = newTopPct + '%';
         });
 
         box.addEventListener('pointerup', (e) => {
@@ -2556,7 +2584,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         box.addEventListener('touchstart', (e) => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            if (e.touches.length === 1) {
+            if (e.touches.length === 1 && container) {
                 activeBox = box;
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
@@ -2567,12 +2595,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { passive: true });
 
         box.addEventListener('touchmove', (e) => {
-            if (!activeBox || activeBox !== box) return;
+            if (!activeBox || activeBox !== box || !container) return;
             if (e.touches.length === 1) {
                 let dx = e.touches[0].clientX - startX;
                 let dy = e.touches[0].clientY - startY;
-                box.style.left = (initialX + dx) + 'px';
-                box.style.top = (initialY + dy) + 'px';
+                const cWidth = container.clientWidth;
+                const cHeight = container.clientHeight;
+                let newLeftPct = ((initialX + dx) / cWidth) * 100;
+                let newTopPct = ((initialY + dy) / cHeight) * 100;
+                box.style.left = newLeftPct + '%';
+                box.style.top = newTopPct + '%';
                 e.preventDefault();
             }
         }, { passive: false });
