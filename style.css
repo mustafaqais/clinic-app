@@ -1,6 +1,6 @@
 /* ==========================================
    Clinic Master System - Cloud Ultimate Edition
-   style.css (محدث لضبط الطباعة وملء الورقة 100%)
+   style.css (معدل: شاشة واسعة على الحاسبة + الحفاظ على تعديلات الروشتة)
    ========================================== */
 
 * {
@@ -21,22 +21,24 @@ body {
     min-height: 100vh;
 }
 
+/* الحاوية المتجاوبة: عریض على الحاسبة، ومرن على الموبايل */
 .mobile-container {
     width: 100%;
-    max-width: 480px;
+    max-width: 1200px; /* تم توسيع العرض بالحاسبة ليعود لشاشته الطبيعية والواسعة */
     height: 100vh;
-    max-height: 950px;
+    max-height: 98vh;
     background: #f8fafc;
     display: flex;
     flex-direction: column;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    border-radius: 20px;
+    border-radius: 16px;
     overflow: hidden;
     position: relative;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
     .mobile-container {
+        max-width: 480px;
         height: 100vh;
         max-height: none;
         border-radius: 0;
@@ -163,7 +165,7 @@ body {
 .content {
     flex: 1;
     overflow-y: auto;
-    padding: 14px;
+    padding: 16px;
     background: #f1f5f9;
 }
 
@@ -327,14 +329,20 @@ body {
 
 .menu-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(3, 1fr); /* شبكة واسعة ومريحة على الحاسبة */
+    gap: 12px;
+}
+
+@media (max-width: 768px) {
+    .menu-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .menu-card {
     background: white;
     border-radius: 14px;
-    padding: 12px;
+    padding: 14px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -390,7 +398,7 @@ body {
 .group-card {
     background: white;
     border-radius: 14px;
-    padding: 14px;
+    padding: 16px;
     margin-bottom: 14px;
     border: 1px solid #e2e8f0;
 }
@@ -420,9 +428,15 @@ body {
 
 .analytics-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
     margin-bottom: 14px;
+}
+
+@media (max-width: 768px) {
+    .analytics-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .analytics-box {
@@ -519,7 +533,7 @@ body {
 .visit-card {
     background: white;
     border-radius: 14px;
-    padding: 14px;
+    padding: 16px;
     margin-bottom: 14px;
     border: 1px solid #cbd5e1;
     box-shadow: 0 3px 10px rgba(0,0,0,0.03);
@@ -823,7 +837,7 @@ body.dark-mode .input-wrapper textarea {
 }
 
 /* ==========================================
-   إعدادات الطباعة المطلقة في ملف الـ CSS (ملء ورقة الطباعة 100% من الحافة للحافة A4 & A5)
+   إعدادات الطباعة المطلقة (ملء ورقة A4 / A5 تماماً 100% من الحافة للحافة)
    ========================================== */
 @media print {
     @page {
@@ -917,7 +931,7 @@ body.dark-mode .input-wrapper textarea {
         height: 100vh !important;
         max-width: none !important;
         max-height: none !important;
-        object-fit: fill !important; /* لملء ورقة الطباعة والـ PDF بنسبة 100% من الحافة للحافة */
+        object-fit: fill !important; /* تغطية كامل الورقة من الحافة للحافة */
         z-index: 1 !important;
         display: block !important;
         -webkit-print-color-adjust: exact !important;
