@@ -1,6 +1,6 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.50
-// (محدث: إصلاح طباعة الروشتة ومنع الورقة البيضاء وتأكيد تحميل ترويسة الصورة على جميع الأجهزة)
+// Clinic Master System - Cloud Ultimate Edition v17.51
+// (محدث: فصل طباعة الروشتة عن التقرير الطبي، وفصل إعدادات الأجهزة: حاسبة، آيباد، وموبايل)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1062,7 +1062,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.50",
+        version: "17.51",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2188,7 +2188,7 @@ function loadSavedRxLayout() {
     setRxPaperSize(savedSize);
 }
 
-// دالة طباعة الروشتة المُصححة والمُحسنة لمنع الورقة البيضاء وتأكيد جلب صورة الترويسة على جميع الأجهزة
+// دالة طباعة الروشتة المفصولة تماماً عن التقرير الطبي ومجهزة لكافة الأجهزة (حاسبة، آيباد، موبايل)
 function printPrescriptionDirectly() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
@@ -2205,13 +2205,15 @@ function printPrescriptionDirectly() {
         bgImg.src = savedRxImg;
         bgImg.className = 'rx-bg-img';
         container.insertBefore(bgImg, container.firstChild);
-    } else if (bgImg && savedRxImg && !bgImg.src) {
+    } else if (bgImg && savedRxImg) {
         bgImg.src = savedRxImg;
+        bgImg.style.display = 'block';
     }
 
     const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
     
+    // تفعيل كلاس طباعة الروشتة حصراً وإلغاء أي تداخل مع التقرير
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
     
@@ -2222,10 +2224,9 @@ function printPrescriptionDirectly() {
         reportWasOpen = true;
     }
 
-    // إعطاء مهلة 300 ملي ثانية لتثبيت ورسم الصورة والعناصر بدقة في المتصفح قبل إطلاق أمر الطباعة
     setTimeout(() => {
         window.print();
-    }, 300);
+    }, 400);
 
     setTimeout(() => {
         document.body.classList.remove('is-printing-rx-only');
@@ -2233,9 +2234,10 @@ function printPrescriptionDirectly() {
         if (reportWasOpen && reportModal) {
             reportModal.style.display = 'flex';
         }
-    }, 1200);
+    }, 1500);
 }
 
+// دالة طباعة التقرير الطبي المفصولة تماماً عن الروشتة
 function printMedicalReportDirectly() {
     if (repConfigModeActive) {
         toggleRepConfigMode();
@@ -2244,15 +2246,28 @@ function printMedicalReportDirectly() {
     const controls = container ? container.querySelectorAll('.box-font-controls') : [];
     controls.forEach(c => c.style.display = 'none');
 
+    // تفعيل كلاس طباعة التقرير حصراً وإلغاء أي تداخل مع الروشتة
     document.body.classList.add('is-printing-report-only');
     document.body.classList.remove('is-printing-rx-only');
+
+    const rxModal = document.getElementById('rxModal');
+    let rxWasOpen = false;
+    if (rxModal && (rxModal.style.display === 'flex' || window.getComputedStyle(rxModal).display === 'flex')) {
+        rxModal.style.display = 'none';
+        rxWasOpen = true;
+    }
     
-    window.print();
+    setTimeout(() => {
+        window.print();
+    }, 400);
     
     setTimeout(() => {
         document.body.classList.remove('is-printing-report-only');
         controls.forEach(c => c.style.display = '');
-    }, 1000);
+        if (rxWasOpen && rxModal) {
+            rxModal.style.display = 'flex';
+        }
+    }, 1500);
 }
 
 function openPrescriptionPDF() {
@@ -2415,7 +2430,7 @@ function openMedicalReportModal(visitId) {
         if (!bgImg) {
             bgImg = document.createElement('img');
             bgImg.className = 'rep-bg-img';
-            bgImg.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 0; pointer-events: none; opacity: 0.95;';
+            bgImg.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 1; pointer-events: none; opacity: 1;';
             container.insertBefore(bgImg, container.firstChild);
         }
         if (savedRxImg) {
@@ -2599,7 +2614,7 @@ function printMedicalReportOnly(visitId) {
     openMedicalReportModal(visitId);
     setTimeout(() => {
         printMedicalReportDirectly();
-    }, 300);
+    }, 400);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -2763,7 +2778,7 @@ function removeDictTerm(category, index) {
     let dictKey = category;
     if (category === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (category === 'historyPresentIllness') dictKey = 'history_present';
-    else if (category === 'reviewSystems') dictKey = 'review_systems';
+    else if (cat === 'reviewSystems') dictKey = 'review_systems';
 
     if (medicalDict[dictKey]) {
         medicalDict[dictKey].splice(index, 1);
