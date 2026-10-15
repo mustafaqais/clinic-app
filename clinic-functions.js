@@ -2314,8 +2314,12 @@ function toggleRepConfigMode() {
             else el.classList.remove('config-mode');
         }
     });
+
     const saveBtn = document.getElementById('repSaveLayoutBtn');
-    if (saveBtn) saveBtn.style.display = repConfigModeActive ? 'block' : 'none';
+    if (saveBtn) {
+        saveBtn.style.display = repConfigModeActive ? 'block' : 'none';
+    }
+
     const toggleBtn = document.getElementById('repConfigToggleBtn');
     if (toggleBtn) {
         toggleBtn.style.background = repConfigModeActive ? '#0d9488' : '#f0fdfa';
@@ -2353,6 +2357,7 @@ function saveRepLayoutPositions() {
     
     loadRepLayoutPositions();
     alert('تم حفظ أماكن التقرير الطبي والخطوط بنجاح لتكون ثابتة تماماً في المستقبل!');
+    
     if (repConfigModeActive) {
         toggleRepConfigMode();
     }
