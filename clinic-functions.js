@@ -1,6 +1,6 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.49
-// (الكود الشامل والكامل - استقلالية تامة، ضبط الطباعة للحاسبة والموبايل، التقرير الطبي، والتفاف النصوص)
+// Clinic Master System - Cloud Ultimate Edition v17.50
+// (الكود الشامل والكامل - ضبط الطباعة للتوافق التام مع A4 و A5 للحاسبة والموبايل)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1057,7 +1057,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.49",
+        version: "17.50",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2183,7 +2183,7 @@ function loadSavedRxLayout() {
 }
 
 // ==========================================
-// دوال طباعة الراشيتة والتقرير الطبي (معزولة ومضبوطة للحاسبة والموبايل)
+// دوال الطباعة المعزولة والمتوافقة مع مقاسات A4 و A5
 // ==========================================
 function printPrescriptionDirectly() {
     isConfigMode = false;
