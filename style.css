@@ -1,6 +1,6 @@
 /* ==========================================
    Clinic Master System - Cloud Ultimate Edition
-   الملف الشامل لتنسيقات الـ CSS (مع ضبط طباعة الحاسبة والموبايل نهائياً)
+   الملف الشامل لتنسيقات الـ CSS (النسخة النهائية المنفصلة للحاسبة والموبايل)
    ========================================== */
 
 * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
@@ -326,20 +326,16 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 }
 
 /* ==========================================
-   إعدادات الطباعة النهائية والمعزولة (للحاسبة والموبايل - ملء ورقة A4 / A5 بالكامل وبدون قص أو أشرطة تمرير)
+   إعدادات الطباعة النهائية والمعزولة (للحاسبة والموبايل بدقة تامة)
    ========================================== */
 @media print {
-    /* إلغاء واختفاء كافة عناصر التطبيق افتراضياً */
+    /* إخفاء عناصر التطبيق العامة خارج نافذة الروشتة */
     body > *:not(#rxModal) {
         display: none !important;
         visibility: hidden !important;
     }
 
-    body * {
-        visibility: hidden !important;
-    }
-
-    /* إظهار نافذة الراشيتة ومحتوياتها بالكامل فقط */
+    /* إظهار نافذة الراشيتة وحاويتها الداخلية وعناصرها بالكامل فقط */
     #rxModal,
     #rxModal *,
     .rx-canvas-container,
@@ -357,10 +353,10 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         opacity: 1 !important;
     }
 
-    /* تثبيت مقاس صفحة الطباعة وملء ورقة A4/A5 تماماً بدون هوامش أو أشرطة تمرير */
+    /* ضبط حجم صفحة الطباعة وتصفير الهوامش */
     @page {
         size: auto;
-        margin: 0;
+        margin: 0mm;
     }
 
     html, body {
@@ -372,6 +368,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         overflow: hidden !important;
     }
 
+    /* تثبيت نافذة الـ Modal وحاوية الراشيتة لملء ورقة A4 / A5 بالكامل بدون قص أو أشرطة */
     #rxModal {
         position: absolute !important;
         left: 0 !important;
@@ -408,7 +405,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         print-color-adjust: exact !important;
     }
 
-    /* جعل الصورة تملأ الصفحة بالكامل 100% عرضاً وارتفاعاً بدون قص وبدون أشرطة تمرير */
+    /* جعل الصورة تملأ الصفحة بالكامل 100% عرضاً وارتفاعاً بدون قص من الأعلى أو الأسفل */
     .rx-bg-img {
         position: absolute !important;
         left: 0 !important;
@@ -429,7 +426,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         box-shadow: none !important;
     }
 
-    /* إخفاء الأزرار وأدوات التحكم تماماً */
+    /* إخفاء تام وصريح لكل الأزرار، أدوات التحكم، ومربعات الحوار أثناء الطباعة */
     button,
     .box-font-controls,
     .modal-header,
