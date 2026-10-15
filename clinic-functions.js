@@ -1,6 +1,6 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.42
-// (الملف الشامل والكامل - مطابق لطباعة الروشتة والحفظ التلقائي)
+// Clinic Master System - Cloud Ultimate Edition v17.43
+// (الملف الشامل والكامل - مطبق مع ثبات التقرير الطبي والروشتة)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1048,7 +1048,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.42",
+        version: "17.43",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2209,7 +2209,7 @@ function initDraggableElements() {
 }
 
 // ==========================================
-// دوال التقرير الطبي المستقل
+// دوال التقرير الطبي المستقل والمصححة نهائياً
 // ==========================================
 let repConfigModeActive = false;
 let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
@@ -2342,16 +2342,20 @@ function saveRepLayoutPositions() {
         const el = document.getElementById(id);
         if (el) {
             positions[id] = {
-                top: el.style.top,
-                left: el.style.left,
-                width: el.style.width,
-                fontSizes: repFontSizes
+                top: el.style.top || (el.offsetTop + 'px'),
+                left: el.style.left || (el.offsetLeft + 'px'),
+                width: el.style.width || (el.offsetWidth + 'px')
             };
         }
     });
+    positions.fontSizes = repFontSizes;
     localStorage.setItem('clinic_rep_layout_v1', JSON.stringify(positions));
-    alert('تم حفظ أماكن التقرير الطبي والخطوط بنجاح لتكون ثابتة في المستقبل!');
-    toggleRepConfigMode();
+    
+    loadRepLayoutPositions();
+    alert('تم حفظ أماكن التقرير الطبي والخطوط بنجاح لتكون ثابتة تماماً في المستقبل!');
+    if (repConfigModeActive) {
+        toggleRepConfigMode();
+    }
 }
 
 function loadRepLayoutPositions() {
@@ -2359,15 +2363,25 @@ function loadRepLayoutPositions() {
     if (saved) {
         try {
             let data = JSON.parse(saved);
-            for (let id in data) {
+            const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
+            boxes.forEach(id => {
                 const el = document.getElementById(id);
                 if (el && data[id]) {
-                    // استعادة الإحداثيات المحفوظة بدقة تامة للصناديق
-                    if (data[id].top) el.style.top = data[id].top;
-                    if (data[id].left) el.style.left = data[id].left;
-                    if (data[id].width) el.style.width = data[id].width;
-                    if (data[id].fontSizes) repFontSizes = data[id].fontSizes;
+                    if (data[id].top) {
+                        el.style.top = data[id].top;
+                        if (!data[id].top.includes('px') && !data[id].top.includes('%')) el.style.top += 'px';
+                    }
+                    if (data[id].left) {
+                        el.style.left = data[id].left;
+                        if (!data[id].left.includes('px') && !data[id].left.includes('%')) el.style.left += 'px';
+                    }
+                    if (data[id].width) {
+                        el.style.width = data[id].width;
+                    }
                 }
+            });
+            if (data.fontSizes) {
+                repFontSizes = data.fontSizes;
             }
             if (document.getElementById('repPatientText')) document.getElementById('repPatientText').style.fontSize = (repFontSizes.patient || 14) + 'px';
             if (document.getElementById('repTitleText')) document.getElementById('repTitleText').style.fontSize = (repFontSizes.title || 16) + 'px';
