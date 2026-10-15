@@ -1,6 +1,6 @@
 /* ==========================================
    Clinic Master System - Cloud Ultimate Edition
-   الملف الشامل لتنسيقات الـ CSS (الطباعة القياسية المطابقة لورقة A4/A5 تماماً)
+   الملف الشامل لتنسيقات الـ CSS (النسخة النهائية المنفصلة والمضبوطة للطباعة)
    ========================================== */
 
 * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
@@ -326,17 +326,22 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 }
 
 /* ==========================================
-   إعدادات الطباعة القياسية المطابقة لورقة A4/A5 بالكامل (مفصولة تماماً)
+   إعدادات الطباعة المطلقة (فصل تام بين الموبايل والحاسبة وتغطية ورقة A4/A5 بالكامل بدون فراغ علوي)
    ========================================== */
 @media print {
-    /* فرض مقاسات الهوامش الصفرية على مستوى الصفحة لإلغاء أي فراغ تظهر فيه كتابة المتصفح */
+    /* تصفير هوامش الصفحة بالكامل لإلغاء أي مساحة يظهر فيها رابط المتصفح أو كلمة RX ready */
     @page {
         size: auto;
-        margin: 0mm;
+        margin: 0 !important;
     }
 
-    /* --- 1. طباعة الموبايل: مطابقة لقياس الورقة تماماً وصعود الصورة للأعلى لتغطية المساحة بالكامل --- */
+    /* --- 1. إعدادات طباعة الموبايل (منفصلة تماماً وتملأ ورقة A4/A5 بدون هوامش) --- */
     @media (max-width: 1023px) {
+        body > *:not(#rxModal) {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
         body * {
             visibility: hidden !important;
         }
@@ -354,6 +359,8 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         .rx-rx-title,
         .rx-treatment-text {
             visibility: visible !important;
+            display: block !important;
+            opacity: 1 !important;
         }
 
         html, body {
@@ -366,18 +373,19 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         }
 
         #rxModal {
-            position: absolute !important;
+            position: fixed !important;
             left: 0 !important;
             top: 0 !important;
             width: 100% !important;
             height: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
-            box-shadow: none !important;
-            border: none !important;
             z-index: 999999 !important;
-            display: block !important;
+            border: none !important;
+            box-shadow: none !important;
             overflow: hidden !important;
         }
 
@@ -400,7 +408,8 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
             top: 0 !important;
             width: 100% !important;
             height: 100% !important;
-            object-fit: fill !important; /* تغطية مساحة ورقة A5 أو A4 بالكامل من الأعلى للأسفل وبدون أي مساحة فارغة */
+            object-fit: fill !important; /* ملء ورقة الـ A4/A5 تماماً من الحافة للحافة وصعود الصورة للأعلى */
+            z-index: 1 !important;
         }
 
         button,
@@ -413,10 +422,32 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
         }
     }
 
-    /* --- 2. طباعة الحاسبة (Desktop): تغطية ورقة A4/A5 بالكامل بدون أي فراغ علوي أو سفلي --- */
+    /* --- 2. إعدادات طباعة الحاسبة (Desktop منفصلة تماماً وتملأ ورقة A4/A5 بالكامل بدون قص علوي) --- */
     @media (min-width: 1024px) {
         body > *:not(#rxModal) {
             display: none !important;
+            visibility: hidden !important;
+        }
+
+        body * {
+            visibility: hidden !important;
+        }
+
+        #rxModal,
+        #rxModal *,
+        .rx-canvas-container,
+        .rx-canvas-container *,
+        .rx-bg-img,
+        .draggable-box,
+        .rx-patient-details-text,
+        .rx-date-text,
+        .rx-vitals-text,
+        .rx-treatment-wrapper,
+        .rx-rx-title,
+        .rx-treatment-text {
+            visibility: visible !important;
+            display: block !important;
+            opacity: 1 !important;
         }
 
         html, body {
@@ -440,9 +471,6 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
             padding: 0 !important;
             background: #ffffff !important;
             z-index: 999999 !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
             border: none !important;
             box-shadow: none !important;
             overflow: hidden !important;
@@ -470,7 +498,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
             top: 0 !important;
             width: 100% !important;
             height: 100% !important;
-            object-fit: fill !important; /* ملء ورقة الـ A4 أو A5 بالكامل تماماً واختفاء أي عبارات في أعلى الصفحة */
+            object-fit: fill !important; /* ملء الشاشة والورقة بالكامل من الحافة للحافة وبدون أي فراغ علوي */
             z-index: 1 !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
