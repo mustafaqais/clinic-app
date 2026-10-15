@@ -327,7 +327,8 @@ window.addEventListener("DOMContentLoaded", () => {
                     }, err => console.log("Real-time listener error:", err));
             }
 
-            if (user.email.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
+            const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
+            if (user.email.toLowerCase() === founderMail) {
                 setupFounderInterfaceAfterAuth();
             } else {
                 checkUserSubscriptionStatus(user.uid, isUserSecretary);
@@ -711,6 +712,7 @@ async function handleAuthSubmit(e) {
     e.preventDefault();
     const identifier = document.getElementById('authEmail').value.trim();
     const pass = document.getElementById('authPassword').value;
+    const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
 
     if (isRegisterMode) {
         const phone = document.getElementById('regPhoneInput').value.trim();
@@ -724,8 +726,8 @@ async function handleAuthSubmit(e) {
                         email: identifier.toLowerCase(),
                         phone: phone || '',
                         password: pass,
-                        role: identifier.toLowerCase() === FOUNDER_EMAIL.toLowerCase() ? 'Founder' : 'Client Node',
-                        isActivated: identifier.toLowerCase() === FOUNDER_EMAIL.toLowerCase(),
+                        role: identifier.toLowerCase() === founderMail ? 'Founder' : 'Client Node',
+                        isActivated: identifier.toLowerCase() === founderMail,
                         doctorName: "نظام عيادة ماستر",
                         createdAt: new Date().toISOString()
                     }, { merge: true });
@@ -733,7 +735,7 @@ async function handleAuthSubmit(e) {
                     console.log("Error:", err);
                 }
 
-                if (identifier.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
+                if (identifier.toLowerCase() === founderMail) {
                     const expiryDate = new Date();
                     expiryDate.setFullYear(expiryDate.getFullYear() + 10);
                     localStorage.setItem('sub_expiry_' + res.user.uid, expiryDate.toISOString());
@@ -792,7 +794,7 @@ async function handleAuthSubmit(e) {
                     isUserSecretary = true;
                     applySecretaryUIVisibility();
                     restorePreviousScreenState();
-                } else if (loginEmail.toLowerCase() === FOUNDER_EMAIL.toLowerCase()) {
+                } else if (loginEmail.toLowerCase() === founderMail) {
                     setupFounderInterfaceAfterAuth();
                 } else {
                     checkUserSubscriptionStatus(res.user.uid, false);
@@ -1281,7 +1283,8 @@ function openNetworkHierarchy() {
             const nodeUid = doc.id;
             const userEmail = data.email || data.secretaryEmail || 'User';
             const currentDocName = data.doctorName || 'غير مسجل';
-            const isFounder = userEmail.toLowerCase() === FOUNDER_EMAIL.toLowerCase();
+            const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
+            const isFounder = userEmail.toLowerCase() === founderMail;
 
             html += '<div class="node-card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;">' +
                     '<div class="node-info">' +
@@ -2206,7 +2209,7 @@ function initDraggableElements() {
 }
 
 // ==========================================
-// دوال التقرير الطبي المستقل (محدثة، محفوظة، وذات طباعة احترافية)
+// دوال التقرير الطبي المستقل
 // ==========================================
 let repConfigModeActive = false;
 let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
@@ -2225,7 +2228,6 @@ function toggleMedicalReportInputs(visitId) {
     }
 }
 
-// دالة لحفظ حقول التقرير الطبي فور الكتابة داخل المراجعة
 function updateReportFieldData(visitId, fieldName, value) {
     if (isSubscriptionExpired) return;
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
@@ -2246,7 +2248,6 @@ function openMedicalReportModal(visitId) {
     if (!modal) return;
     modal.style.display = 'flex';
 
-    // جلب ترويسة الروشتة المعتمدة بشكل صحيح
     let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
     const container = document.getElementById('repCanvasContainer');
     if (container) {
@@ -2277,7 +2278,6 @@ function openMedicalReportModal(visitId) {
     const repPatText = document.getElementById('repPatientText');
     if (repPatText) repPatText.textContent = patDetailsStr;
 
-    // استرجاع البيانات المحفوظة بدقة
     const repData = (visit && visit.medicalReport) ? visit.medicalReport : {};
     
     let titleVal = repData.title || (document.getElementById(`rep_title_${visitId}`) ? document.getElementById(`rep_title_${visitId}`).value : "تقرير طبي");
@@ -2368,7 +2368,7 @@ function loadRepLayoutPositions() {
                     if (data[id].fontSizes) repFontSizes = data[id].fontSizes;
                 }
             }
-            if (document.getElementById('repPatientText')) document.getElementById('repPatientText'].style.fontSize = (repFontSizes.patient || 14) + 'px';
+            if (document.getElementById('repPatientText')) document.getElementById('repPatientText').style.fontSize = (repFontSizes.patient || 14) + 'px';
             if (document.getElementById('repTitleText')) document.getElementById('repTitleText').style.fontSize = (repFontSizes.title || 16) + 'px';
             if (document.getElementById('repToText')) document.getElementById('repToText').style.fontSize = (repFontSizes.to || 15) + 'px';
             if (document.getElementById('repDetailsText')) document.getElementById('repDetailsText').style.fontSize = (repFontSizes.details || 15) + 'px';
@@ -2376,7 +2376,6 @@ function loadRepLayoutPositions() {
     }
 }
 
-// دالة الطباعة الاحترافية للتقرير الطبي المطابقة لطباعة الروشتة تماماً
 function printMedicalReportDirectly() {
     if (repConfigModeActive) {
         toggleRepConfigMode();
@@ -2922,7 +2921,6 @@ function renderVisits(visits, forceFullRender = true) {
             '</button>' +
             '</div>' +
             
-            // قسم التقرير الطبي المستقل المحفوظ تلقائياً
             '<div style="margin-top: 10px; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; background: #ffffff;">' +
             '<div onclick="toggleMedicalReportInputs(' + v.visitId + ')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 700; color: #0d9488; font-size: 0.9rem;">' +
             '<span><i class="fa-solid fa-file-medical"></i> تقرير طبي (محفوظ تلقائياً)</span>' +
