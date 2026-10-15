@@ -1,6 +1,6 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.47
-// (الملف الشامل والكامل - استقلالية تامة ونسب مئوية دقيقة لكل جهاز: حاسبة، أيباد، موبايل على كافة المتصفحات)
+// Clinic Master System - Cloud Ultimate Edition v17.48
+// (الكود الشامل والكامل - استقلالية تامة، ضبط التقرير الطبي، التفاف النصوص، وكلمة "إلى:")
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1057,7 +1057,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.47",
+        version: "17.48",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2112,7 +2112,6 @@ function setRxPaperSize(size) {
     localStorage.setItem('clinic_rx_paper_size', size);
 }
 
-// دالة تحديد مفتاح تخزين الروشتة لكل جهاز على حدة (متطابقة على كافة المتصفحات)
 function getRxDeviceStorageKey() {
     const width = window.innerWidth;
     if (width <= 768) {
@@ -2221,7 +2220,6 @@ function openPrescriptionPDF() {
     });
 }
 
-// تفعيل السحب والإفلات الشامل (يدعم الموبايل باللمس والأجهزة الأخرى بالفأرة) للروشتة
 function initDraggableElements() {
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
@@ -2308,7 +2306,7 @@ function initDraggableElements() {
 }
 
 // ==========================================
-// دوال التقرير الطبي المستقل والمخصص لكل جهاز على حدة (نسب مئوية متطابقة)
+// التقرير الطبي المطوّر (التفاف النصوص، خط واضح، وكلمة "إلى:")
 // ==========================================
 let repConfigModeActive = false;
 let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
@@ -2403,8 +2401,19 @@ function openMedicalReportModal(visitId) {
     const repDetailsText = document.getElementById('repDetailsText');
 
     if (repTitleText) repTitleText.textContent = titleVal || "تقرير طبي";
-    if (repToText) repToText.textContent = toVal ? `إلى ${toVal}` : "";
-    if (repDetailsText) repDetailsText.textContent = detailsVal;
+    
+    // ضبط كلمة "إلى:" بوضوح
+    if (repToText) {
+        repToText.textContent = toVal ? `إلى: ${toVal}` : "";
+    }
+    
+    if (repDetailsText) {
+        repDetailsText.textContent = detailsVal;
+        repDetailsText.style.whiteSpace = 'pre-wrap';
+        repDetailsText.style.wordBreak = 'break-word';
+        repDetailsText.style.fontFamily = "'Cairo', 'Tajawal', sans-serif";
+        repDetailsText.style.lineHeight = '1.6';
+    }
 
     loadRepLayoutPositions();
 }
@@ -2446,7 +2455,14 @@ function changeRepBoxFontSize(boxKey, delta) {
     else if (boxKey === 'details') targetId = 'repDetailsText';
 
     const el = document.getElementById(targetId);
-    if (el) el.style.fontSize = repFontSizes[boxKey] + 'px';
+    if (el) {
+        el.style.fontSize = repFontSizes[boxKey] + 'px';
+        if (boxKey === 'details') {
+            el.style.whiteSpace = 'pre-wrap';
+            el.style.wordBreak = 'break-word';
+            el.style.fontFamily = "'Cairo', 'Tajawal', sans-serif";
+        }
+    }
 }
 
 function saveRepLayoutPositions() {
@@ -2500,16 +2516,28 @@ function loadRepLayoutPositions() {
                 if (el && data[id]) {
                     if (data[id].top) el.style.top = data[id].top;
                     if (data[id].left) el.style.left = data[id].left;
-                    if (data[id].width) el.style.width = data[id].width;
+                    if (data[id].width) {
+                        el.style.width = data[id].width;
+                        el.style.maxWidth = '100%';
+                    }
                 }
             });
             if (data.fontSizes) {
                 repFontSizes = data.fontSizes;
             }
+            
             if (document.getElementById('repPatientText')) document.getElementById('repPatientText').style.fontSize = (repFontSizes.patient || 14) + 'px';
             if (document.getElementById('repTitleText')) document.getElementById('repTitleText').style.fontSize = (repFontSizes.title || 16) + 'px';
             if (document.getElementById('repToText')) document.getElementById('repToText').style.fontSize = (repFontSizes.to || 15) + 'px';
-            if (document.getElementById('repDetailsText')) document.getElementById('repDetailsText').style.fontSize = (repFontSizes.details || 15) + 'px';
+            
+            const detailsEl = document.getElementById('repDetailsText');
+            if (detailsEl) {
+                detailsEl.style.fontSize = (repFontSizes.details || 15) + 'px';
+                detailsEl.style.whiteSpace = 'pre-wrap';
+                detailsEl.style.wordBreak = 'break-word';
+                detailsEl.style.fontFamily = "'Cairo', 'Tajawal', sans-serif";
+                detailsEl.style.lineHeight = '1.6';
+            }
         } catch(e) {
             console.log("Error loading rep layout:", e);
         }
@@ -2540,7 +2568,6 @@ function printMedicalReportOnly(visitId) {
     }, 300);
 }
 
-// تفعيل السحب والإفلات الشامل للتقرير الطبي
 document.addEventListener('DOMContentLoaded', () => {
     const draggableBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
     let activeBox = null;
