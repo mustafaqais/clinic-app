@@ -56,6 +56,8 @@
             margin: 4px 0 !important;
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
         }
+        
+        /* الحاوية القياسية الموحدة للروشتة */
         .rx-canvas-container {
             position: relative !important;
             width: 540px !important;
@@ -90,7 +92,7 @@
             text-align: right;
         }
         .config-mode.draggable-box {
-            background: rgba(255, 255, 255, 0.9) !important;
+            background: rgba(255, 255, 255, 0.95) !important;
             border: 1px dashed #0d9488 !important;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
             padding: 8px !important;
@@ -124,11 +126,12 @@
             font-size: 0.75rem;
         }
 
+        /* تحجيم شاشة الموبايل فقط لعرض المعاينة بدون التأثير على الحفظ أو الطباعة */
         @media screen and (max-width: 600px) {
             .rx-canvas-container {
-                transform: scale(0.68) !important;
+                transform: scale(0.65) !important;
                 transform-origin: top center !important;
-                margin-bottom: -220px !important;
+                margin-bottom: -240px !important;
             }
         }
         .modal-body {
@@ -140,7 +143,7 @@
             text-align: center;
         }
 
-        /* تنسيق الطباعة الصارم لإلغاء أي تشويه في الموبايل والحاسبة */
+        /* تنسيق الطباعة الصارم والمستقل للحاسبة والموبايل */
         @media print {
             @page {
                 size: A4 portrait;
@@ -193,23 +196,29 @@
                 left: 50% !important;
                 top: 50% !important;
                 transform: translate(-50%, -50%) scale(1) !important;
-                width: 100% !important;
-                max-width: 210mm !important;
-                height: 100% !important;
-                max-height: 297mm !important;
+                width: 540px !important;
+                height: 765px !important;
+                min-height: 765px !important;
                 border: none !important;
                 box-shadow: none !important;
                 margin: 0 !important;
                 border-radius: 0 !important;
                 background: #ffffff !important;
             }
-            .box-font-controls, button, .modal-header, #rxModeHint, .modal-overlay > div > div:first-child, div[style*="display: flex; justify-content: space-between"] {
+            /* إخفاء أدوات التحكم نهائياً وجعل البوكسات شفافة ونقية تماماً عند الطباعة */
+            .box-font-controls, 
+            button, 
+            .modal-header, 
+            #rxModeHint, 
+            .modal-overlay > div > div:first-child, 
+            div[style*="display: flex; justify-content: space-between"] {
                 display: none !important;
             }
-            .draggable-box {
+            .draggable-box, .config-mode.draggable-box {
                 border: none !important;
                 background: transparent !important;
                 box-shadow: none !important;
+                padding: 4px !important;
             }
         }
     </style>
