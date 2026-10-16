@@ -695,11 +695,6 @@
                             <div class="input-wrapper"><input type="text" id="pName" placeholder="Enter patient full name..." required></div>
                         </div>
 
-                        <div class="field-box">
-                            <span class="field-label" id="lblPatSubName">Grandfather Name / Tribe / Note (Optional)</span>
-                            <div class="input-wrapper"><input type="text" id="pSubName" placeholder="e.g. محمد / العشيرة لتمييز الاسم التشابه"></div>
-                        </div>
-
                         <div style="display: flex; gap: 10px;">
                             <div class="field-box" style="flex: 1;">
                                 <span class="field-label" id="lblPatAge">Age *</span>
@@ -715,6 +710,11 @@
                                         <option value="Female" id="optFemale">Female</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            <div class="field-box" style="flex: 1;">
+                                <span class="field-label">المحافظة (اختياري)</span>
+                                <div class="input-wrapper"><input type="text" id="pCity" placeholder="مثال: بغداد، ميسان..."></div>
                             </div>
                         </div>
 
@@ -892,7 +892,7 @@
     </div>
 </div>
 
-<!-- نافذة تعديل بيانات المريض (مضافة حديثاً لتلافي الخطأ) -->
+<!-- نافذة تعديل بيانات المريض (محدثة بدون حقل العشيرة المستقل) -->
 <div id="editPatientModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 450px; text-align: left; direction: ltr; background: #ffffff; border-radius: 14px; padding: 20px;">
         <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -903,10 +903,6 @@
         <div class="field-box" style="margin-bottom: 10px;">
             <span class="field-label">Full Name</span>
             <div class="input-wrapper"><input type="text" id="editPName"></div>
-        </div>
-        <div class="field-box" style="margin-bottom: 10px;">
-            <span class="field-label">Grandfather Name / Tribe</span>
-            <div class="input-wrapper"><input type="text" id="editPSubName"></div>
         </div>
         <div style="display: flex; gap: 8px;">
             <div class="field-box" style="flex: 1; margin-bottom: 10px;">
@@ -921,6 +917,10 @@
                         <option value="Female">Female</option>
                     </select>
                 </div>
+            </div>
+            <div class="field-box" style="flex: 1; margin-bottom: 10px;">
+                <span class="field-label">المحافظة (اختياري)</span>
+                <div class="input-wrapper"><input type="text" id="editPCity" placeholder="المحافظة..."></div>
             </div>
         </div>
         <div class="field-box" style="margin-bottom: 10px;">
@@ -957,7 +957,7 @@
     </div>
 </div>
 
-<!-- نافذة التاريخ المرضي والأمراض المزمنة (مضافة حديثاً لتلافي الخطأ) -->
+<!-- نافذة التاريخ المرضي والأمراض المزمنة -->
 <div id="medHistoryModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 500px; text-align: left; direction: ltr; background: #ffffff; border-radius: 14px; padding: 20px; max-height: 90vh; overflow-y: auto;">
         <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -1032,7 +1032,7 @@
     </div>
 </div>
 
-<!-- نافذة حاسبة مؤشر كتلة الجسم (مضافة حديثاً لتلافي الخطأ) -->
+<!-- نافذة حاسبة مؤشر كتلة الجسم (BMI) -->
 <div id="bmiCalculatorModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 400px; text-align: left; direction: ltr; background: #ffffff; border-radius: 14px; padding: 20px;">
         <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
