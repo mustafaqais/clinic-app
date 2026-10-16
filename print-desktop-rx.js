@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Clean & Safe
+// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Fixed & Guaranteed
 // ==========================================
 
 let isDesktopRxConfigMode = false;
@@ -77,12 +77,6 @@ function printPrescriptionDirectly() {
     let bgImg = container.querySelector('#rxBgImg');
     let savedRxImg = localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
 
-    if (bgImg && savedRxImg) {
-        bgImg.src = savedRxImg;
-        bgImg.style.display = 'block';
-        bgImg.style.visibility = 'visible';
-    }
-
     const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
 
@@ -92,13 +86,39 @@ function printPrescriptionDirectly() {
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
 
-    setTimeout(() => {
-        window.print();
-    }, 600);
+    // دالة تنفيذ الطباعة بعد التأكد من جاهزية الصورة
+    const executePrint = () => {
+        setTimeout(() => {
+            window.print();
+            setTimeout(() => {
+                document.body.classList.remove('is-printing-rx-only');
+                controls.forEach(c => c.style.display = '');
+                if (rxSymbol) rxSymbol.style.display = '';
+            }, 1000);
+        }, 400);
+    };
 
-    setTimeout(() => {
-        document.body.classList.remove('is-printing-rx-only');
-        controls.forEach(c => c.style.display = '');
-        if (rxSymbol) rxSymbol.style.display = '';
-    }, 1800);
+    if (bgImg) {
+        if (savedRxImg) {
+            bgImg.style.display = 'block';
+            bgImg.style.visibility = 'visible';
+            bgImg.style.opacity = '1';
+            
+            // إذا كانت الصورة لم تحمل بعد أو تم تغيير رابطها
+            if (bgImg.src !== savedRxImg) {
+                bgImg.onload = executePrint;
+                bgImg.onerror = executePrint;
+                bgImg.src = savedRxImg;
+            } else if (bgImg.complete) {
+                executePrint();
+            } else {
+                bgImg.onload = executePrint;
+            }
+        } else {
+            bgImg.style.display = 'none';
+            executePrint();
+        }
+    } else {
+        executePrint();
+    }
 }
