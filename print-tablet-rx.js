@@ -1,49 +1,60 @@
 // ==========================================
-// Clinic Master - Tablet RX Print (print-tablet-rx.js) - Independent & Optimized
+// Clinic Master - Tablet RX Print (print-tablet-rx.js) - Final Optimized
 // ==========================================
 
 function printPrescriptionDirectly() {
+    isConfigMode = false;
+    document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
+    updateConfigModeUI();
+
     const container = document.getElementById('rxCanvasContainer');
     if (!container) return;
 
-    let bgImg = container.querySelector('#rxBgImg') || container.querySelector('.rx-bg-img');
+    let bgImg = container.querySelector('.rx-bg-img');
     let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    
+    if (!bgImg && savedRxImg) {
+        bgImg = document.createElement('img');
+        bgImg.src = savedRxImg;
+        bgImg.className = 'rx-bg-img';
+        container.insertBefore(bgImg, container.firstChild);
+    } else if (bgImg && savedRxImg) {
+        bgImg.src = savedRxImg;
+        bgImg.style.display = 'block';
+    }
 
-    const rxSymbol = container.querySelector('#rxDragBoxTreatment div:nth-child(2)');
-    if (rxSymbol) rxSymbol.style.display = 'none';
-
+    const controls = container.querySelectorAll('.box-font-controls');
+    controls.forEach(c => c.style.display = 'none');
+    
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
+    
+    const reportModal = document.getElementById('medicalReportModal');
+    let reportWasOpen = false;
+    if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
+        reportModal.style.display = 'none';
+        reportWasOpen = true;
+    }
 
     const executeTabletPrint = () => {
         setTimeout(() => {
             window.print();
             setTimeout(() => {
                 document.body.classList.remove('is-printing-rx-only');
-                if (rxSymbol) rxSymbol.style.display = '';
+                controls.forEach(c => c.style.display = '');
+                if (reportWasOpen && reportModal) {
+                    reportModal.style.display = 'flex';
+                }
             }, 1200);
-        }, 600); // مهلة زمنية مخصصة للتابلت
+        }, 600);
     };
 
-    if (bgImg) {
-        if (savedRxImg) {
-            bgImg.style.display = 'block';
-            bgImg.style.visibility = 'visible';
-            bgImg.style.opacity = '1';
-            bgImg.style.zIndex = '1';
-
-            if (bgImg.src !== savedRxImg) {
-                bgImg.onload = executeTabletPrint;
-                bgImg.onerror = executeTabletPrint;
-                bgImg.src = savedRxImg;
-            } else if (bgImg.complete) {
-                executeTabletPrint();
-            } else {
-                bgImg.onload = executeTabletPrint;
-            }
-        } else {
-            bgImg.style.display = 'none';
+    if (bgImg && savedRxImg) {
+        if (bgImg.complete) {
             executeTabletPrint();
+        } else {
+            bgImg.onload = executeTabletPrint;
+            bgImg.onerror = executeTabletPrint;
         }
     } else {
         executeTabletPrint();
