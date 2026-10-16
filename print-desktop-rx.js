@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master - Desktop RX Print (With Auto-Compression & PDF Engine)
+// Clinic Master - Desktop RX Print (With Built-in Diagnostic Logger)
 // ==========================================
 
 let isConfigMode = false;
@@ -72,7 +72,7 @@ function saveRxLayoutPositions() {
     alert('تم حفظ إعدادات روشتة الحاسبة بنجاح!');
 }
 
-// دالة الحفظ كـ PDF (التي تعمل لديك بامتياز)
+// دالة الحفظ كـ PDF (التي تعمل لديك بامتياز تام)
 function openPrescriptionPDF() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
@@ -107,7 +107,31 @@ function openPrescriptionPDF() {
     });
 }
 
-// دالة ضغط الصورة برمجياً لتخفيف الوزن على الذاكرة قبل الطباعة المباشرة
+// أداة التشخيص البرمجي لكشف سبب المشكلة
+function diagnosePrintIssue(imgElement) {
+    console.group("🩺 Clinic Master - Print Diagnostics Logger");
+    if (!imgElement) {
+        console.error("❌ التشخيص: عنصر الصورة (rxBgImg) غير موجود في الـ DOM وقت الطباعة!");
+        console.groupEnd();
+        return;
+    }
+    console.log("🔍 عنصر الصورة الموجود:", imgElement);
+    console.log("🔍 رابط الصورة (src length):", imgElement.src ? imgElement.src.length : 0);
+    console.log("🔍 حالة اكتمال التحميل (complete):", imgElement.complete);
+    console.log("🔍 العرض الطبيعي للصورة (naturalWidth):", imgElement.naturalWidth);
+    console.log("🔍 الارتفاع الطبيعي للصورة (naturalHeight):", imgElement.naturalHeight);
+    
+    if (!imgElement.src || imgElement.src.startsWith('data:image/jpeg;base64,,') || imgElement.src.length < 50) {
+        console.warn("⚠️ تحذير تشخيصي: رابط الصورة يبدو فارغاً أو غير مكتمل في الذاكرة!");
+    } else if (imgElement.naturalWidth === 0) {
+        console.error("❌ خطأ قاطع: المتصفح يرفض قراءة بكسل الصورة (naturalWidth = 0)، مما يشير إلى تلف بيانات الـ Base64 أو حظر أمني.");
+    } else {
+        console.log("✅ التشخيص البرمجي: بيانات الصورة سليمة 100% ومحملة في الذاكرة، المشكلة محصورة حصراً في آلية رندر الطباعة المباشرة للمتصفح.");
+    }
+    console.groupEnd();
+}
+
+// دالة ضغط الصورة برمجياً لتخفيف الوزن قبل الإرسال
 function compressImageForPrint(dataUrl, callback) {
     if (!dataUrl) {
         callback(null);
@@ -121,7 +145,7 @@ function compressImageForPrint(dataUrl, callback) {
         
         let width = img.width;
         let height = img.height;
-        const maxDim = 1000; // أبعاد مثالية للوضوح والسرعة القصوى
+        const maxDim = 1000;
 
         if (width > height && width > maxDim) {
             height = Math.round((height * maxDim) / width);
@@ -141,7 +165,7 @@ function compressImageForPrint(dataUrl, callback) {
     };
 }
 
-// زر الطباعة المباشرة مع آلية الضغط الذكي ومنع الصفحة البيضاء
+// دالة الطباعة المباشرة مع تضمين أداة التشخيص
 function printPrescriptionDirectly() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
@@ -155,7 +179,6 @@ function printPrescriptionDirectly() {
     const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
 
-    // ضغط الصورة أولاً ثم إرسالها للرندر والطباعة الفورية
     compressImageForPrint(savedRxImg, function(compressedImg) {
         let bgImg = container.querySelector('.rx-bg-img');
         if (!bgImg) {
@@ -168,6 +191,9 @@ function printPrescriptionDirectly() {
             bgImg.src = compressedImg;
             bgImg.style.display = 'block';
         }
+
+        // تشغيل أداة الفحص فورا قبل الطباعة لتسجيل الحالة في الـ Console
+        diagnosePrintIssue(bgImg);
 
         html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
             const imgData = canvas.toDataURL('image/png');
