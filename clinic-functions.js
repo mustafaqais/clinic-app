@@ -1,6 +1,6 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.51
-// (محدث: تفعيل عنوان Rx الأحمر والترقيم الإنجليزي التلقائي للأدوية لكافة الأجهزة ومعالجة مصادقة الموبايل)
+// Clinic Master System - Cloud Ultimate Edition v17.52
+// (محدث: فصل ملفات طباعة الروشتة والتقارير في 6 ملفات مستقلة لكل جهاز عبر الـ Dynamic CSS Injection)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1063,7 +1063,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.51",
+        version: "17.52",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2215,7 +2215,33 @@ function loadSavedRxLayout() {
     setRxPaperSize(savedSize);
 }
 
+// دالة تحديد الجهاز وحقن ملف الستايل الخاص بالطباعة ديناميكياً
+function injectPrintStyle(type = 'rx') {
+    const width = window.innerWidth;
+    let deviceType = 'desktop';
+    
+    if (width <= 768) {
+        deviceType = 'mobile';
+    } else if (width > 768 && width <= 1024) {
+        deviceType = 'tablet';
+    }
+
+    const styleFileName = `print-styles/print-${type}-${deviceType}.css`;
+
+    let oldLink = document.getElementById('activePrintStyle');
+    if (oldLink) oldLink.remove();
+
+    const link = document.createElement('link');
+    link.id = 'activePrintStyle';
+    link.rel = 'stylesheet';
+    link.href = styleFileName;
+    document.head.appendChild(link);
+}
+
 function printPrescriptionDirectly() {
+    // حقن ستايل الروشتة المستقل الخاص بالجهاز الحالي
+    injectPrintStyle('rx');
+
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
     updateConfigModeUI();
@@ -2263,6 +2289,9 @@ function printPrescriptionDirectly() {
 }
 
 function printMedicalReportDirectly() {
+    // حقن ستايل التقرير الطبي المستقل الخاص بالجهاز الحالي
+    injectPrintStyle('report');
+
     if (repConfigModeActive) {
         toggleRepConfigMode();
     }
