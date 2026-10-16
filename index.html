@@ -1074,17 +1074,21 @@
 <script>eruda.init();</script>
 
 <script>
-    // فحص تشخيصي فوري للتأكد من حالة الفايربيز والـ Auth
+    // تعديل ذكي لإجبار إظهار لوحة التحكم للمستخدم المسجل دخوله فوراً
     try {
-        console.log("=== DIAGNOSTIC CHECK ===");
-        console.log("Firebase Apps count:", firebase.apps.length);
         firebase.auth().onAuthStateChanged(function(user) {
-            console.log("Auth State Changed -> User:", user ? user.email : "Not logged in");
-        }, function(err) {
-            console.error("Auth State Error:", err);
+            if (user) {
+                const authScreen = document.getElementById('authScreen');
+                const appContainer = document.getElementById('appContainer');
+                const mainScreen = document.getElementById('mainScreen');
+                
+                if (authScreen) authScreen.style.display = 'none';
+                if (appContainer) appContainer.style.display = 'flex';
+                if (mainScreen) mainScreen.style.display = 'block';
+            }
         });
     } catch(err) {
-        console.error("Diagnostic Exception:", err);
+        console.error("Auth Exception:", err);
     }
 
     window.toggleLanguage = function() {
