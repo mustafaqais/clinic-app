@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.52
-// (محدث: إصلاح الإضافة الجماعية، إكمال الاقتراحات، وتفريغ حقول المريض الجديد)
+// (محدث: إصلاح السحب والإفلات لبوكسات التقرير الطبي، الإضافة الجماعية، وإكمال الاقتراحات)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1593,7 +1593,7 @@ function handleLiveInput(textarea, category, visitId) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1606,7 +1606,6 @@ function handleLiveInput(textarea, category, visitId) {
     updateVisitFieldData(visitId, category, textarea.value);
 }
 
-// [إصلاح المشكلة الثانية]: دالة اختيار الاقتراحات وإكمال الكلمة بالكامل داخل الحقل بسلاسة
 function selectSuggestion(category, visitId, term) {
     const textarea = document.getElementById('v' + category.charAt(0).toUpperCase() + category.slice(1) + '-' + visitId);
     if (!textarea) return;
@@ -1686,7 +1685,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2544,6 +2543,7 @@ function updateReportFieldData(visitId, fieldName, value) {
     savePatientToCloudAndLocal(patient);
 }
 
+// [إصلاح وتحسين دالة فتح نافذة التقرير الطبي لتهيئة السحب والإفلات وتنشيط البوكسات فوراً]
 function openMedicalReportModal(visitId) {
     currentVisitIdForModal = visitId;
     const modal = document.getElementById('medicalReportModal');
@@ -2609,6 +2609,9 @@ function openMedicalReportModal(visitId) {
     }
 
     loadRepLayoutPositions();
+    
+    // استدعاء دالة تفعيل السحب والإفلات فور فتح النافذة لضمان عملها 100%
+    initReportDraggableElements();
 }
 
 function closeMedicalReportModal() {
@@ -2709,7 +2712,7 @@ function loadRepLayoutPositions() {
                 if (el && data[id]) {
                     if (data[id].top) el.style.top = data[id].top;
                     if (data[id].left) el.style.left = data[id].left;
-                    if (data[id].width) {
+                    if (data.width) {
                         el.style.width = data[id].width;
                         el.style.maxWidth = '100%';
                     }
@@ -2744,14 +2747,20 @@ function printMedicalReportOnly(visitId) {
     }, 400);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+// [تحويل منطق السحب والإفلات للتقرير إلى دالة مستقلة تُستدعى عند فتح النافذة لضمان عملها]
+function initReportDraggableElements() {
     const draggableBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
     const container = document.getElementById('repCanvasContainer');
+    if (!container) return;
 
     draggableBoxes.forEach(box => {
         box.style.touchAction = 'none';
+
+        box.onpointerdown = null;
+        box.onpointermove = null;
+        box.onpointerup = null;
 
         box.addEventListener('pointerdown', (e) => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
@@ -2792,43 +2801,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeBox = null;
             }
         });
-
-        box.addEventListener('touchstart', (e) => {
-            if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            if (e.touches.length === 1 && container) {
-                activeBox = box;
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                const cWidth = container.clientWidth;
-                const cHeight = container.clientHeight;
-                initialLeftPct = (box.offsetLeft / cWidth) * 100;
-                initialTopPct = (box.offsetTop / cHeight) * 100;
-                e.stopPropagation();
-            }
-        }, { passive: true });
-
-        box.addEventListener('touchmove', (e) => {
-            if (!activeBox || activeBox !== box || !container) return;
-            if (e.touches.length === 1) {
-                let dx = e.touches[0].clientX - startX;
-                let dy = e.touches[0].clientY - startY;
-                const cWidth = container.clientWidth;
-                const cHeight = container.clientHeight;
-                let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
-                let newTopPct = initialTopPct + (dy / cHeight) * 100;
-                box.style.left = newLeftPct + '%';
-                box.style.top = newTopPct + '%';
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        box.addEventListener('touchend', (e) => {
-            if (activeBox === box) {
-                activeBox = null;
-            }
-        });
     });
-});
+}
 
 function autoSaveMedicalRecord() {}
 
@@ -2933,7 +2907,6 @@ function closeBulkAddModal() {
     document.getElementById('bulkAddDictModal').style.display = 'none';
 }
 
-// [إصلاح المشكلة الأولى]: معالجة النصوص المستنسخة دفعة واحدة ولصقها بشكل صحيح في القاموس
 function processAndSaveBulkDict() {
     const text = document.getElementById('bulkDictInput').value;
     if (!text.trim()) {
