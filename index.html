@@ -1152,5 +1152,21 @@
         if (menu) menu.style.display = 'none';
     });
 </script>
+
+<!-- ========================================== -->
+<!-- Fallback Script لضمان عدم ظهور أخطاء is not defined -->
+<!-- ========================================== -->
+<script>
+    window.openPatientsArchive = window.openPatientsArchive || function() { navigateTo('archiveScreen', 'Patients Archive', 'Search & records'); };
+    window.openRxTemplateManager = window.openRxTemplateManager || function() { navigateTo('rxTemplateScreen', 'RX Template', 'Header customization'); };
+    window.openSpecialtiesDashboard = window.openSpecialtiesDashboard || function() { navigateTo('specialtiesDashboardScreen', 'لوحة تحكم الاختصاصات', 'تخصيص الحقول'); };
+    window.openDictionaryManager = window.openDictionaryManager || function() { navigateTo('dictScreen', 'Dictionary Manager', 'Manage terms'); };
+    window.openAnalyticsDashboard = window.openAnalyticsDashboard || function() { navigateTo('analyticsScreen', 'Clinic Analytics', 'Smart performance'); };
+    window.openBackupManager = window.openBackupManager || function() { navigateTo('backupScreen', 'Backup Manager', 'Export and restore data'); };
+    window.openTrashBin = window.openTrashBin || function() { navigateTo('trashScreen', 'Trash Bin', 'Recover deleted items'); };
+    window.openAccountSettings = window.openAccountSettings || function() { navigateTo('settingsScreen', 'Account Settings', 'Change email and password'); };
+    window.openPermissionsManager = window.openPermissionsManager || function() { navigateTo('permissionsScreen', 'Secretary Management', 'Create account & permissions'); };
+    window.openNetworkHierarchy = window.openNetworkHierarchy || function() { navigateTo('networkScreen', 'قاعدة بيانات الشبكة', 'إدارة المستخدمين'); };
+</script>
 </body>
 </html>
