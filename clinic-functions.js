@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.52
-// (محدث: إصلاح الإضافة الجماعية، إكمال الاقتراحات، وتفريغ حقول المريض الجديد)
+// (محدث نهائياً: إصلاح وتفعيل أزرار Medical History والتعديل Edit بدقة)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
