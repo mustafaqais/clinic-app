@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Final Synced Version
+// Clinic Master - Desktop RX Print (Synced with Report Print Logic)
 // ==========================================
 
 let isConfigMode = false;
@@ -72,6 +72,7 @@ function saveRxLayoutPositions() {
     alert('تم حفظ إعدادات روشتة الحاسبة بنجاح!');
 }
 
+// دالة الطباعة المحدثة والمطابقة تماماً لمنطق التقرير الطبي
 function printPrescriptionDirectly() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
@@ -80,28 +81,31 @@ function printPrescriptionDirectly() {
     const container = document.getElementById('rxCanvasContainer');
     if (!container) return;
 
-    // جلب رابط الترويسة المحفوظ بشتى الطرق لضمان عدم ضياعه
-    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    // جلب الصورة تماماً مثل التقرير الطبي
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image'] || '';
     
     let bgImg = container.querySelector('.rx-bg-img');
-    
     if (!bgImg) {
         bgImg = document.createElement('img');
         bgImg.className = 'rx-bg-img';
+        bgImg.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 1; pointer-events: none; opacity: 1;';
         container.insertBefore(bgImg, container.firstChild);
     }
 
     if (savedRxImg) {
         bgImg.src = savedRxImg;
         bgImg.style.display = 'block';
+    } else {
+        bgImg.style.display = 'none';
     }
 
     const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
-    
+
+    // تفعيل كلاس الطباعة الخاص بالروشتة تماماً كالتقارير
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
-    
+
     const reportModal = document.getElementById('medicalReportModal');
     let reportWasOpen = false;
     if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
@@ -109,27 +113,16 @@ function printPrescriptionDirectly() {
         reportWasOpen = true;
     }
 
-    const executePrint = () => {
-        setTimeout(() => {
-            window.print();
-            setTimeout(() => {
-                document.body.classList.remove('is-printing-rx-only');
-                controls.forEach(c => c.style.display = '');
-                if (reportWasOpen && reportModal) {
-                    reportModal.style.display = 'flex';
-                }
-            }, 1200);
-        }, 600);
-    };
+    // اعتماد نفس توقيت التقرير الطبي السلس
+    setTimeout(() => {
+        window.print();
+    }, 400);
 
-    if (savedRxImg) {
-        if (bgImg.complete && bgImg.naturalWidth > 0) {
-            executePrint();
-        } else {
-            bgImg.onload = executePrint;
-            bgImg.onerror = executePrint;
+    setTimeout(() => {
+        document.body.classList.remove('is-printing-rx-only');
+        controls.forEach(c => c.style.display = '');
+        if (reportWasOpen && reportModal) {
+            reportModal.style.display = 'flex';
         }
-    } else {
-        executePrint();
-    }
+    }, 1500);
 }
