@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master - Desktop RX Print (Synced with Report Print Logic)
+// Clinic Master - Desktop RX Print (PDF Canvas Engine for Direct Print)
 // ==========================================
 
 let isConfigMode = false;
@@ -72,7 +72,42 @@ function saveRxLayoutPositions() {
     alert('تم حفظ إعدادات روشتة الحاسبة بنجاح!');
 }
 
-// دالة الطباعة المحدثة والمطابقة تماماً لمنطق التقرير الطبي
+// دالة الحفظ كـ PDF (التي تعمل لديك بامتياز وبدون أي مشاكل)
+function openPrescriptionPDF() {
+    isConfigMode = false;
+    document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
+    updateConfigModeUI();
+
+    const container = document.getElementById('rxCanvasContainer');
+    if (!container) return;
+
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image'] || '';
+    let bgImg = container.querySelector('.rx-bg-img');
+    if (!bgImg && savedRxImg) {
+        bgImg = document.createElement('img');
+        bgImg.className = 'rx-bg-img';
+        container.insertBefore(bgImg, container.firstChild);
+    }
+    if (bgImg && savedRxImg) {
+        bgImg.src = savedRxImg;
+        bgImg.style.display = 'block';
+    }
+
+    const controls = container.querySelectorAll('.box-font-controls');
+    controls.forEach(c => c.style.display = 'none');
+
+    html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('portrait', 'mm', 'a4');
+        const imgWidth = 210;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+        pdf.save('Prescription_' + Date.now() + '.pdf');
+        controls.forEach(c => c.style.display = '');
+    });
+}
+
+// توجيه زر الطباعة المباشرة (Direct Print) ليعتمد محرك الـ PDF السليم والمضمون
 function printPrescriptionDirectly() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
@@ -81,48 +116,56 @@ function printPrescriptionDirectly() {
     const container = document.getElementById('rxCanvasContainer');
     if (!container) return;
 
-    // جلب الصورة تماماً مثل التقرير الطبي
     let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image'] || '';
-    
     let bgImg = container.querySelector('.rx-bg-img');
-    if (!bgImg) {
+    if (!bgImg && savedRxImg) {
         bgImg = document.createElement('img');
         bgImg.className = 'rx-bg-img';
-        bgImg.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 1; pointer-events: none; opacity: 1;';
         container.insertBefore(bgImg, container.firstChild);
     }
-
-    if (savedRxImg) {
+    if (bgImg && savedRxImg) {
         bgImg.src = savedRxImg;
         bgImg.style.display = 'block';
-    } else {
-        bgImg.style.display = 'none';
     }
 
     const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
 
-    // تفعيل كلاس الطباعة الخاص بالروشتة تماماً كالتقارير
-    document.body.classList.add('is-printing-rx-only');
-    document.body.classList.remove('is-printing-report-only');
-
-    const reportModal = document.getElementById('medicalReportModal');
-    let reportWasOpen = false;
-    if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
-        reportModal.style.display = 'none';
-        reportWasOpen = true;
-    }
-
-    // اعتماد نفس توقيت التقرير الطبي السلس
-    setTimeout(() => {
-        window.print();
-    }, 400);
-
-    setTimeout(() => {
-        document.body.classList.remove('is-printing-rx-only');
-        controls.forEach(c => c.style.display = '');
-        if (reportWasOpen && reportModal) {
-            reportModal.style.display = 'flex';
+    // استخدام محرك html2canvas لطباعة الروشتة بصورة مطابقة تماماً للـ PDF وبدون أي فراغ أو اختفاء للترويسة
+    html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        
+        // إنشاء نافذة طباعة مؤقتة تحمل الـ Canvas بصيغة مثالية للطباعة المباشرة
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Print Prescription</title>
+                        <style>
+                            body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
+                            img { max-width: 100%; height: auto; object-fit: contain; }
+                            @media print {
+                                body { margin: 0; }
+                                img { width: 100vw; height: 100vh; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <img src="${imgData}" onload="window.print(); window.close();" />
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+        } else {
+            // كخيار بديل إذا تم حظر النوافذ المنبثقة، يتم استدعاء حفظ الـ PDF مباشرة
+            openPrescriptionPDF();
         }
-    }, 1500);
+        
+        controls.forEach(c => c.style.display = '');
+    }).catch(err => {
+        console.error("Print Canvas Error:", err);
+        controls.forEach(c => c.style.display = '');
+        openPrescriptionPDF();
+    });
 }
