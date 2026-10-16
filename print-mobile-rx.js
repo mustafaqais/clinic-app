@@ -1,18 +1,22 @@
 // ==========================================
-// Clinic Master - Mobile RX Print (print-mobile-rx.js) - Complete File
+// Clinic Master - Mobile RX Print (print-mobile-rx.js) - Ultimate Force Fix
 // ==========================================
 
 function printPrescriptionDirectly() {
     const container = document.getElementById('rxCanvasContainer');
     if (!container) return;
 
-    let bgImg = container.querySelector('#rxBgImg') || container.querySelector('.rx-bg-img');
+    let bgImg = container.querySelector('#rxBgImg');
     let savedRxImg = localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
 
-    if (bgImg && savedRxImg) {
-        bgImg.src = savedRxImg;
-        bgImg.style.display = 'block';
-        bgImg.style.visibility = 'visible';
+    if (bgImg) {
+        if (savedRxImg) {
+            bgImg.src = savedRxImg;
+            bgImg.style.display = 'block';
+            bgImg.style.visibility = 'visible';
+            bgImg.style.opacity = '1';
+            bgImg.style.zIndex = '1';
+        }
     }
 
     const rxSymbol = container.querySelector('#rxDragBoxTreatment div:nth-child(2)');
@@ -23,10 +27,10 @@ function printPrescriptionDirectly() {
     
     setTimeout(() => {
         window.print();
-    }, 500);
+    }, 1000); // زيادة وقت الانتظار للموبايل لضمان سحب الصورة ورسمها
     
     setTimeout(() => { 
         document.body.classList.remove('is-printing-rx-only'); 
         if (rxSymbol) rxSymbol.style.display = '';
-    }, 1500);
+    }, 2500);
 }
