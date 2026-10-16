@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.52
-// (محدث: تعديل مسار الستايلات لتتوافق مع الملفات الموجودة مباشرة في المجلد الرئيسي)
+// (محدث: تعديل مسار الستايلات لتتوافق مع الملفات الموجودة مباشرة في المجلد الرئيسي + إصلاح سحب بوكسات التقرير الطبي)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -2669,7 +2669,7 @@ function printMedicalReportOnly(visitId) {
 document.addEventListener('DOMContentLoaded', () => {
     const draggableBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
     let activeBox = null;
-    let startX = 0, startY = 0, initialX = 0, initialY = 0;
+    let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
     const container = document.getElementById('repCanvasContainer');
 
     draggableBoxes.forEach(box => {
@@ -2680,8 +2680,13 @@ document.addEventListener('DOMContentLoaded', () => {
             activeBox = box;
             startX = e.clientX;
             startY = e.clientY;
-            initialX = box.offsetLeft;
-            initialY = box.offsetTop;
+            
+            const cWidth = container.clientWidth;
+            const cHeight = container.clientHeight;
+            
+            initialLeftPct = (box.offsetLeft / cWidth) * 100;
+            initialTopPct = (box.offsetTop / cHeight) * 100;
+            
             box.setPointerCapture(e.pointerId);
             e.stopPropagation();
         });
@@ -2690,10 +2695,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!activeBox || activeBox !== box || !container) return;
             let dx = e.clientX - startX;
             let dy = e.clientY - startY;
+            
             const cWidth = container.clientWidth;
             const cHeight = container.clientHeight;
-            let newLeftPct = ((initialX + dx) / cWidth) * 100;
-            let newTopPct = ((initialY + dy) / cHeight) * 100;
+
+            let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
+            let newTopPct = initialTopPct + (dy / cHeight) * 100;
+
             box.style.left = newLeftPct + '%';
             box.style.top = newTopPct + '%';
         });
@@ -2713,8 +2721,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeBox = box;
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
-                initialX = box.offsetLeft;
-                initialY = box.offsetTop;
+                const cWidth = container.clientWidth;
+                const cHeight = container.clientHeight;
+                initialLeftPct = (box.offsetLeft / cWidth) * 100;
+                initialTopPct = (box.offsetTop / cHeight) * 100;
                 e.stopPropagation();
             }
         }, { passive: true });
@@ -2726,8 +2736,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 let dy = e.touches[0].clientY - startY;
                 const cWidth = container.clientWidth;
                 const cHeight = container.clientHeight;
-                let newLeftPct = ((initialX + dx) / cWidth) * 100;
-                let newTopPct = ((initialY + dy) / cHeight) * 100;
+                let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
+                let newTopPct = initialTopPct + (dy / cHeight) * 100;
                 box.style.left = newLeftPct + '%';
                 box.style.top = newTopPct + '%';
                 e.preventDefault();
