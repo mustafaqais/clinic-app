@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.52
-// (محدث: تعديل مسار الستايلات لتتوافق مع الملفات الموجودة مباشرة في المجلد الرئيسي + إصلاح سحب بوكسات التقرير الطبي)
+// (محدث: تعديل مسار الستايلات + إصلاح سحب بوكسات التقرير + طباعة الروشتة كصورة للموبايل تجريبياً)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -2238,52 +2238,120 @@ function injectPrintStyle(type = 'rx') {
 }
 
 function printPrescriptionDirectly() {
-    injectPrintStyle('rx');
+    const isMobile = window.innerWidth <= 768;
 
-    isConfigMode = false;
-    document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
-    updateConfigModeUI();
+    if (isMobile) {
+        // الطريقة التجريبية الخاصة بالموبايل: تحويل الروشتة إلى صورة لضمان صفحة واحدة وعدم التداخل
+        isConfigMode = false;
+        document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
+        updateConfigModeUI();
 
-    const container = document.getElementById('rxCanvasContainer');
-    if (!container) return;
+        const container = document.getElementById('rxCanvasContainer');
+        if (!container) return;
 
-    let bgImg = container.querySelector('.rx-bg-img');
-    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
-    
-    if (!bgImg && savedRxImg) {
-        bgImg = document.createElement('img');
-        bgImg.src = savedRxImg;
-        bgImg.className = 'rx-bg-img';
-        container.insertBefore(bgImg, container.firstChild);
-    } else if (bgImg && savedRxImg) {
-        bgImg.src = savedRxImg;
-        bgImg.style.display = 'block';
-    }
-
-    const controls = container.querySelectorAll('.box-font-controls');
-    controls.forEach(c => c.style.display = 'none');
-    
-    document.body.classList.add('is-printing-rx-only');
-    document.body.classList.remove('is-printing-report-only');
-    
-    const reportModal = document.getElementById('medicalReportModal');
-    let reportWasOpen = false;
-    if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
-        reportModal.style.display = 'none';
-        reportWasOpen = true;
-    }
-
-    setTimeout(() => {
-        window.print();
-    }, 400);
-
-    setTimeout(() => {
-        document.body.classList.remove('is-printing-rx-only');
-        controls.forEach(c => c.style.display = '');
-        if (reportWasOpen && reportModal) {
-            reportModal.style.display = 'flex';
+        let bgImg = container.querySelector('.rx-bg-img');
+        let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+        
+        if (!bgImg && savedRxImg) {
+            bgImg = document.createElement('img');
+            bgImg.src = savedRxImg;
+            bgImg.className = 'rx-bg-img';
+            container.insertBefore(bgImg, container.firstChild);
+        } else if (bgImg && savedRxImg) {
+            bgImg.src = savedRxImg;
+            bgImg.style.display = 'block';
         }
-    }, 1500);
+
+        const controls = container.querySelectorAll('.box-font-controls');
+        controls.forEach(c => c.style.display = 'none');
+
+        const reportModal = document.getElementById('medicalReportModal');
+        let reportWasOpen = false;
+        if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
+            reportModal.style.display = 'none';
+            reportWasOpen = true;
+        }
+
+        html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
+            const imgData = canvas.toDataURL('image/jpeg', 0.90);
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Print Prescription</title>
+                        <style>
+                            body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #fff; display: flex; justify-content: center; align-items: center; }
+                            img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; }
+                            @page { size: auto; margin: 0; }
+                        </style>
+                    </head>
+                    <body>
+                        <img src="${imgData}" onload="window.print(); window.close();" />
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+
+            controls.forEach(c => c.style.display = '');
+            if (reportWasOpen && reportModal) {
+                reportModal.style.display = 'flex';
+            }
+        }).catch(err => {
+            console.error("Mobile print canvas error:", err);
+            alert("تعذر إنشاء صورة الطباعة للموبايل.");
+            controls.forEach(c => c.style.display = '');
+        });
+
+    } else {
+        // الطريقة الأصلية للحاسوب والتابلت
+        injectPrintStyle('rx');
+
+        isConfigMode = false;
+        document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
+        updateConfigModeUI();
+
+        const container = document.getElementById('rxCanvasContainer');
+        if (!container) return;
+
+        let bgImg = container.querySelector('.rx-bg-img');
+        let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+        
+        if (!bgImg && savedRxImg) {
+            bgImg = document.createElement('img');
+            bgImg.src = savedRxImg;
+            bgImg.className = 'rx-bg-img';
+            container.insertBefore(bgImg, container.firstChild);
+        } else if (bgImg && savedRxImg) {
+            bgImg.src = savedRxImg;
+            bgImg.style.display = 'block';
+        }
+
+        const controls = container.querySelectorAll('.box-font-controls');
+        controls.forEach(c => c.style.display = 'none');
+        
+        document.body.classList.add('is-printing-rx-only');
+        document.body.classList.remove('is-printing-report-only');
+        
+        const reportModal = document.getElementById('medicalReportModal');
+        let reportWasOpen = false;
+        if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
+            reportModal.style.display = 'none';
+            reportWasOpen = true;
+        }
+
+        setTimeout(() => {
+            window.print();
+        }, 400);
+
+        setTimeout(() => {
+            document.body.classList.remove('is-printing-rx-only');
+            controls.forEach(c => c.style.display = '');
+            if (reportWasOpen && reportModal) {
+                reportModal.style.display = 'flex';
+            }
+        }, 1500);
+    }
 }
 
 function printMedicalReportDirectly() {
