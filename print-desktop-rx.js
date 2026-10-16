@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Complete File
+// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Ultimate Force Fix
 // ==========================================
 
 let isDesktopRxConfigMode = false;
@@ -73,13 +73,20 @@ function printPrescriptionDirectly() {
     const container = document.getElementById('rxCanvasContainer');
     if (!container) return;
 
-    let bgImg = container.querySelector('#rxBgImg') || container.querySelector('.rx-bg-img');
+    // جلب الصورة من كافة الاحتمالات الممكنة في الذاكرة
+    let bgImg = container.querySelector('#rxBgImg');
     let savedRxImg = localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
 
-    if (bgImg && savedRxImg) {
-        bgImg.src = savedRxImg;
-        bgImg.style.display = 'block';
-        bgImg.style.visibility = 'visible';
+    if (bgImg) {
+        if (savedRxImg) {
+            bgImg.src = savedRxImg;
+            bgImg.style.display = 'block';
+            bgImg.style.visibility = 'visible';
+            bgImg.style.opacity = '1';
+            bgImg.style.zIndex = '1';
+        } else {
+            console.warn("تحذير: لا توجد صورة روشتة مخزنة في localStorage!");
+        }
     }
 
     const controls = container.querySelectorAll('.box-font-controls');
@@ -91,15 +98,16 @@ function printPrescriptionDirectly() {
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
 
+    // إعطاء مهلة كافية جداً لرسم الصورة في الـ DOM قبل فتح أمر الطباعة
     setTimeout(() => {
         window.print();
-    }, 400);
+    }, 800);
 
     setTimeout(() => {
         document.body.classList.remove('is-printing-rx-only');
         controls.forEach(c => c.style.display = '');
         if (rxSymbol) rxSymbol.style.display = '';
-    }, 1500);
+    }, 2000);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
