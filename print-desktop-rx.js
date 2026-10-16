@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Ultimate Direct Print Fix
+// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Final Synced Version
 // ==========================================
 
 let isConfigMode = false;
@@ -80,22 +80,20 @@ function printPrescriptionDirectly() {
     const container = document.getElementById('rxCanvasContainer');
     if (!container) return;
 
-    // جلب رابط الصورة المحفوظة
+    // جلب رابط الترويسة المحفوظ بشتى الطرق لضمان عدم ضياعه
     let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
     
-    let bgImg = container.querySelector('#rxBgImg') || container.querySelector('.rx-bg-img');
+    let bgImg = container.querySelector('.rx-bg-img');
     
     if (!bgImg) {
         bgImg = document.createElement('img');
-        bgImg.id = 'rxBgImg';
         bgImg.className = 'rx-bg-img';
         container.insertBefore(bgImg, container.firstChild);
     }
 
     if (savedRxImg) {
         bgImg.src = savedRxImg;
-        // إجبار ظهور الصورة وتنسيقها لتملأ الحاوي أثناء الطباعة
-        bgImg.style.cssText = "position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 1; display: block !important; visibility: visible !important; opacity: 1 !important;";
+        bgImg.style.display = 'block';
     }
 
     const controls = container.querySelectorAll('.box-font-controls');
@@ -111,8 +109,7 @@ function printPrescriptionDirectly() {
         reportWasOpen = true;
     }
 
-    // الانتظار حتى يتم تحميل الصورة تماماً قبل إعطاء أمر الـ print
-    const runPrint = () => {
+    const executePrint = () => {
         setTimeout(() => {
             window.print();
             setTimeout(() => {
@@ -121,18 +118,18 @@ function printPrescriptionDirectly() {
                 if (reportWasOpen && reportModal) {
                     reportModal.style.display = 'flex';
                 }
-            }, 1000);
-        }, 500);
+            }, 1200);
+        }, 600);
     };
 
     if (savedRxImg) {
-        if (bgImg.complete && bgImg.naturalWidth !== 0) {
-            runPrint();
+        if (bgImg.complete && bgImg.naturalWidth > 0) {
+            executePrint();
         } else {
-            bgImg.onload = runPrint;
-            bgImg.onerror = runPrint;
+            bgImg.onload = executePrint;
+            bgImg.onerror = executePrint;
         }
     } else {
-        runPrint();
+        executePrint();
     }
 }
