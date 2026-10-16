@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Fixed & Guaranteed
+// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Final Fixed
 // ==========================================
 
 let isDesktopRxConfigMode = false;
@@ -74,8 +74,9 @@ function printPrescriptionDirectly() {
     const container = document.getElementById('rxCanvasContainer');
     if (!container) return;
 
-    let bgImg = container.querySelector('#rxBgImg');
-    let savedRxImg = localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    // جلب العنصر بالـ ID الصحيح الموجود في الـ HTML (#rxBgImg)
+    let bgImg = container.querySelector('#rxBgImg') || container.querySelector('.rx-bg-img');
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
 
     const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
@@ -86,7 +87,6 @@ function printPrescriptionDirectly() {
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
 
-    // دالة تنفيذ الطباعة بعد التأكد من جاهزية الصورة
     const executePrint = () => {
         setTimeout(() => {
             window.print();
@@ -95,7 +95,7 @@ function printPrescriptionDirectly() {
                 controls.forEach(c => c.style.display = '');
                 if (rxSymbol) rxSymbol.style.display = '';
             }, 1000);
-        }, 400);
+        }, 500);
     };
 
     if (bgImg) {
@@ -104,7 +104,6 @@ function printPrescriptionDirectly() {
             bgImg.style.visibility = 'visible';
             bgImg.style.opacity = '1';
             
-            // إذا كانت الصورة لم تحمل بعد أو تم تغيير رابطها
             if (bgImg.src !== savedRxImg) {
                 bgImg.onload = executePrint;
                 bgImg.onerror = executePrint;
