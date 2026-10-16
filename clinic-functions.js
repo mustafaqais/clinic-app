@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.52
-// (محدث: فحص التكرار الصامت، حقل المحافظة، وإصلاح السحب والإفلات للتقرير الطبي ودوال التنقل)
+// (محدث: إصلاح السحب والإفلات لبوكسات التقرير الطبي، الإضافة الجماعية، وإكمال الاقتراحات)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -74,22 +74,17 @@ async function generateNewKey(type) {
 let screenHistory = ['mainScreen'];
 
 function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', saveState = true) {
-    if (typeof isSubscriptionExpired !== 'undefined' && !isSubscriptionExpired) {
-        if (typeof autoSaveMedicalRecord === 'function') {
-            autoSaveMedicalRecord();
-        }
+    if (!isSubscriptionExpired) {
+        autoSaveMedicalRecord();
     }
     hideAllScreensInner();
     
     const target = document.getElementById(screenId);
-    if (target) {
-        target.style.display = 'block';
-    } else {
-        console.error("Screen ID not found:", screenId);
-    }
+    if (target) target.style.display = 'block';
 
+    // [إصلاح المشكلة الثالثة]: إذا كانت الشاشة هي صفحة مريض جديد، يتم تفريغ جميع الحقول بالكامل لتكون فارغة تماماً
     if (screenId === 'addPatientScreen') {
-        const fieldsToReset = ['pName', 'pAge', 'pGender', 'pProvince', 'pMarital', 'pJob', 'pPhone'];
+        const fieldsToReset = ['pName', 'pSubName', 'pAge', 'pGender', 'pMarital', 'pJob', 'pPhone'];
         fieldsToReset.forEach(id => {
             const el = document.getElementById(id);
             if (el) {
@@ -105,12 +100,8 @@ function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', save
     const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
     const headerTitleText = (screenId === 'mainScreen') ? customBrandName : (title || customBrandName);
 
-    const headerTitleEl = document.getElementById('headerTitle');
-    const headerSubEl = document.getElementById('headerSub');
-    const backBtnEl = document.getElementById('backBtn');
-
-    if (headerTitleEl) headerTitleEl.innerText = headerTitleText;
-    if (headerSubEl) headerSubEl.innerText = sub;
+    document.getElementById('headerTitle').innerText = headerTitleText;
+    document.getElementById('headerSub').innerText = sub;
 
     if (saveState) {
         sessionStorage.setItem('current_screen', screenId);
@@ -118,57 +109,48 @@ function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', save
         sessionStorage.setItem('header_sub', sub);
         if (screenId !== 'medicalRecordScreen') {
             sessionStorage.removeItem('current_patient_id');
-            if (typeof currentPatientId !== 'undefined') currentPatientId = null;
+            currentPatientId = null;
         }
     }
 
-    if (backBtnEl) {
-        if (screenId === 'mainScreen') {
-            backBtnEl.style.display = 'none';
-            screenHistory = ['mainScreen'];
-        } else {
-            backBtnEl.style.display = 'flex';
-            if (screenHistory[screenHistory.length - 1] !== screenId) {
-                screenHistory.push(screenId);
-            }
+    if (screenId === 'mainScreen') {
+        document.getElementById('backBtn').style.display = 'none';
+        screenHistory = ['mainScreen'];
+    } else {
+        document.getElementById('backBtn').style.display = 'flex';
+        if (screenHistory[screenHistory.length - 1] !== screenId) {
+            screenHistory.push(screenId);
         }
     }
 }
 
 function goBackScreen() {
-    if (typeof isSubscriptionExpired !== 'undefined' && !isSubscriptionExpired) {
-        if (typeof autoSaveMedicalRecord === 'function') {
-            autoSaveMedicalRecord();
-        }
+    if (!isSubscriptionExpired) {
+        autoSaveMedicalRecord();
     }
     if (screenHistory.length > 1) {
         screenHistory.pop();
         const prevScreen = screenHistory[screenHistory.length - 1];
         
         hideAllScreensInner();
-        const prevTarget = document.getElementById(prevScreen);
-        if (prevTarget) prevTarget.style.display = 'block';
+        document.getElementById(prevScreen).style.display = 'block';
         sessionStorage.setItem('current_screen', prevScreen);
 
         const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
-        const headerTitleEl = document.getElementById('headerTitle');
-        const headerSubEl = document.getElementById('headerSub');
-        const backBtnEl = document.getElementById('backBtn');
-        const currentLang = typeof currentLang !== 'undefined' ? currentLang : 'ar';
 
         if (prevScreen === 'mainScreen') {
-            if (backBtnEl) backBtnEl.style.display = 'none';
-            if (headerTitleEl) headerTitleEl.innerText = customBrandName;
-            if (headerSubEl) headerSubEl.innerText = translations && translations[currentLang] ? translations[currentLang].headerSub : 'Cloud Secure Dashboard';
+            document.getElementById('backBtn').style.display = 'none';
+            document.getElementById('headerTitle').innerText = customBrandName;
+            document.getElementById('headerSub').innerText = translations[currentLang].headerSub;
             sessionStorage.setItem('header_title', customBrandName);
-            sessionStorage.setItem('header_sub', headerSubEl ? headerSubEl.innerText : '');
+            sessionStorage.setItem('header_sub', translations[currentLang].headerSub);
             sessionStorage.removeItem('current_patient_id');
-            if (typeof currentPatientId !== 'undefined') currentPatientId = null;
+            currentPatientId = null;
         } else if (prevScreen === 'archiveScreen') {
-            if (headerTitleEl) headerTitleEl.innerText = translations && translations[currentLang] ? translations[currentLang].archive : 'Archive';
-            if (headerSubEl) headerSubEl.innerText = 'Advanced search, filters & records';
+            document.getElementById('headerTitle').innerText = translations[currentLang].archive;
+            document.getElementById('headerSub').innerText = 'Advanced search, filters & records';
             sessionStorage.removeItem('current_patient_id');
-            if (typeof currentPatientId !== 'undefined') currentPatientId = null;
+            currentPatientId = null;
         }
     } else {
         showMainMenu();
@@ -177,25 +159,34 @@ function goBackScreen() {
 
 window.addEventListener('popstate', function(event) {
     event.preventDefault();
-    const modals = [
-        { id: 'medHistoryModal', close: closeMedHistoryModal },
-        { id: 'bmiCalculatorModal', close: closeBmiModal },
-        { id: 'rxModal', close: closeRxModal },
-        { id: 'medicalReportModal', close: closeMedicalReportModal },
-        { id: 'editPatientModal', close: closeEditPatientModal },
-        { id: 'supportModal', close: closeSupportModal },
-        { id: 'bulkAddDictModal', close: closeBulkAddModal }
-    ];
-    
-    for (let m of modals) {
-        const el = document.getElementById(m.id);
-        if (el && el.style.display === 'flex') {
-            if (typeof m.close === 'function') m.close();
-            else el.style.display = 'none';
-            return;
-        }
+    if (document.getElementById('medHistoryModal').style.display === 'flex') {
+        closeMedHistoryModal();
+        return;
     }
-
+    if (document.getElementById('bmiCalculatorModal').style.display === 'flex') {
+        closeBmiModal();
+        return;
+    }
+    if (document.getElementById('rxModal').style.display === 'flex') {
+        closeRxModal();
+        return;
+    }
+    if (document.getElementById('medicalReportModal') && document.getElementById('medicalReportModal').style.display === 'flex') {
+        closeMedicalReportModal();
+        return;
+    }
+    if (document.getElementById('editPatientModal').style.display === 'flex') {
+        closeEditPatientModal();
+        return;
+    }
+    if (document.getElementById('supportModal').style.display === 'flex') {
+        closeSupportModal();
+        return;
+    }
+    if (document.getElementById('bulkAddDictModal').style.display === 'flex') {
+        closeBulkAddModal();
+        return;
+    }
     if (screenHistory.length > 1) {
         goBackScreen();
     } else {
@@ -206,27 +197,27 @@ window.addEventListener('popstate', function(event) {
 history.pushState(null, '', window.location.href);
 
 function hideAllScreensInner() {
-    const screens = [
-        'mainScreen', 'addPatientScreen', 'rxTemplateScreen', 
-        'specialtiesDashboardScreen', 'archiveScreen', 'trashScreen', 
-        'medicalRecordScreen', 'dictScreen', 'networkScreen', 
-        'analyticsScreen', 'settingsScreen', 'backupScreen', 'permissionsScreen'
-    ];
-    
-    screens.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-    });
+    document.getElementById('mainScreen').style.display = 'none';
+    document.getElementById('addPatientScreen').style.display = 'none';
+    document.getElementById('rxTemplateScreen').style.display = 'none';
+    document.getElementById('specialtiesDashboardScreen').style.display = 'none';
+    document.getElementById('archiveScreen').style.display = 'none';
+    document.getElementById('trashScreen').style.display = 'none';
+    document.getElementById('medicalRecordScreen').style.display = 'none';
+    document.getElementById('dictScreen').style.display = 'none';
+    document.getElementById('networkScreen').style.display = 'none';
+    document.getElementById('analyticsScreen').style.display = 'none';
+    document.getElementById('settingsScreen').style.display = 'none';
+    document.getElementById('backupScreen').style.display = 'none';
+    document.getElementById('permissionsScreen').style.display = 'none';
 }
 
 function applyLanguage() {
-    if (typeof currentLang !== 'undefined') {
-        localStorage.setItem('clinic_lang', currentLang);
-    }
+    localStorage.setItem('clinic_lang', currentLang);
 }
 
 function applyDarkModeState() {
-    if (typeof isDarkMode !== 'undefined' && isDarkMode) {
+    if (isDarkMode) {
         document.body.classList.add('dark-mode');
     } else {
         document.body.classList.remove('dark-mode');
@@ -259,123 +250,119 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    if (typeof auth !== 'undefined' && auth) {
-        auth.onAuthStateChanged(async user => {
-            const activScreen = document.getElementById('activationScreen');
-            const appCont = document.getElementById('appContainer');
-            const authScreen = document.getElementById('authScreen');
+    auth.onAuthStateChanged(async user => {
+        const activScreen = document.getElementById('activationScreen');
+        const appCont = document.getElementById('appContainer');
+        const authScreen = document.getElementById('authScreen');
 
-            if (user) {
-                currentUserId = user.uid;
-                let dataOwnerUid = user.uid;
-                isUserSecretary = false;
+        if (user) {
+            currentUserId = user.uid;
+            let dataOwnerUid = user.uid;
+            isUserSecretary = false;
 
-                try {
-                    const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', user.email.toLowerCase()).get();
-                    if (!secQuery.empty) {
-                        const doctorDoc = secQuery.docs[0];
-                        dataOwnerUid = doctorDoc.id;
+            try {
+                const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', user.email.toLowerCase()).get();
+                if (!secQuery.empty) {
+                    const doctorDoc = secQuery.docs[0];
+                    dataOwnerUid = doctorDoc.id;
+                    sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
+                    isUserSecretary = true;
+                } else {
+                    const directDoc = await db.collection('network_hierarchy').doc(user.uid).get();
+                    if (directDoc.exists && directDoc.data().doctorUid) {
+                        dataOwnerUid = directDoc.data().doctorUid;
                         sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
                         isUserSecretary = true;
-                    } else {
-                        const directDoc = await db.collection('network_hierarchy').doc(user.uid).get();
-                        if (directDoc.exists && directDoc.data().doctorUid) {
-                            dataOwnerUid = directDoc.data().doctorUid;
-                            sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
-                            isUserSecretary = true;
+                    }
+                }
+            } catch (e) {
+                console.log("Secretary query error:", e);
+            }
+
+            await loadDoctorBranding(dataOwnerUid);
+
+            patients = JSON.parse(localStorage.getItem('clinic_patients_' + dataOwnerUid)) || patients;
+            trashBin = JSON.parse(localStorage.getItem('clinic_trash_' + dataOwnerUid)) || trashBin;
+
+            if (patientsListenerUnsubscribe) {
+                patientsListenerUnsubscribe();
+            }
+
+            if (navigator.onLine) {
+                db.collection('users_data').doc(dataOwnerUid).get().then(doc => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        if (data.rxImage) {
+                            currentDoctorRxImage = data.rxImage;
+                            localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
+                        }
+                        if (data.rxLayout) {
+                            localStorage.setItem('doctor_rx_layout', JSON.stringify(data.rxLayout));
+                        }
+                        if (data.dictionary) {
+                            medicalDict = data.dictionary;
+                            if (!medicalDict.mh_history) medicalDict.mh_history = ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"];
+                            if (!medicalDict.chief_complaint) medicalDict.chief_complaint = ["Cough and fever", "Severe headache", "Chest pain"];
+                            if (!medicalDict.history_present) medicalDict.history_present = ["Started 3 days ago, progressive"];
+                            if (!medicalDict.review_systems) medicalDict.review_systems = ["No fever, no shortness of breath"];
+                            localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
+                        }
+                        if (data.trashBin) {
+                            trashBin = data.trashBin;
+                            localStorage.setItem('clinic_trash_' + dataOwnerUid, JSON.stringify(trashBin));
+                        }
+                        if (data.secretaryAccount) {
+                            secretaryAccount = data.secretaryAccount;
+                            localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
+                        }
+                        if (data.specialtyConfig) {
+                            specialtyConfig = data.specialtyConfig;
+                            localStorage.setItem('clinic_specialty_config', JSON.stringify(specialtyConfig));
                         }
                     }
-                } catch (e) {
-                    console.log("Secretary query error:", e);
-                }
+                }).catch(err => console.log(err));
 
-                await loadDoctorBranding(dataOwnerUid);
+                patientsListenerUnsubscribe = db.collection('users_data').doc(dataOwnerUid).collection('patients')
+                    .onSnapshot(snapshot => {
+                        let cloudPatients = [];
+                        snapshot.forEach(doc => {
+                            cloudPatients.push(doc.data());
+                        });
+                        patients = cloudPatients;
+                        localStorage.setItem('clinic_patients_' + dataOwnerUid, JSON.stringify(patients));
+                        localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
-                patients = JSON.parse(localStorage.getItem('clinic_patients_' + dataOwnerUid)) || patients;
-                trashBin = JSON.parse(localStorage.getItem('clinic_trash_' + dataOwnerUid)) || trashBin;
-
-                if (typeof patientsListenerUnsubscribe === 'function' && patientsListenerUnsubscribe) {
-                    patientsListenerUnsubscribe();
-                }
-
-                if (navigator.onLine) {
-                    db.collection('users_data').doc(dataOwnerUid).get().then(doc => {
-                        if (doc.exists) {
-                            const data = doc.data();
-                            if (data.rxImage) {
-                                currentDoctorRxImage = data.rxImage;
-                                localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
-                            }
-                            if (data.rxLayout) {
-                                localStorage.setItem('doctor_rx_layout', JSON.stringify(data.rxLayout));
-                            }
-                            if (data.dictionary) {
-                                medicalDict = data.dictionary;
-                                if (!medicalDict.mh_history) medicalDict.mh_history = ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"];
-                                if (!medicalDict.chief_complaint) medicalDict.chief_complaint = ["Cough and fever", "Severe headache", "Chest pain"];
-                                if (!medicalDict.history_present) medicalDict.history_present = ["Started 3 days ago, progressive"];
-                                if (!medicalDict.review_systems) medicalDict.review_systems = ["No fever, no shortness of breath"];
-                                localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
-                            }
-                            if (data.trashBin) {
-                                trashBin = data.trashBin;
-                                localStorage.setItem('clinic_trash_' + dataOwnerUid, JSON.stringify(trashBin));
-                            }
-                            if (data.secretaryAccount) {
-                                secretaryAccount = data.secretaryAccount;
-                                localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
-                            }
-                            if (data.specialtyConfig) {
-                                specialtyConfig = data.specialtyConfig;
-                                localStorage.setItem('clinic_specialty_config', JSON.stringify(specialtyConfig));
+                        if (document.getElementById('archiveScreen').style.display === 'block') {
+                            filterPatients();
+                        } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
+                            const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
+                            if (pat) {
+                                if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) return;
+                                renderVisits(pat.visits || [], false);
+                            } else {
+                                showMainMenu();
                             }
                         }
-                    }).catch(err => console.log(err));
-
-                    patientsListenerUnsubscribe = db.collection('users_data').doc(dataOwnerUid).collection('patients')
-                        .onSnapshot(snapshot => {
-                            let cloudPatients = [];
-                            snapshot.forEach(doc => {
-                                cloudPatients.push(doc.data());
-                            });
-                            patients = cloudPatients;
-                            localStorage.setItem('clinic_patients_' + dataOwnerUid, JSON.stringify(patients));
-                            localStorage.setItem('clinic_patients', JSON.stringify(patients));
-
-                            const archiveScreen = document.getElementById('archiveScreen');
-                            const medRecScreen = document.getElementById('medicalRecordScreen');
-                            if (archiveScreen && archiveScreen.style.display === 'block') {
-                                filterPatients();
-                            } else if (medRecScreen && medRecScreen.style.display === 'block' && currentPatientId) {
-                                const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
-                                if (pat) {
-                                    if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) return;
-                                    renderVisits(pat.visits || [], false);
-                                } else {
-                                    showMainMenu();
-                                }
-                            }
-                        }, err => console.log("Real-time listener error:", err));
-                }
-
-                const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
-                if (user.email.toLowerCase() === founderMail) {
-                    setupFounderInterfaceAfterAuth();
-                } else {
-                    checkUserSubscriptionStatus(user.uid, isUserSecretary);
-                }
-            } else {
-                if (typeof patientsListenerUnsubscribe === 'function' && patientsListenerUnsubscribe) patientsListenerUnsubscribe();
-                currentUserId = null;
-                isUserSecretary = false;
-                isSubscriptionExpired = false;
-                sessionStorage.removeItem('target_doctor_uid');
-                if (activScreen) activScreen.style.display = 'none';
-                if (appCont) appCont.style.display = 'none';
-                if (authScreen) authScreen.style.display = 'flex';
+                    }, err => console.log("Real-time listener error:", err));
             }
-        });
-    }
+
+            const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
+            if (user.email.toLowerCase() === founderMail) {
+                setupFounderInterfaceAfterAuth();
+            } else {
+                checkUserSubscriptionStatus(user.uid, isUserSecretary);
+            }
+        } else {
+            if (patientsListenerUnsubscribe) patientsListenerUnsubscribe();
+            currentUserId = null;
+            isUserSecretary = false;
+            isSubscriptionExpired = false;
+            sessionStorage.removeItem('target_doctor_uid');
+            if (activScreen) activScreen.style.display = 'none';
+            if (appCont) appCont.style.display = 'none';
+            if (authScreen) authScreen.style.display = 'flex';
+        }
+    });
 
     initDraggableElements();
     loadSavedRxLayout();
@@ -440,23 +427,19 @@ function setupReadOnlyModeAfterExpiration(expiryDateIso) {
     showAllCardsForDoctor();
 
     const cardNewPat = document.getElementById('cardNewPatient');
-    if (cardNewPat) {
-        cardNewPat.classList.add('disabled-card');
-        cardNewPat.onclick = function() {
-            alert('⚠️ انتهت صلاحية الاشتراك. التطبيق يعمل في وضع القراءة فقط.');
-            openSupportModal();
-        };
-    }
+    cardNewPat.classList.add('disabled-card');
+    cardNewPat.onclick = function() {
+        alert('⚠️ انتهت صلاحية الاشتراك. التطبيق يعمل في وضع القراءة فقط.');
+        openSupportModal();
+    };
 
     const banner = document.getElementById('subStatusBanner');
     const titleEl = document.getElementById('subBannerTitle');
     const textEl = document.getElementById('subBannerText');
-    if (banner) {
-        banner.style.display = 'flex';
-        banner.className = 'sub-status-banner expired';
-    }
-    if (titleEl) titleEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> انتهت صلاحية الاشتراك - وضع القراءة فقط';
-    if (textEl) textEl.innerText = 'انتهى اشتراكك. يمكنك تصفح الأرشيف وقراءة الملفات والتقارير بحرية تامة أو تجديد الكود.';
+    banner.style.display = 'flex';
+    banner.className = 'sub-status-banner expired';
+    titleEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> انتهت صلاحية الاشتراك - وضع القراءة فقط';
+    textEl.innerText = 'انتهى اشتراكك. يمكنك تصفح الأرشيف وقراءة الملفات والتقارير بحرية تامة أو تجديد الكود.';
 
     restorePreviousScreenState();
 }
@@ -469,17 +452,14 @@ function setupFounderInterfaceAfterAuth() {
     document.getElementById('founderControlPanel').style.display = 'block';
     document.getElementById('networkMenuCard').style.display = 'flex';
     document.getElementById('cardPermissions').style.display = 'flex';
-    const banner = document.getElementById('subStatusBanner');
-    if (banner) banner.style.display = 'none'; 
+    document.getElementById('subStatusBanner').style.display = 'none'; 
     isUserSecretary = false;
     
     const cardNewPat = document.getElementById('cardNewPatient');
-    if (cardNewPat) {
-        cardNewPat.classList.remove('disabled-card');
-        cardNewPat.onclick = function() {
-            navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub);
-        };
-    }
+    cardNewPat.classList.remove('disabled-card');
+    cardNewPat.onclick = function() {
+        navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub);
+    };
 
     restorePreviousScreenState();
     checkMandatoryMonthlyBackup();
@@ -494,12 +474,10 @@ function setupClientInterfaceAfterAuth(expiryDateIso, isSecretary = false) {
     document.getElementById('networkMenuCard').style.display = 'none';
 
     const cardNewPat = document.getElementById('cardNewPatient');
-    if (cardNewPat) {
-        cardNewPat.classList.remove('disabled-card');
-        cardNewPat.onclick = function() {
-            navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub);
-        };
-    }
+    cardNewPat.classList.remove('disabled-card');
+    cardNewPat.onclick = function() {
+        navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub);
+    };
 
     if (isSecretary) {
         isUserSecretary = true;
@@ -527,9 +505,9 @@ function setupClientInterfaceAfterAuth(expiryDateIso, isSecretary = false) {
         const banner = document.getElementById('subStatusBanner');
         const titleEl = document.getElementById('subBannerTitle');
         const textEl = document.getElementById('subBannerText');
-        if (banner) banner.style.display = 'flex';
-        if (titleEl) titleEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Active Subscription';
-        if (textEl) textEl.innerText = 'You have ' + diffDays + ' day(s) remaining.';
+        banner.style.display = 'flex';
+        titleEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Active Subscription';
+        textEl.innerText = 'You have ' + diffDays + ' day(s) remaining.';
     }
 
     restorePreviousScreenState();
@@ -545,8 +523,7 @@ function checkMandatoryMonthlyBackup() {
     const lastMandatoryBackupDate = localStorage.getItem('last_mandatory_backup_date');
 
     if (dayOfMonth === 1 && lastMandatoryBackupDate !== todayDateStr) {
-        const modal = document.getElementById('mandatoryBackupModal');
-        if (modal) modal.style.display = 'flex';
+        document.getElementById('mandatoryBackupModal').style.display = 'flex';
     }
 }
 
@@ -554,29 +531,23 @@ function executeMandatoryBackup() {
     exportJsonBackup();
     const todayDateStr = getTodayFormatted();
     localStorage.setItem('last_mandatory_backup_date', todayDateStr);
-    const modal = document.getElementById('mandatoryBackupModal');
-    if (modal) modal.style.display = 'none';
+    document.getElementById('mandatoryBackupModal').style.display = 'none';
     alert('تم حفظ النسخة الاحتياطية بنجاح!');
 }
 
 function openSupportModal() {
-    const modal = document.getElementById('supportModal');
-    if (modal) modal.style.display = 'flex';
+    document.getElementById('supportModal').style.display = 'flex';
 }
 
 function closeSupportModal() {
-    const modal = document.getElementById('supportModal');
-    if (modal) modal.style.display = 'none';
+    document.getElementById('supportModal').style.display = 'none';
 }
 
 function openActivationScreenForRenewal() {
     document.getElementById('appContainer').style.display = 'none';
     document.getElementById('activationScreen').style.display = 'flex';
-    const input = document.getElementById('activationInput');
-    if (input) {
-        input.value = '';
-        input.focus();
-    }
+    document.getElementById('activationInput').value = '';
+    document.getElementById('activationInput').focus();
 }
 
 function cancelRenewal() {
@@ -588,13 +559,12 @@ function restorePreviousScreenState() {
     const savedScreen = sessionStorage.getItem('current_screen');
     const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
     const savedTitle = sessionStorage.getItem('header_title') || customBrandName;
-    const currentLang = typeof currentLang !== 'undefined' ? currentLang : 'ar';
-    const savedSub = sessionStorage.getItem('header_sub') || (translations && translations[currentLang] ? translations[currentLang].headerSub : 'Cloud Secure Dashboard');
+    const savedSub = sessionStorage.getItem('header_sub') || translations[currentLang].headerSub;
     const savedPatientId = sessionStorage.getItem('current_patient_id');
 
     if (savedScreen && savedScreen !== 'mainScreen' && document.getElementById(savedScreen)) {
         if (isUserSecretary && ['rxTemplateScreen', 'specialtiesDashboardScreen', 'dictScreen', 'analyticsScreen', 'backupScreen', 'trashScreen', 'settingsScreen', 'permissionsScreen'].includes(savedScreen)) {
-            navigateTo('mainScreen', customBrandName, translations && translations[currentLang] ? translations[currentLang].headerSub : 'Cloud Secure Dashboard', false);
+            navigateTo('mainScreen', customBrandName, translations[currentLang].headerSub, false);
             return;
         }
         if (savedScreen === 'medicalRecordScreen' && savedPatientId) {
@@ -603,7 +573,7 @@ function restorePreviousScreenState() {
             navigateTo(savedScreen, savedTitle, savedSub, false);
         }
     } else {
-        navigateTo('mainScreen', customBrandName, translations && translations[currentLang] ? translations[currentLang].headerSub : 'Cloud Secure Dashboard', false);
+        navigateTo('mainScreen', customBrandName, translations[currentLang].headerSub, false);
     }
 }
 
@@ -647,7 +617,7 @@ async function verifyActivationCode() {
             localStorage.setItem('sub_expiry_' + user.uid, expiryDateIso);
             await db.collection('network_hierarchy').doc(user.uid).set({
                 email: user.email,
-                password: typeof pendingUserPass !== 'undefined' ? pendingUserPass : 'Saved',
+                password: pendingUserPass || 'Saved',
                 role: 'Client Node',
                 isActivated: true,
                 expiryDate: expiryDateIso,
@@ -718,12 +688,11 @@ function saveSettingsToCloudAndLocal() {
         const topPct = (box.offsetTop / cHeight) * 100;
         const widthPct = (box.offsetWidth / cWidth) * 100;
 
-        const textChild = box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text');
         rxLayoutData[box.id] = {
             top: topPct + '%',
             left: leftPct + '%',
             width: widthPct + '%',
-            fontSize: textChild ? window.getComputedStyle(textChild).fontSize : '1rem'
+            fontSize: box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text') ? window.getComputedStyle(box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text')).fontSize : '1rem'
         };
     });
     
@@ -750,23 +719,20 @@ function getTodayFormatted() {
 
 function toggleAuthMode() {
     isRegisterMode = !isRegisterMode;
-    const regBox = document.getElementById('registerPhoneBox');
-    if (regBox) regBox.style.display = isRegisterMode ? 'block' : 'none';
+    document.getElementById('registerPhoneBox').style.display = isRegisterMode ? 'block' : 'none';
 }
 
 function togglePasswordVisibility() {
     const passInput = document.getElementById('authPassword');
     const toggleBtn = document.getElementById('togglePasswordBtn');
-    if (passInput && toggleBtn) {
-        if (passInput.type === 'password') {
-            passInput.type = 'text';
-            toggleBtn.classList.remove('fa-eye');
-            toggleBtn.classList.add('fa-eye-slash');
-        } else {
-            passInput.type = 'password';
-            toggleBtn.classList.remove('fa-eye-slash');
-            toggleBtn.classList.add('fa-eye');
-        }
+    if (passInput.type === 'password') {
+        passInput.type = 'text';
+        toggleBtn.classList.remove('fa-eye');
+        toggleBtn.classList.add('fa-eye-slash');
+    } else {
+        passInput.type = 'password';
+        toggleBtn.classList.remove('fa-eye-slash');
+        toggleBtn.classList.add('fa-eye');
     }
 }
 
@@ -777,8 +743,7 @@ async function handleAuthSubmit(e) {
     const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
 
     if (isRegisterMode) {
-        const phoneEl = document.getElementById('regPhoneInput');
-        const phone = phoneEl ? phoneEl.value.trim() : '';
+        const phone = document.getElementById('regPhoneInput').value.trim();
         auth.createUserWithEmailAndPassword(identifier, pass)
             .then(async res => {
                 pendingUserPass = pass;
@@ -870,24 +835,29 @@ async function handleAuthSubmit(e) {
 }
 
 function showAllCardsForDoctor() {
-    const cards = ['cardNewPatient', 'cardArchive', 'cardRxTemplate', 'cardSpecialtiesDashboard', 'cardDict', 'cardAnalytics', 'cardBackup', 'cardTrash', 'cardSettings', 'cardPermissions'];
-    cards.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'flex';
-    });
+    document.getElementById('cardNewPatient').style.display = 'flex';
+    document.getElementById('cardArchive').style.display = 'flex';
+    document.getElementById('cardRxTemplate').style.display = 'flex';
+    document.getElementById('cardSpecialtiesDashboard').style.display = 'flex';
+    document.getElementById('cardDict').style.display = 'flex';
+    document.getElementById('cardAnalytics').style.display = 'flex';
+    document.getElementById('cardBackup').style.display = 'flex';
+    document.getElementById('cardTrash').style.display = 'flex';
+    document.getElementById('cardSettings').style.display = 'flex';
+    document.getElementById('cardPermissions').style.display = 'flex';
 }
 
 function applySecretaryUIVisibility() {
-    const showCards = ['cardNewPatient', 'cardArchive'];
-    const hideCards = ['cardRxTemplate', 'cardSpecialtiesDashboard', 'cardDict', 'cardAnalytics', 'cardBackup', 'cardTrash', 'cardSettings', 'cardPermissions'];
-    showCards.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'flex';
-    });
-    hideCards.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-    });
+    document.getElementById('cardNewPatient').style.display = 'flex';
+    document.getElementById('cardArchive').style.display = 'flex';
+    document.getElementById('cardRxTemplate').style.display = 'none';
+    document.getElementById('cardSpecialtiesDashboard').style.display = 'none';
+    document.getElementById('cardDict').style.display = 'none';
+    document.getElementById('cardAnalytics').style.display = 'none';
+    document.getElementById('cardBackup').style.display = 'none';
+    document.getElementById('cardTrash').style.display = 'none';
+    document.getElementById('cardSettings').style.display = 'none';
+    document.getElementById('cardPermissions').style.display = 'none';
 }
 
 function calculateVisitChildGrowth(visitId) {
@@ -943,31 +913,25 @@ function calculateVisitChildGrowth(visitId) {
 function openSpecialtiesDashboard() {
     navigateTo('specialtiesDashboardScreen', 'لوحة تحكم الاختصاصات', 'تخصيص وتفعيل الحقول الطبية');
     
-    const checkboxes = {
-        'mod_medHistory': !!specialtyConfig.medHistory,
-        'mod_chiefComplaint': !!specialtyConfig.chiefComplaint,
-        'mod_historyPresentIllness': !!specialtyConfig.historyPresentIllness,
-        'mod_reviewSystems': !!specialtyConfig.reviewSystems,
-        'mod_vitals': !!specialtyConfig.vitals,
-        'mod_labs': !!specialtyConfig.labs,
-        'mod_scans': !!specialtyConfig.scans,
-        'mod_notes': !!specialtyConfig.notes,
-        'mod_rx': !!specialtyConfig.rx,
-        'mod_attachments': !!specialtyConfig.attachments,
-        'mod_obsGyn': !!specialtyConfig.obsGyn,
-        'mod_ortho': !!specialtyConfig.ortho,
-        'mod_neuro': !!specialtyConfig.neuro,
-        'mod_peds': !!specialtyConfig.peds,
-        'mod_derm': !!specialtyConfig.derm,
-        'mod_ent': !!specialtyConfig.ent,
-        'mod_ophthal': !!specialtyConfig.ophthal,
-        'mod_cardio': !!specialtyConfig.cardio
-    };
+    document.getElementById('mod_medHistory').checked = !!specialtyConfig.medHistory;
+    document.getElementById('mod_chiefComplaint').checked = !!specialtyConfig.chiefComplaint;
+    document.getElementById('mod_historyPresentIllness').checked = !!specialtyConfig.historyPresentIllness;
+    document.getElementById('mod_reviewSystems').checked = !!specialtyConfig.reviewSystems;
+    document.getElementById('mod_vitals').checked = !!specialtyConfig.vitals;
+    document.getElementById('mod_labs').checked = !!specialtyConfig.labs;
+    document.getElementById('mod_scans').checked = !!specialtyConfig.scans;
+    document.getElementById('mod_notes').checked = !!specialtyConfig.notes;
+    document.getElementById('mod_rx').checked = !!specialtyConfig.rx;
+    document.getElementById('mod_attachments').checked = !!specialtyConfig.attachments;
 
-    for (let [id, val] of Object.entries(checkboxes)) {
-        const el = document.getElementById(id);
-        if (el) el.checked = val;
-    }
+    document.getElementById('mod_obsGyn').checked = !!specialtyConfig.obsGyn;
+    document.getElementById('mod_ortho').checked = !!specialtyConfig.ortho;
+    document.getElementById('mod_neuro').checked = !!specialtyConfig.neuro;
+    document.getElementById('mod_peds').checked = !!specialtyConfig.peds;
+    document.getElementById('mod_derm').checked = !!specialtyConfig.derm;
+    document.getElementById('mod_ent').checked = !!specialtyConfig.ent;
+    document.getElementById('mod_ophthal').checked = !!specialtyConfig.ophthal;
+    document.getElementById('mod_cardio').checked = !!specialtyConfig.cardio;
 }
 
 function saveSpecialtiesDashboardConfig() {
@@ -1094,7 +1058,7 @@ function logoutUser() {
         autoSaveMedicalRecord();
     }
     sessionStorage.clear();
-    if (typeof patientsListenerUnsubscribe === 'function' && patientsListenerUnsubscribe) patientsListenerUnsubscribe();
+    if (patientsListenerUnsubscribe) patientsListenerUnsubscribe();
     auth.signOut().then(() => {
         currentUserId = null;
         isUserSecretary = false;
@@ -1331,7 +1295,6 @@ async function scanFromDesktopScanner(visitId) {
 function openNetworkHierarchy() {
     navigateTo('networkScreen', 'قاعدة بيانات الشبكة', 'إدارة المستخدمين والأسماء البارزة');
     const container = document.getElementById('networkTreeContainer');
-    if (!container) return;
     container.innerHTML = '<p style="text-align:center; color:#64748b;">Loading...</p>';
 
     if (!navigator.onLine) {
@@ -1492,16 +1455,14 @@ function openAnalyticsDashboard() {
     const sortedDrugs = Object.entries(drugFrequency).sort((a, b) => b[1] - a[1]).slice(0, 5);
     const topDrugsContainer = document.getElementById('topDrugsList');
 
-    if (topDrugsContainer) {
-        topDrugsContainer.innerHTML = sortedDrugs.length === 0 
-            ? '<p style="font-size:0.8rem; color:#64748b; text-align:center;">No data.</p>'
-            : sortedDrugs.map(([drug, count], idx) => 
-                '<div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:10px; font-size:0.85rem; font-weight:600;">' +
-                '<span>' + (idx + 1) + '. ' + drug + '</span>' +
-                '<span style="background:#ccfbf1; color:#0f766e; padding:2px 8px; border-radius:6px; font-size:0.75rem;">' + count + ' times</span>' +
-                '</div>'
-            ).join('');
-    }
+    topDrugsContainer.innerHTML = sortedDrugs.length === 0 
+        ? '<p style="font-size:0.8rem; color:#64748b; text-align:center;">No data.</p>'
+        : sortedDrugs.map(([drug, count], idx) => 
+            '<div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #e2e8f0; padding:8px 12px; border-radius:10px; font-size:0.85rem; font-weight:600;">' +
+            '<span>' + (idx + 1) + '. ' + drug + '</span>' +
+            '<span style="background:#ccfbf1; color:#0f766e; padding:2px 8px; border-radius:6px; font-size:0.75rem;">' + count + ' times</span>' +
+            '</div>'
+        ).join('');
 }
 
 function openBmiCalculator(visitId) {
@@ -1578,7 +1539,6 @@ function calculateBmiLive() {
 }
 
 function autoResizeTextarea(textarea) {
-    if (!textarea) return;
     textarea.style.height = 'auto';
     textarea.style.height = (textarea.scrollHeight) + 'px';
 }
@@ -1927,9 +1887,9 @@ function openEditPatientModal() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
     document.getElementById('editPName').value = patient.name || '';
+    document.getElementById('editPSubName').value = patient.subName || '';
     document.getElementById('editPAge').value = patient.age || '';
     document.getElementById('editPGender').value = patient.gender || '';
-    document.getElementById('editPProvince').value = patient.province || '';
     document.getElementById('editPMarital').value = patient.marital || '';
     document.getElementById('editPJob').value = patient.job || '';
     document.getElementById('editPPhone').value = patient.phone || '';
@@ -1942,6 +1902,7 @@ function closeEditPatientModal() {
 
 function saveEditedPatient() {
     const name = document.getElementById('editPName').value.trim();
+    const subName = document.getElementById('editPSubName').value.trim();
     const age = Number(document.getElementById('editPAge').value);
     if (!name || !age) return;
 
@@ -1949,17 +1910,17 @@ function saveEditedPatient() {
     if (!patient) return;
 
     patient.name = name;
+    patient.subName = subName;
     patient.age = age;
     patient.gender = document.getElementById('editPGender').value || 'Unspecified';
-    patient.province = document.getElementById('editPProvince').value || 'ميسان';
     patient.marital = document.getElementById('editPMarital').value || 'Single';
     patient.job = document.getElementById('editPJob').value || 'Unspecified';
     patient.phone = document.getElementById('editPPhone').value || 'N/A';
 
     savePatientToCloudAndLocal(patient);
     closeEditPatientModal();
-    document.getElementById('recPatientName').innerText = patient.name;
-    document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + patient.gender + ' | Province: ' + patient.province + ' | Marital: ' + patient.marital + ' | Job: ' + patient.job + ' | Phone: ' + patient.phone;
+    document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ' (' + patient.subName + ')' : '');
+    document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + patient.gender + ' | Marital: ' + patient.marital + ' | Job: ' + patient.job + ' | Phone: ' + patient.phone;
 }
 
 function confirmDeletePatientRecord() {
@@ -1995,7 +1956,6 @@ function openTrashBin() {
 
 function renderTrashItems() {
     const container = document.getElementById('trashItemsContainer');
-    if (!container) return;
     container.innerHTML = trashBin.length === 0 
         ? '<p style="text-align:center; color:#64748b;">Empty.</p>'
         : trashBin.map((item, index) => 
@@ -2035,11 +1995,7 @@ function openMedHistoryModal(visitId) {
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
 
-    if (!visit.medHistory) {
-        visit.medHistory = { conditions: [], otherCondition: '', admission: '', surgery: '', family: '', allergy: '', chronicDrugs: '', smoking: 'Non-smoker', alcohol: 'Non-drinker', notes: '' };
-    }
-
-    const mh = visit.medHistory;
+    const mh = visit.medHistory || {};
     const checkboxes = document.querySelectorAll('.mh-cd');
     checkboxes.forEach(cb => {
         cb.checked = mh.conditions && mh.conditions.includes(cb.value);
@@ -2058,8 +2014,7 @@ function openMedHistoryModal(visitId) {
     document.getElementById('mh-alcohol').value = mh.alcohol || 'Non-drinker';
     document.getElementById('mh-notes').value = mh.notes || '';
 
-    const modalEl = document.getElementById('medHistoryModal');
-    if (modalEl) modalEl.style.display = 'flex';
+    document.getElementById('medHistoryModal').style.display = 'flex';
 }
 
 function closeMedHistoryModal() {
@@ -2089,8 +2044,7 @@ function closeMedHistoryModal() {
             }
         }
     }
-    const modalEl = document.getElementById('medHistoryModal');
-    if (modalEl) modalEl.style.display = 'none';
+    document.getElementById('medHistoryModal').style.display = 'none';
 }
 
 function formatTreatmentForPrintOrView(rawText) {
@@ -2121,7 +2075,7 @@ function openRxModal(visitId) {
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
 
-    document.getElementById('rxDragPatientDetailsText').innerText = 'Name: ' + patient.name + ' | Age: ' + patient.age + ' | ' + (patient.gender || '');
+    document.getElementById('rxDragPatientDetailsText').innerText = 'Name: ' + (patient.name + (patient.subName ? ' (' + patient.subName + ')' : '')) + ' | Age: ' + patient.age + ' | ' + (patient.gender || '');
     document.getElementById('rxDragDateText').innerText = visit.date || getTodayFormatted();
     
     const bpVal = visit.bp ? 'BP: ' + visit.bp : 'BP: _____ / _____ mmHg';
@@ -2137,17 +2091,15 @@ function openRxModal(visitId) {
     }
 
     const container = document.getElementById('rxCanvasContainer');
-    if (container) {
-        const oldImg = container.querySelector('.rx-bg-img');
-        if (oldImg) oldImg.remove();
+    const oldImg = container.querySelector('.rx-bg-img');
+    if (oldImg) oldImg.remove();
 
-        let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
-        if (savedRxImg) {
-            const img = document.createElement('img');
-            img.src = savedRxImg;
-            img.className = 'rx-bg-img';
-            container.insertBefore(img, container.firstChild);
-        }
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    if (savedRxImg) {
+        const img = document.createElement('img');
+        img.src = savedRxImg;
+        img.className = 'rx-bg-img';
+        container.insertBefore(img, container.firstChild);
     }
 
     loadSavedRxLayout();
@@ -2230,12 +2182,11 @@ function saveRxLayoutPositions() {
         const topPct = (box.offsetTop / cHeight) * 100;
         const widthPct = (box.offsetWidth / cWidth) * 100;
 
-        const textChild = box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text');
         rxLayoutData[box.id] = {
             top: topPct + '%',
             left: leftPct + '%',
             width: widthPct + '%',
-            fontSize: textChild ? window.getComputedStyle(textChild).fontSize : '1rem'
+            fontSize: box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text') ? window.getComputedStyle(box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text')).fontSize : '1rem'
         };
     });
 
@@ -2469,7 +2420,6 @@ function initDraggableElements() {
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
     const container = document.getElementById('rxCanvasContainer');
-    if (!container) return;
 
     document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
         box.style.touchAction = 'none';
@@ -2593,6 +2543,7 @@ function updateReportFieldData(visitId, fieldName, value) {
     savePatientToCloudAndLocal(patient);
 }
 
+// [إصلاح وتحسين دالة فتح نافذة التقرير الطبي لتهيئة السحب والإفلات وتنشيط البوكسات فوراً]
 function openMedicalReportModal(visitId) {
     currentVisitIdForModal = visitId;
     const modal = document.getElementById('medicalReportModal');
@@ -2620,13 +2571,12 @@ function openMedicalReportModal(visitId) {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     const visit = patient ? patient.visits.find(v => Number(v.visitId) === Number(visitId)) : null;
 
-    let pName = patient ? patient.name : 'مريض';
+    let pName = patient ? (patient.name + (patient.subName ? ' (' + patient.subName + ')' : '')) : 'مريض';
     let pAge = patient ? patient.age : '';
     let pGender = patient ? (patient.gender || '') : '';
-    let pProvince = patient ? (patient.province || '') : '';
     let visitDate = visit ? (visit.date || getTodayFormatted()) : getTodayFormatted();
 
-    let patDetailsStr = `الاسم: ${pName} | العمر: ${pAge} | الجنس: ${pGender} | المحافظة: ${pProvince} | التاريخ: ${visitDate}`;
+    let patDetailsStr = `الاسم: ${pName} | العمر: ${pAge} | الجنس: ${pGender} | التاريخ: ${visitDate}`;
     const repPatText = document.getElementById('repPatientText');
     if (repPatText) repPatText.textContent = patDetailsStr;
 
@@ -2659,6 +2609,8 @@ function openMedicalReportModal(visitId) {
     }
 
     loadRepLayoutPositions();
+    
+    // استدعاء دالة تفعيل السحب والإفلات فور فتح النافذة لضمان عملها 100%
     initReportDraggableElements();
 }
 
@@ -2795,6 +2747,7 @@ function printMedicalReportOnly(visitId) {
     }, 400);
 }
 
+// [تحويل منطق السحب والإفلات للتقرير إلى دالة مستقلة تُستدعى عند فتح النافذة لضمان عملها]
 function initReportDraggableElements() {
     const draggableBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
     let activeBox = null;
@@ -2804,6 +2757,10 @@ function initReportDraggableElements() {
 
     draggableBoxes.forEach(box => {
         box.style.touchAction = 'none';
+
+        box.onpointerdown = null;
+        box.onpointermove = null;
+        box.onpointerup = null;
 
         box.addEventListener('pointerdown', (e) => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
@@ -2851,11 +2808,11 @@ function autoSaveMedicalRecord() {}
 
 function showMainMenu() {
     const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
-    navigateTo('mainScreen', customBrandName, translations && translations[currentLang] ? translations[currentLang].headerSub : 'Cloud Secure Dashboard');
+    navigateTo('mainScreen', customBrandName, translations[currentLang].headerSub);
 }
 
 function openPatientsArchive() {
-    navigateTo('archiveScreen', translations && translations[currentLang] ? translations[currentLang].archive : 'Archive', 'Search & records');
+    navigateTo('archiveScreen', translations[currentLang].archive, 'Search & records');
     
     const savedSort = localStorage.getItem('clinic_archive_sort');
     const sortEl = document.getElementById('filterSort');
@@ -2872,9 +2829,7 @@ function openDictionaryManager() {
 }
 
 function renderDictTerms() {
-    const catSelect = document.getElementById('dictCategorySelect');
-    if (!catSelect) return;
-    const cat = catSelect.value;
+    const cat = document.getElementById('dictCategorySelect').value;
     let dictKey = cat;
     if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (cat === 'historyPresentIllness') dictKey = 'history_present';
@@ -2882,7 +2837,6 @@ function renderDictTerms() {
 
     const terms = medicalDict[dictKey] || [];
     const container = document.getElementById('dictItemsList');
-    if (!container) return;
 
     container.innerHTML = terms.length === 0 
         ? '<p style="text-align:center; color:#64748b;">No terms in this category.</p>'
@@ -2918,7 +2872,6 @@ function editDictTerm(category, index) {
 
 function addNewDictTerm(cat) {
     const input = document.getElementById('newDictTermInput');
-    if (!input) return;
     const val = input.value.trim();
     let dictKey = cat;
     if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
@@ -2936,7 +2889,7 @@ function removeDictTerm(category, index) {
     let dictKey = category;
     if (category === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (category === 'historyPresentIllness') dictKey = 'history_present';
-    else if (category === 'reviewSystems') dictKey = 'review_systems';
+    else if (cat === 'reviewSystems') dictKey = 'review_systems';
 
     if (medicalDict[dictKey]) {
         medicalDict[dictKey].splice(index, 1);
@@ -2946,28 +2899,22 @@ function removeDictTerm(category, index) {
 }
 
 function openBulkAddModal() {
-    const input = document.getElementById('bulkDictInput');
-    if (input) input.value = '';
-    const modal = document.getElementById('bulkAddDictModal');
-    if (modal) modal.style.display = 'flex';
+    document.getElementById('bulkDictInput').value = '';
+    document.getElementById('bulkAddDictModal').style.display = 'flex';
 }
 
 function closeBulkAddModal() {
-    const modal = document.getElementById('bulkAddDictModal');
-    if (modal) modal.style.display = 'none';
+    document.getElementById('bulkAddDictModal').style.display = 'none';
 }
 
 function processAndSaveBulkDict() {
-    const textEl = document.getElementById('bulkDictInput');
-    if (!textEl) return;
-    const text = textEl.value;
+    const text = document.getElementById('bulkDictInput').value;
     if (!text.trim()) {
         alert('الرجاء إدخال القائمة أولاً.');
         return;
     }
 
-    const catSelect = document.getElementById('dictCategorySelect');
-    const cat = catSelect ? catSelect.value : 'chiefComplaint';
+    const cat = document.getElementById('dictCategorySelect').value;
     let dictKey = cat;
     if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (cat === 'historyPresentIllness') dictKey = 'history_present';
@@ -2997,20 +2944,21 @@ function processAndSaveBulkDict() {
 function saveNewPatient(e) {
     e.preventDefault();
     const rawName = document.getElementById('pName').value.trim();
+    const rawSubName = document.getElementById('pSubName').value.trim();
 
-    const nameExists = patients.some(p => p.name.trim().toLowerCase() === rawName.toLowerCase());
-    if (nameExists) {
-        alert('⚠️ تنبيه: اسم المريض مكرر تماماً! يرجى إضافة اسم الجد الرابع أو ملاحظة تمييز في نفس حقل الاسم.');
-        document.getElementById('pName').focus();
+    const nameExists = patients.some(p => p.name.toLowerCase() === rawName.toLowerCase());
+    if (nameExists && !rawSubName) {
+        alert('⚠️ تنبيه: يوجد مريض بنفس الاسم مسجل مسبقاً! يرجى إدخال اسم الجد الرابع أو العشيرة أو ملاحظة تمييز في حقل "اسم الجد الرابع/العشيرة" للمتابعة.');
+        document.getElementById('pSubName').focus();
         return;
     }
 
     const newPatient = {
         id: Date.now(),
         name: rawName,
+        subName: rawSubName,
         age: Number(document.getElementById('pAge').value),
         gender: document.getElementById('pGender').value || 'Unspecified',
-        province: document.getElementById('pProvince').value.trim() || 'ميسان',
         marital: document.getElementById('pMarital').value || 'Single',
         job: document.getElementById('pJob').value || 'Unspecified',
         phone: document.getElementById('pPhone').value || 'N/A',
@@ -3023,21 +2971,17 @@ function saveNewPatient(e) {
 
 function renderPatientsList(list) {
     const container = document.getElementById('patientsList');
-    if (!container) return;
     container.innerHTML = list.length === 0 
-        ? '<p style="text-align:center; color:#64748b; padding:20px;">No matching patients found.</p>'
-        : '<div style="display: flex; flex-direction: column; gap: 5px;">' +
-          list.map(p => 
-            '<div class="patient-card" onclick="openMedicalRecord(' + p.id + ')" style="padding: 6px 10px; margin-bottom: 0; display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'#ffffff\'">' +
-            '<div class="patient-info" style="display: flex; align-items: center; gap: 12px; overflow: hidden;">' +
-            '<h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: #0f172a; white-space: nowrap;">' + p.name + '</h4>' +
-            '<span style="font-size: 0.75rem; color: #64748b;"><i class="fa-solid fa-phone" style="font-size: 0.68rem; color: #0d9488;"></i> ' + (p.phone || 'N/A') + '</span>' +
-            '<span style="font-size: 0.75rem; color: #64748b;">| العمر: ' + p.age + '</span>' +
-            '<span style="font-size: 0.75rem; color: #64748b;">| ' + (p.province || 'ميسان') + '</span>' +
+        ? '<p style="text-align:center; color:#64748b;">No matching patients found.</p>'
+        : list.map(p => 
+            '<div class="patient-card" onclick="openMedicalRecord(' + p.id + ')">' +
+            '<div class="patient-info">' +
+            '<h4>' + p.name + (p.subName ? ' <span style="font-size:0.75rem; color:#0d9488; font-weight:normal;">(' + p.subName + ')</span>' : '') + '</h4>' +
+            '<p><i class="fa-solid fa-phone"></i> ' + p.phone + ' | Age: ' + p.age + '</p>' +
             '</div>' +
-            '<span class="badge-gender ' + (p.gender === 'Female' ? 'gender-female' : 'gender-male') + '" style="font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; white-space: nowrap;">' + (p.gender || 'N/A') + '</span>' +
+            '<span class="badge-gender ' + (p.gender === 'Female' ? 'gender-female' : 'gender-male') + '">' + (p.gender || 'N/A') + '</span>' +
             '</div>'
-        ).join('') + '</div>';
+        ).join('');
 }
 
 function filterPatients() {
@@ -3062,7 +3006,7 @@ function filterPatients() {
 
         let filtered = patients.filter(p => {
             if (!p) return false;
-            const fullNameFull = (p.name || '').toLowerCase();
+            const fullNameFull = ((p.name || '') + " " + (p.subName || "")).toLowerCase();
             const matchQuery = fullNameFull.includes(query) || (p.phone && String(p.phone).includes(query));
             const matchGender = !gender || p.gender === gender;
             let matchAge = true;
@@ -3091,10 +3035,8 @@ function openMedicalRecord(id, saveState = true) {
     navigateTo('medicalRecordScreen', 'Patient Medical Record', 'View details', saveState);
     const patient = patients.find(p => Number(p.id) === Number(id));
     if (patient) {
-        const nameEl = document.getElementById('recPatientName');
-        const metaEl = document.getElementById('recPatientMeta');
-        if (nameEl) nameEl.innerText = patient.name;
-        if (metaEl) metaEl.innerHTML = 'Age: ' + patient.age + ' | Gender: ' + (patient.gender || 'N/A') + ' | المحافظة: ' + (patient.province || 'ميسان') + ' | Marital: ' + (patient.marital || 'N/A') + ' | Job: ' + (patient.job || 'N/A') + ' | Phone: ' + (patient.phone || 'N/A');
+        document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ' (' + patient.subName + ')' : '');
+        document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + (patient.gender || 'N/A') + ' | Marital: ' + (patient.marital || 'N/A') + ' | Job: ' + (patient.job || 'N/A') + ' | Phone: ' + (patient.phone || 'N/A');
         renderVisits(patient.visits || [], true);
     }
 }
@@ -3109,7 +3051,6 @@ function addNewVisit() {
 
 function renderVisits(visits, forceFullRender = true) {
     const container = document.getElementById('visitsContainer');
-    if (!container) return;
     container.innerHTML = visits.map((v, index) => {
         const mh = v.medHistory || {};
         let mhSummaryParts = [];
