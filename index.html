@@ -141,9 +141,6 @@
             text-align: center;
         }
 
-        /* ==========================================================================
-           إعدادات الطباعة الشاملة والدقيقة (المعدلة جذرياً لمنع صفحة بيضاء)
-           ========================================================================== */
         @media print {
             @page {
                 size: auto;
@@ -160,7 +157,6 @@
                 print-color-adjust: exact !important;
             }
             
-            /* إخفاء كل عناصر الصفحة ما عدا المودال المطلوب طباعته */
             body > *:not(#rxModal):not(#medicalReportModal) {
                 display: none !important;
             }
@@ -279,7 +275,7 @@
 <div class="mobile-container">
     <div id="networkStatusBar" class="network-status-bar">⚠️ Offline Mode - Changes saved locally, will sync when online</div>
 
-    <div id="authScreen" class="auth-screen">
+    <div id="authScreen" class="auth-screen" style="display: flex;">
         <div style="position: absolute; top: 15px; right: 15px;">
             <button onclick="toggleLanguage()" id="authLangBtn" style="background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 10px; font-size: 0.78rem; font-weight: 700; cursor: pointer; color: #0f172a;">عربي / EN</button>
         </div>
@@ -359,7 +355,7 @@
         </div>
 
         <div class="content">
-            <div id="mainScreen" style="display: none;">
+            <div id="mainScreen" style="display: block;">
                 
                 <div class="sub-status-banner" id="subStatusBanner" style="display: none;">
                     <div class="sub-status-info">
@@ -896,7 +892,6 @@
     </div>
 </div>
 
-<!-- نافذة الروشتة العلاجية (Modal) -->
 <div id="rxModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 580px; text-align: left; direction: ltr; background: #f8fafc; border-radius: 14px; padding: 15px;">
         <div class="modal-header" style="direction: ltr; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -977,7 +972,6 @@
     </div>
 </div>
 
-<!-- نافذة معاينة وطباعة التقرير الطبي المستقل -->
 <div id="medicalReportModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 580px; text-align: left; direction: ltr; background: #f8fafc; border-radius: 14px; padding: 15px;">
         <div class="modal-header" style="direction: ltr; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -1053,11 +1047,9 @@
     </div>
 </div>
 
-<!-- تحميل السكريبتات الأساسية بالترتيب الصحيح -->
 <script src="config.js"></script>
 <script src="clinic-functions.js?v=17.52"></script>
 
-<!-- تحميل ملفات الطباعة الستة المستقلة بحسب نوع الجهاز (استدعاء ذكي مزدوج) -->
 <script src="print-core.js"></script>
 <script>
     const screenWidth = window.innerWidth;
@@ -1078,7 +1070,6 @@
     document.body.appendChild(script2);
 </script>
 
-<!-- أداة Eruda لفحص الأخطاء -->
 <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 <script>eruda.init();</script>
 
