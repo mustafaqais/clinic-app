@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Ultimate Force Fix
+// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Clean & Safe
 // ==========================================
 
 let isDesktopRxConfigMode = false;
@@ -44,8 +44,9 @@ function saveRxLayoutPositions() {
     updateDesktopRxConfigModeUI();
 
     const container = document.getElementById('rxCanvasContainer');
-    const cWidth = container ? container.clientWidth : 1;
-    const cHeight = container ? container.clientHeight : 1;
+    if (!container) return;
+    const cWidth = container.clientWidth || 1;
+    const cHeight = container.clientHeight || 1;
 
     const rxLayoutData = {};
     document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
@@ -57,7 +58,7 @@ function saveRxLayoutPositions() {
             top: topPct + '%',
             left: leftPct + '%',
             width: widthPct + '%',
-            fontSize: box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text') ? window.getComputedStyle(box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text')).fontSize : '1rem'
+            fontSize: '1rem'
         };
     });
 
@@ -73,20 +74,13 @@ function printPrescriptionDirectly() {
     const container = document.getElementById('rxCanvasContainer');
     if (!container) return;
 
-    // جلب الصورة من كافة الاحتمالات الممكنة في الذاكرة
     let bgImg = container.querySelector('#rxBgImg');
     let savedRxImg = localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
 
-    if (bgImg) {
-        if (savedRxImg) {
-            bgImg.src = savedRxImg;
-            bgImg.style.display = 'block';
-            bgImg.style.visibility = 'visible';
-            bgImg.style.opacity = '1';
-            bgImg.style.zIndex = '1';
-        } else {
-            console.warn("تحذير: لا توجد صورة روشتة مخزنة في localStorage!");
-        }
+    if (bgImg && savedRxImg) {
+        bgImg.src = savedRxImg;
+        bgImg.style.display = 'block';
+        bgImg.style.visibility = 'visible';
     }
 
     const controls = container.querySelectorAll('.box-font-controls');
@@ -98,56 +92,13 @@ function printPrescriptionDirectly() {
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
 
-    // إعطاء مهلة كافية جداً لرسم الصورة في الـ DOM قبل فتح أمر الطباعة
     setTimeout(() => {
         window.print();
-    }, 800);
+    }, 600);
 
     setTimeout(() => {
         document.body.classList.remove('is-printing-rx-only');
         controls.forEach(c => c.style.display = '');
         if (rxSymbol) rxSymbol.style.display = '';
-    }, 2000);
+    }, 1800);
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    let activeBox = null;
-    let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
-    const container = document.getElementById('rxCanvasContainer');
-
-    document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
-        box.addEventListener('mousedown', e => {
-            if (!isDesktopRxConfigMode || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            activeBox = box;
-            startX = e.clientX;
-            startY = e.clientY;
-            
-            if (!container) return;
-            const cWidth = container.clientWidth;
-            const cHeight = container.clientHeight;
-            
-            initialLeftPct = (box.offsetLeft / cWidth) * 100;
-            initialTopPct = (box.offsetTop / cHeight) * 100;
-            e.stopPropagation();
-        });
-
-        document.addEventListener('mousemove', e => {
-            if (!activeBox || !container) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            
-            const cWidth = container.clientWidth;
-            const cHeight = container.clientHeight;
-
-            let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
-            let newTopPct = initialTopPct + (dy / cHeight) * 100;
-
-            activeBox.style.left = newLeftPct + '%';
-            activeBox.style.top = newTopPct + '%';
-        });
-
-        document.addEventListener('mouseup', () => {
-            activeBox = null;
-        });
-    });
-});
