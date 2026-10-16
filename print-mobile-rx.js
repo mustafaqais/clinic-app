@@ -1,86 +1,40 @@
 // ==========================================
-// Clinic Master - Mobile RX Print (print-mobile-rx.js) - Complete & Optimized
+// Clinic Master - Mobile RX Print (print-mobile-rx.js) - Final Optimized
 // ==========================================
 
-let isMobileRxConfigMode = false;
-
-function toggleRxConfigMode() {
-    isMobileRxConfigMode = !isMobileRxConfigMode;
-    document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
-        if (isMobileRxConfigMode) box.classList.add('config-mode');
-        else box.classList.remove('config-mode');
-    });
-    updateMobileRxConfigModeUI();
-}
-
-function updateMobileRxConfigModeUI() {
-    const hint = document.getElementById('rxModeHint');
-    const saveBtn = document.getElementById('rxSaveLayoutBtn');
-    if (isMobileRxConfigMode) {
-        if (hint) hint.innerText = 'Mobile RX Config Mode Active';
-        if (saveBtn) saveBtn.style.display = 'block';
-    } else {
-        if (hint) hint.innerText = '';
-        if (saveBtn) saveBtn.style.display = 'none';
-    }
-}
-
-function changeBoxFontSize(boxType, delta) {
-    const map = {
-        patientDetails: 'rxDragPatientDetailsText',
-        date: 'rxDragDateText',
-        vitals: 'rxDragVitalsText',
-        treatment: 'rxDragTreatmentText'
-    };
-    const el = document.getElementById(map[boxType]);
-    if (!el) return;
-    const currentSize = parseFloat(window.getComputedStyle(el).fontSize);
-    el.style.fontSize = (currentSize + delta) + 'px';
-}
-
-function saveRxLayoutPositions() {
-    isMobileRxConfigMode = false;
-    document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
-    updateMobileRxConfigModeUI();
-
-    const container = document.getElementById('rxCanvasContainer');
-    if (!container) return;
-    const cWidth = container.clientWidth || 1;
-    const cHeight = container.clientHeight || 1;
-
-    const rxLayoutData = {};
-    document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
-        const leftPct = (box.offsetLeft / cWidth) * 100;
-        const topPct = (box.offsetTop / cHeight) * 100;
-        const widthPct = (box.offsetWidth / cWidth) * 100;
-
-        rxLayoutData[box.id] = {
-            top: topPct + '%',
-            left: leftPct + '%',
-            width: widthPct + '%',
-            fontSize: box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text') ? window.getComputedStyle(box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text')).fontSize : '1rem'
-        };
-    });
-
-    localStorage.setItem('doctor_rx_layout_mobile', JSON.stringify(rxLayoutData));
-    alert('تم حفظ إعدادات روشتة الموبايل بنجاح!');
-}
-
 function printPrescriptionDirectly() {
+    isConfigMode = false;
+    document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
+    updateConfigModeUI();
+
     const container = document.getElementById('rxCanvasContainer');
     if (!container) return;
 
-    let bgImg = container.querySelector('#rxBgImg') || container.querySelector('.rx-bg-img');
+    let bgImg = container.querySelector('.rx-bg-img');
     let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    
+    if (!bgImg && savedRxImg) {
+        bgImg = document.createElement('img');
+        bgImg.src = savedRxImg;
+        bgImg.className = 'rx-bg-img';
+        container.insertBefore(bgImg, container.firstChild);
+    } else if (bgImg && savedRxImg) {
+        bgImg.src = savedRxImg;
+        bgImg.style.display = 'block';
+    }
 
     const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
-
-    const rxSymbol = container.querySelector('#rxDragBoxTreatment div:nth-child(2)');
-    if (rxSymbol) rxSymbol.style.display = 'none';
-
+    
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
+    
+    const reportModal = document.getElementById('medicalReportModal');
+    let reportWasOpen = false;
+    if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
+        reportModal.style.display = 'none';
+        reportWasOpen = true;
+    }
 
     const executeMobilePrint = () => {
         setTimeout(() => {
@@ -88,30 +42,19 @@ function printPrescriptionDirectly() {
             setTimeout(() => {
                 document.body.classList.remove('is-printing-rx-only');
                 controls.forEach(c => c.style.display = '');
-                if (rxSymbol) rxSymbol.style.display = '';
+                if (reportWasOpen && reportModal) {
+                    reportModal.style.display = 'flex';
+                }
             }, 1500);
-        }, 800); // مهلة زمنية مخصصة للموبايل
+        }, 800);
     };
 
-    if (bgImg) {
-        if (savedRxImg) {
-            bgImg.style.display = 'block';
-            bgImg.style.visibility = 'visible';
-            bgImg.style.opacity = '1';
-            bgImg.style.zIndex = '1';
-
-            if (bgImg.src !== savedRxImg) {
-                bgImg.onload = executeMobilePrint;
-                bgImg.onerror = executeMobilePrint;
-                bgImg.src = savedRxImg;
-            } else if (bgImg.complete) {
-                executeMobilePrint();
-            } else {
-                bgImg.onload = executeMobilePrint;
-            }
-        } else {
-            bgImg.style.display = 'none';
+    if (bgImg && savedRxImg) {
+        if (bgImg.complete) {
             executeMobilePrint();
+        } else {
+            bgImg.onload = executeMobilePrint;
+            bgImg.onerror = executeMobilePrint;
         }
     } else {
         executeMobilePrint();
