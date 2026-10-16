@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Exact Fix
+// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Complete File
 // ==========================================
 
 let isDesktopRxConfigMode = false;
@@ -73,7 +73,6 @@ function printPrescriptionDirectly() {
     const container = document.getElementById('rxCanvasContainer');
     if (!container) return;
 
-    // ضمان تحميل الصورة الخلفية تماماً مثل آلية التقارير الناجحة
     let bgImg = container.querySelector('#rxBgImg') || container.querySelector('.rx-bg-img');
     let savedRxImg = localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
 
