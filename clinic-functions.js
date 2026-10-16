@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.52
-// (محدث: تعديل مسار الستايلات + إصلاح سحب بوكسات التقرير + طباعة الروشتة كصورة للموبايل تجريبياً)
+// (محدث: إصلاح الإضافة الجماعية، إكمال الاقتراحات، وتفريغ حقول المريض الجديد)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -81,6 +81,21 @@ function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', save
     
     const target = document.getElementById(screenId);
     if (target) target.style.display = 'block';
+
+    // [إصلاح المشكلة الثالثة]: إذا كانت الشاشة هي صفحة مريض جديد، يتم تفريغ جميع الحقول بالكامل لتكون فارغة تماماً
+    if (screenId === 'addPatientScreen') {
+        const fieldsToReset = ['pName', 'pSubName', 'pAge', 'pGender', 'pMarital', 'pJob', 'pPhone'];
+        fieldsToReset.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                if (el.tagName === 'SELECT') {
+                    el.selectedIndex = 0;
+                } else {
+                    el.value = '';
+                }
+            }
+        });
+    }
 
     const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
     const headerTitleText = (screenId === 'mainScreen') ? customBrandName : (title || customBrandName);
@@ -1549,7 +1564,7 @@ function handleDrugsKeyDown(event, textarea, visitId) {
 function handleLiveInput(textarea, category, visitId) {
     if (isUserSecretary || isSubscriptionExpired) return;
     autoResizeTextarea(textarea);
-    const val = textarea.value.trim();
+    const val = textarea.value;
     const box = document.getElementById('suggestions-' + category + '-' + visitId);
     const saveBar = document.getElementById('save-bar-' + category + '-' + visitId);
     
@@ -1566,13 +1581,19 @@ function handleLiveInput(textarea, category, visitId) {
     if (currentLine.length > 0) {
         if (saveBar) {
             saveBar.style.display = 'flex';
-            document.getElementById('line-text-' + category + '-' + visitId).innerText = currentLine;
+            const textSpan = document.getElementById('line-text-' + category + '-' + visitId);
+            if (textSpan) textSpan.innerText = currentLine;
         }
-        const terms = medicalDict[category] || [];
+        let dictKey = category;
+        if (category === 'chiefComplaint') dictKey = 'chief_complaint';
+        else if (category === 'historyPresentIllness') dictKey = 'history_present';
+        else if (category === 'reviewSystems') dictKey = 'review_systems';
+
+        const terms = medicalDict[dictKey] || medicalDict[category] || [];
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onclick="selectSuggestionByClick(this)" data-category="' + category + '" data-visit-id="' + visitId + '" data-term="' + encodeURIComponent(m) + '">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1585,13 +1606,7 @@ function handleLiveInput(textarea, category, visitId) {
     updateVisitFieldData(visitId, category, textarea.value);
 }
 
-function selectSuggestionByClick(el) {
-    const category = el.getAttribute('data-category');
-    const visitId = el.getAttribute('data-visit-id');
-    const term = decodeURIComponent(el.getAttribute('data-term'));
-    selectSuggestion(category, visitId, term);
-}
-
+// [إصلاح المشكلة الثانية]: دالة اختيار الاقتراحات وإكمال الكلمة بالكامل داخل الحقل بسلاسة
 function selectSuggestion(category, visitId, term) {
     const textarea = document.getElementById('v' + category.charAt(0).toUpperCase() + category.slice(1) + '-' + visitId);
     if (!textarea) return;
@@ -1601,8 +1616,11 @@ function selectSuggestion(category, visitId, term) {
     textarea.value = lines.join('\n') + '\n';
     autoResizeTextarea(textarea);
 
-    document.getElementById('suggestions-' + category + '-' + visitId).style.display = 'none';
-    document.getElementById('save-bar-' + category + '-' + visitId).style.display = 'none';
+    const box = document.getElementById('suggestions-' + category + '-' + visitId);
+    const saveBar = document.getElementById('save-bar-' + category + '-' + visitId);
+    if (box) box.style.display = 'none';
+    if (saveBar) saveBar.style.display = 'none';
+
     updateVisitFieldData(visitId, category, textarea.value);
     textarea.focus();
 }
@@ -1613,7 +1631,7 @@ function hideSuggestions(category, visitId) {
         const bar = document.getElementById('save-bar-' + category + '-' + visitId);
         if (box) box.style.display = 'none';
         if (bar) bar.style.display = 'none';
-    }, 200);
+    }, 250);
 }
 
 function saveLineToDict(event, category, visitId) {
@@ -1661,13 +1679,14 @@ function handleMhLiveInput(inputEl, inputKey) {
     if (currentLine.length > 0) {
         if (saveBar) {
             saveBar.style.display = 'flex';
-            document.getElementById('line-text-' + inputKey).innerText = currentLine;
+            const textSpan = document.getElementById('line-text-' + inputKey);
+            if (textSpan) textSpan.innerText = currentLine;
         }
         const terms = medicalDict.mh_history || [];
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onclick="selectMhSuggestionByClick(this)" data-input-key="' + inputKey + '" data-term="' + encodeURIComponent(m) + '">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1676,12 +1695,6 @@ function handleMhLiveInput(inputEl, inputKey) {
         if (saveBar) saveBar.style.display = 'none';
         if (box) box.style.display = 'none';
     }
-}
-
-function selectMhSuggestionByClick(el) {
-    const inputKey = el.getAttribute('data-input-key');
-    const term = decodeURIComponent(el.getAttribute('data-term'));
-    selectMhSuggestion(inputKey, term);
 }
 
 function selectMhSuggestion(inputKey, term) {
@@ -1704,7 +1717,7 @@ function hideMhSuggestions(inputKey) {
         const bar = document.getElementById('save-bar-' + inputKey);
         if (box) box.style.display = 'none';
         if (bar) bar.style.display = 'none';
-    }, 200);
+    }, 250);
 }
 
 function saveMhLineToDict(event, inputKey) {
@@ -2214,7 +2227,6 @@ function loadSavedRxLayout() {
     setRxPaperSize(savedSize);
 }
 
-// دالة تحديد الجهاز وحقن ملف الستايل الخاص بالطباعة ديناميكياً من المجلد الرئيسي
 function injectPrintStyle(type = 'rx') {
     const width = window.innerWidth;
     let deviceType = 'desktop';
@@ -2241,7 +2253,6 @@ function printPrescriptionDirectly() {
     const isMobile = window.innerWidth <= 768;
 
     if (isMobile) {
-        // الطريقة التجريبية الخاصة بالموبايل: تحويل الروشتة إلى صورة لضمان صفحة واحدة وعدم التداخل
         isConfigMode = false;
         document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
         updateConfigModeUI();
@@ -2304,7 +2315,6 @@ function printPrescriptionDirectly() {
         });
 
     } else {
-        // الطريقة الأصلية للحاسوب والتابلت
         injectPrintStyle('rx');
 
         isConfigMode = false;
@@ -2923,6 +2933,7 @@ function closeBulkAddModal() {
     document.getElementById('bulkAddDictModal').style.display = 'none';
 }
 
+// [إصلاح المشكلة الأولى]: معالجة النصوص المستنسخة دفعة واحدة ولصقها بشكل صحيح في القاموس
 function processAndSaveBulkDict() {
     const text = document.getElementById('bulkDictInput').value;
     if (!text.trim()) {
@@ -2944,7 +2955,7 @@ function processAndSaveBulkDict() {
     let addedCount = 0;
 
     lines.forEach(line => {
-        const cleanLine = line.trim();
+        const cleanLine = line.replace(/^\d+[\.\-\)]\s*/, '').trim();
         if (cleanLine && !medicalDict[dictKey].includes(cleanLine)) {
             medicalDict[dictKey].push(cleanLine);
             addedCount++;
