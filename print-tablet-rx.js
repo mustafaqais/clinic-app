@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master - Tablet RX Print (print-tablet-rx.js) - Fixed & Guaranteed
+// Clinic Master - Tablet RX Print (print-tablet-rx.js) - Independent & Optimized
 // ==========================================
 
 function printPrescriptionDirectly() {
@@ -7,7 +7,7 @@ function printPrescriptionDirectly() {
     if (!container) return;
 
     let bgImg = container.querySelector('#rxBgImg') || container.querySelector('.rx-bg-img');
-    let savedRxImg = localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
 
     const rxSymbol = container.querySelector('#rxDragBoxTreatment div:nth-child(2)');
     if (rxSymbol) rxSymbol.style.display = 'none';
@@ -15,7 +15,6 @@ function printPrescriptionDirectly() {
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
 
-    // دالة تنفيذ الطباعة بعد التأكد من جاهزية الصورة تماماً مثل التقارير
     const executeTabletPrint = () => {
         setTimeout(() => {
             window.print();
@@ -23,7 +22,7 @@ function printPrescriptionDirectly() {
                 document.body.classList.remove('is-printing-rx-only');
                 if (rxSymbol) rxSymbol.style.display = '';
             }, 1200);
-        }, 500);
+        }, 600); // مهلة زمنية مخصصة للتابلت
     };
 
     if (bgImg) {
