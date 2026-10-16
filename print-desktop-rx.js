@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Final Robust Fix
+// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Exact Fix
 // ==========================================
 
 let isDesktopRxConfigMode = false;
@@ -73,8 +73,15 @@ function printPrescriptionDirectly() {
     const container = document.getElementById('rxCanvasContainer');
     if (!container) return;
 
+    // ضمان تحميل الصورة الخلفية تماماً مثل آلية التقارير الناجحة
     let bgImg = container.querySelector('#rxBgImg') || container.querySelector('.rx-bg-img');
     let savedRxImg = localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+
+    if (bgImg && savedRxImg) {
+        bgImg.src = savedRxImg;
+        bgImg.style.display = 'block';
+        bgImg.style.visibility = 'visible';
+    }
 
     const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
@@ -85,42 +92,15 @@ function printPrescriptionDirectly() {
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
 
-    if (bgImg && savedRxImg) {
-        bgImg.onload = function() {
-            setTimeout(() => {
-                window.print();
-                cleanupAfterPrint(controls, rxSymbol);
-            }, 300);
-        };
-        bgImg.onerror = function() {
-            window.print();
-            cleanupAfterPrint(controls, rxSymbol);
-        };
-        bgImg.src = savedRxImg;
-        bgImg.style.display = 'block';
-        bgImg.style.visibility = 'visible';
-        bgImg.style.opacity = '1';
+    setTimeout(() => {
+        window.print();
+    }, 400);
 
-        if (bgImg.complete) {
-            setTimeout(() => {
-                window.print();
-                cleanupAfterPrint(controls, rxSymbol);
-            }, 300);
-        }
-    } else {
-        setTimeout(() => {
-            window.print();
-            cleanupAfterPrint(controls, rxSymbol);
-        }, 300);
-    }
-}
-
-function cleanupAfterPrint(controls, rxSymbol) {
     setTimeout(() => {
         document.body.classList.remove('is-printing-rx-only');
         controls.forEach(c => c.style.display = '');
         if (rxSymbol) rxSymbol.style.display = '';
-    }, 1000);
+    }, 1500);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
