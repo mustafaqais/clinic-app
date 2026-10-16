@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.52
-// (محدث نهائياً: دمج الجد الرابع في حقل الاسم، التنبيه الذكي للتكرار، وحقل المحافظة الاختياري)
+// (الكود الكامل والمحدث: دمج الجد الرابع، التنبيه الذكي للتكرار، حقل المحافظة، وإصلاح الدخول)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -742,7 +742,7 @@ async function handleAuthSubmit(e) {
     const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
 
     if (isRegisterMode) {
-        const phone = document.getElementById('regPhoneInput').value.trim();
+        const phone = document.getElementById('regPhoneInput') ? document.getElementById('regPhoneInput').value.trim() : '';
         auth.createUserWithEmailAndPassword(identifier, pass)
             .then(async res => {
                 pendingUserPass = pass;
@@ -772,7 +772,7 @@ async function handleAuthSubmit(e) {
                     document.getElementById('activationScreen').style.display = 'flex';
                 }
             })
-            .catch(err => alert('خطأ: ' + err.message));
+            .catch(err => alert('خطأ في التسجيل: ' + err.message));
     } else {
         let loginEmail = identifier;
         if (!identifier.includes('@')) {
