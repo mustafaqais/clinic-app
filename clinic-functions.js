@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.51
-// (محدث: تفعيل عنوان Rx الأحمر والترقيم الإنجليزي التلقائي للأدوية لكافة الأجهزة)
+// (محدث: تفعيل عنوان Rx الأحمر والترقيم الإنجليزي التلقائي للأدوية لكافة الأجهزة ومعالجة مصادقة الموبايل)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -236,6 +236,10 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     auth.onAuthStateChanged(async user => {
+        const activScreen = document.getElementById('activationScreen');
+        const appCont = document.getElementById('appContainer');
+        const authScreen = document.getElementById('authScreen');
+
         if (user) {
             currentUserId = user.uid;
             let dataOwnerUid = user.uid;
@@ -339,9 +343,6 @@ window.addEventListener("DOMContentLoaded", () => {
             isUserSecretary = false;
             isSubscriptionExpired = false;
             sessionStorage.removeItem('target_doctor_uid');
-            const activScreen = document.getElementById('activationScreen');
-            const appCont = document.getElementById('appContainer');
-            const authScreen = document.getElementById('authScreen');
             if (activScreen) activScreen.style.display = 'none';
             if (appCont) appCont.style.display = 'none';
             if (authScreen) authScreen.style.display = 'flex';
@@ -2073,7 +2074,6 @@ function openRxModal(visitId) {
 
     document.getElementById('rxDragVitalsText').innerText = bpVal + ' | ' + hrVal + ' | ' + tempVal + ' | ' + bmiVal;
     
-    // حقن الأدوية باستخدام الدالة المركزية لتظهر مرقمة ومع عنوان Rx الأحمر في الـ Modal والطباعة
     const treatmentEl = document.getElementById('rxDragTreatmentText');
     if (treatmentEl) {
         treatmentEl.innerHTML = formatTreatmentForPrintOrView(visit.drugs);
@@ -2215,7 +2215,6 @@ function loadSavedRxLayout() {
     setRxPaperSize(savedSize);
 }
 
-// دالة طباعة الروشتة المفصولة تماماً ومجهزة لكافة الأجهزة مع تنسيق الأدوية وعنوان Rx
 function printPrescriptionDirectly() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
@@ -2225,7 +2224,7 @@ function printPrescriptionDirectly() {
     if (!container) return;
 
     let bgImg = container.querySelector('.rx-bg-img');
-    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image'] || '';
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
     
     if (!bgImg && savedRxImg) {
         bgImg = document.createElement('img');
@@ -2263,7 +2262,6 @@ function printPrescriptionDirectly() {
     }, 1500);
 }
 
-// دالة طباعة التقرير الطبي المفصولة تماماً عن الروشتة
 function printMedicalReportDirectly() {
     if (repConfigModeActive) {
         toggleRepConfigMode();
@@ -2448,7 +2446,7 @@ function openMedicalReportModal(visitId) {
     if (!modal) return;
     modal.style.display = 'flex';
 
-    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image'] || '';
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
     const container = document.getElementById('repCanvasContainer');
     if (container) {
         let bgImg = container.querySelector('.rep-bg-img');
