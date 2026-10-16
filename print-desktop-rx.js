@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master - Desktop RX Print (PDF Canvas Engine for Direct Print)
+// Clinic Master - Desktop RX Print (With Auto-Compression & PDF Engine)
 // ==========================================
 
 let isConfigMode = false;
@@ -72,7 +72,7 @@ function saveRxLayoutPositions() {
     alert('تم حفظ إعدادات روشتة الحاسبة بنجاح!');
 }
 
-// دالة الحفظ كـ PDF (التي تعمل لديك بامتياز وبدون أي مشاكل)
+// دالة الحفظ كـ PDF (التي تعمل لديك بامتياز)
 function openPrescriptionPDF() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
@@ -81,7 +81,7 @@ function openPrescriptionPDF() {
     const container = document.getElementById('rxCanvasContainer');
     if (!container) return;
 
-    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image'] || '';
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
     let bgImg = container.querySelector('.rx-bg-img');
     if (!bgImg && savedRxImg) {
         bgImg = document.createElement('img');
@@ -107,7 +107,41 @@ function openPrescriptionPDF() {
     });
 }
 
-// توجيه زر الطباعة المباشرة (Direct Print) ليعتمد محرك الـ PDF السليم والمضمون
+// دالة ضغط الصورة برمجياً لتخفيف الوزن على الذاكرة قبل الطباعة المباشرة
+function compressImageForPrint(dataUrl, callback) {
+    if (!dataUrl) {
+        callback(null);
+        return;
+    }
+    const img = new Image();
+    img.src = dataUrl;
+    img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        let width = img.width;
+        let height = img.height;
+        const maxDim = 1000; // أبعاد مثالية للوضوح والسرعة القصوى
+
+        if (width > height && width > maxDim) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+        } else if (height > maxDim) {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        ctx.drawImage(img, 0, 0, width, height);
+        callback(canvas.toDataURL('image/jpeg', 0.82));
+    };
+    img.onerror = function() {
+        callback(dataUrl);
+    };
+}
+
+// زر الطباعة المباشرة مع آلية الضغط الذكي ومنع الصفحة البيضاء
 function printPrescriptionDirectly() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
@@ -116,56 +150,58 @@ function printPrescriptionDirectly() {
     const container = document.getElementById('rxCanvasContainer');
     if (!container) return;
 
-    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image'] || '';
-    let bgImg = container.querySelector('.rx-bg-img');
-    if (!bgImg && savedRxImg) {
-        bgImg = document.createElement('img');
-        bgImg.className = 'rx-bg-img';
-        container.insertBefore(bgImg, container.firstChild);
-    }
-    if (bgImg && savedRxImg) {
-        bgImg.src = savedRxImg;
-        bgImg.style.display = 'block';
-    }
-
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    
     const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
 
-    // استخدام محرك html2canvas لطباعة الروشتة بصورة مطابقة تماماً للـ PDF وبدون أي فراغ أو اختفاء للترويسة
-    html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        
-        // إنشاء نافذة طباعة مؤقتة تحمل الـ Canvas بصيغة مثالية للطباعة المباشرة
-        const printWindow = window.open('', '_blank');
-        if (printWindow) {
-            printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Print Prescription</title>
-                        <style>
-                            body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
-                            img { max-width: 100%; height: auto; object-fit: contain; }
-                            @media print {
-                                body { margin: 0; }
-                                img { width: 100vw; height: 100vh; }
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        <img src="${imgData}" onload="window.print(); window.close();" />
-                    </body>
-                </html>
-            `);
-            printWindow.document.close();
-        } else {
-            // كخيار بديل إذا تم حظر النوافذ المنبثقة، يتم استدعاء حفظ الـ PDF مباشرة
-            openPrescriptionPDF();
+    // ضغط الصورة أولاً ثم إرسالها للرندر والطباعة الفورية
+    compressImageForPrint(savedRxImg, function(compressedImg) {
+        let bgImg = container.querySelector('.rx-bg-img');
+        if (!bgImg) {
+            bgImg = document.createElement('img');
+            bgImg.className = 'rx-bg-img';
+            container.insertBefore(bgImg, container.firstChild);
         }
         
-        controls.forEach(c => c.style.display = '');
-    }).catch(err => {
-        console.error("Print Canvas Error:", err);
-        controls.forEach(c => c.style.display = '');
-        openPrescriptionPDF();
+        if (compressedImg) {
+            bgImg.src = compressedImg;
+            bgImg.style.display = 'block';
+        }
+
+        html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            
+            const printWindow = window.open('', '_blank');
+            if (printWindow) {
+                printWindow.document.write(`
+                    <html>
+                        <head>
+                            <title>Print Prescription</title>
+                            <style>
+                                body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
+                                img { max-width: 100%; height: auto; object-fit: contain; }
+                                @media print {
+                                    body { margin: 0; }
+                                    img { width: 100vw; height: 100vh; }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <img src="${imgData}" onload="window.print(); window.close();" />
+                        </body>
+                    </html>
+                `);
+                printWindow.document.close();
+            } else {
+                openPrescriptionPDF();
+            }
+            
+            controls.forEach(c => c.style.display = '');
+        }).catch(err => {
+            console.error("Print Error:", err);
+            controls.forEach(c => c.style.display = '');
+            openPrescriptionPDF();
+        });
     });
 }
