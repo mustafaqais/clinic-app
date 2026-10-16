@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.52
-// (محدث: فصل ملفات طباعة الروشتة والتقارير في 6 ملفات مستقلة لكل جهاز عبر الـ Dynamic CSS Injection)
+// (محدث: تعديل مسار الستايلات لتتوافق مع الملفات الموجودة مباشرة في المجلد الرئيسي)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -2035,7 +2035,6 @@ function closeMedHistoryModal() {
     document.getElementById('medHistoryModal').style.display = 'none';
 }
 
-// دالة مركزية لتنسيق الأدوية مع عنوان Rx الأحمر والترقيم التلقائي بالإنجليزية لكافة الأجهزة
 function formatTreatmentForPrintOrView(rawText) {
     if (!rawText) return 'No medications prescribed.';
     
@@ -2215,7 +2214,7 @@ function loadSavedRxLayout() {
     setRxPaperSize(savedSize);
 }
 
-// دالة تحديد الجهاز وحقن ملف الستايل الخاص بالطباعة ديناميكياً
+// دالة تحديد الجهاز وحقن ملف الستايل الخاص بالطباعة ديناميكياً من المجلد الرئيسي
 function injectPrintStyle(type = 'rx') {
     const width = window.innerWidth;
     let deviceType = 'desktop';
@@ -2226,7 +2225,7 @@ function injectPrintStyle(type = 'rx') {
         deviceType = 'tablet';
     }
 
-    const styleFileName = `print-styles/print-${type}-${deviceType}.css`;
+    const styleFileName = `print-${type}-${deviceType}.css`;
 
     let oldLink = document.getElementById('activePrintStyle');
     if (oldLink) oldLink.remove();
@@ -2239,7 +2238,6 @@ function injectPrintStyle(type = 'rx') {
 }
 
 function printPrescriptionDirectly() {
-    // حقن ستايل الروشتة المستقل الخاص بالجهاز الحالي
     injectPrintStyle('rx');
 
     isConfigMode = false;
@@ -2289,7 +2287,6 @@ function printPrescriptionDirectly() {
 }
 
 function printMedicalReportDirectly() {
-    // حقن ستايل التقرير الطبي المستقل الخاص بالجهاز الحالي
     injectPrintStyle('report');
 
     if (repConfigModeActive) {
