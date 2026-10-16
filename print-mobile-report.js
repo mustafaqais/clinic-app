@@ -1,25 +1,25 @@
 // ==========================================
-// Clinic Master - Mobile RX Print (Clean & Safe Version)
+// Clinic Master - Mobile Medical Report Print (print-mobile-report.js)
 // ==========================================
 
 if (typeof window.isConfigMode === 'undefined') {
     window.isConfigMode = false;
 }
 
-function toggleRxConfigMode() {
+function toggleReportConfigMode() {
     isConfigMode = !isConfigMode;
-    document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
+    document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
         if (isConfigMode) box.classList.add('config-mode');
         else box.classList.remove('config-mode');
     });
-    updateConfigModeUI();
+    updateReportConfigModeUI();
 }
 
-function updateConfigModeUI() {
-    const hint = document.getElementById('rxModeHint');
-    const saveBtn = document.getElementById('rxSaveLayoutBtn');
+function updateReportConfigModeUI() {
+    const hint = document.getElementById('repModeHint');
+    const saveBtn = document.getElementById('repSaveLayoutBtn');
     if (isConfigMode) {
-        if (hint) hint.innerText = 'Mobile RX Config Mode Active';
+        if (hint) hint.innerText = 'Report Config Mode Active';
         if (saveBtn) saveBtn.style.display = 'block';
     } else {
         if (hint) hint.innerText = '';
@@ -27,12 +27,14 @@ function updateConfigModeUI() {
     }
 }
 
-function changeBoxFontSize(boxType, delta) {
+function changeReportBoxFontSize(boxType, delta) {
     const map = {
-        patientDetails: 'rxDragPatientDetailsText',
-        date: 'rxDragDateText',
-        vitals: 'rxDragVitalsText',
-        treatment: 'rxDragTreatmentText'
+        patientText: 'repPatientText',
+        titleText: 'repTitleText',
+        toText: 'repToText',
+        detailsText: 'repDetailsText',
+        dateText: 'repDateText',
+        signatureText: 'repSignatureText'
     };
     const el = document.getElementById(map[boxType]);
     if (!el) return;
@@ -40,150 +42,83 @@ function changeBoxFontSize(boxType, delta) {
     el.style.fontSize = (currentSize + delta) + 'px';
 }
 
-function saveRxLayoutPositions() {
+function saveReportLayoutPositions() {
     isConfigMode = false;
-    document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
-    updateConfigModeUI();
+    document.querySelectorAll('#medicalReportModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
+    updateReportConfigModeUI();
 
-    const container = document.getElementById('rxCanvasContainer');
+    const container = document.getElementById('repCanvasContainer');
     if (!container) return;
     const cWidth = container.clientWidth || 1;
     const cHeight = container.clientHeight || 1;
 
-    const rxLayoutData = {};
-    document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
+    const repLayoutData = {};
+    document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
         const leftPct = (box.offsetLeft / cWidth) * 100;
         const topPct = (box.offsetTop / cHeight) * 100;
         const widthPct = (box.offsetWidth / cWidth) * 100;
 
-        rxLayoutData[box.id] = {
+        repLayoutData[box.id] = {
             top: topPct + '%',
             left: leftPct + '%',
             width: widthPct + '%',
-            fontSize: box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text') ? window.getComputedStyle(box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text')).fontSize : '1rem'
+            fontSize: box.querySelector('div, span, p') ? window.getComputedStyle(box.querySelector('div, span, p')).fontSize : '1rem'
         };
     });
 
-    localStorage.setItem('doctor_rx_layout_mobile', JSON.stringify(rxLayoutData));
-    localStorage.setItem('doctor_rx_layout', JSON.stringify(rxLayoutData));
+    localStorage.setItem('doctor_report_layout_mobile', JSON.stringify(repLayoutData));
+    localStorage.setItem('doctor_report_layout', JSON.stringify(repLayoutData));
     
     if (typeof saveSettingsToCloudAndLocal === 'function') {
         saveSettingsToCloudAndLocal();
     }
 
-    alert('تم حفظ إعدادات روشتة الموبايل بنجاح!');
+    alert('تم حفظ إعدادات تخطيط التقرير الطبي بنجاح!');
 }
 
-function openPrescriptionPDF() {
+function printMedicalReportDirectly() {
     isConfigMode = false;
-    document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
-    updateConfigModeUI();
+    document.querySelectorAll('#medicalReportModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
+    updateReportConfigModeUI();
 
-    const container = document.getElementById('rxCanvasContainer');
+    const container = document.getElementById('repCanvasContainer');
     if (!container) return;
 
-    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
-    let bgImg = container.querySelector('.rx-bg-img');
-    if (!bgImg && savedRxImg) {
+    let savedReportImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    let bgImg = container.querySelector('.rep-bg-img');
+    if (!bgImg && savedReportImg) {
         bgImg = document.createElement('img');
-        bgImg.className = 'rx-bg-img';
+        bgImg.className = 'rep-bg-img';
         container.insertBefore(bgImg, container.firstChild);
     }
-    if (bgImg && savedRxImg) {
-        bgImg.src = savedRxImg;
+    if (bgImg && savedReportImg) {
+        bgImg.src = savedReportImg;
         bgImg.style.display = 'block';
     }
 
     const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
 
-    html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('portrait', 'mm', 'a4');
-        const imgWidth = 210;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
-        pdf.save('Prescription_' + Date.now() + '.pdf');
-        controls.forEach(c => c.style.display = '');
-    });
-}
+    // تفعيل كلاس طباعة التقرير تماماً كالنسخة الأصلية
+    document.body.classList.add('is-printing-report-only');
+    document.body.classList.remove('is-printing-rx-only');
 
-function compressImageForPrint(dataUrl, callback) {
-    if (!dataUrl) {
-        callback(null);
-        return;
+    const rxModal = document.getElementById('rxModal');
+    let rxWasOpen = false;
+    if (rxModal && (rxModal.style.display === 'flex' || window.getComputedStyle(rxModal).display === 'flex')) {
+        rxModal.style.display = 'none';
+        rxWasOpen = true;
     }
-    const img = new Image();
-    img.src = dataUrl;
-    img.onload = function() {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        let width = img.width;
-        let height = img.height;
-        const maxDim = 1000;
-        if (width > height && width > maxDim) {
-            height = Math.round((height * maxDim) / width);
-            width = maxDim;
-        } else if (height > maxDim) {
-            width = Math.round((width * maxDim) / height);
-            height = maxDim;
+
+    setTimeout(() => {
+        window.print();
+    }, 400);
+
+    setTimeout(() => {
+        document.body.classList.remove('is-printing-report-only');
+        controls.forEach(c => c.style.display = '');
+        if (rxWasOpen && rxModal) {
+            rxModal.style.display = 'flex';
         }
-        canvas.width = width;
-        canvas.height = height;
-        ctx.drawImage(img, 0, 0, width, height);
-        callback(canvas.toDataURL('image/jpeg', 0.82));
-    };
-    img.onerror = function() { callback(dataUrl); };
-}
-
-function printPrescriptionDirectly() {
-    isConfigMode = false;
-    document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
-    updateConfigModeUI();
-
-    const container = document.getElementById('rxCanvasContainer');
-    if (!container) return;
-
-    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
-    const controls = container.querySelectorAll('.box-font-controls');
-    controls.forEach(c => c.style.display = 'none');
-
-    compressImageForPrint(savedRxImg, function(compressedImg) {
-        let bgImg = container.querySelector('.rx-bg-img');
-        if (!bgImg) {
-            bgImg = document.createElement('img');
-            bgImg.className = 'rx-bg-img';
-            container.insertBefore(bgImg, container.firstChild);
-        }
-        if (compressedImg) {
-            bgImg.src = compressedImg;
-            bgImg.style.display = 'block';
-        }
-
-        html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
-            const printWindow = window.open('', '_blank');
-            if (printWindow) {
-                printWindow.document.write(`
-                    <html>
-                        <head><title>Print Prescription</title>
-                        <style>
-                            body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
-                            img { max-width: 100%; height: auto; object-fit: contain; }
-                            @media print { body { margin: 0; } img { width: 100vw; height: 100vh; } }
-                        </style></head>
-                        <body><img src="${imgData}" onload="window.print(); window.close();" /></body>
-                    </html>
-                `);
-                printWindow.document.close();
-            } else {
-                openPrescriptionPDF();
-            }
-            controls.forEach(c => c.style.display = '');
-        }).catch(err => {
-            console.error("Print Error:", err);
-            controls.forEach(c => c.style.display = '');
-            openPrescriptionPDF();
-        });
-    });
+    }, 1500);
 }
