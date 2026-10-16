@@ -1,35 +1,53 @@
 // ==========================================
-// Clinic Master - Mobile RX Print (print-mobile-rx.js) - Fixed Version
+// Clinic Master - Mobile RX Print (print-mobile-rx.js) - Final Robust Fix
 // ==========================================
 
 function printPrescriptionDirectly() {
     const container = document.getElementById('rxCanvasContainer');
-    if (container) {
-        // جلب صورة الترويسة المحفوظة من الـ localStorage وتطبيقها مباشرة على الـ img الخلفية
-        let bgImg = container.querySelector('#rxBgImg') || container.querySelector('.rx-bg-img');
-        let savedRxImg = localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
-        
-        if (bgImg) {
-            if (savedRxImg) {
-                bgImg.src = savedRxImg;
-                bgImg.style.display = 'block';
-                bgImg.style.visibility = 'visible';
-            } else {
-                bgImg.style.display = 'none';
-            }
-        }
-    }
+    if (!container) return;
 
-    const rxSymbol = container ? container.querySelector('#rxDragBoxTreatment div:nth-child(2)') : null;
+    let bgImg = container.querySelector('#rxBgImg') || container.querySelector('.rx-bg-img');
+    let savedRxImg = localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+
+    const rxSymbol = container.querySelector('#rxDragBoxTreatment div:nth-child(2)');
     if (rxSymbol) rxSymbol.style.display = 'none';
 
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
-    
-    setTimeout(() => { window.print(); }, 600);
-    
-    setTimeout(() => { 
-        document.body.classList.remove('is-printing-rx-only'); 
+
+    if (bgImg && savedRxImg) {
+        bgImg.onload = function() {
+            setTimeout(() => {
+                window.print();
+                cleanupMobileAfterPrint(rxSymbol);
+            }, 400);
+        };
+        bgImg.onerror = function() {
+            window.print();
+            cleanupMobileAfterPrint(rxSymbol);
+        };
+        bgImg.src = savedRxImg;
+        bgImg.style.display = 'block';
+        bgImg.style.visibility = 'visible';
+        bgImg.style.opacity = '1';
+
+        if (bgImg.complete) {
+            setTimeout(() => {
+                window.print();
+                cleanupMobileAfterPrint(rxSymbol);
+            }, 400);
+        }
+    } else {
+        setTimeout(() => {
+            window.print();
+            cleanupMobileAfterPrint(rxSymbol);
+        }, 400);
+    }
+}
+
+function cleanupMobileAfterPrint(rxSymbol) {
+    setTimeout(() => {
+        document.body.classList.remove('is-printing-rx-only');
         if (rxSymbol) rxSymbol.style.display = '';
-    }, 1800);
+    }, 1200);
 }
