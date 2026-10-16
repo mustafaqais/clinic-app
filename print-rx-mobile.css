@@ -31,13 +31,16 @@
         margin: 0 !important;
     }
 
+    /* جعل الحاوية تأخذ مقاس ورقة A5 الحقيقي بالمليمتر لتملأ الورقة بالكامل بدون أي فراغات أو تصغير */
     #rxCanvasContainer {
-        position: relative !important;
-        width: 100% !important;
-        height: 100% !important;
-        max-width: 100% !important;
-        max-height: 100% !important;
-        min-height: unset !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 148mm !important;
+        height: 210mm !important;
+        max-width: none !important;
+        max-height: none !important;
+        min-height: none !important;
         margin: 0 !important;
         padding: 0 !important;
         box-shadow: none !important;
@@ -47,13 +50,14 @@
         background: #ffffff !important;
     }
 
+    /* تمديد صورة الترويسة لتغطي كامل مساحة ورقة الـ A5 بنسبة 100% بدون تصغير أو تمركز جانبي */
     .rx-bg-img {
         position: absolute !important;
         left: 0 !important;
         top: 0 !important;
         width: 100% !important;
         height: 100% !important;
-        object-fit: contain !important;
+        object-fit: fill !important;
         z-index: 1 !important;
     }
 
@@ -65,10 +69,10 @@
         box-shadow: none !important;
     }
 
-    /* ضبط النصوص لمنع التشابك والتحاشك نهائياً وتحديد أحجام واضحة */
+    /* حل مشكلة الكتابة المشابكة نهائياً بزيادة تباعد الأسطر وحجم الخط الواضح */
     .rx-patient-details-text, .rx-date-text, .rx-vitals-text {
         font-size: 13px !important;
-        line-height: 1.6 !important;
+        line-height: 1.8 !important;
         word-break: break-word !important;
         white-space: pre-wrap !important;
         color: #000000 !important;
@@ -76,7 +80,7 @@
 
     .rx-treatment-list {
         font-size: 14px !important;
-        line-height: 1.8 !important;
+        line-height: 2.0 !important;
         word-break: break-word !important;
         white-space: pre-wrap !important;
         color: #000000 !important;
@@ -86,7 +90,7 @@
         font-size: 18px !important;
         font-weight: 900 !important;
         color: #b91c1c !important;
-        margin-bottom: 4px !important;
+        margin-bottom: 6px !important;
     }
 
     .box-font-controls, button, .modal-header, #rxModeHint {
