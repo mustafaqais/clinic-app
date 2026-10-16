@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.52
-// (محدث نهائياً: إصلاح وتفعيل أزرار Medical History والتعديل Edit بدقة)
+// (محدث نهائياً: دمج الجد الرابع في حقل الاسم، التنبيه الذكي للتكرار، وحقل المحافظة الاختياري)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -83,7 +83,7 @@ function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', save
     if (target) target.style.display = 'block';
 
     if (screenId === 'addPatientScreen') {
-        const fieldsToReset = ['pName', 'pSubName', 'pAge', 'pGender', 'pMarital', 'pJob', 'pPhone'];
+        const fieldsToReset = ['pName', 'pAge', 'pGender', 'pCity', 'pMarital', 'pJob', 'pPhone'];
         fieldsToReset.forEach(id => {
             const el = document.getElementById(id);
             if (el) {
@@ -1684,7 +1684,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1886,9 +1886,9 @@ function openEditPatientModal() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
     document.getElementById('editPName').value = patient.name || '';
-    document.getElementById('editPSubName').value = patient.subName || '';
     document.getElementById('editPAge').value = patient.age || '';
     document.getElementById('editPGender').value = patient.gender || '';
+    document.getElementById('editPCity').value = patient.city || '';
     document.getElementById('editPMarital').value = patient.marital || '';
     document.getElementById('editPJob').value = patient.job || '';
     document.getElementById('editPPhone').value = patient.phone || '';
@@ -1901,7 +1901,6 @@ function closeEditPatientModal() {
 
 function saveEditedPatient() {
     const name = document.getElementById('editPName').value.trim();
-    const subName = document.getElementById('editPSubName').value.trim();
     const age = Number(document.getElementById('editPAge').value);
     if (!name || !age) return;
 
@@ -1909,17 +1908,17 @@ function saveEditedPatient() {
     if (!patient) return;
 
     patient.name = name;
-    patient.subName = subName;
     patient.age = age;
     patient.gender = document.getElementById('editPGender').value || 'Unspecified';
+    patient.city = document.getElementById('editPCity').value || '';
     patient.marital = document.getElementById('editPMarital').value || 'Single';
     patient.job = document.getElementById('editPJob').value || 'Unspecified';
     patient.phone = document.getElementById('editPPhone').value || 'N/A';
 
     savePatientToCloudAndLocal(patient);
     closeEditPatientModal();
-    document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ' (' + patient.subName + ')' : '');
-    document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + patient.gender + ' | Marital: ' + patient.marital + ' | Job: ' + patient.job + ' | Phone: ' + patient.phone;
+    document.getElementById('recPatientName').innerText = patient.name;
+    document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + patient.gender + (patient.city ? ' | المحافظة: ' + patient.city : '') + ' | Marital: ' + patient.marital + ' | Job: ' + patient.job + ' | Phone: ' + patient.phone;
 }
 
 function confirmDeletePatientRecord() {
@@ -2080,7 +2079,7 @@ function openRxModal(visitId) {
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
 
-    document.getElementById('rxDragPatientDetailsText').innerText = 'Name: ' + (patient.name + (patient.subName ? ' (' + patient.subName + ')' : '')) + ' | Age: ' + patient.age + ' | ' + (patient.gender || '');
+    document.getElementById('rxDragPatientDetailsText').innerText = 'Name: ' + patient.name + ' | Age: ' + patient.age + ' | ' + (patient.gender || '');
     document.getElementById('rxDragDateText').innerText = visit.date || getTodayFormatted();
     
     const bpVal = visit.bp ? 'BP: ' + visit.bp : 'BP: _____ / _____ mmHg';
@@ -2576,12 +2575,13 @@ function openMedicalReportModal(visitId) {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     const visit = patient ? patient.visits.find(v => Number(v.visitId) === Number(visitId)) : null;
 
-    let pName = patient ? (patient.name + (patient.subName ? ' (' + patient.subName + ')' : '')) : 'مريض';
+    let pName = patient ? patient.name : 'مريض';
     let pAge = patient ? patient.age : '';
     let pGender = patient ? (patient.gender || '') : '';
+    let pCity = patient && patient.city ? ' | المحافظة: ' + patient.city : '';
     let visitDate = visit ? (visit.date || getTodayFormatted()) : getTodayFormatted();
 
-    let patDetailsStr = `الاسم: ${pName} | العمر: ${pAge} | الجنس: ${pGender} | التاريخ: ${visitDate}`;
+    let patDetailsStr = `الاسم: ${pName} | العمر: ${pAge} | الجنس: ${pGender}${pCity} | التاريخ: ${visitDate}`;
     const repPatText = document.getElementById('repPatientText');
     if (repPatText) repPatText.textContent = patDetailsStr;
 
@@ -2975,19 +2975,19 @@ function processAndSaveBulkDict() {
 function saveNewPatient(e) {
     e.preventDefault();
     const rawName = document.getElementById('pName').value.trim();
-    const rawSubName = document.getElementById('pSubName').value.trim();
+    const rawCity = document.getElementById('pCity') ? document.getElementById('pCity').value.trim() : '';
 
     const nameExists = patients.some(p => p.name.toLowerCase() === rawName.toLowerCase());
-    if (nameExists && !rawSubName) {
-        alert('⚠️ تنبيه: يوجد مريض بنفس الاسم مسجل مسبقاً! يرجى إدخال اسم الجد الرابع أو العشيرة أو ملاحظة تمييز في حقل "اسم الجد الرابع/العشيرة" للمتابعة.');
-        document.getElementById('pSubName').focus();
+    if (nameExists) {
+        alert('⚠️ تنبيه: هذا الاسم مكرر تماماً! يرجى إضافة اسم الجد الرابع داخل نفس حقل الاسم (مثال: سيف قيس قاسم محمد) لكي يقبل النظام تخزين ملف المريض بنجاح.');
+        document.getElementById('pName').focus();
         return;
     }
 
     const newPatient = {
         id: Date.now(),
         name: rawName,
-        subName: rawSubName,
+        city: rawCity,
         age: Number(document.getElementById('pAge').value),
         gender: document.getElementById('pGender').value || 'Unspecified',
         marital: document.getElementById('pMarital').value || 'Single',
@@ -3007,7 +3007,7 @@ function renderPatientsList(list) {
         : list.map(p => 
             '<div class="patient-card" onclick="openMedicalRecord(' + p.id + ')">' +
             '<div class="patient-info">' +
-            '<h4>' + p.name + (p.subName ? ' <span style="font-size:0.75rem; color:#0d9488; font-weight:normal;">(' + p.subName + ')</span>' : '') + '</h4>' +
+            '<h4>' + p.name + (p.city ? ' <span style="font-size:0.75rem; color:#0d9488; font-weight:normal;">(' + p.city + ')</span>' : '') + '</h4>' +
             '<p><i class="fa-solid fa-phone"></i> ' + p.phone + ' | Age: ' + p.age + '</p>' +
             '</div>' +
             '<span class="badge-gender ' + (p.gender === 'Female' ? 'gender-female' : 'gender-male') + '">' + (p.gender || 'N/A') + '</span>' +
@@ -3037,7 +3037,7 @@ function filterPatients() {
 
         let filtered = patients.filter(p => {
             if (!p) return false;
-            const fullNameFull = ((p.name || '') + " " + (p.subName || "")).toLowerCase();
+            const fullNameFull = ((p.name || '') + " " + (p.city || "")).toLowerCase();
             const matchQuery = fullNameFull.includes(query) || (p.phone && String(p.phone).includes(query));
             const matchGender = !gender || p.gender === gender;
             let matchAge = true;
@@ -3066,8 +3066,8 @@ function openMedicalRecord(id, saveState = true) {
     navigateTo('medicalRecordScreen', 'Patient Medical Record', 'View details', saveState);
     const patient = patients.find(p => Number(p.id) === Number(id));
     if (patient) {
-        document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ' (' + patient.subName + ')' : '');
-        document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + (patient.gender || 'N/A') + ' | Marital: ' + (patient.marital || 'N/A') + ' | Job: ' + (patient.job || 'N/A') + ' | Phone: ' + (patient.phone || 'N/A');
+        document.getElementById('recPatientName').innerText = patient.name;
+        document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + (patient.gender || 'N/A') + (patient.city ? ' | المحافظة: ' + patient.city : '') + ' | Marital: ' + (patient.marital || 'N/A') + ' | Job: ' + (patient.job || 'N/A') + ' | Phone: ' + (patient.phone || 'N/A');
         renderVisits(patient.visits || [], true);
     }
 }
