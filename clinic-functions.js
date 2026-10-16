@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.52
-// (محدث: فحص التكرار الصامت، حقل المحافظة، وإصلاح السحب والإفلات للتقرير الطبي)
+// (محدث بالكامل: ربط كل الدوال بالنطاق العام window لمنع أخطاء is not defined)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -19,7 +19,7 @@ function updateOnlineStatus() {
     }
 }
 
-function syncLocalDataToCloud() {
+window.syncLocalDataToCloud = function() {
     if (!currentUserId || !navigator.onLine) return;
     const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
 
@@ -36,7 +36,7 @@ function syncLocalDataToCloud() {
         specialtyConfig: specialtyConfig,
         updatedAt: new Date().toISOString()
     }, { merge: true }).catch(err => console.log("Settings sync error:", err));
-}
+};
 
 function generateKey(type) {
     const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -47,7 +47,7 @@ function generateKey(type) {
     return code;
 }
 
-async function generateNewKey(type) {
+window.generateNewKey = async function(type) {
     let prefix = "TRL";
     let days = 14;
     if (type === 'EXT') { prefix = "EXT"; days = 7; }
@@ -69,11 +69,11 @@ async function generateNewKey(type) {
     } catch (e) {
         alert('Error generating key: ' + e.message);
     }
-}
+};
 
 let screenHistory = ['mainScreen'];
 
-function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', saveState = true) {
+window.navigateTo = function(screenId, title = null, sub = 'Cloud Secure Dashboard', saveState = true) {
     if (!isSubscriptionExpired) {
         autoSaveMedicalRecord();
     }
@@ -121,9 +121,9 @@ function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', save
             screenHistory.push(screenId);
         }
     }
-}
+};
 
-function goBackScreen() {
+window.goBackScreen = function() {
     if (!isSubscriptionExpired) {
         autoSaveMedicalRecord();
     }
@@ -154,46 +154,7 @@ function goBackScreen() {
     } else {
         showMainMenu();
     }
-}
-
-window.addEventListener('popstate', function(event) {
-    event.preventDefault();
-    if (document.getElementById('medHistoryModal').style.display === 'flex') {
-        closeMedHistoryModal();
-        return;
-    }
-    if (document.getElementById('bmiCalculatorModal').style.display === 'flex') {
-        closeBmiModal();
-        return;
-    }
-    if (document.getElementById('rxModal').style.display === 'flex') {
-        closeRxModal();
-        return;
-    }
-    if (document.getElementById('medicalReportModal') && document.getElementById('medicalReportModal').style.display === 'flex') {
-        closeMedicalReportModal();
-        return;
-    }
-    if (document.getElementById('editPatientModal').style.display === 'flex') {
-        closeEditPatientModal();
-        return;
-    }
-    if (document.getElementById('supportModal').style.display === 'flex') {
-        closeSupportModal();
-        return;
-    }
-    if (document.getElementById('bulkAddDictModal').style.display === 'flex') {
-        closeBulkAddModal();
-        return;
-    }
-    if (screenHistory.length > 1) {
-        goBackScreen();
-    } else {
-        history.pushState(null, '', window.location.href);
-    }
-});
-
-history.pushState(null, '', window.location.href);
+};
 
 function hideAllScreensInner() {
     document.getElementById('mainScreen').style.display = 'none';
@@ -211,29 +172,46 @@ function hideAllScreensInner() {
     document.getElementById('permissionsScreen').style.display = 'none';
 }
 
-function applyLanguage() {
-    localStorage.setItem('clinic_lang', currentLang);
-}
+// ---------------------------------------------------------
+// ربط واجهة الأيقونات والأزرار بالنطاق العام (window) لضمان العمل الفوري
+// ---------------------------------------------------------
+window.openPatientsArchive = function() { navigateTo('archiveScreen', translations[currentLang].archive, 'Search & visit history'); };
+window.openRxTemplateManager = function() { navigateTo('rxTemplateScreen', 'RX Template', 'Prescription header image'); };
+window.openSpecialtiesDashboard = function() { 
+    navigateTo('specialtiesDashboardScreen', 'لوحة تحكم الاختصاصات', 'تخصيص وتفعيل الحقول الطبية');
+    document.getElementById('mod_medHistory').checked = !!specialtyConfig.medHistory;
+    document.getElementById('mod_chiefComplaint').checked = !!specialtyConfig.chiefComplaint;
+    document.getElementById('mod_historyPresentIllness').checked = !!specialtyConfig.historyPresentIllness;
+    document.getElementById('mod_reviewSystems').checked = !!specialtyConfig.reviewSystems;
+    document.getElementById('mod_vitals').checked = !!specialtyConfig.vitals;
+    document.getElementById('mod_labs').checked = !!specialtyConfig.labs;
+    document.getElementById('mod_scans').checked = !!specialtyConfig.scans;
+    document.getElementById('mod_notes').checked = !!specialtyConfig.notes;
+    document.getElementById('mod_rx').checked = !!specialtyConfig.rx;
+    document.getElementById('mod_attachments').checked = !!specialtyConfig.attachments;
+    document.getElementById('mod_obsGyn').checked = !!specialtyConfig.obsGyn;
+    document.getElementById('mod_ortho').checked = !!specialtyConfig.ortho;
+    document.getElementById('mod_neuro').checked = !!specialtyConfig.neuro;
+    document.getElementById('mod_peds').checked = !!specialtyConfig.peds;
+    document.getElementById('mod_derm').checked = !!specialtyConfig.derm;
+    document.getElementById('mod_ent').checked = !!specialtyConfig.ent;
+    document.getElementById('mod_ophthal').checked = !!specialtyConfig.ophthal;
+    document.getElementById('mod_cardio').checked = !!specialtyConfig.cardio;
+};
+window.openDictionaryManager = function() { navigateTo('dictScreen', 'Medical Dictionary', 'Manage drugs & doses'); };
+window.openAnalyticsDashboard = function() { navigateTo('analyticsScreen', 'Clinic Analytics', 'Smart performance'); openAnalyticsDashboardCore(); };
+window.openBackupManager = function() { navigateTo('backupScreen', 'Backup Manager', 'Export and restore data'); document.getElementById('backupFileInput').value = ''; };
+window.openTrashBin = function() { navigateTo('trashScreen', 'Trash Bin', 'Recover deleted items'); renderTrashItems(); };
+window.openAccountSettings = function() { navigateTo('settingsScreen', 'Account Settings', 'Change email and password'); const user = auth.currentUser; if(user) document.getElementById('currentAccountEmail').value = user.email || ''; };
+window.openPermissionsManager = function() { navigateTo('permissionsScreen', 'Secretary Management', 'Create account & permissions'); document.getElementById('secEmailInput').value = secretaryAccount.email || ''; document.getElementById('secPassInput').value = secretaryAccount.password || ''; };
+window.openNetworkHierarchy = function() { navigateTo('networkScreen', 'قاعدة بيانات الشبكة', 'إدارة المستخدمين والأسماء البارزة'); openNetworkHierarchyCore(); };
+window.showMainMenu = function() { const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر"; navigateTo('mainScreen', customBrandName, translations[currentLang].headerSub); };
 
-function applyDarkModeState() {
-    if (isDarkMode) {
-        document.body.classList.add('dark-mode');
-    } else {
-        document.body.classList.remove('dark-mode');
-    }
-}
-
-function toggleLanguage() {
-    currentLang = currentLang === 'ar' ? 'en' : 'ar';
-    applyLanguage();
-    location.reload();
-}
-
-function toggleDarkMode() {
-    isDarkMode = !isDarkMode;
-    localStorage.setItem('clinic_dark_mode', isDarkMode);
-    applyDarkModeState();
-}
+// باقي الدوال البرمجية للنظام
+function applyLanguage() { localStorage.setItem('clinic_lang', currentLang); }
+function applyDarkModeState() { if (isDarkMode) document.body.classList.add('dark-mode'); else document.body.classList.remove('dark-mode'); }
+window.toggleLanguage = function() { currentLang = currentLang === 'ar' ? 'en' : 'ar'; applyLanguage(); location.reload(); };
+window.toggleDarkMode = function() { isDarkMode = !isDarkMode; localStorage.setItem('clinic_dark_mode', isDarkMode); applyDarkModeState(); };
 
 window.addEventListener("DOMContentLoaded", () => {
     const pDateEl = document.getElementById('pDate');
@@ -274,30 +252,21 @@ window.addEventListener("DOMContentLoaded", () => {
                         isUserSecretary = true;
                     }
                 }
-            } catch (e) {
-                console.log("Secretary query error:", e);
-            }
+            } catch (e) { console.log("Secretary query error:", e); }
 
             await loadDoctorBranding(dataOwnerUid);
 
             patients = JSON.parse(localStorage.getItem('clinic_patients_' + dataOwnerUid)) || patients;
             trashBin = JSON.parse(localStorage.getItem('clinic_trash_' + dataOwnerUid)) || trashBin;
 
-            if (patientsListenerUnsubscribe) {
-                patientsListenerUnsubscribe();
-            }
+            if (patientsListenerUnsubscribe) patientsListenerUnsubscribe();
 
             if (navigator.onLine) {
                 db.collection('users_data').doc(dataOwnerUid).get().then(doc => {
                     if (doc.exists) {
                         const data = doc.data();
-                        if (data.rxImage) {
-                            currentDoctorRxImage = data.rxImage;
-                            localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
-                        }
-                        if (data.rxLayout) {
-                            localStorage.setItem('doctor_rx_layout', JSON.stringify(data.rxLayout));
-                        }
+                        if (data.rxImage) { currentDoctorRxImage = data.rxImage; localStorage.setItem('doctor_rx_template', currentDoctorRxImage); }
+                        if (data.rxLayout) { localStorage.setItem('doctor_rx_layout', JSON.stringify(data.rxLayout)); }
                         if (data.dictionary) {
                             medicalDict = data.dictionary;
                             if (!medicalDict.mh_history) medicalDict.mh_history = ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"];
@@ -306,27 +275,16 @@ window.addEventListener("DOMContentLoaded", () => {
                             if (!medicalDict.review_systems) medicalDict.review_systems = ["No fever, no shortness of breath"];
                             localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
                         }
-                        if (data.trashBin) {
-                            trashBin = data.trashBin;
-                            localStorage.setItem('clinic_trash_' + dataOwnerUid, JSON.stringify(trashBin));
-                        }
-                        if (data.secretaryAccount) {
-                            secretaryAccount = data.secretaryAccount;
-                            localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
-                        }
-                        if (data.specialtyConfig) {
-                            specialtyConfig = data.specialtyConfig;
-                            localStorage.setItem('clinic_specialty_config', JSON.stringify(specialtyConfig));
-                        }
+                        if (data.trashBin) { trashBin = data.trashBin; localStorage.setItem('clinic_trash_' + dataOwnerUid, JSON.stringify(trashBin)); }
+                        if (data.secretaryAccount) { secretaryAccount = data.secretaryAccount; localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount)); }
+                        if (data.specialtyConfig) { specialtyConfig = data.specialtyConfig; localStorage.setItem('clinic_specialty_config', JSON.stringify(specialtyConfig)); }
                     }
                 }).catch(err => console.log(err));
 
                 patientsListenerUnsubscribe = db.collection('users_data').doc(dataOwnerUid).collection('patients')
                     .onSnapshot(snapshot => {
                         let cloudPatients = [];
-                        snapshot.forEach(doc => {
-                            cloudPatients.push(doc.data());
-                        });
+                        snapshot.forEach(doc => { cloudPatients.push(doc.data()); });
                         patients = cloudPatients;
                         localStorage.setItem('clinic_patients_' + dataOwnerUid, JSON.stringify(patients));
                         localStorage.setItem('clinic_patients', JSON.stringify(patients));
@@ -338,9 +296,7 @@ window.addEventListener("DOMContentLoaded", () => {
                             if (pat) {
                                 if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) return;
                                 renderVisits(pat.visits || [], false);
-                            } else {
-                                showMainMenu();
-                            }
+                            } else { showMainMenu(); }
                         }
                     }, err => console.log("Real-time listener error:", err));
             }
@@ -379,34 +335,21 @@ async function loadDoctorBranding(ownerUid) {
                 titleEl.innerText = customName;
             }
         }
-    } catch (e) {
-        console.log("Branding load error:", e);
-    }
+    } catch (e) { console.log("Branding load error:", e); }
 }
 
 async function checkUserSubscriptionStatus(uid, isSecretary = false) {
     let expiryDateStr = localStorage.getItem('sub_expiry_' + uid);
-
     if (navigator.onLine) {
         try {
             const docRef = await db.collection('network_hierarchy').doc(uid).get();
             if (docRef.exists) {
                 const data = docRef.data();
-                if (data.expiryDate) {
-                    expiryDateStr = data.expiryDate;
-                    localStorage.setItem('sub_expiry_' + uid, expiryDateStr);
-                }
+                if (data.expiryDate) { expiryDateStr = data.expiryDate; localStorage.setItem('sub_expiry_' + uid, expiryDateStr); }
             }
-        } catch (e) {
-            console.log(e);
-        }
+        } catch (e) { console.log(e); }
     }
-
-    if (isSecretary) {
-        setupClientInterfaceAfterAuth(null, true);
-        return;
-    }
-
+    if (isSecretary) { setupClientInterfaceAfterAuth(null, true); return; }
     if (expiryDateStr && new Date().getTime() < new Date(expiryDateStr).getTime()) {
         isSubscriptionExpired = false;
         setupClientInterfaceAfterAuth(expiryDateStr, false);
@@ -427,10 +370,7 @@ function setupReadOnlyModeAfterExpiration(expiryDateIso) {
 
     const cardNewPat = document.getElementById('cardNewPatient');
     cardNewPat.classList.add('disabled-card');
-    cardNewPat.onclick = function() {
-        alert('⚠️ انتهت صلاحية الاشتراك. التطبيق يعمل في وضع القراءة فقط.');
-        openSupportModal();
-    };
+    cardNewPat.onclick = function() { alert('⚠️ انتهت صلاحية الاشتراك. التطبيق يعمل في وضع القراءة فقط.'); openSupportModal(); };
 
     const banner = document.getElementById('subStatusBanner');
     const titleEl = document.getElementById('subBannerTitle');
@@ -439,7 +379,6 @@ function setupReadOnlyModeAfterExpiration(expiryDateIso) {
     banner.className = 'sub-status-banner expired';
     titleEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> انتهت صلاحية الاشتراك - وضع القراءة فقط';
     textEl.innerText = 'انتهى اشتراكك. يمكنك تصفح الأرشيف وقراءة الملفات والتقارير بحرية تامة أو تجديد الكود.';
-
     restorePreviousScreenState();
 }
 
@@ -456,9 +395,7 @@ function setupFounderInterfaceAfterAuth() {
     
     const cardNewPat = document.getElementById('cardNewPatient');
     cardNewPat.classList.remove('disabled-card');
-    cardNewPat.onclick = function() {
-        navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub);
-    };
+    cardNewPat.onclick = function() { navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub); };
 
     restorePreviousScreenState();
     checkMandatoryMonthlyBackup();
@@ -474,9 +411,7 @@ function setupClientInterfaceAfterAuth(expiryDateIso, isSecretary = false) {
 
     const cardNewPat = document.getElementById('cardNewPatient');
     cardNewPat.classList.remove('disabled-card');
-    cardNewPat.onclick = function() {
-        navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub);
-    };
+    cardNewPat.onclick = function() { navigateTo('addPatientScreen', translations[currentLang].newPatient, translations[currentLang].newPatientSub); };
 
     if (isSecretary) {
         isUserSecretary = true;
@@ -510,9 +445,7 @@ function setupClientInterfaceAfterAuth(expiryDateIso, isSecretary = false) {
     }
 
     restorePreviousScreenState();
-    if (!isSecretary) {
-        checkMandatoryMonthlyBackup();
-    }
+    if (!isSecretary) checkMandatoryMonthlyBackup();
 }
 
 function checkMandatoryMonthlyBackup() {
@@ -526,33 +459,18 @@ function checkMandatoryMonthlyBackup() {
     }
 }
 
-function executeMandatoryBackup() {
+window.executeMandatoryBackup = function() {
     exportJsonBackup();
     const todayDateStr = getTodayFormatted();
     localStorage.setItem('last_mandatory_backup_date', todayDateStr);
     document.getElementById('mandatoryBackupModal').style.display = 'none';
     alert('تم حفظ النسخة الاحتياطية بنجاح!');
-}
+};
 
-function openSupportModal() {
-    document.getElementById('supportModal').style.display = 'flex';
-}
-
-function closeSupportModal() {
-    document.getElementById('supportModal').style.display = 'none';
-}
-
-function openActivationScreenForRenewal() {
-    document.getElementById('appContainer').style.display = 'none';
-    document.getElementById('activationScreen').style.display = 'flex';
-    document.getElementById('activationInput').value = '';
-    document.getElementById('activationInput').focus();
-}
-
-function cancelRenewal() {
-    document.getElementById('activationScreen').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'flex';
-}
+window.openSupportModal = function() { document.getElementById('supportModal').style.display = 'flex'; };
+window.closeSupportModal = function() { document.getElementById('supportModal').style.display = 'none'; };
+window.openActivationScreenForRenewal = function() { document.getElementById('appContainer').style.display = 'none'; document.getElementById('activationScreen').style.display = 'flex'; document.getElementById('activationInput').value = ''; document.getElementById('activationInput').focus(); };
+window.cancelRenewal = function() { document.getElementById('activationScreen').style.display = 'none'; document.getElementById('appContainer').style.display = 'flex'; };
 
 function restorePreviousScreenState() {
     const savedScreen = sessionStorage.getItem('current_screen');
@@ -576,51 +494,31 @@ function restorePreviousScreenState() {
     }
 }
 
-async function verifyActivationCode() {
+window.verifyActivationCode = async function() {
     const inputCode = document.getElementById('activationInput').value.trim().toUpperCase();
     if (!inputCode) { alert('Please enter an activation code.'); return; }
-
-    if (!navigator.onLine) {
-        alert('Internet connection required.');
-        return;
-    }
+    if (!navigator.onLine) { alert('Internet connection required.'); return; }
 
     try {
         const keyRef = db.collection('activation_keys').doc(inputCode);
         const keyDoc = await keyRef.get();
-
-        if (!keyDoc.exists) {
-            alert('Invalid activation code!');
-            return;
-        }
+        if (!keyDoc.exists) { alert('Invalid activation code!'); return; }
 
         const keyData = keyDoc.data();
-        if (keyData.isUsed === true) {
-            alert('This activation code has already been used!');
-            return;
-        }
+        if (keyData.isUsed === true) { alert('This activation code has already been used!'); return; }
 
         const durationDays = keyData.durationDays || 14;
         const expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + durationDays);
         const expiryDateIso = expiryDate.toISOString();
 
-        await keyRef.update({
-            isUsed: true,
-            usedBy: auth.currentUser ? auth.currentUser.email : 'Unknown',
-            usedAt: new Date().toISOString()
-        });
+        await keyRef.update({ isUsed: true, usedBy: auth.currentUser ? auth.currentUser.email : 'Unknown', usedAt: new Date().toISOString() });
 
         const user = auth.currentUser;
         if (user) {
             localStorage.setItem('sub_expiry_' + user.uid, expiryDateIso);
             await db.collection('network_hierarchy').doc(user.uid).set({
-                email: user.email,
-                password: pendingUserPass || 'Saved',
-                role: 'Client Node',
-                isActivated: true,
-                expiryDate: expiryDateIso,
-                activatedAt: new Date().toISOString()
+                email: user.email, password: pendingUserPass || 'Saved', role: 'Client Node', isActivated: true, expiryDate: expiryDateIso, activatedAt: new Date().toISOString()
             }, { merge: true });
         }
 
@@ -628,22 +526,17 @@ async function verifyActivationCode() {
         document.getElementById('activationScreen').style.display = 'none';
         isSubscriptionExpired = false;
         setupClientInterfaceAfterAuth(expiryDateIso, false);
-
-    } catch (err) {
-        alert('Error during activation: ' + err.message);
-    }
-}
+    } catch (err) { alert('Error during activation: ' + err.message); }
+};
 
 function savePatientToCloudAndLocal(patientObj) {
     if (!currentUserId || isSubscriptionExpired) return;
     const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
 
     const idx = patients.findIndex(p => Number(p.id) === Number(patientObj.id));
-    if (idx !== -1) {
-        patients[idx] = patientObj;
-    } else {
-        patients.unshift(patientObj);
-    }
+    if (idx !== -1) patients[idx] = patientObj;
+    else patients.unshift(patientObj);
+
     localStorage.setItem('clinic_patients_' + ownerUid, JSON.stringify(patients));
     localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
@@ -661,10 +554,8 @@ function saveTrashToCloudAndLocal() {
     localStorage.setItem('clinic_trash', JSON.stringify(trashBin));
 
     if (navigator.onLine) {
-        db.collection('users_data').doc(ownerUid).set({
-            trashBin: trashBin,
-            updatedAt: new Date().toISOString()
-        }, { merge: true }).catch(err => console.log("Trash sync error:", err));
+        db.collection('users_data').doc(ownerUid).set({ trashBin: trashBin, updatedAt: new Date().toISOString() }, { merge: true })
+            .catch(err => console.log("Trash sync error:", err));
     }
 }
 
@@ -688,9 +579,7 @@ function saveSettingsToCloudAndLocal() {
         const widthPct = (box.offsetWidth / cWidth) * 100;
 
         rxLayoutData[box.id] = {
-            top: topPct + '%',
-            left: leftPct + '%',
-            width: widthPct + '%',
+            top: topPct + '%', left: leftPct + '%', width: widthPct + '%',
             fontSize: box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text') ? window.getComputedStyle(box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text')).fontSize : '1rem'
         };
     });
@@ -701,12 +590,7 @@ function saveSettingsToCloudAndLocal() {
 
     if (navigator.onLine) {
         db.collection('users_data').doc(ownerUid).set({
-            rxImage: currentDoctorRxImage,
-            rxLayout: rxLayoutData,
-            dictionary: medicalDict,
-            secretaryAccount: secretaryAccount,
-            specialtyConfig: specialtyConfig,
-            updatedAt: new Date().toISOString()
+            rxImage: currentDoctorRxImage, rxLayout: rxLayoutData, dictionary: medicalDict, secretaryAccount: secretaryAccount, specialtyConfig: specialtyConfig, updatedAt: new Date().toISOString()
         }, { merge: true }).catch(err => console.log("Settings save error:", err));
     }
 }
@@ -716,12 +600,12 @@ function getTodayFormatted() {
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 }
 
-function toggleAuthMode() {
+window.toggleAuthMode = function() {
     isRegisterMode = !isRegisterMode;
     document.getElementById('registerPhoneBox').style.display = isRegisterMode ? 'block' : 'none';
-}
+};
 
-function togglePasswordVisibility() {
+window.togglePasswordVisibility = function() {
     const passInput = document.getElementById('authPassword');
     const toggleBtn = document.getElementById('togglePasswordBtn');
     if (passInput.type === 'password') {
@@ -733,9 +617,9 @@ function togglePasswordVisibility() {
         toggleBtn.classList.remove('fa-eye-slash');
         toggleBtn.classList.add('fa-eye');
     }
-}
+};
 
-async function handleAuthSubmit(e) {
+window.handleAuthSubmit = async function(e) {
     e.preventDefault();
     const identifier = document.getElementById('authEmail').value.trim();
     const pass = document.getElementById('authPassword').value;
@@ -747,20 +631,11 @@ async function handleAuthSubmit(e) {
             .then(async res => {
                 pendingUserPass = pass;
                 currentUserId = res.user.uid;
-                
                 try {
                     await db.collection('network_hierarchy').doc(currentUserId).set({
-                        email: identifier.toLowerCase(),
-                        phone: phone || '',
-                        password: pass,
-                        role: identifier.toLowerCase() === founderMail ? 'Founder' : 'Client Node',
-                        isActivated: identifier.toLowerCase() === founderMail,
-                        doctorName: "نظام عيادة ماستر",
-                        createdAt: new Date().toISOString()
+                        email: identifier.toLowerCase(), phone: phone || '', password: pass, role: identifier.toLowerCase() === founderMail ? 'Founder' : 'Client Node', isActivated: identifier.toLowerCase() === founderMail, doctorName: "نظام عيادة ماستر", createdAt: new Date().toISOString()
                     }, { merge: true });
-                } catch (err) {
-                    console.log("Error:", err);
-                }
+                } catch (err) { console.log("Error:", err); }
 
                 if (identifier.toLowerCase() === founderMail) {
                     const expiryDate = new Date();
@@ -778,12 +653,8 @@ async function handleAuthSubmit(e) {
         if (!identifier.includes('@')) {
             try {
                 const querySnap = await db.collection('network_hierarchy').where('phone', '==', identifier).get();
-                if (!querySnap.empty) {
-                    loginEmail = querySnap.docs[0].data().email;
-                }
-            } catch (err) {
-                console.log(err);
-            }
+                if (!querySnap.empty) loginEmail = querySnap.docs[0].data().email;
+            } catch (err) { console.log(err); }
         }
 
         auth.signInWithEmailAndPassword(loginEmail, pass)
@@ -807,9 +678,7 @@ async function handleAuthSubmit(e) {
                             isSec = true;
                         }
                     }
-                } catch (e) {
-                    console.log(e);
-                }
+                } catch (e) { console.log(e); }
 
                 await loadDoctorBranding(dataOwnerUid);
 
@@ -831,7 +700,7 @@ async function handleAuthSubmit(e) {
             })
             .catch(err => alert('خطأ في تسجيل الدخول: ' + err.message));
     }
-}
+};
 
 function showAllCardsForDoctor() {
     document.getElementById('cardNewPatient').style.display = 'flex';
@@ -859,7 +728,7 @@ function applySecretaryUIVisibility() {
     document.getElementById('cardPermissions').style.display = 'none';
 }
 
-function calculateVisitChildGrowth(visitId) {
+window.calculateVisitChildGrowth = function(visitId) {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
@@ -869,10 +738,7 @@ function calculateVisitChildGrowth(visitId) {
     const weight = parseFloat(document.getElementById('pedsWeight-' + visitId).value);
     const height = parseFloat(document.getElementById('pedsHeight-' + visitId).value);
 
-    if (!ageMonths || isNaN(ageMonths) || ageMonths < 0) {
-        alert('الرجاء إدخال عمر الطفل بالأشهر أولاً.');
-        return;
-    }
+    if (!ageMonths || isNaN(ageMonths) || ageMonths < 0) { alert('الرجاء إدخال عمر الطفل بالأشهر أولاً.'); return; }
 
     let weightStatus = 'وزن طبيعي (Normal Weight - P15-P85)';
     let heightStatus = 'طول طبيعي (Normal Height - P15-P85)';
@@ -883,23 +749,13 @@ function calculateVisitChildGrowth(visitId) {
     const expectedHeight = (ageMonths * 1.5) + 50;
 
     if (!isNaN(weight)) {
-        if (weight < expectedWeight * 0.8) {
-            weightStatus = 'نحافة ملحوظة أو نقص بالوزن (< P3)';
-            weightColor = '#b91c1c';
-        } else if (weight > expectedWeight * 1.25) {
-            weightStatus = 'زيادة وزن محتملة (> P85)';
-            weightColor = '#c2410c';
-        }
+        if (weight < expectedWeight * 0.8) { weightStatus = 'نحافة ملحوظة أو نقص بالوزن (< P3)'; weightColor = '#b91c1c'; }
+        else if (weight > expectedWeight * 1.25) { weightStatus = 'زيادة وزن محتملة (> P85)'; weightColor = '#c2410c'; }
     }
 
     if (!isNaN(height)) {
-        if (height < expectedHeight * 0.88) {
-            weightStatus = 'قصر قامة / تقزم محتمل (< P3)';
-            weightColor = '#b91c1c';
-        } else if (height > expectedHeight * 1.12) {
-            weightStatus = 'طول أعلى من المعدل';
-            weightColor = '#0284c7';
-        }
+        if (height < expectedHeight * 0.88) { weightStatus = 'قصر قامة / تقزم محتمل (< P3)'; weightColor = '#b91c1c'; }
+        else if (height > expectedHeight * 1.12) { weightStatus = 'طول أعلى من المعدل'; weightColor = '#0284c7'; }
     }
 
     visit.pedsGrowthResult = '• <b>تقييم الوزن:</b> <span style="color:' + weightColor + '; font-weight:700;">' + weightStatus + '</span><br>' +
@@ -907,37 +763,10 @@ function calculateVisitChildGrowth(visitId) {
 
     savePatientToCloudAndLocal(patient);
     renderVisits(patient.visits, false);
-}
+};
 
-function openSpecialtiesDashboard() {
-    navigateTo('specialtiesDashboardScreen', 'لوحة تحكم الاختصاصات', 'تخصيص وتفعيل الحقول الطبية');
-    
-    document.getElementById('mod_medHistory').checked = !!specialtyConfig.medHistory;
-    document.getElementById('mod_chiefComplaint').checked = !!specialtyConfig.chiefComplaint;
-    document.getElementById('mod_historyPresentIllness').checked = !!specialtyConfig.historyPresentIllness;
-    document.getElementById('mod_reviewSystems').checked = !!specialtyConfig.reviewSystems;
-    document.getElementById('mod_vitals').checked = !!specialtyConfig.vitals;
-    document.getElementById('mod_labs').checked = !!specialtyConfig.labs;
-    document.getElementById('mod_scans').checked = !!specialtyConfig.scans;
-    document.getElementById('mod_notes').checked = !!specialtyConfig.notes;
-    document.getElementById('mod_rx').checked = !!specialtyConfig.rx;
-    document.getElementById('mod_attachments').checked = !!specialtyConfig.attachments;
-
-    document.getElementById('mod_obsGyn').checked = !!specialtyConfig.obsGyn;
-    document.getElementById('mod_ortho').checked = !!specialtyConfig.ortho;
-    document.getElementById('mod_neuro').checked = !!specialtyConfig.neuro;
-    document.getElementById('mod_peds').checked = !!specialtyConfig.peds;
-    document.getElementById('mod_derm').checked = !!specialtyConfig.derm;
-    document.getElementById('mod_ent').checked = !!specialtyConfig.ent;
-    document.getElementById('mod_ophthal').checked = !!specialtyConfig.ophthal;
-    document.getElementById('mod_cardio').checked = !!specialtyConfig.cardio;
-}
-
-function saveSpecialtiesDashboardConfig() {
-    if (isSubscriptionExpired) {
-        alert('التطبيق في وضع القراءة فقط.');
-        return;
-    }
+window.saveSpecialtiesDashboardConfig = function() {
+    if (isSubscriptionExpired) { alert('التطبيق في وضع القراءة فقط.'); return; }
     specialtyConfig = {
         medHistory: document.getElementById('mod_medHistory').checked,
         chiefComplaint: document.getElementById('mod_chiefComplaint').checked,
@@ -962,26 +791,14 @@ function saveSpecialtiesDashboardConfig() {
     saveSettingsToCloudAndLocal();
     alert('تم حفظ إعدادات لوحة تحكم الاختصاصات بنجاح!');
     showMainMenu();
-}
+};
 
-function openPermissionsManager() {
-    navigateTo('permissionsScreen', 'Secretary Management', 'Create account & permissions');
-    document.getElementById('secEmailInput').value = secretaryAccount.email || '';
-    document.getElementById('secPassInput').value = secretaryAccount.password || '';
-}
-
-async function saveSecretaryAccount() {
-    if (isSubscriptionExpired) {
-        alert('التطبيق في وضع القراءة فقط.');
-        return;
-    }
+window.saveSecretaryAccount = async function() {
+    if (isSubscriptionExpired) { alert('التطبيق في وضع القراءة فقط.'); return; }
     const email = document.getElementById('secEmailInput').value.trim();
     const password = document.getElementById('secPassInput').value;
 
-    if (!email || !password) {
-        alert('Please enter both email and password.');
-        return;
-    }
+    if (!email || !password) { alert('Please enter both email and password.'); return; }
 
     try {
         const userCred = await auth.createUserWithEmailAndPassword(email, password);
@@ -989,73 +806,43 @@ async function saveSecretaryAccount() {
         secretaryAccount = { email, password };
         
         if (currentUserId) {
-            await db.collection('network_hierarchy').doc(currentUserId).set({
-                secretaryEmail: email.toLowerCase()
-            }, { merge: true });
-
-            await db.collection('network_hierarchy').doc(secUid).set({
-                email: email,
-                password: password,
-                role: 'Secretary Node',
-                doctorUid: currentUserId,
-                isActivated: true,
-                createdAt: new Date().toISOString()
-            });
+            await db.collection('network_hierarchy').doc(currentUserId).set({ secretaryEmail: email.toLowerCase() }, { merge: true });
+            await db.collection('network_hierarchy').doc(secUid).set({ email: email, password: password, role: 'Secretary Node', doctorUid: currentUserId, isActivated: true, createdAt: new Date().toISOString() });
         }
-
         saveSettingsToCloudAndLocal();
         alert('Secretary account created successfully!');
     } catch (e) {
         if (e.code === 'auth/email-already-in-use') {
             secretaryAccount = { email, password };
-            if (currentUserId) {
-                await db.collection('network_hierarchy').doc(currentUserId).set({
-                    secretaryEmail: email.toLowerCase()
-                }, { merge: true });
-            }
+            if (currentUserId) await db.collection('network_hierarchy').doc(currentUserId).set({ secretaryEmail: email.toLowerCase() }, { merge: true });
             saveSettingsToCloudAndLocal();
             alert('Secretary account updated successfully!');
-        } else {
-            alert('Error: ' + e.message);
-        }
+        } else { alert('Error: ' + e.message); }
     }
-}
+};
 
-async function deleteSecretaryAccount() {
+window.deleteSecretaryAccount = async function() {
     if (isSubscriptionExpired) return;
     if (confirm('Are you sure you want to delete secretary account?')) {
         secretaryAccount = { email: "", password: "" };
         document.getElementById('secEmailInput').value = '';
         document.getElementById('secPassInput').value = '';
-        
-        if (currentUserId) {
-            await db.collection('network_hierarchy').doc(currentUserId).set({
-                secretaryEmail: "",
-            }, { merge: true });
-        }
-
+        if (currentUserId) await db.collection('network_hierarchy').doc(currentUserId).set({ secretaryEmail: "" }, { merge: true });
         saveSettingsToCloudAndLocal();
         alert('Secretary account revoked.');
     }
-}
+};
 
-function saveSecretaryPermissions() {
-    alert('Permissions saved.');
-    showMainMenu();
-}
+window.saveSecretaryPermissions = function() { alert('Permissions saved.'); showMainMenu(); };
 
-function resetPassword() {
+window.resetPassword = function() {
     const identifier = document.getElementById('authEmail').value;
     if (!identifier) { alert('Enter email first.'); return; }
-    auth.sendPasswordResetEmail(identifier)
-        .then(() => alert('Reset link sent!'))
-        .catch(err => alert(err.message));
-}
+    auth.sendPasswordResetEmail(identifier).then(() => alert('Reset link sent!')).catch(err => alert(err.message));
+};
 
-function logoutUser() {
-    if (!isSubscriptionExpired) {
-        autoSaveMedicalRecord();
-    }
+window.logoutUser = function() {
+    if (!isSubscriptionExpired) autoSaveMedicalRecord();
     sessionStorage.clear();
     if (patientsListenerUnsubscribe) patientsListenerUnsubscribe();
     auth.signOut().then(() => {
@@ -1067,26 +854,12 @@ function logoutUser() {
         document.getElementById('appContainer').style.display = 'none';
         document.getElementById('authScreen').style.display = 'flex';
     });
-}
+};
 
-function openBackupManager() {
-    navigateTo('backupScreen', 'Backup Manager', 'Export and restore data');
-    document.getElementById('backupFileInput').value = '';
-}
-
-function exportJsonBackup() {
+window.exportJsonBackup = function() {
     const backupData = {
-        exportDate: new Date().toISOString(),
-        version: "17.52",
-        patients: patients,
-        trashBin: trashBin,
-        medicalDict: medicalDict,
-        rxImage: currentDoctorRxImage,
-        rxLayout: JSON.parse(localStorage.getItem('doctor_rx_layout') || '{}'),
-        secretaryAccount: secretaryAccount,
-        specialtyConfig: specialtyConfig
+        exportDate: new Date().toISOString(), version: "17.52", patients: patients, trashBin: trashBin, medicalDict: medicalDict, rxImage: currentDoctorRxImage, rxLayout: JSON.parse(localStorage.getItem('doctor_rx_layout') || '{}'), secretaryAccount: secretaryAccount, specialtyConfig: specialtyConfig
     };
-
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
@@ -1095,25 +868,17 @@ function exportJsonBackup() {
     downloadAnchor.click();
     downloadAnchor.remove();
     alert('Backup exported successfully!');
-}
+};
 
-function restoreFromUploadedFile(input) {
-    if (isSubscriptionExpired) {
-        alert('التطبيق في وضع القراءة فقط.');
-        return;
-    }
+window.restoreFromUploadedFile = function(input) {
+    if (isSubscriptionExpired) { alert('التطبيق في وضع القراءة فقط.'); return; }
     if (input.files && input.files[0]) {
         const file = input.files[0];
         const reader = new FileReader();
-        
         reader.onload = function(e) {
             try {
                 const parsed = JSON.parse(e.target.result);
-                if (!parsed.patients || !Array.isArray(parsed.patients)) {
-                    alert('Invalid backup file.');
-                    return;
-                }
-
+                if (!parsed.patients || !Array.isArray(parsed.patients)) { alert('Invalid backup file.'); return; }
                 if (confirm('Restore data with (' + parsed.patients.length + ') patients?')) {
                     patients = parsed.patients;
                     trashBin = parsed.trashBin || [];
@@ -1130,94 +895,43 @@ function restoreFromUploadedFile(input) {
                     }
                     saveSettingsToCloudAndLocal();
                     syncLocalDataToCloud();
-
                     alert('Backup restored successfully!');
                     showMainMenu();
                 }
-            } catch (err) {
-                alert('Error: ' + err.message);
-            }
+            } catch (err) { alert('Error: ' + err.message); }
         };
         reader.readAsText(file);
     }
-}
+};
 
-function openAccountSettings() {
-    navigateTo('settingsScreen', 'Account Settings', 'Change email and password');
-    const user = auth.currentUser;
-    if (user) {
-        document.getElementById('currentAccountEmail').value = user.email || '';
-    }
-    document.getElementById('newAccountEmail').value = '';
-    document.getElementById('confirmEmailPass').value = '';
-    document.getElementById('newAccountPassword').value = '';
-}
-
-function updateAccountEmail() {
+window.updateAccountEmail = function() {
     const newEmail = document.getElementById('newAccountEmail').value.trim();
     const password = document.getElementById('confirmEmailPass').value;
     const user = auth.currentUser;
-
-    if (!newEmail || !password) {
-        alert('Please enter new email and current password.');
-        return;
-    }
-
+    if (!newEmail || !password) { alert('Please enter new email and current password.'); return; }
     const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
     user.reauthenticateWithCredential(credential).then(() => {
-        user.updateEmail(newEmail).then(() => {
-            alert('Email updated!');
-            document.getElementById('currentAccountEmail').value = newEmail;
-        }).catch(error => alert('Error: ' + error.message));
+        user.updateEmail(newEmail).then(() => { alert('Email updated!'); document.getElementById('currentAccountEmail').value = newEmail; }).catch(error => alert('Error: ' + error.message));
     }).catch(error => alert('Incorrect password: ' + error.message));
-}
+};
 
-function updateAccountPassword() {
+window.updateAccountPassword = function() {
     const newPass = document.getElementById('newAccountPassword').value;
     const user = auth.currentUser;
-
-    if (!newPass || newPass.length < 6) {
-        alert('Password must be at least 6 characters.');
-        return;
-    }
-
+    if (!newPass || newPass.length < 6) { alert('Password must be at least 6 characters.'); return; }
     if (confirm('Change password?')) {
-        user.updatePassword(newPass).then(() => {
-            alert('Password changed!');
-            document.getElementById('newAccountPassword').value = '';
-        }).catch(error => alert('Error: ' + error.message));
+        user.updatePassword(newPass).then(() => { alert('Password changed!'); document.getElementById('newAccountPassword').value = ''; }).catch(error => alert('Error: ' + error.message));
     }
-}
+};
 
-function sendPasswordResetEmailFromSettings() {
+window.sendPasswordResetEmailFromSettings = function() {
     const user = auth.currentUser;
     if (!user || !user.email) return;
+    auth.sendPasswordResetEmail(user.email).then(() => alert('Reset email sent!')).catch(error => alert('Error: ' + error.message));
+};
 
-    auth.sendPasswordResetEmail(user.email).then(() => {
-        alert('Reset email sent!');
-    }).catch(error => alert('Error: ' + error.message));
-}
-
-function openRxTemplateManager() {
-    navigateTo('rxTemplateScreen', 'RX Template', 'Header customization');
-    const previewImg = document.getElementById('rxPreviewImg');
-    const noText = document.getElementById('noRxText');
-
-    if (currentDoctorRxImage) {
-        previewImg.src = currentDoctorRxImage;
-        previewImg.style.display = 'block';
-        noText.style.display = 'none';
-    } else {
-        previewImg.style.display = 'none';
-        noText.style.display = 'block';
-    }
-}
-
-function saveRxTemplateImage() {
-    if (isSubscriptionExpired) {
-        alert('التطبيق في وضع القراءة فقط.');
-        return;
-    }
+window.saveRxTemplateImage = function() {
+    if (isSubscriptionExpired) { alert('التطبيق في وضع القراءة فقط.'); return; }
     const fileInput = document.getElementById('rxImageFileInput');
     if (fileInput.files && fileInput.files[0]) {
         const file = fileInput.files[0];
@@ -1228,23 +942,12 @@ function saveRxTemplateImage() {
             img.onload = function() {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-                
-                let width = img.width;
-                let height = img.height;
+                let width = img.width, height = img.height;
                 const maxDim = 900;
-
-                if (width > height && width > maxDim) {
-                    height = Math.round((height * maxDim) / width);
-                    width = maxDim;
-                } else if (height > maxDim) {
-                    width = Math.round((width * maxDim) / height);
-                    height = maxDim;
-                }
-
-                canvas.width = width;
-                canvas.height = height;
+                if (width > height && width > maxDim) { height = Math.round((height * maxDim) / width); width = maxDim; }
+                else if (height > maxDim) { width = Math.round((width * maxDim) / height); height = maxDim; }
+                canvas.width = width; canvas.height = height;
                 ctx.drawImage(img, 0, 0, width, height);
-
                 currentDoctorRxImage = canvas.toDataURL('image/jpeg', 0.70);
                 saveSettingsToCloudAndLocal();
                 alert('Prescription header saved!');
@@ -1252,60 +955,35 @@ function saveRxTemplateImage() {
             };
         };
         reader.readAsDataURL(file);
-    } else {
-        alert('Please select an image.');
-    }
-}
+    } else { alert('Please select an image.'); }
+};
 
-async function scanFromDesktopScanner(visitId) {
+window.scanFromDesktopScanner = async function(visitId) {
     alert("جاري الاتصال بالسكانر المكتبي وسحب المستند...");
-
     try {
-        const response = await fetch('http://localhost:5000/scan', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
+        const response = await fetch('http://localhost:5000/scan', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
         const data = await response.json();
-
         if (data.success && data.image) {
             const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
             if (!patient) return;
             const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
             if (!visit) return;
-
             if (!visit.attachments) visit.attachments = [];
             visit.attachments.push({ name: "Desktop_Scan_" + Date.now() + ".jpg", dataUrl: data.image });
-
             savePatientToCloudAndLocal(patient);
             renderVisits(patient.visits, false);
             alert("تم سحب المستند من السكانر وتخزينه بنجاح!");
-        } else {
-            alert("تعذر السحب من السكانر: " + (data.error || "تأكد من توصيل الجهاز."));
-        }
-    } catch (err) {
-        console.error(err);
-        alert("فشل الاتصال بالجسر المحلي. تأكد أن نافذة البايثون السوداء تعمل على حاسوب العيادة.");
-    }
-}
+        } else { alert("تعذر السحب من السكانر: " + (data.error || "تأكد من توصيل الجهاز.")); }
+    } catch (err) { alert("فشل الاتصال بالجسر المحلي. تأكد أن نافذة البايثون السوداء تعمل على حاسوب العيادة."); }
+};
 
-function openNetworkHierarchy() {
-    navigateTo('networkScreen', 'قاعدة بيانات الشبكة', 'إدارة المستخدمين والأسماء البارزة');
+function openNetworkHierarchyCore() {
     const container = document.getElementById('networkTreeContainer');
     container.innerHTML = '<p style="text-align:center; color:#64748b;">Loading...</p>';
-
-    if (!navigator.onLine) {
-        container.innerHTML = '<p style="text-align:center; color:#b91c1c;">Internet required.</p>';
-        return;
-    }
+    if (!navigator.onLine) { container.innerHTML = '<p style="text-align:center; color:#b91c1c;">Internet required.</p>'; return; }
 
     db.collection('network_hierarchy').get().then(snapshot => {
-        if (snapshot.empty) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b;">No users found.</p>';
-            return;
-        }
+        if (snapshot.empty) { container.innerHTML = '<p style="text-align:center; color:#64748b;">No users found.</p>'; return; }
         let html = '';
         snapshot.forEach(doc => {
             const data = doc.data();
@@ -1332,98 +1010,59 @@ function openNetworkHierarchy() {
     });
 }
 
-function promptFounderEditNameByElement(btn) {
-    const nodeUid = btn.getAttribute('data-uid');
-    const currentName = btn.getAttribute('data-name');
-    const userEmail = btn.getAttribute('data-email');
-    promptFounderEditName(nodeUid, currentName, userEmail);
-}
-
-function promptFounderDeleteNodeByElement(btn) {
-    const nodeUid = btn.getAttribute('data-uid');
-    const userEmail = btn.getAttribute('data-email');
-    promptFounderDeleteNode(nodeUid, userEmail);
-}
-
-function promptFounderEditName(nodeUid, currentName, userEmail) {
-    targetNodeUidForNameEdit = nodeUid;
-    document.getElementById('editNameTargetEmail').innerText = userEmail;
-    document.getElementById('founderInputDoctorName').value = currentName !== 'غير مسجل' ? currentName : '';
+window.promptFounderEditNameByElement = function(btn) {
+    targetNodeUidForNameEdit = btn.getAttribute('data-uid');
+    document.getElementById('editNameTargetEmail').innerText = btn.getAttribute('data-email');
+    document.getElementById('founderInputDoctorName').value = btn.getAttribute('data-name') !== 'غير مسجل' ? btn.getAttribute('data-name') : '';
     document.getElementById('founderEditNameModal').style.display = 'flex';
-}
+};
 
-function closeFounderEditNameModal() {
-    document.getElementById('founderEditNameModal').style.display = 'none';
-    targetNodeUidForNameEdit = null;
-}
+window.closeFounderEditNameModal = function() { document.getElementById('founderEditNameModal').style.display = 'none'; targetNodeUidForNameEdit = null; };
 
-async function executeFounderUpdateDoctorName() {
+window.executeFounderUpdateDoctorName = async function() {
     const newName = document.getElementById('founderInputDoctorName').value.trim();
     if (!targetNodeUidForNameEdit) return;
-
     try {
-        await db.collection('network_hierarchy').doc(targetNodeUidForNameEdit).set({
-            doctorName: newName || "نظام عيادة ماستر"
-        }, { merge: true });
-
+        await db.collection('network_hierarchy').doc(targetNodeUidForNameEdit).set({ doctorName: newName || "نظام عيادة ماستر" }, { merge: true });
         closeFounderEditNameModal();
         alert('تم تحديث اسم الطبيب/العيادة بنجاح!');
         openNetworkHierarchy();
-    } catch (e) {
-        alert('خطأ أثناء التحديث: ' + e.message);
-    }
-}
+    } catch (e) { alert('خطأ أثناء التحديث: ' + e.message); }
+};
 
-function promptFounderDeleteNode(nodeUid, nodeEmail) {
-    targetNodeUidToDelete = nodeUid;
-    targetNodeEmailToDelete = nodeEmail;
-    document.getElementById('delTargetEmailDisplay').innerText = nodeEmail;
+window.promptFounderDeleteNodeByElement = function(btn) {
+    targetNodeUidToDelete = btn.getAttribute('data-uid');
+    targetNodeEmailToDelete = btn.getAttribute('data-email');
+    document.getElementById('delTargetEmailDisplay').innerText = targetNodeEmailToDelete;
     document.getElementById('founderConfirmPassInput').value = '';
     document.getElementById('founderDeleteModal').style.display = 'flex';
-}
+};
 
-function closeFounderDeleteModal() {
-    document.getElementById('founderDeleteModal').style.display = 'none';
-    targetNodeUidToDelete = null;
-    targetNodeEmailToDelete = null;
-}
+window.closeFounderDeleteModal = function() { document.getElementById('founderDeleteModal').style.display = 'none'; targetNodeUidToDelete = null; targetNodeEmailToDelete = null; };
 
-async function executeFounderDeleteAccount() {
+window.executeFounderDeleteAccount = async function() {
     const inputPass = document.getElementById('founderConfirmPassInput').value;
     if (!inputPass) return;
-
     try {
         const founderDoc = await db.collection('network_hierarchy').doc(currentUserId).get();
-        if (founderDoc.exists && founderDoc.data().password && inputPass !== founderDoc.data().password) {
-            alert('Incorrect password.');
-            return;
-        }
-
+        if (founderDoc.exists && founderDoc.data().password && inputPass !== founderDoc.data().password) { alert('Incorrect password.'); return; }
         if (!targetNodeUidToDelete) return;
         await db.collection('network_hierarchy').doc(targetNodeUidToDelete).delete();
-        
         closeFounderDeleteModal();
         alert('Account deleted.');
         openNetworkHierarchy();
-    } catch (e) {
-        alert('Error: ' + e.message);
-    }
-}
+    } catch (e) { alert('Error: ' + e.message); }
+};
 
-function openAnalyticsDashboard() {
-    navigateTo('analyticsScreen', 'Clinic Analytics', 'Smart performance');
-
+function openAnalyticsDashboardCore() {
     const totalPatients = patients.length;
-    let todayVisitsCount = 0;
-    let maleCount = 0;
-    let femaleCount = 0;
+    let todayVisitsCount = 0, maleCount = 0, femaleCount = 0;
     const todayStr = getTodayFormatted();
     const drugFrequency = {};
 
     patients.forEach(p => {
         if (p.gender === 'Male') maleCount++;
         else if (p.gender === 'Female') femaleCount++;
-
         if (p.visits) {
             p.visits.forEach(v => {
                 if (v.date === todayStr) todayVisitsCount++;
@@ -1464,7 +1103,7 @@ function openAnalyticsDashboard() {
         ).join('');
 }
 
-function openBmiCalculator(visitId) {
+window.openBmiCalculator = function(visitId) {
     currentVisitIdForModal = visitId;
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
@@ -1475,9 +1114,9 @@ function openBmiCalculator(visitId) {
     document.getElementById('bmiHeight').value = visit.bmiHeight || '';
     calculateBmiLive();
     document.getElementById('bmiCalculatorModal').style.display = 'flex';
-}
+};
 
-function closeBmiModal() {
+window.closeBmiModal = function() {
     if (!isSubscriptionExpired && currentVisitIdForModal && currentPatientId) {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (patient) {
@@ -1490,18 +1129,16 @@ function closeBmiModal() {
                 if (w && h && Number(h) > 0) {
                     const hM = Number(h) / 100;
                     visit.bmiScore = (Number(w) / (hM * hM)).toFixed(1);
-                } else {
-                    visit.bmiScore = '';
-                }
+                } else { visit.bmiScore = ''; }
                 savePatientToCloudAndLocal(patient);
                 renderVisits(patient.visits, false);
             }
         }
     }
     document.getElementById('bmiCalculatorModal').style.display = 'none';
-}
+};
 
-function calculateBmiLive() {
+window.calculateBmiLive = function() {
     const w = parseFloat(document.getElementById('bmiWeight').value);
     const h = parseFloat(document.getElementById('bmiHeight').value);
     const scoreDisplay = document.getElementById('bmiScoreDisplay');
@@ -1517,38 +1154,27 @@ function calculateBmiLive() {
     const bmi = (w / (hM * hM)).toFixed(1);
     scoreDisplay.innerText = bmi;
 
-    let badgeText = '';
-    let badgeStyle = '';
-
-    if (bmi < 18.5) {
-        badgeText = 'نحافة (Underweight: ' + bmi + ')';
-        badgeStyle = 'background:#fef3c7; color:#d97706;';
-    } else if (bmi >= 18.5 && bmi <= 24.9) {
-        badgeText = 'وزن طبيعي (Normal: ' + bmi + ')';
-        badgeStyle = 'background:#dcfce7; color:#15803d;';
-    } else if (bmi >= 25 && bmi <= 29.9) {
-        badgeText = 'زيادة وزن (Overweight: ' + bmi + ')';
-        badgeStyle = 'background:#ffedd5; color:#c2410c;';
-    } else {
-        badgeText = 'سمنة (Obese: ' + bmi + ')';
-        badgeStyle = 'background:#fee2e2; color:#b91c1c;';
-    }
+    let badgeText = '', badgeStyle = '';
+    if (bmi < 18.5) { badgeText = 'نحافة (Underweight: ' + bmi + ')'; badgeStyle = 'background:#fef3c7; color:#d97706;'; }
+    else if (bmi >= 18.5 && bmi <= 24.9) { badgeText = 'وزن طبيعي (Normal: ' + bmi + ')'; badgeStyle = 'background:#dcfce7; color:#15803d;'; }
+    else if (bmi >= 25 && bmi <= 29.9) { badgeText = 'زيادة وزن (Overweight: ' + bmi + ')'; badgeStyle = 'background:#ffedd5; color:#c2410c;'; }
+    else { badgeText = 'سمنة (Obese: ' + bmi + ')'; badgeStyle = 'background:#fee2e2; color:#b91c1c;'; }
 
     badgeContainer.innerHTML = '<span class="bmi-badge" style="' + badgeStyle + '">' + badgeText + '</span>';
-}
+};
 
 function autoResizeTextarea(textarea) {
     textarea.style.height = 'auto';
     textarea.style.height = (textarea.scrollHeight) + 'px';
 }
 
-function handleDrugsInput(textarea, visitId) {
+window.handleDrugsInput = function(textarea, visitId) {
     if (isUserSecretary || isSubscriptionExpired) return;
     autoResizeTextarea(textarea);
     handleLiveInput(textarea, 'drugs', visitId);
-}
+};
 
-function handleDrugsKeyDown(event, textarea, visitId) {
+window.handleDrugsKeyDown = function(event, textarea, visitId) {
     if (event.key === 'Enter') {
         event.preventDefault();
         const start = textarea.selectionStart;
@@ -1558,9 +1184,9 @@ function handleDrugsKeyDown(event, textarea, visitId) {
         autoResizeTextarea(textarea);
         handleLiveInput(textarea, 'drugs', visitId);
     }
-}
+};
 
-function handleLiveInput(textarea, category, visitId) {
+window.handleLiveInput = function(textarea, category, visitId) {
     if (isUserSecretary || isSubscriptionExpired) return;
     autoResizeTextarea(textarea);
     const val = textarea.value;
@@ -1594,50 +1220,42 @@ function handleLiveInput(textarea, category, visitId) {
         if (matches.length > 0 && box) {
             box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
             box.style.display = 'block';
-        } else if (box) {
-            box.style.display = 'none';
-        }
+        } else if (box) { box.style.display = 'none'; }
     } else {
         if (saveBar) saveBar.style.display = 'none';
         if (box) box.style.display = 'none';
     }
-
     updateVisitFieldData(visitId, category, textarea.value);
-}
+};
 
-function selectSuggestion(category, visitId, term) {
+window.selectSuggestion = function(category, visitId, term) {
     const textarea = document.getElementById('v' + category.charAt(0).toUpperCase() + category.slice(1) + '-' + visitId);
     if (!textarea) return;
-
     const lines = textarea.value.split('\n');
     lines[lines.length - 1] = term;
     textarea.value = lines.join('\n') + '\n';
     autoResizeTextarea(textarea);
 
-    const box = document.getElementById('suggestions-' + category + '-' + visitId);
-    const saveBar = document.getElementById('save-bar-' + category + '-' + visitId);
-    if (box) box.style.display = 'none';
-    if (saveBar) saveBar.style.display = 'none';
-
+    document.getElementById('suggestions-' + category + '-' + visitId).style.display = 'none';
+    document.getElementById('save-bar-' + category + '-' + visitId).style.display = 'none';
     updateVisitFieldData(visitId, category, textarea.value);
     textarea.focus();
-}
+};
 
-function hideSuggestions(category, visitId) {
+window.hideSuggestions = function(category, visitId) {
     setTimeout(() => {
         const box = document.getElementById('suggestions-' + category + '-' + visitId);
         const bar = document.getElementById('save-bar-' + category + '-' + visitId);
         if (box) box.style.display = 'none';
         if (bar) bar.style.display = 'none';
     }, 250);
-}
+};
 
-function saveLineToDict(event, category, visitId) {
+window.saveLineToDict = function(event, category, visitId) {
     event.preventDefault();
     const textSpan = document.getElementById('line-text-' + category + '-' + visitId);
     if (!textSpan) return;
     const lineText = textSpan.innerText.trim();
-    
     let dictKey = category;
     if (category === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (category === 'historyPresentIllness') dictKey = 'history_present';
@@ -1657,23 +1275,20 @@ function saveLineToDict(event, category, visitId) {
             }, 1000);
         }
     }
-}
+};
 
-function handleMhLiveInput(inputEl, inputKey) {
+window.handleMhLiveInput = function(inputEl, inputKey) {
     autoResizeTextarea(inputEl);
     const val = inputEl.value.trim();
     const box = document.getElementById('suggestions-' + inputKey);
     const saveBar = document.getElementById('save-bar-' + inputKey);
-
     if (!val || val.length < 1) {
         if (box) box.style.display = 'none';
         if (saveBar) saveBar.style.display = 'none';
         return;
     }
-
     const lines = inputEl.value.split('\n');
     const currentLine = lines[lines.length - 1].trim();
-
     if (currentLine.length > 0) {
         if (saveBar) {
             saveBar.style.display = 'flex';
@@ -1682,43 +1297,38 @@ function handleMhLiveInput(inputEl, inputKey) {
         }
         const terms = medicalDict.mh_history || [];
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
-
         if (matches.length > 0 && box) {
             box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
             box.style.display = 'block';
-        } else if (box) {
-            box.style.display = 'none';
-        }
+        } else if (box) { box.style.display = 'none'; }
     } else {
         if (saveBar) saveBar.style.display = 'none';
         if (box) box.style.display = 'none';
     }
-}
+};
 
-function selectMhSuggestion(inputKey, term) {
+window.selectMhSuggestion = function(inputKey, term) {
     const el = inputKey === 'mh_other' ? document.getElementById('mh-cd-other') : document.getElementById('mh-' + inputKey.replace('mh_', ''));
     if (!el) return;
-
     const lines = el.value.split('\n');
     lines[lines.length - 1] = term;
     el.value = lines.join('\n') + '\n';
     autoResizeTextarea(el);
-
     document.getElementById('suggestions-' + inputKey).style.display = 'none';
     document.getElementById('save-bar-' + inputKey).style.display = 'none';
     el.focus();
-}
+};
 
-function hideMhSuggestions(inputKey) {
+window.hideMhSuggestions = function(inputKey) {
     setTimeout(() => {
         const box = document.getElementById('suggestions-' + inputKey);
         const bar = document.getElementById('save-bar-' + inputKey);
         if (box) box.style.display = 'none';
         if (bar) bar.style.display = 'none';
     }, 250);
-}
+};
 
-function saveMhLineToDict(event, inputKey) {
+window.saveMhLineToDict = function(event, inputKey) {
     event.preventDefault();
     const textSpan = document.getElementById('line-text-' + inputKey);
     if (!textSpan) return;
@@ -1730,19 +1340,15 @@ function saveMhLineToDict(event, inputKey) {
         if (btn) {
             btn.innerText = 'Saved!';
             btn.classList.add('saved');
-            setTimeout(() => {
-                btn.innerText = 'Save';
-                btn.classList.remove('saved');
-                document.getElementById('save-bar-' + inputKey).style.display = 'none';
-            }, 1000);
+            setTimeout(() => { btn.innerText = 'Save'; btn.classList.remove('saved'); document.getElementById('save-bar-' + inputKey).style.display = 'none'; }, 1000);
         }
     }
-}
+};
 
-function toggleOtherInput() {
+window.toggleOtherInput = function() {
     const isChecked = document.getElementById('mh-other-check').checked;
     document.getElementById('mh-other-box').style.display = isChecked ? 'block' : 'none';
-}
+};
 
 function updateVisitFieldData(visitId, category, value) {
     if (isSubscriptionExpired) return;
@@ -1750,12 +1356,11 @@ function updateVisitFieldData(visitId, category, value) {
     if (!patient) return;
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
-
     visit[category] = value;
     savePatientToCloudAndLocal(patient);
 }
 
-function handleLmpInput(visitId, lmpVal) {
+window.handleLmpInput = function(visitId, lmpVal) {
     updateVisitFieldData(visitId, 'obsLmp', lmpVal);
     if (lmpVal) {
         let lmpDate = new Date(lmpVal);
@@ -1765,7 +1370,6 @@ function handleLmpInput(visitId, lmpVal) {
             let month = String(eddDate.getMonth() + 1).padStart(2, '0');
             let day = String(eddDate.getDate()).padStart(2, '0');
             let eddStr = year + '-' + month + '-' + day;
-            
             const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
             if (patient) {
                 const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
@@ -1778,50 +1382,41 @@ function handleLmpInput(visitId, lmpVal) {
             }
         }
     }
-}
+};
 
-function updateVisitDate(visitId, newDate) {
+window.updateVisitDate = function(visitId, newDate) {
     if (isSubscriptionExpired) return;
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
-
     visit.date = newDate;
     savePatientToCloudAndLocal(patient);
-}
+};
 
-function updateBpFields(visitId) {
+window.updateBpFields = function(visitId) {
     if (isSubscriptionExpired) return;
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
-
     const sys = document.getElementById('vBpSys-' + visitId).value.trim();
     const dias = document.getElementById('vBpDias-' + visitId).value.trim();
-
-    if (sys || dias) {
-        visit.bp = (sys || '___') + '/' + (dias || '___') + ' mmHg';
-    } else {
-        visit.bp = '';
-    }
+    if (sys || dias) visit.bp = (sys || '___') + '/' + (dias || '___') + ' mmHg';
+    else visit.bp = '';
     savePatientToCloudAndLocal(patient);
-}
+};
 
-function handleFileUpload(input, visitId) {
+window.handleFileUpload = function(input, visitId) {
     if (isSubscriptionExpired) return;
     if (input.files && input.files.length > 0) {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (!patient) return;
         const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
         if (!visit) return;
-
         if (!visit.attachments) visit.attachments = [];
-
         const filesArray = Array.from(input.files);
         let processedCount = 0;
-
         filesArray.forEach(file => {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -1830,26 +1425,15 @@ function handleFileUpload(input, visitId) {
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
-                    let width = img.width;
-                    let height = img.height;
+                    let width = img.width, height = img.height;
                     const maxDim = 800;
-
-                    if (width > height && width > maxDim) {
-                        height = Math.round((height * maxDim) / width);
-                        width = maxDim;
-                    } else if (height > maxDim) {
-                        width = Math.round((width * maxDim) / height);
-                        height = maxDim;
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
+                    if (width > height && width > maxDim) { height = Math.round((height * maxDim) / width); width = maxDim; }
+                    else if (height > maxDim) { width = Math.round((width * maxDim) / height); height = maxDim; }
+                    canvas.width = width; canvas.height = height;
                     ctx.drawImage(img, 0, 0, width, height);
                     const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.65);
-
                     visit.attachments.push({ name: file.name, dataUrl: compressedDataUrl });
                     processedCount++;
-
                     if (processedCount === filesArray.length) {
                         savePatientToCloudAndLocal(patient);
                         renderVisits(patient.visits, false);
@@ -1859,30 +1443,26 @@ function handleFileUpload(input, visitId) {
             reader.readAsDataURL(file);
         });
     }
-}
+};
 
-function previewAttachmentByIndex(el) {
+window.previewAttachmentByIndex = function(el) {
     const visitId = el.getAttribute('data-visit-id');
     const index = el.getAttribute('data-attachment-index');
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit || !visit.attachments || !visit.attachments[index]) return;
-    
-    const att = visit.attachments[index];
-    previewAttachmentImage(att.dataUrl);
-}
+    previewAttachmentImage(visit.attachments[index].dataUrl);
+};
 
-function previewAttachmentImage(imgSrc) {
+window.previewAttachmentImage = function(imgSrc) {
     document.getElementById('previewModalImg').src = imgSrc;
     document.getElementById('imagePreviewModal').style.display = 'flex';
-}
+};
 
-function closeImagePreview() {
-    document.getElementById('imagePreviewModal').style.display = 'none';
-}
+window.closeImagePreview = function() { document.getElementById('imagePreviewModal').style.display = 'none'; };
 
-function openEditPatientModal() {
+window.openEditPatientModal = function() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
     document.getElementById('editPName').value = patient.name || '';
@@ -1893,35 +1473,29 @@ function openEditPatientModal() {
     document.getElementById('editPJob').value = patient.job || '';
     document.getElementById('editPPhone').value = patient.phone || '';
     document.getElementById('editPatientModal').style.display = 'flex';
-}
+};
 
-function closeEditPatientModal() {
-    document.getElementById('editPatientModal').style.display = 'none';
-}
+window.closeEditPatientModal = function() { document.getElementById('editPatientModal').style.display = 'none'; };
 
-function saveEditedPatient() {
+window.saveEditedPatient = function() {
     const name = document.getElementById('editPName').value.trim();
     const age = Number(document.getElementById('editPAge').value);
     if (!name || !age) return;
-
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
-
-    patient.name = name;
-    patient.age = age;
+    patient.name = name; patient.age = age;
     patient.gender = document.getElementById('editPGender').value || 'Unspecified';
     patient.province = document.getElementById('editPProvince').value || 'ميسان';
     patient.marital = document.getElementById('editPMarital').value || 'Single';
     patient.job = document.getElementById('editPJob').value || 'Unspecified';
     patient.phone = document.getElementById('editPPhone').value || 'N/A';
-
     savePatientToCloudAndLocal(patient);
     closeEditPatientModal();
     document.getElementById('recPatientName').innerText = patient.name;
     document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + patient.gender + ' | Province: ' + patient.province + ' | Marital: ' + patient.marital + ' | Job: ' + patient.job + ' | Phone: ' + patient.phone;
-}
+};
 
-function confirmDeletePatientRecord() {
+window.confirmDeletePatientRecord = function() {
     if (confirm('Delete patient record?')) {
         const idx = patients.findIndex(p => Number(p.id) === Number(currentPatientId));
         if (idx !== -1) {
@@ -1931,9 +1505,9 @@ function confirmDeletePatientRecord() {
         }
         openPatientsArchive();
     }
-}
+};
 
-function confirmDeleteVisit(visitId) {
+window.confirmDeleteVisit = function(visitId) {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient || patient.visits.length <= 1) return;
     if (confirm('Delete visit?')) {
@@ -1945,68 +1519,47 @@ function confirmDeleteVisit(visitId) {
             renderVisits(patient.visits, false);
         }
     }
-}
-
-function openTrashBin() {
-    navigateTo('trashScreen', 'Trash Bin', 'Recover deleted items');
-    renderTrashItems();
-}
+};
 
 function renderTrashItems() {
     const container = document.getElementById('trashItemsContainer');
     container.innerHTML = trashBin.length === 0 
         ? '<p style="text-align:center; color:#64748b;">Empty.</p>'
         : trashBin.map((item, index) => 
-            '<div class="trash-card">' +
-            '<div><h4>' + (item.data.name || item.patientName) + '</h4></div>' +
-            '<button class="btn-restore" onclick="restoreTrashItem(' + index + ')">Restore</button>' +
-            '</div>'
+            '<div class="trash-card"><div><h4>' + (item.data.name || item.patientName) + '</h4></div>' +
+            '<button class="btn-restore" onclick="restoreTrashItem(' + index + ')">Restore</button></div>'
         ).join('');
 }
 
-function restoreTrashItem(index) {
+window.restoreTrashItem = function(index) {
     const item = trashBin.splice(index, 1)[0];
     if (item.type === 'patient') {
         patients.unshift(item.data);
         savePatientToCloudAndLocal(item.data);
     } else {
         const patient = patients.find(p => Number(p.id) === Number(item.patientId));
-        if (patient) {
-            patient.visits.unshift(item.data);
-            savePatientToCloudAndLocal(patient);
-        }
+        if (patient) { patient.visits.unshift(item.data); savePatientToCloudAndLocal(patient); }
     }
     saveTrashToCloudAndLocal();
     renderTrashItems();
-}
+};
 
-function confirmEmptyTrash() {
-    trashBin = [];
-    saveTrashToCloudAndLocal();
-    renderTrashItems();
-}
+window.confirmEmptyTrash = function() { trashBin = []; saveTrashToCloudAndLocal(); renderTrashItems(); };
 
-function openMedHistoryModal(visitId) {
+window.openMedHistoryModal = function(visitId) {
     currentVisitIdForModal = visitId;
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
-
     if (!visit.medHistory) {
         visit.medHistory = { conditions: [], otherCondition: '', admission: '', surgery: '', family: '', allergy: '', chronicDrugs: '', smoking: 'Non-smoker', alcohol: 'Non-drinker', notes: '' };
     }
-
     const mh = visit.medHistory;
-    const checkboxes = document.querySelectorAll('.mh-cd');
-    checkboxes.forEach(cb => {
-        cb.checked = mh.conditions && mh.conditions.includes(cb.value);
-    });
-
+    document.querySelectorAll('.mh-cd').forEach(cb => { cb.checked = mh.conditions && mh.conditions.includes(cb.value); });
     document.getElementById('mh-other-check').checked = !!mh.otherCondition;
     document.getElementById('mh-cd-other').value = mh.otherCondition || '';
     document.getElementById('mh-other-box').style.display = mh.otherCondition ? 'block' : 'none';
-
     document.getElementById('mh-prev-admission').value = mh.admission || '';
     document.getElementById('mh-past-surgery').value = mh.surgery || '';
     document.getElementById('mh-family-history').value = mh.family || '';
@@ -2015,12 +1568,10 @@ function openMedHistoryModal(visitId) {
     document.getElementById('mh-smoking').value = mh.smoking || 'Non-smoker';
     document.getElementById('mh-alcohol').value = mh.alcohol || 'Non-drinker';
     document.getElementById('mh-notes').value = mh.notes || '';
+    document.getElementById('medHistoryModal').style.display = 'flex';
+};
 
-    const modalEl = document.getElementById('medHistoryModal');
-    if (modalEl) modalEl.style.display = 'flex';
-}
-
-function closeMedHistoryModal() {
+window.closeMedHistoryModal = function() {
     if (!isSubscriptionExpired && currentVisitIdForModal && currentPatientId) {
         const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
         if (patient) {
@@ -2028,7 +1579,6 @@ function closeMedHistoryModal() {
             if (visit) {
                 const conditions = [];
                 document.querySelectorAll('.mh-cd:checked').forEach(cb => conditions.push(cb.value));
-
                 visit.medHistory = {
                     conditions: conditions,
                     otherCondition: document.getElementById('mh-other-check').checked ? document.getElementById('mh-cd-other').value : '',
@@ -2041,38 +1591,29 @@ function closeMedHistoryModal() {
                     alcohol: document.getElementById('mh-alcohol').value,
                     notes: document.getElementById('mh-notes').value
                 };
-
                 savePatientToCloudAndLocal(patient);
                 renderVisits(patient.visits, false);
             }
         }
     }
-    const modalEl = document.getElementById('medHistoryModal');
-    if (modalEl) modalEl.style.display = 'none';
-}
+    document.getElementById('medHistoryModal').style.display = 'none';
+};
 
 function formatTreatmentForPrintOrView(rawText) {
     if (!rawText) return 'No medications prescribed.';
-    
     let lines = rawText.split('\n').filter(line => line.trim() !== '');
-    
     let htmlOutput = `<div class="rx-rx-title" style="color: #b91c1c; font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.4rem; margin-bottom: 6px; text-align: left; direction: ltr;">Rx</div>`;
     htmlOutput += `<div class="rx-treatment-list" style="text-align: left; direction: ltr;">`;
-    
     let counter = 1;
     lines.forEach(line => {
         let cleanLine = line.replace(/^\d+[\.\-\)]\s*/, '').trim();
-        if (cleanLine) {
-            htmlOutput += `<div style="margin-bottom: 4px; font-weight: 700; color: #000000; font-size: 1.05rem;">${counter}. ${cleanLine}</div>`;
-            counter++;
-        }
+        if (cleanLine) { htmlOutput += `<div style="margin-bottom: 4px; font-weight: 700; color: #000000; font-size: 1.05rem;">${counter}. ${cleanLine}</div>`; counter++; }
     });
-    
     htmlOutput += `</div>`;
     return htmlOutput;
 }
 
-function openRxModal(visitId) {
+window.openRxModal = function(visitId) {
     currentVisitIdForModal = visitId;
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
@@ -2090,9 +1631,7 @@ function openRxModal(visitId) {
     document.getElementById('rxDragVitalsText').innerText = bpVal + ' | ' + hrVal + ' | ' + tempVal + ' | ' + bmiVal;
     
     const treatmentEl = document.getElementById('rxDragTreatmentText');
-    if (treatmentEl) {
-        treatmentEl.innerHTML = formatTreatmentForPrintOrView(visit.drugs);
-    }
+    if (treatmentEl) treatmentEl.innerHTML = formatTreatmentForPrintOrView(visit.drugs);
 
     const container = document.getElementById('rxCanvasContainer');
     const oldImg = container.querySelector('.rx-bg-img');
@@ -2105,27 +1644,21 @@ function openRxModal(visitId) {
         img.className = 'rx-bg-img';
         container.insertBefore(img, container.firstChild);
     }
-
     loadSavedRxLayout();
     document.getElementById('rxModal').style.display = 'flex';
-}
+};
 
-function closeRxModal() {
-    document.getElementById('rxModal').style.display = 'none';
-}
+window.closeRxModal = function() { document.getElementById('rxModal').style.display = 'none'; };
+window.printPrescriptionOnly = function(visitId) { openRxModal(visitId); };
 
-function printPrescriptionOnly(visitId) {
-    openRxModal(visitId);
-}
-
-function toggleRxConfigMode() {
+window.toggleRxConfigMode = function() {
     isConfigMode = !isConfigMode;
     document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
         if (isConfigMode) box.classList.add('config-mode');
         else box.classList.remove('config-mode');
     });
     updateConfigModeUI();
-}
+};
 
 function updateConfigModeUI() {
     const hint = document.getElementById('rxModeHint');
@@ -2139,39 +1672,30 @@ function updateConfigModeUI() {
     }
 }
 
-function changeBoxFontSize(boxType, delta) {
-    const map = {
-        patientDetails: 'rxDragPatientDetailsText',
-        date: 'rxDragDateText',
-        vitals: 'rxDragVitalsText',
-        treatment: 'rxDragTreatmentText'
-    };
+window.changeBoxFontSize = function(boxType, delta) {
+    const map = { patientDetails: 'rxDragPatientDetailsText', date: 'rxDragDateText', vitals: 'rxDragVitalsText', treatment: 'rxDragTreatmentText' };
     const el = document.getElementById(map[boxType]);
     if (!el) return;
     const currentSize = parseFloat(window.getComputedStyle(el).fontSize);
     el.style.fontSize = (currentSize + delta) + 'px';
-}
+};
 
-function setRxPaperSize(size) {
+window.setRxPaperSize = function(size) {
     const container = document.getElementById('rxCanvasContainer');
     if (!container) return;
     container.classList.remove('size-a4', 'size-a5');
     container.classList.add('size-' + size);
     localStorage.setItem('clinic_rx_paper_size', size);
-}
+};
 
 function getRxDeviceStorageKey() {
     const width = window.innerWidth;
-    if (width <= 768) {
-        return 'doctor_rx_layout_mobile';
-    } else if (width > 768 && width <= 1024) {
-        return 'doctor_rx_layout_tablet';
-    } else {
-        return 'doctor_rx_layout_desktop';
-    }
+    if (width <= 768) return 'doctor_rx_layout_mobile';
+    else if (width > 768 && width <= 1024) return 'doctor_rx_layout_tablet';
+    else return 'doctor_rx_layout_desktop';
 }
 
-function saveRxLayoutPositions() {
+window.saveRxLayoutPositions = function() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
     updateConfigModeUI();
@@ -2187,9 +1711,7 @@ function saveRxLayoutPositions() {
         const widthPct = (box.offsetWidth / cWidth) * 100;
 
         rxLayoutData[box.id] = {
-            top: topPct + '%',
-            left: leftPct + '%',
-            width: widthPct + '%',
+            top: topPct + '%', left: leftPct + '%', width: widthPct + '%',
             fontSize: box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text') ? window.getComputedStyle(box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text')).fontSize : '1rem'
         };
     });
@@ -2197,22 +1719,13 @@ function saveRxLayoutPositions() {
     const storageKey = getRxDeviceStorageKey();
     localStorage.setItem(storageKey, JSON.stringify(rxLayoutData));
     localStorage.setItem('doctor_rx_layout', JSON.stringify(rxLayoutData));
-
-    if (typeof saveSettingsToCloudAndLocal === 'function') {
-        saveSettingsToCloudAndLocal();
-    }
-
+    saveSettingsToCloudAndLocal();
     alert('تم حفظ أماكن وأحجام الروشتة الخاصة بهذا الجهاز فقط وبشكل مستقل بنجاح!');
-}
+};
 
 function loadSavedRxLayout() {
     const storageKey = getRxDeviceStorageKey();
-    let savedJson = localStorage.getItem(storageKey);
-    
-    if (!savedJson) {
-        savedJson = localStorage.getItem('doctor_rx_layout');
-    }
-
+    let savedJson = localStorage.getItem(storageKey) || localStorage.getItem('doctor_rx_layout');
     const savedLayout = JSON.parse(savedJson || '{}');
     for (const [boxId, data] of Object.entries(savedLayout)) {
         const box = document.getElementById(boxId);
@@ -2226,25 +1739,15 @@ function loadSavedRxLayout() {
             }
         }
     }
-    const savedSize = localStorage.getItem('clinic_rx_paper_size') || 'a4';
-    setRxPaperSize(savedSize);
+    setRxPaperSize(localStorage.getItem('clinic_rx_paper_size') || 'a4');
 }
 
 function injectPrintStyle(type = 'rx') {
     const width = window.innerWidth;
-    let deviceType = 'desktop';
-    
-    if (width <= 768) {
-        deviceType = 'mobile';
-    } else if (width > 768 && width <= 1024) {
-        deviceType = 'tablet';
-    }
-
+    let deviceType = width <= 768 ? 'mobile' : (width <= 1024 ? 'tablet' : 'desktop');
     const styleFileName = `print-${type}-${deviceType}.css`;
-
     let oldLink = document.getElementById('activePrintStyle');
     if (oldLink) oldLink.remove();
-
     const link = document.createElement('link');
     link.id = 'activePrintStyle';
     link.rel = 'stylesheet';
@@ -2252,173 +1755,101 @@ function injectPrintStyle(type = 'rx') {
     document.head.appendChild(link);
 }
 
-function printPrescriptionDirectly() {
+window.printPrescriptionDirectly = function() {
     const isMobile = window.innerWidth <= 768;
-
     if (isMobile) {
         isConfigMode = false;
         document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
         updateConfigModeUI();
-
         const container = document.getElementById('rxCanvasContainer');
         if (!container) return;
-
         let bgImg = container.querySelector('.rx-bg-img');
-        let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
-        
+        let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || '';
         if (!bgImg && savedRxImg) {
             bgImg = document.createElement('img');
             bgImg.src = savedRxImg;
             bgImg.className = 'rx-bg-img';
             container.insertBefore(bgImg, container.firstChild);
-        } else if (bgImg && savedRxImg) {
-            bgImg.src = savedRxImg;
-            bgImg.style.display = 'block';
-        }
+        } else if (bgImg && savedRxImg) { bgImg.src = savedRxImg; bgImg.style.display = 'block'; }
 
         const controls = container.querySelectorAll('.box-font-controls');
         controls.forEach(c => c.style.display = 'none');
-
         const reportModal = document.getElementById('medicalReportModal');
         let reportWasOpen = false;
         if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
-            reportModal.style.display = 'none';
-            reportWasOpen = true;
+            reportModal.style.display = 'none'; reportWasOpen = true;
         }
 
         html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
             const imgData = canvas.toDataURL('image/jpeg', 0.90);
-            
             const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Print Prescription</title>
-                        <style>
-                            body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #fff; display: flex; justify-content: center; align-items: center; }
-                            img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; }
-                            @page { size: auto; margin: 0; }
-                        </style>
-                    </head>
-                    <body>
-                        <img src="${imgData}" onload="window.print(); window.close();" />
-                    </body>
-                </html>
-            `);
+            printWindow.document.write(`<html><head><title>Print Prescription</title><style>body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #fff; display: flex; justify-content: center; align-items: center; } img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; } @page { size: auto; margin: 0; }</style></head><body><img src="${imgData}" onload="window.print(); window.close();" /></body></html>`);
             printWindow.document.close();
-
             controls.forEach(c => c.style.display = '');
-            if (reportWasOpen && reportModal) {
-                reportModal.style.display = 'flex';
-            }
-        }).catch(err => {
-            console.error("Mobile print canvas error:", err);
-            alert("تعذر إنشاء صورة الطباعة للموبايل.");
-            controls.forEach(c => c.style.display = '');
-        });
-
+            if (reportWasOpen && reportModal) reportModal.style.display = 'flex';
+        }).catch(err => { console.error(err); controls.forEach(c => c.style.display = ''); });
     } else {
         injectPrintStyle('rx');
-
         isConfigMode = false;
         document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
         updateConfigModeUI();
-
         const container = document.getElementById('rxCanvasContainer');
         if (!container) return;
-
-        let bgImg = container.querySelector('.rx-bg-img');
-        let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
-        
-        if (!bgImg && savedRxImg) {
-            bgImg = document.createElement('img');
-            bgImg.src = savedRxImg;
-            bgImg.className = 'rx-bg-img';
-            container.insertBefore(bgImg, container.firstChild);
-        } else if (bgImg && savedRxImg) {
-            bgImg.src = savedRxImg;
-            bgImg.style.display = 'block';
-        }
-
         const controls = container.querySelectorAll('.box-font-controls');
         controls.forEach(c => c.style.display = 'none');
-        
         document.body.classList.add('is-printing-rx-only');
         document.body.classList.remove('is-printing-report-only');
-        
         const reportModal = document.getElementById('medicalReportModal');
         let reportWasOpen = false;
         if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
-            reportModal.style.display = 'none';
-            reportWasOpen = true;
+            reportModal.style.display = 'none'; reportWasOpen = true;
         }
-
-        setTimeout(() => {
-            window.print();
-        }, 400);
-
+        setTimeout(() => { window.print(); }, 400);
         setTimeout(() => {
             document.body.classList.remove('is-printing-rx-only');
             controls.forEach(c => c.style.display = '');
-            if (reportWasOpen && reportModal) {
-                reportModal.style.display = 'flex';
-            }
+            if (reportWasOpen && reportModal) reportModal.style.display = 'flex';
         }, 1500);
     }
-}
+};
 
-function printMedicalReportDirectly() {
+window.printMedicalReportDirectly = function() {
     injectPrintStyle('report');
-
-    if (repConfigModeActive) {
-        toggleRepConfigMode();
-    }
+    if (repConfigModeActive) toggleRepConfigMode();
     const container = document.getElementById('repCanvasContainer');
     const controls = container ? container.querySelectorAll('.box-font-controls') : [];
     controls.forEach(c => c.style.display = 'none');
-
     document.body.classList.add('is-printing-report-only');
     document.body.classList.remove('is-printing-rx-only');
-
     const rxModal = document.getElementById('rxModal');
     let rxWasOpen = false;
     if (rxModal && (rxModal.style.display === 'flex' || window.getComputedStyle(rxModal).display === 'flex')) {
-        rxModal.style.display = 'none';
-        rxWasOpen = true;
+        rxModal.style.display = 'none'; rxWasOpen = true;
     }
-    
-    setTimeout(() => {
-        window.print();
-    }, 400);
-    
+    setTimeout(() => { window.print(); }, 400);
     setTimeout(() => {
         document.body.classList.remove('is-printing-report-only');
         controls.forEach(c => c.style.display = '');
-        if (rxWasOpen && rxModal) {
-            rxModal.style.display = 'flex';
-        }
+        if (rxWasOpen && rxModal) rxModal.style.display = 'flex';
     }, 1500);
-}
+};
 
-function openPrescriptionPDF() {
+window.openPrescriptionPDF = function() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
     updateConfigModeUI();
-
     const container = document.getElementById('rxCanvasContainer');
     const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
-
     html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('portrait', 'mm', 'a4');
-        const imgWidth = 210;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        const imgWidth = 210, imgHeight = (canvas.height * imgWidth) / canvas.width;
         pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
         pdf.save('Prescription_' + Date.now() + '.pdf');
         controls.forEach(c => c.style.display = '');
     });
-}
+};
 
 function initDraggableElements() {
     let activeBox = null;
@@ -2427,80 +1858,24 @@ function initDraggableElements() {
 
     document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
         box.style.touchAction = 'none';
-
         box.addEventListener('pointerdown', e => {
             if (!isConfigMode || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            activeBox = box;
-            startX = e.clientX;
-            startY = e.clientY;
-            
-            const cWidth = container.clientWidth;
-            const cHeight = container.clientHeight;
-            
+            activeBox = box; startX = e.clientX; startY = e.clientY;
+            const cWidth = container.clientWidth, cHeight = container.clientHeight;
             initialLeftPct = (box.offsetLeft / cWidth) * 100;
             initialTopPct = (box.offsetTop / cHeight) * 100;
-            
             box.setPointerCapture(e.pointerId);
             e.stopPropagation();
         });
-
         box.addEventListener('pointermove', e => {
             if (!activeBox || activeBox !== box) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            
-            const cWidth = container.clientWidth;
-            const cHeight = container.clientHeight;
-
-            let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
-            let newTopPct = initialTopPct + (dy / cHeight) * 100;
-
-            box.style.left = newLeftPct + '%';
-            box.style.top = newTopPct + '%';
+            let dx = e.clientX - startX, dy = e.clientY - startY;
+            const cWidth = container.clientWidth, cHeight = container.clientHeight;
+            box.style.left = (initialLeftPct + (dx / cWidth) * 100) + '%';
+            box.style.top = (initialTopPct + (dy / cHeight) * 100) + '%';
         });
-
         box.addEventListener('pointerup', e => {
-            if (activeBox === box) {
-                activeBox = null;
-                if (box.hasPointerCapture(e.pointerId)) {
-                    box.releasePointerCapture(e.pointerId);
-                }
-            }
-        });
-
-        box.addEventListener('touchstart', (e) => {
-            if (!isConfigMode || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            if (e.touches.length === 1 && container) {
-                activeBox = box;
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                const cWidth = container.clientWidth;
-                const cHeight = container.clientHeight;
-                initialLeftPct = (box.offsetLeft / cWidth) * 100;
-                initialTopPct = (box.offsetTop / cHeight) * 100;
-                e.stopPropagation();
-            }
-        }, { passive: true });
-
-        box.addEventListener('touchmove', (e) => {
-            if (!activeBox || activeBox !== box || !container) return;
-            if (e.touches.length === 1) {
-                let dx = e.touches[0].clientX - startX;
-                let dy = e.touches[0].clientY - startY;
-                const cWidth = container.clientWidth;
-                const cHeight = container.clientHeight;
-                let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
-                let newTopPct = initialTopPct + (dy / cHeight) * 100;
-                box.style.left = newLeftPct + '%';
-                box.style.top = newTopPct + '%';
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        box.addEventListener('touchend', (e) => {
-            if (activeBox === box) {
-                activeBox = null;
-            }
+            if (activeBox === box) { activeBox = null; if (box.hasPointerCapture(e.pointerId)) box.releasePointerCapture(e.pointerId); }
         });
     });
 }
@@ -2510,65 +1885,48 @@ let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
 
 function getReportDeviceStorageKey() {
     const width = window.innerWidth;
-    if (width <= 768) {
-        return 'clinic_rep_layout_mobile';
-    } else if (width > 768 && width <= 1024) {
-        return 'clinic_rep_layout_tablet';
-    } else {
-        return 'clinic_rep_layout_desktop';
-    }
+    if (width <= 768) return 'clinic_rep_layout_mobile';
+    else if (width > 768 && width <= 1024) return 'clinic_rep_layout_tablet';
+    else return 'clinic_rep_layout_desktop';
 }
 
-function toggleMedicalReportInputs(visitId) {
+window.toggleMedicalReportInputs = function(visitId) {
     const container = document.getElementById(`repContainer_${visitId}`);
     const chevron = document.getElementById(`repChevron_${visitId}`);
     if (container) {
-        if (container.style.display === 'none') {
-            container.style.display = 'block';
-            if (chevron) chevron.className = 'fa-solid fa-chevron-up';
-        } else {
-            container.style.display = 'none';
-            if (chevron) chevron.className = 'fa-solid fa-chevron-down';
-        }
+        if (container.style.display === 'none') { container.style.display = 'block'; if (chevron) chevron.className = 'fa-solid fa-chevron-up'; }
+        else { container.style.display = 'none'; if (chevron) chevron.className = 'fa-solid fa-chevron-down'; }
     }
-}
+};
 
-function updateReportFieldData(visitId, fieldName, value) {
+window.updateReportFieldData = function(visitId, fieldName, value) {
     if (isSubscriptionExpired) return;
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
-
-    if (!visit.medicalReport) {
-        visit.medicalReport = { title: "تقرير طبي", to: "", details: "" };
-    }
+    if (!visit.medicalReport) visit.medicalReport = { title: "تقرير طبي", to: "", details: "" };
     visit.medicalReport[fieldName] = value;
     savePatientToCloudAndLocal(patient);
-}
+};
 
-function openMedicalReportModal(visitId) {
+window.openMedicalReportModal = function(visitId) {
     currentVisitIdForModal = visitId;
     const modal = document.getElementById('medicalReportModal');
     if (!modal) return;
     modal.style.display = 'flex';
 
-    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || '';
     const container = document.getElementById('repCanvasContainer');
     if (container) {
         let bgImg = container.querySelector('.rep-bg-img');
         if (!bgImg) {
             bgImg = document.createElement('img');
             bgImg.className = 'rep-bg-img';
-            bgImg.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 1; pointer-events: none; opacity: 1;';
+            bgImg.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 1; pointer-events: none;';
             container.insertBefore(bgImg, container.firstChild);
         }
-        if (savedRxImg) {
-            bgImg.src = savedRxImg;
-            bgImg.style.display = 'block';
-        } else {
-            bgImg.style.display = 'none';
-        }
+        if (savedRxImg) { bgImg.src = savedRxImg; bgImg.style.display = 'block'; } else { bgImg.style.display = 'none'; }
     }
 
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
@@ -2585,257 +1943,127 @@ function openMedicalReportModal(visitId) {
     if (repPatText) repPatText.textContent = patDetailsStr;
 
     const repData = (visit && visit.medicalReport) ? visit.medicalReport : {};
-    
-    let titleVal = repData.title || (document.getElementById(`rep_title_${visitId}`) ? document.getElementById(`rep_title_${visitId}`).value : "تقرير طبي");
-    let toVal = repData.to || (document.getElementById(`rep_to_${visitId}`) ? document.getElementById(`rep_to_${visitId}`).value : "");
-    let detailsVal = repData.details || (document.getElementById(`rep_details_${visitId}`) ? document.getElementById(`rep_details_${visitId}`).value : "");
+    let titleVal = repData.title || "تقرير طبي";
+    let toVal = repData.to || "";
+    let detailsVal = repData.details || "";
 
     if (document.getElementById(`rep_title_${visitId}`)) document.getElementById(`rep_title_${visitId}`).value = titleVal;
     if (document.getElementById(`rep_to_${visitId}`)) document.getElementById(`rep_to_${visitId}`).value = toVal;
     if (document.getElementById(`rep_details_${visitId}`)) document.getElementById(`rep_details_${visitId}`).value = detailsVal;
 
-    const repTitleText = document.getElementById('repTitleText');
-    const repToText = document.getElementById('repToText');
-    const repDetailsText = document.getElementById('repDetailsText');
-
-    if (repTitleText) repTitleText.textContent = titleVal || "تقرير طبي";
-    
-    if (repToText) {
-        repToText.textContent = toVal ? `إلى: ${toVal}` : "";
-    }
-    
-    if (repDetailsText) {
-        repDetailsText.textContent = detailsVal;
-        repDetailsText.style.whiteSpace = 'pre-wrap';
-        repDetailsText.style.wordBreak = 'break-word';
-        repDetailsText.style.fontFamily = "'Cairo', 'Tajawal', sans-serif";
-        repDetailsText.style.lineHeight = '1.6';
-    }
+    document.getElementById('repTitleText').textContent = titleVal || "تقرير طبي";
+    document.getElementById('repToText').textContent = toVal ? `إلى: ${toVal}` : "";
+    document.getElementById('repDetailsText').textContent = detailsVal;
 
     loadRepLayoutPositions();
     initReportDraggableElements();
-}
+};
 
-function closeMedicalReportModal() {
-    const modal = document.getElementById('medicalReportModal');
-    if (modal) modal.style.display = 'none';
-}
+window.closeMedicalReportModal = function() { document.getElementById('medicalReportModal').style.display = 'none'; };
 
-function toggleRepConfigMode() {
+window.toggleRepConfigMode = function() {
     repConfigModeActive = !repConfigModeActive;
-    const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
-    boxes.forEach(id => {
+    ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) {
-            if (repConfigModeActive) el.classList.add('config-mode');
-            else el.classList.remove('config-mode');
-        }
+        if (el) { if (repConfigModeActive) el.classList.add('config-mode'); else el.classList.remove('config-mode'); }
     });
-
     const saveBtn = document.getElementById('repSaveLayoutBtn');
-    if (saveBtn) {
-        saveBtn.style.display = repConfigModeActive ? 'block' : 'none';
-    }
+    if (saveBtn) saveBtn.style.display = repConfigModeActive ? 'block' : 'none';
+};
 
-    const toggleBtn = document.getElementById('repConfigToggleBtn');
-    if (toggleBtn) {
-        toggleBtn.style.background = repConfigModeActive ? '#0d9488' : '#f0fdfa';
-        toggleBtn.style.color = repConfigModeActive ? '#ffffff' : '#0d9488';
-    }
-}
-
-function changeRepBoxFontSize(boxKey, delta) {
+window.changeRepBoxFontSize = function(boxKey, delta) {
     repFontSizes[boxKey] = Math.max(10, Math.min(30, (repFontSizes[boxKey] || 14) + delta));
-    let targetId = '';
-    if (boxKey === 'patient') targetId = 'repPatientText';
-    else if (boxKey === 'title') targetId = 'repTitleText';
-    else if (boxKey === 'to') targetId = 'repToText';
-    else if (boxKey === 'details') targetId = 'repDetailsText';
-
+    let targetId = boxKey === 'patient' ? 'repPatientText' : (boxKey === 'title' ? 'repTitleText' : (boxKey === 'to' ? 'repToText' : 'repDetailsText'));
     const el = document.getElementById(targetId);
-    if (el) {
-        el.style.fontSize = repFontSizes[boxKey] + 'px';
-        if (boxKey === 'details') {
-            el.style.whiteSpace = 'pre-wrap';
-            el.style.wordBreak = 'break-word';
-            el.style.fontFamily = "'Cairo', 'Tajawal', sans-serif";
-        }
-    }
-}
+    if (el) el.style.fontSize = repFontSizes[boxKey] + 'px';
+};
 
-function saveRepLayoutPositions() {
+window.saveRepLayoutPositions = function() {
     let positions = {};
     const container = document.getElementById('repCanvasContainer');
-    const cWidth = container ? container.clientWidth : 1;
-    const cHeight = container ? container.clientHeight : 1;
-
-    const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
-    boxes.forEach(id => {
+    const cWidth = container ? container.clientWidth : 1, cHeight = container ? container.clientHeight : 1;
+    ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'].forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-            const leftPct = (el.offsetLeft / cWidth) * 100;
-            const topPct = (el.offsetTop / cHeight) * 100;
-            const widthPct = (el.offsetWidth / cWidth) * 100;
-
-            positions[id] = {
-                top: topPct + '%',
-                left: leftPct + '%',
-                width: widthPct + '%'
-            };
+            positions[id] = { top: ((el.offsetTop / cHeight) * 100) + '%', left: ((el.offsetLeft / cWidth) * 100) + '%', width: ((el.offsetWidth / cWidth) * 100) + '%' };
         }
     });
     positions.fontSizes = repFontSizes;
-    
-    const storageKey = getReportDeviceStorageKey();
-    localStorage.setItem(storageKey, JSON.stringify(positions));
-    
+    localStorage.setItem(getReportDeviceStorageKey(), JSON.stringify(positions));
     loadRepLayoutPositions();
     alert('تم حفظ أماكن التقرير الطبي الخاصة بهذا الجهاز فقط بنجاح!');
-    
-    if (repConfigModeActive) {
-        toggleRepConfigMode();
-    }
-}
+    if (repConfigModeActive) toggleRepConfigMode();
+};
 
 function loadRepLayoutPositions() {
-    const storageKey = getReportDeviceStorageKey();
-    let saved = localStorage.getItem(storageKey);
-    
-    if (!saved) {
-        saved = localStorage.getItem('clinic_rep_layout_v1');
-    }
-
+    let saved = localStorage.getItem(getReportDeviceStorageKey()) || localStorage.getItem('clinic_rep_layout_v1');
     if (saved) {
         try {
             let data = JSON.parse(saved);
-            const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
-            boxes.forEach(id => {
+            ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el && data[id]) {
                     if (data[id].top) el.style.top = data[id].top;
                     if (data[id].left) el.style.left = data[id].left;
-                    if (data.width) {
-                        el.style.width = data[id].width;
-                        el.style.maxWidth = '100%';
-                    }
+                    if (data[id].width) { el.style.width = data[id].width; el.style.maxWidth = '100%'; }
                 }
             });
-            if (data.fontSizes) {
-                repFontSizes = data.fontSizes;
-            }
-            
+            if (data.fontSizes) repFontSizes = data.fontSizes;
             if (document.getElementById('repPatientText')) document.getElementById('repPatientText').style.fontSize = (repFontSizes.patient || 14) + 'px';
             if (document.getElementById('repTitleText')) document.getElementById('repTitleText').style.fontSize = (repFontSizes.title || 16) + 'px';
             if (document.getElementById('repToText')) document.getElementById('repToText').style.fontSize = (repFontSizes.to || 15) + 'px';
-            
-            const detailsEl = document.getElementById('repDetailsText');
-            if (detailsEl) {
-                detailsEl.style.fontSize = (repFontSizes.details || 15) + 'px';
-                detailsEl.style.whiteSpace = 'pre-wrap';
-                detailsEl.style.wordBreak = 'break-word';
-                detailsEl.style.fontFamily = "'Cairo', 'Tajawal', sans-serif";
-                detailsEl.style.lineHeight = '1.6';
-            }
-        } catch(e) {
-            console.log("Error loading rep layout:", e);
-        }
+            if (document.getElementById('repDetailsText')) document.getElementById('repDetailsText').style.fontSize = (repFontSizes.details || 15) + 'px';
+        } catch(e) { console.log(e); }
     }
 }
 
-function printMedicalReportOnly(visitId) {
+window.printMedicalReportOnly = function(visitId) {
     openMedicalReportModal(visitId);
-    setTimeout(() => {
-        printMedicalReportDirectly();
-    }, 400);
-}
+    setTimeout(() => { printMedicalReportDirectly(); }, 400);
+};
 
 function initReportDraggableElements() {
-    const draggableBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
     const container = document.getElementById('repCanvasContainer');
     if (!container) return;
 
-    draggableBoxes.forEach(box => {
+    document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
         box.style.touchAction = 'none';
-
-        box.onpointerdown = null;
-        box.onpointermove = null;
-        box.onpointerup = null;
-
         box.addEventListener('pointerdown', (e) => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            activeBox = box;
-            startX = e.clientX;
-            startY = e.clientY;
-            
-            const cWidth = container.clientWidth;
-            const cHeight = container.clientHeight;
-            
-            initialLeftPct = (box.offsetLeft / cWidth) * 100;
-            initialTopPct = (box.offsetTop / cHeight) * 100;
-            
+            activeBox = box; startX = e.clientX; startY = e.clientY;
+            initialLeftPct = (box.offsetLeft / container.clientWidth) * 100;
+            initialTopPct = (box.offsetTop / container.clientHeight) * 100;
             box.setPointerCapture(e.pointerId);
             e.stopPropagation();
         });
-
         box.addEventListener('pointermove', (e) => {
-            if (!activeBox || activeBox !== box || !container) return;
-            let dx = e.clientX - startX;
-            let dy = e.clientY - startY;
-            
-            const cWidth = container.clientWidth;
-            const cHeight = container.clientHeight;
-
-            let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
-            let newTopPct = initialTopPct + (dy / cHeight) * 100;
-
-            box.style.left = newLeftPct + '%';
-            box.style.top = newTopPct + '%';
+            if (!activeBox || activeBox !== box) return;
+            box.style.left = (initialLeftPct + ((e.clientX - startX) / container.clientWidth) * 100) + '%';
+            box.style.top = (initialTopPct + ((e.clientY - startY) / container.clientHeight) * 100) + '%';
         });
-
         box.addEventListener('pointerup', (e) => {
-            if (activeBox === box) {
-                if (box.hasPointerCapture(e.pointerId)) {
-                    box.releasePointerCapture(e.pointerId);
-                }
-                activeBox = null;
-            }
+            if (activeBox === box) { if (box.hasPointerCapture(e.pointerId)) box.releasePointerCapture(e.pointerId); activeBox = null; }
         });
     });
 }
 
 function autoSaveMedicalRecord() {}
 
-function showMainMenu() {
-    const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
-    navigateTo('mainScreen', customBrandName, translations[currentLang].headerSub);
-}
-
-function openPatientsArchive() {
+window.openPatientsArchive = function() {
     navigateTo('archiveScreen', translations[currentLang].archive, 'Search & records');
-    
     const savedSort = localStorage.getItem('clinic_archive_sort');
     const sortEl = document.getElementById('filterSort');
-    if (sortEl && savedSort) {
-        sortEl.value = savedSort;
-    }
-
+    if (sortEl && savedSort) sortEl.value = savedSort;
     filterPatients();
-}
+};
 
-function openDictionaryManager() {
-    navigateTo('dictScreen', 'Dictionary Manager', 'Manage terms');
-    renderDictTerms();
-}
+window.openDictionaryManager = function() { navigateTo('dictScreen', 'Dictionary Manager', 'Manage terms'); renderDictTerms(); };
 
-function renderDictTerms() {
+window.renderDictTerms = function() {
     const cat = document.getElementById('dictCategorySelect').value;
-    let dictKey = cat;
-    if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
-    else if (cat === 'historyPresentIllness') dictKey = 'history_present';
-    else if (cat === 'reviewSystems') dictKey = 'review_systems';
-
+    let dictKey = cat === 'chiefComplaint' ? 'chief_complaint' : (cat === 'historyPresentIllness' ? 'history_present' : (cat === 'reviewSystems' ? 'review_systems' : cat));
     const terms = medicalDict[dictKey] || [];
     const container = document.getElementById('dictItemsList');
 
@@ -2851,111 +2079,70 @@ function renderDictTerms() {
         ).join('') + 
         '<div style="display:flex; gap:8px; margin-top:12px;">' +
         '<div class="input-wrapper" style="flex:1;"><input type="text" id="newDictTermInput" placeholder="Add new term..."></div>' +
-        '<button class="btn-main" onclick="addNewDictTerm(\'' + cat + '\')" style="width:auto; padding:0 16px;">Add</button>' +
-        '</div>';
-}
+        '<button class="btn-main" onclick="addNewDictTerm(\'' + cat + '\')" style="width:auto; padding:0 16px;">Add</button></div>';
+};
 
-function editDictTerm(category, index) {
-    let dictKey = category;
-    if (category === 'chiefComplaint') dictKey = 'chief_complaint';
-    else if (category === 'historyPresentIllness') dictKey = 'history_present';
-    else if (category === 'reviewSystems') dictKey = 'review_systems';
-
+window.editDictTerm = function(category, index) {
+    let dictKey = category === 'chiefComplaint' ? 'chief_complaint' : (category === 'historyPresentIllness' ? 'history_present' : (category === 'reviewSystems' ? 'review_systems' : category));
     const terms = medicalDict[dictKey] || [];
-    const currentTerm = terms[index] || '';
-    const newTerm = prompt('تعديل المصطلح الطبي:', currentTerm);
+    const newTerm = prompt('تعديل المصطلح الطبي:', terms[index] || '');
     if (newTerm !== null && newTerm.trim() !== '') {
         terms[index] = newTerm.trim();
         saveSettingsToCloudAndLocal();
         renderDictTerms();
     }
-}
+};
 
-function addNewDictTerm(cat) {
-    const input = document.getElementById('newDictTermInput');
-    const val = input.value.trim();
-    let dictKey = cat;
-    if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
-    else if (cat === 'historyPresentIllness') dictKey = 'history_present';
-    else if (cat === 'reviewSystems') dictKey = 'review_systems';
-
+window.addNewDictTerm = function(cat) {
+    const val = document.getElementById('newDictTermInput').value.trim();
+    let dictKey = cat === 'chiefComplaint' ? 'chief_complaint' : (cat === 'historyPresentIllness' ? 'history_present' : (cat === 'reviewSystems' ? 'review_systems' : cat));
     if (val && medicalDict[dictKey] && !medicalDict[dictKey].includes(val)) {
         medicalDict[dictKey].push(val);
         saveSettingsToCloudAndLocal();
         renderDictTerms();
     }
-}
+};
 
-function removeDictTerm(category, index) {
-    let dictKey = category;
-    if (category === 'chiefComplaint') dictKey = 'chief_complaint';
-    else if (category === 'historyPresentIllness') dictKey = 'history_present';
-    else if (cat === 'reviewSystems') dictKey = 'review_systems';
-
+window.removeDictTerm = function(category, index) {
+    let dictKey = category === 'chiefComplaint' ? 'chief_complaint' : (category === 'historyPresentIllness' ? 'history_present' : (category === 'reviewSystems' ? 'review_systems' : category));
     if (medicalDict[dictKey]) {
         medicalDict[dictKey].splice(index, 1);
         saveSettingsToCloudAndLocal();
         renderDictTerms();
     }
-}
+};
 
-function openBulkAddModal() {
-    document.getElementById('bulkDictInput').value = '';
-    document.getElementById('bulkAddDictModal').style.display = 'flex';
-}
+window.openBulkAddModal = function() { document.getElementById('bulkDictInput').value = ''; document.getElementById('bulkAddDictModal').style.display = 'flex'; };
+window.closeBulkAddModal = function() { document.getElementById('bulkAddDictModal').style.display = 'none'; };
 
-function closeBulkAddModal() {
-    document.getElementById('bulkAddDictModal').style.display = 'none';
-}
-
-function processAndSaveBulkDict() {
+window.processAndSaveBulkDict = function() {
     const text = document.getElementById('bulkDictInput').value;
-    if (!text.trim()) {
-        alert('الرجاء إدخال القائمة أولاً.');
-        return;
-    }
-
+    if (!text.trim()) { alert('الرجاء إدخال القائمة أولاً.'); return; }
     const cat = document.getElementById('dictCategorySelect').value;
-    let dictKey = cat;
-    if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
-    else if (cat === 'historyPresentIllness') dictKey = 'history_present';
-    else if (cat === 'reviewSystems') dictKey = 'review_systems';
-
-    if (!medicalDict[dictKey]) {
-        medicalDict[dictKey] = [];
-    }
-
-    const lines = text.split('\n');
+    let dictKey = cat === 'chiefComplaint' ? 'chief_complaint' : (cat === 'historyPresentIllness' ? 'history_present' : (cat === 'reviewSystems' ? 'review_systems' : cat));
+    if (!medicalDict[dictKey]) medicalDict[dictKey] = [];
     let addedCount = 0;
-
-    lines.forEach(line => {
+    text.split('\n').forEach(line => {
         const cleanLine = line.replace(/^\d+[\.\-\)]\s*/, '').trim();
-        if (cleanLine && !medicalDict[dictKey].includes(cleanLine)) {
-            medicalDict[dictKey].push(cleanLine);
-            addedCount++;
-        }
+        if (cleanLine && !medicalDict[dictKey].includes(cleanLine)) { medicalDict[dictKey].push(cleanLine); addedCount++; }
     });
-
     saveSettingsToCloudAndLocal();
     closeBulkAddModal();
     renderDictTerms();
-    alert(`تمت إضافة وطحن (${addedCount}) عنصر جديد إلى القاموس بنجاح!`);
-}
+    alert(`تمت إضافة (${addedCount}) عنصر جديد إلى القاموس بنجاح!`);
+};
 
-function saveNewPatient(e) {
+window.saveNewPatient = function(e) {
     e.preventDefault();
     const rawName = document.getElementById('pName').value.trim();
-
     const nameExists = patients.some(p => p.name.trim().toLowerCase() === rawName.toLowerCase());
     if (nameExists) {
         alert('⚠️ تنبيه: اسم المريض مكرر تماماً! يرجى إضافة اسم الجد الرابع أو ملاحظة تمييز في نفس حقل الاسم.');
         document.getElementById('pName').focus();
         return;
     }
-
     const newPatient = {
-        id: Date.now(),
-        name: rawName,
+        id: Date.now(), name: rawName,
         age: Number(document.getElementById('pAge').value),
         gender: document.getElementById('pGender').value || 'Unspecified',
         province: document.getElementById('pProvince').value.trim() || 'ميسان',
@@ -2967,16 +2154,15 @@ function saveNewPatient(e) {
     patients.unshift(newPatient);
     savePatientToCloudAndLocal(newPatient);
     openMedicalRecord(newPatient.id);
-}
+};
 
-// تعديل دالة عرض قائمة المرضى لتكون تسلسلية طولانية مضغوطة تعرض حوالي 10 مرضى أمامك مباشرة
 function renderPatientsList(list) {
     const container = document.getElementById('patientsList');
     container.innerHTML = list.length === 0 
         ? '<p style="text-align:center; color:#64748b; padding:20px;">No matching patients found.</p>'
         : '<div style="display: flex; flex-direction: column; gap: 5px;">' +
           list.map(p => 
-            '<div class="patient-card" onclick="openMedicalRecord(' + p.id + ')" style="padding: 6px 10px; margin-bottom: 0; display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'#ffffff\'">' +
+            '<div class="patient-card" onclick="openMedicalRecord(' + p.id + ')" style="padding: 6px 10px; margin-bottom: 0; display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer;">' +
             '<div class="patient-info" style="display: flex; align-items: center; gap: 12px; overflow: hidden;">' +
             '<h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: #0f172a; white-space: nowrap;">' + p.name + '</h4>' +
             '<span style="font-size: 0.75rem; color: #64748b;"><i class="fa-solid fa-phone" style="font-size: 0.68rem; color: #0d9488;"></i> ' + (p.phone || 'N/A') + '</span>' +
@@ -2988,53 +2174,29 @@ function renderPatientsList(list) {
         ).join('') + '</div>';
 }
 
-function filterPatients() {
+window.filterPatients = function() {
     try {
-        const searchInput = document.getElementById('searchInput');
-        const query = searchInput ? searchInput.value.toLowerCase() : '';
-        
-        const genderEl = document.getElementById('filterGender');
-        const ageGroupEl = document.getElementById('filterAgeGroup');
-        const sortEl = document.getElementById('filterSort');
-
-        const gender = genderEl ? genderEl.value : '';
-        const ageGroup = ageGroupEl ? ageGroupEl.value : '';
-        
-        let sortOrder = sortEl ? sortEl.value : null;
-        if (!sortOrder) {
-            sortOrder = localStorage.getItem('clinic_archive_sort') || 'newest';
-            if (sortEl) sortEl.value = sortOrder;
-        } else {
-            localStorage.setItem('clinic_archive_sort', sortOrder);
-        }
+        const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
+        const gender = document.getElementById('filterGender')?.value || '';
+        const ageGroup = document.getElementById('filterAgeGroup')?.value || '';
+        let sortOrder = document.getElementById('filterSort')?.value || localStorage.getItem('clinic_archive_sort') || 'newest';
+        localStorage.setItem('clinic_archive_sort', sortOrder);
 
         let filtered = patients.filter(p => {
             if (!p) return false;
-            const fullNameFull = (p.name || '').toLowerCase();
-            const matchQuery = fullNameFull.includes(query) || (p.phone && String(p.phone).includes(query));
+            const matchQuery = (p.name || '').toLowerCase().includes(query) || (p.phone && String(p.phone).includes(query));
             const matchGender = !gender || p.gender === gender;
-            let matchAge = true;
             const age = Number(p.age) || 0;
-            if (ageGroup === 'child') matchAge = age < 18;
-            else if (ageGroup === 'adult') matchAge = age >= 18 && age <= 50;
-            else if (ageGroup === 'senior') matchAge = age > 50;
-
+            let matchAge = ageGroup === 'child' ? age < 18 : (ageGroup === 'adult' ? (age >= 18 && age <= 50) : (ageGroup === 'senior' ? age > 50 : true));
             return matchQuery && matchGender && matchAge;
         });
 
-        filtered.sort((a, b) => {
-            const idA = Number(a && a.id) || 0;
-            const idB = Number(b && b.id) || 0;
-            return sortOrder === 'oldest' ? idA - idB : idB - idA;
-        });
-
+        filtered.sort((a, b) => sortOrder === 'oldest' ? (Number(a?.id) || 0) - (Number(b?.id) || 0) : (Number(b?.id) || 0) - (Number(a?.id) || 0));
         renderPatientsList(filtered);
-    } catch (e) {
-        console.error("Filter error:", e);
-    }
-}
+    } catch (e) { console.error(e); }
+};
 
-function openMedicalRecord(id, saveState = true) {
+window.openMedicalRecord = function(id, saveState = true) {
     currentPatientId = id;
     navigateTo('medicalRecordScreen', 'Patient Medical Record', 'View details', saveState);
     const patient = patients.find(p => Number(p.id) === Number(id));
@@ -3043,25 +2205,22 @@ function openMedicalRecord(id, saveState = true) {
         document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + (patient.gender || 'N/A') + ' | المحافظة: ' + (patient.province || 'ميسان') + ' | Marital: ' + (patient.marital || 'N/A') + ' | Job: ' + (patient.job || 'N/A') + ' | Phone: ' + (patient.phone || 'N/A');
         renderVisits(patient.visits || [], true);
     }
-}
+};
 
-function addNewVisit() {
+window.addNewVisit = function() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
     patient.visits.unshift({ visitId: Date.now(), date: getTodayFormatted(), medHistory: {}, chiefComplaint: '', historyPresentIllness: '', reviewSystems: '', notes: '', attachments: [] });
     savePatientToCloudAndLocal(patient);
     renderVisits(patient.visits, true);
-}
+};
 
-function renderVisits(visits, forceFullRender = true) {
+function renderVisits(visits) {
     const container = document.getElementById('visitsContainer');
-    container.innerHTML = visits.map((v, index) => {
+    container.innerHTML = visits.map(v => {
         const mh = v.medHistory || {};
         let mhSummaryParts = [];
-        
-        if (mh.conditions && mh.conditions.length > 0) {
-            mhSummaryParts.push('<b>الأمراض المزمنة:</b> ' + mh.conditions.join(', '));
-        }
+        if (mh.conditions && mh.conditions.length > 0) mhSummaryParts.push('<b>الأمراض المزمنة:</b> ' + mh.conditions.join(', '));
         if (mh.otherCondition) mhSummaryParts.push('<b>أخرى:</b> ' + mh.otherCondition);
         if (mh.admission) mhSummaryParts.push('<b>دخول المستشفى:</b> ' + mh.admission);
         if (mh.surgery) mhSummaryParts.push('<b>العمليات:</b> ' + mh.surgery);
@@ -3073,267 +2232,32 @@ function renderVisits(visits, forceFullRender = true) {
         if (mh.notes) mhSummaryParts.push('<b>ملاحظات:</b> ' + mh.notes);
 
         const mhSummaryText = mhSummaryParts.length > 0 ? mhSummaryParts.join(' | ') : 'لم يتم تسجيل تفاصيل التاريخ المرضي بعد.';
-
-        let bpSys = '';
-        let bpDias = '';
+        let bpSys = '', bpDias = '';
         if (v.bp && v.bp.includes('/')) {
             const parts = v.bp.split('/');
             bpSys = parts[0] !== '___' ? parts[0] : '';
             bpDias = parts[1] ? parts[1].replace(' mmHg', '').trim() : '';
-        } else if (v.bp) {
-            bpSys = v.bp;
-        }
+        } else if (v.bp) { bpSys = v.bp; }
 
         const cfg = specialtyConfig;
         const repData = v.medicalReport || {};
 
         return '<div class="visit-card" data-visit-id="' + v.visitId + '">' +
             '<div class="visit-header">' +
-            '<div style="display: flex; align-items: center; gap: 8px;">' +
-            '<span>Visit Date:</span>' +
-            '<input type="date" value="' + (v.date || getTodayFormatted()) + '" onchange="updateVisitDate(' + v.visitId + ', this.value)" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.8rem; font-weight: 700; outline: none; cursor: pointer;">' +
+            '<div style="display: flex; align-items: center; gap: 8px;"><span>Visit Date:</span>' +
+            '<input type="date" value="' + (v.date || getTodayFormatted()) + '" onchange="updateVisitDate(' + v.visitId + ', this.value)" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.8rem; font-weight: 700;">' +
+            '</div>' + (visits.length > 1 ? '<button onclick="confirmDeleteVisit(' + v.visitId + ')" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:2px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i> Delete Visit</button>' : '') +
             '</div>' +
-            (visits.length > 1 ? '<button onclick="confirmDeleteVisit(' + v.visitId + ')" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:2px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i> Delete Visit</button>' : '') +
-            '</div>' +
-
-            (cfg.medHistory ? 
-            '<button type="button" class="btn-med-history" onclick="openMedHistoryModal(' + v.visitId + ')">' +
-            '<span><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History & Chronic Diseases</span>' +
-            '<i class="fa-solid fa-chevron-right"></i>' +
-            '</button>' +
-            '<div class="medical-history-preview-card">' + mhSummaryText + '</div>' : '') +
-
-            (cfg.chiefComplaint ? 
-            '<div class="field-box">' +
-            '<span class="field-label">Chief Complaint (الشكوى الرئيسية)</span>' +
-            '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vChiefComplaint-' + v.visitId + '" rows="1" placeholder="Write chief complaint..." oninput="handleLiveInput(this, \'chiefComplaint\', ' + v.visitId + ')" onblur="hideSuggestions(\'chiefComplaint\', ' + v.visitId + ')">' + (v.chiefComplaint || '') + '</textarea>' +
-            '<div class="suggestions-box" id="suggestions-chiefComplaint-' + v.visitId + '"></div>' +
-            '<div class="live-save-bar" id="save-bar-chiefComplaint-' + v.visitId + '">' +
-            '<span>Save: "<strong id="line-text-chiefComplaint-' + v.visitId + '"></strong>"</span>' +
-            '<button type="button" class="btn-live-save" id="btn-save-chiefComplaint-' + v.visitId + '" onmousedown="saveLineToDict(event, \'chiefComplaint\', ' + v.visitId + ')">Save</button>' +
-            '</div></div></div>' : '') +
-
-            (cfg.historyPresentIllness ? 
-            '<div class="field-box">' +
-            '<span class="field-label">History of Present Illness - HPI (تاريخ المرض الحالي)</span>' +
-            '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vHistoryPresentIllness-' + v.visitId + '" rows="2" placeholder="Write HPI details..." oninput="handleLiveInput(this, \'historyPresentIllness\', ' + v.visitId + ')" onblur="hideSuggestions(\'historyPresentIllness\', ' + v.visitId + ')">' + (v.historyPresentIllness || '') + '</textarea>' +
-            '<div class="suggestions-box" id="suggestions-historyPresentIllness-' + v.visitId + '"></div>' +
-            '<div class="live-save-bar" id="save-bar-historyPresentIllness-' + v.visitId + '">' +
-            '<span>Save: "<strong id="line-text-historyPresentIllness-' + v.visitId + '"></strong>"</span>' +
-            '<button type="button" class="btn-live-save" id="btn-save-historyPresentIllness-' + v.visitId + '" onmousedown="saveLineToDict(event, \'historyPresentIllness\', ' + v.visitId + ')">Save</button>' +
-            '</div></div></div>' : '') +
-
-            (cfg.reviewSystems ? 
-            '<div class="field-box">' +
-            '<span class="field-label">Review of Other Systems - ROS (مراجعة الأجهزة والأنظمة)</span>' +
-            '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vReviewSystems-' + v.visitId + '" rows="2" placeholder="Write ROS details..." oninput="handleLiveInput(this, \'reviewSystems\', ' + v.visitId + ')" onblur="hideSuggestions(\'reviewSystems\', ' + v.visitId + ')">' + (v.reviewSystems || '') + '</textarea>' +
-            '<div class="suggestions-box" id="suggestions-reviewSystems-' + v.visitId + '"></div>' +
-            '<div class="live-save-bar" id="save-bar-reviewSystems-' + v.visitId + '">' +
-            '<span>Save: "<strong id="line-text-reviewSystems-' + v.visitId + '"></strong>"</span>' +
-            '<button type="button" class="btn-live-save" id="btn-save-reviewSystems-' + v.visitId + '" onmousedown="saveLineToDict(event, \'reviewSystems\', ' + v.visitId + ')">Save</button>' +
-            '</div></div></div>' : '') +
-
-            (cfg.vitals ? 
-            '<button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(' + v.visitId + ')">' +
-            '<span><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> Vital Signs & BMI Calculator</span>' +
-            '<span style="font-size:0.75rem; background:#e0f2fe; padding:2px 8px; border-radius:6px;">Score: ' + (v.bmiScore || '—') + '</span>' +
-            '</button>' +
-            '<div class="vital-box" style="margin-bottom: 12px;">' +
-            '<div class="vital-row">' +
-            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-arrow-trend-up"></i> Systolic BP (الضغط العالي)</span>' +
-            '<div class="vital-inputs"><input type="number" id="vBpSys-' + v.visitId + '" value="' + bpSys + '" placeholder="120" oninput="updateBpFields(' + v.visitId + ')"><span>mmHg</span></div></div>' +
-            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-arrow-trend-down"></i> Diastolic BP (الضغط الواطي)</span>' +
-            '<div class="vital-inputs"><input type="number" id="vBpDias-' + v.visitId + '" value="' + bpDias + '" placeholder="80" oninput="updateBpFields(' + v.visitId + ')"><span>mmHg</span></div></div>' +
-            '</div>' +
-            '<div class="vital-row">' +
-            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-heart"></i> Heart Rate (HR)</span>' +
-            '<div class="vital-inputs"><input type="number" value="' + (v.hr || '') + '" placeholder="75" oninput="updateVisitFieldData(' + v.visitId + ', \'hr\', this.value)"><span>bpm</span></div></div>' +
-            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-temperature-high"></i> Temperature</span>' +
-            '<div class="vital-inputs"><input type="number" step="0.1" value="' + (v.temp || '') + '" placeholder="37.0" oninput="updateVisitFieldData(' + v.visitId + ', \'temp\', this.value)"><span>°C</span></div></div>' +
-            '</div>' +
-            '<div class="vital-row">' +
-            '<div class="vital-item" style="grid-column: span 2;"><span class="vital-label"><i class="fa-solid fa-weight-scale"></i> Weight</span>' +
-            '<div class="vital-inputs"><input type="number" value="' + (v.bmiWeight || '') + '" placeholder="70" oninput="updateVisitFieldData(' + v.visitId + ', \'bmiWeight\', this.value)"><span>kg</span></div></div>' +
-            '</div></div>' : '') +
-
-            (cfg.obsGyn ? 
-            '<div class="group-card" style="background:#fce7f3; border-color:#f472b6; margin-bottom:12px; padding:12px;">' +
-            '<span style="font-weight:800; font-size:0.85rem; color:#be185d; display:block; margin-bottom:10px;"><i class="fa-solid fa-person-pregnant"></i> تفاصيل النسائية والتوليد (Obstetrics & Gynecology)</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">LMP (آخر دورة)</span><div class="input-wrapper"><input type="date" id="obsLmp-' + v.visitId + '" value="' + (v.obsLmp || '') + '" oninput="handleLmpInput(' + v.visitId + ', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">EDD (موعد الولادة)</span><div class="input-wrapper"><input type="date" id="obsEdd-' + v.visitId + '" value="' + (v.obsEdd || '') + '" oninput="updateVisitFieldData(' + v.visitId + ', \'obsEdd\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div><div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Gravidity (G)</span><div class="input-wrapper"><input type="text" value="' + (v.obsG || '') + '" placeholder="G3" oninput="updateVisitFieldData(' + v.visitId + ', \'obsG\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Parity (P)</span><div class="input-wrapper"><input type="text" value="' + (v.obsP || '') + '" placeholder="P2" oninput="updateVisitFieldData(' + v.visitId + ', \'obsP\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Abortions (A)</span><div class="input-wrapper"><input type="text" value="' + (v.obsA || '') + '" placeholder="A1" oninput="updateVisitFieldData(' + v.visitId + ', \'obsA\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات السونار والفحص</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'obsNotes\', this.value)" style="font-size:0.85rem;">' + (v.obsNotes || '') + '</textarea></div></div></div>' : '') +
-
-            (cfg.ortho ? 
-            '<div class="group-card" style="background:#fef3c7; border-color:#f59e0b; margin-bottom:12px; padding:12px;">' +
-            '<span style="font-weight:800; font-size:0.85rem; color:#b45309; display:block; margin-bottom:10px;"><i class="fa-solid fa-bone"></i> العظام والمفاصل (Orthopedics)</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">المفصل / الإصابة</span><div class="input-wrapper"><input type="text" value="' + (v.orthoJoint || '') + '" placeholder="الركبة اليمنى" oninput="updateVisitFieldData(' + v.visitId + ', \'orthoJoint\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">درجة الخشونة</span><div class="input-wrapper"><input type="text" value="' + (v.orthoGrade || '') + '" placeholder="Grade II" oninput="updateVisitFieldData(' + v.visitId + ', \'orthoGrade\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مدى الحركة</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات الحركة..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'orthoNotes\', this.value)" style="font-size:0.85rem;">' + (v.orthoNotes || '') + '</textarea></div></div></div>' : '') +
-
-            (cfg.neuro ? 
-            '<div class="group-card" style="background:#f3e8ff; border-color:#c084fc; margin-bottom:12px; padding:12px;">' +
-            '<span style="font-weight:800; font-size:0.85rem; color:#7e22ce; display:block; margin-bottom:10px;"><i class="fa-solid fa-brain"></i> الجملة العصبية (Neurology)</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">GCS</span><div class="input-wrapper"><input type="text" value="' + (v.neuroGcs || '') + '" placeholder="15/15" oninput="updateVisitFieldData(' + v.visitId + ', \'neuroGcs\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Cranial Nerves</span><div class="input-wrapper"><input type="text" value="' + (v.neuroNerves || '') + '" placeholder="Intact" oninput="updateVisitFieldData(' + v.visitId + ', \'neuroNerves\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الأعصاب</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'neuroNotes\', this.value)" style="font-size:0.85rem;">' + (v.neuroNotes || '') + '</textarea></div></div></div>' : '') +
-
-            (cfg.peds ? 
-            '<div class="group-card" style="background:#e0f2fe; border-color:#38bdf8; margin-bottom:12px; padding:12px;">' +
-            '<span style="font-weight:800; font-size:0.85rem; color:#0369a1; display:block; margin-bottom:10px;"><i class="fa-solid fa-child"></i> فحص الأطفال والنمو (WHO Pediatrics)</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">العمر (أشهر)</span><div class="input-wrapper"><input type="number" id="pedsAgeMonths-' + v.visitId + '" value="' + (v.pedsAgeMonths || '') + '" placeholder="12" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsAgeMonths\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الوزن (كغ)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsWeight-' + v.visitId + '" value="' + (v.pedsWeight || '') + '" placeholder="9.5" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsWeight\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الطول (سم)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsHeight-' + v.visitId + '" value="' + (v.pedsHeight || '') + '" placeholder="75" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsHeight\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div>' +
-            '<button type="button" class="btn-main" onclick="calculateVisitChildGrowth(' + v.visitId + ')" style="background:#0284c7; padding:6px 12px; font-size:0.78rem; margin-top:4px; margin-bottom:8px;"><i class="fa-solid fa-calculator"></i> حساب وتقييم نمو الطفل (WHO)</button>' +
-            '<div id="pedsGrowthResult-' + v.visitId + '" style="display:' + (v.pedsGrowthResult ? 'block' : 'none') + '; background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:8px; font-size:0.78rem; color:#14532d; margin-bottom:8px;">' + (v.pedsGrowthResult || '') + '</div>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">اللقاحات</span><div class="input-wrapper"><input type="text" value="' + (v.pedsVaccine || '') + '" placeholder="مكتملة" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsVaccine\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">التغذية</span><div class="input-wrapper"><input type="text" value="' + (v.pedsFeeding || '') + '" placeholder="طبيعية" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsFeeding\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الأطفال</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'pedsNotes\', this.value)" style="font-size:0.85rem;">' + (v.pedsNotes || '') + '</textarea></div></div></div>' : '') +
-
-            (cfg.derm ? 
-            '<div class="group-card" style="background:#ffedd5; border-color:#fb923c; margin-bottom:12px; padding:12px;">' +
-            '<span style="font-weight:800; font-size:0.85rem; color:#c2410c; display:block; margin-bottom:10px;"><i class="fa-solid fa-hand-dots"></i> الجلدية والتناسلية (Dermatology)</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع الآفة</span><div class="input-wrapper"><input type="text" value="' + (v.dermType || '') + '" placeholder="Plaque" oninput="updateVisitFieldData(' + v.visitId + ', \'dermType\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">المكان</span><div class="input-wrapper"><input type="text" value="' + (v.dermSite || '') + '" placeholder="الوجه" oninput="updateVisitFieldData(' + v.visitId + ', \'dermSite\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الجلدية</span><div class="input-wrapper"><textarea rows="2" placeholder="وصف الطفح..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'dermNotes\', this.value)" style="font-size:0.85rem;">' + (v.dermNotes || '') + '</textarea></div></div></div>' : '') +
-
-            (cfg.ent ? 
-            '<div class="group-card" style="background:#ecfdf5; border-color:#34d399; margin-bottom:12px; padding:12px;">' +
-            '<span style="font-weight:800; font-size:0.85rem; color:#047857; display:block; margin-bottom:10px;"><i class="fa-solid fa-ear-deaf"></i> الأذن والأنف والحنجرة (ENT)</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الأذن</span><div class="input-wrapper"><input type="text" value="' + (v.entEar || '') + '" placeholder="طبيعي" oninput="updateVisitFieldData(' + v.visitId + ', \'entEar\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الحلق واللوزتين</span><div class="input-wrapper"><input type="text" value="' + (v.entThroat || '') + '" placeholder="احمرار" oninput="updateVisitFieldData(' + v.visitId + ', \'entThroat\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات ENT</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'entNotes\', this.value)" style="font-size:0.85rem;">' + (v.entNotes || '') + '</textarea></div></div></div>' : '') +
-
-            (cfg.ophthal ? 
-            '<div class="group-card" style="background:#e0e7ff; border-color:#818cf8; margin-bottom:12px; padding:12px;">' +
-            '<span style="font-weight:800; font-size:0.85rem; color:#4338ca; display:block; margin-bottom:10px;"><i class="fa-solid fa-eye"></i> العيون (Ophthalmology)</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (VA)</span><div class="input-wrapper"><input type="text" value="' + (v.ophthalVa || '') + '" placeholder="6/6" oninput="updateVisitFieldData(' + v.visitId + ', \'ophthalVa\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="' + (v.ophthalIop || '') + '" placeholder="15 mmHg" oninput="updateVisitFieldData(' + v.visitId + ', \'ophthalIop\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات العيون</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'ophthalNotes\', this.value)" style="font-size:0.85rem;">' + (v.ophthalNotes || '') + '</textarea></div></div></div>' : '') +
-
-            (cfg.cardio ? 
-            '<div class="group-card" style="background:#fee2e2; border-color:#f87171; margin-bottom:12px; padding:12px;">' +
-            '<span style="font-weight:800; font-size:0.85rem; color:#b91c1c; display:block; margin-bottom:10px;"><i class="fa-solid fa-heart-pulse"></i> القلب والشرايين (Cardiology)</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">تخطيط القلب (ECG)</span><div class="input-wrapper"><input type="text" value="' + (v.cardioEcg || '') + '" placeholder="Normal" oninput="updateVisitFieldData(' + v.visitId + ', \'cardioEcg\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">أصوات القلب</span><div class="input-wrapper"><input type="text" value="' + (v.cardioSounds || '') + '" placeholder="S1 S2 normal" oninput="updateVisitFieldData(' + v.visitId + ', \'cardioSounds\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات القلب</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'cardioNotes\', this.value)" style="font-size:0.85rem;">' + (v.cardioNotes || '') + '</textarea></div></div></div>' : '') +
-
-            (cfg.labs ? 
-            '<div class="field-box">' +
-            '<span class="field-label">Lab Tests</span>' +
-            '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vLabs-' + v.visitId + '" rows="1" placeholder="Request lab tests..." oninput="handleLiveInput(this, \'labs\', ' + v.visitId + ')" onblur="hideSuggestions(\'labs\', ' + v.visitId + ')">' + (v.labs || '') + '</textarea>' +
-            '<div class="suggestions-box" id="suggestions-labs-' + v.visitId + '"></div>' +
-            '<div class="live-save-bar" id="save-bar-labs-' + v.visitId + '">' +
-            '<span>Save: "<strong id="line-text-labs-' + v.visitId + '"></strong>"</span>' +
-            '<button type="button" class="btn-live-save" id="btn-save-labs-' + v.visitId + '" onmousedown="saveLineToDict(event, \'labs\', ' + v.visitId + ')">Save</button>' +
-            '</div></div></div>' : '') +
-
-            (cfg.scans ? 
-            '<div class="field-box">' +
-            '<span class="field-label">Radiology & Scans</span>' +
-            '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vScans-' + v.visitId + '" rows="1" placeholder="Request radiology..." oninput="handleLiveInput(this, \'scans\', ' + v.visitId + ')" onblur="hideSuggestions(\'scans\', ' + v.visitId + ')">' + (v.scans || '') + '</textarea>' +
-            '<div class="suggestions-box" id="suggestions-scans-' + v.visitId + '"></div>' +
-            '<div class="live-save-bar" id="save-bar-scans-' + v.visitId + '">' +
-            '<span>Save: "<strong id="line-text-scans-' + v.visitId + '"></strong>"</span>' +
-            '<button type="button" class="btn-live-save" id="btn-save-scans-' + v.visitId + '" onmousedown="saveLineToDict(event, \'scans\', ' + v.visitId + ')">Save</button>' +
-            '</div></div></div>' : '') +
-
-            (cfg.notes ? 
-            '<div class="field-box">' +
-            '<span class="field-label">Diagnosis & Notes</span>' +
-            '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vNotes-' + v.visitId + '" rows="2" placeholder="Clinical notes & diagnosis..." oninput="handleLiveInput(this, \'notes\', ' + v.visitId + ')" onblur="hideSuggestions(\'notes\', ' + v.visitId + ')">' + (v.notes || '') + '</textarea>' +
-            '<div class="suggestions-box" id="suggestions-notes-' + v.visitId + '"></div>' +
-            '<div class="live-save-bar" id="save-bar-notes-' + v.visitId + '">' +
-            '<span>Save: "<strong id="line-text-notes-' + v.visitId + '"></strong>"</span>' +
-            '<button type="button" class="btn-live-save" id="btn-save-notes-' + v.visitId + '" onmousedown="saveLineToDict(event, \'notes\', ' + v.visitId + ')">Save</button>' +
-            '</div></div></div>' : '') +
-
-            (cfg.rx ? 
-            '<div class="field-box">' +
-            '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; flex-wrap:wrap; gap:6px;">' +
-            '<span class="field-label" style="margin-bottom:0;">Prescribed Medications (RX)</span>' +
-            '<button type="button" onclick="printPrescriptionOnly(' + v.visitId + ')" style="background:#fae8ff; color:#c084fc; border:none; border-radius:8px; padding:6px 14px; font-size:0.8rem; font-weight:700; cursor:pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><i class="fa-solid fa-file-prescription"></i> Print RX Prescription</button>' +
-            '</div>' +
-            '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vDrugs-' + v.visitId + '" rows="3" placeholder="Write prescription drugs here..." oninput="handleDrugsInput(this, ' + v.visitId + ')" onkeydown="handleDrugsKeyDown(event, this, ' + v.visitId + ')" onblur="hideSuggestions(\'drugs\', ' + v.visitId + ')">' + (v.drugs || '') + '</textarea>' +
-            '<div class="suggestions-box" id="suggestions-drugs-' + v.visitId + '"></div>' +
-            '<div class="live-save-bar" id="save-bar-drugs-' + v.visitId + '">' +
-            '<span>Save: "<strong id="line-text-drugs-' + v.visitId + '"></strong>"</span>' +
-            '<button type="button" class="btn-live-save" id="btn-save-drugs-' + v.visitId + '" onmousedown="saveLineToDict(event, \'drugs\', ' + v.visitId + ')">Save</button>' +
-            '</div></div></div>' : '') +
-
-            (cfg.attachments ? 
-            '<div class="field-box">' +
-            '<span class="field-label">Attachments & Medical Reports</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<label style="flex:1; background:#f1f5f9; border:1px dashed #cbd5e1; border-radius:10px; padding:10px; text-align:center; font-size:0.8rem; font-weight:700; color:#475569; cursor:pointer;">' +
-            '<i class="fa-solid fa-cloud-arrow-up"></i> رفع صور متعددة / ملف' +
-            '<input type="file" accept="image/*,.pdf" multiple style="display:none;" onchange="handleFileUpload(this, ' + v.visitId + ')">' +
-            '</label>' +
-            '<button type="button" onclick="scanFromDesktopScanner(' + v.visitId + ')" style="flex:1; background:#f0fdfa; border:1px dashed #0d9488; border-radius:10px; padding:10px; font-size:0.8rem; font-weight:700; color:#0d9488; cursor:pointer;">' +
-            '<i class="fa-solid fa-print"></i> سحب من السكانر (حاسبة)' +
-            '</button>' +
-            '</div>' +
-            
-            '<div style="margin-top: 10px; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; background: #ffffff;">' +
-            '<div onclick="toggleMedicalReportInputs(' + v.visitId + ')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 700; color: #0d9488; font-size: 0.9rem;">' +
-            '<span><i class="fa-solid fa-file-medical"></i> تقرير طبي (محفوظ تلقائياً)</span>' +
-            '<i class="fa-solid fa-chevron-down" id="repChevron_' + v.visitId + '"></i>' +
-            '</div>' +
-            '<div id="repContainer_' + v.visitId + '" style="display: none; margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">' +
-            '<div class="field-box" style="margin-bottom: 8px;">' +
-            '<span class="field-label">عنوان التقرير</span>' +
-            '<div class="input-wrapper"><input type="text" id="rep_title_' + v.visitId + '" value="' + (repData.title || 'تقرير طبي') + '" oninput="updateReportFieldData(' + v.visitId + ', \'title\', this.value)"></div>' +
-            '</div>' +
-            '<div class="field-box" style="margin-bottom: 8px;">' +
-            '<span class="field-label">الجهة الموجه لها التقرير</span>' +
-            '<div class="input-wrapper"><input type="text" id="rep_to_' + v.visitId + '" value="' + (repData.to || '') + '" placeholder="مثال: مستشفى الحكيم التعليمي..." oninput="updateReportFieldData(' + v.visitId + ', \'to\', this.value)"></div>' +
-            '</div>' +
-            '<div class="field-box" style="margin-bottom: 10px;">' +
-            '<span class="field-label">تفاصيل التقرير والحالة السريرية</span>' +
-            '<div class="input-wrapper"><textarea id="rep_details_' + v.visitId + '" rows="3" placeholder="اكتب تفاصيل التقرير هنا..." oninput="updateReportFieldData(' + v.visitId + ', \'details\', this.value)">' + (repData.details || '') + '</textarea></div>' +
-            '</div>' +
-            '<button type="button" class="btn-main" onclick="openMedicalReportModal(' + v.visitId + ')" style="background: #0284c7; padding: 8px; font-size: 0.85rem;">' +
-            '<i class="fa-solid fa-print"></i> معاينة وطباعة التقرير الطبي (بروية الترويسة)' +
-            '</button>' +
-            '</div></div>' +
-
-            '<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;" id="attachments-container-' + v.visitId + '">' +
-            (v.attachments || []).map((att, aIdx) => {
-                if (!att || !att.dataUrl || att.dataUrl.length < 50) {
-                    return '<div style="padding:6px 10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; font-size:0.7rem; color:#b91c1c;">⚠️ صورة تالفة</div>';
-                }
-                return '<div style="position:relative; width:65px; height:65px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; cursor:pointer;" data-visit-id="' + v.visitId + '" data-attachment-index="' + aIdx + '" onclick="previewAttachmentByIndex(this)">' +
-                    '<img src="' + att.dataUrl + '" style="width:100%; height:100%; object-fit:cover;">' +
-                    '</div>';
-            }).join('') +
-            '</div></div>' : '') +
+            (cfg.medHistory ? '<button type="button" class="btn-med-history" onclick="openMedHistoryModal(' + v.visitId + ')"><span><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History & Chronic Diseases</span><i class="fa-solid fa-chevron-right"></i></button><div class="medical-history-preview-card">' + mhSummaryText + '</div>' : '') +
+            (cfg.chiefComplaint ? '<div class="field-box"><span class="field-label">Chief Complaint (الشكوى الرئيسية)</span><div class="input-wrapper" style="position: relative;"><textarea id="vChiefComplaint-' + v.visitId + '" rows="1" oninput="handleLiveInput(this, \'chiefComplaint\', ' + v.visitId + ')" onblur="hideSuggestions(\'chiefComplaint\', ' + v.visitId + ')">' + (v.chiefComplaint || '') + '</textarea><div class="suggestions-box" id="suggestions-chiefComplaint-' + v.visitId + '"></div><div class="live-save-bar" id="save-bar-chiefComplaint-' + v.visitId + '"><span>Save: "<strong id="line-text-chiefComplaint-' + v.visitId + '"></strong>"</span><button type="button" class="btn-live-save" id="btn-save-chiefComplaint-' + v.visitId + '" onmousedown="saveLineToDict(event, \'chiefComplaint\', ' + v.visitId + ')">Save</button></div></div></div>' : '') +
+            (cfg.historyPresentIllness ? '<div class="field-box"><span class="field-label">History of Present Illness - HPI</span><div class="input-wrapper" style="position: relative;"><textarea id="vHistoryPresentIllness-' + v.visitId + '" rows="2" oninput="handleLiveInput(this, \'historyPresentIllness\', ' + v.visitId + ')" onblur="hideSuggestions(\'historyPresentIllness\', ' + v.visitId + ')">' + (v.historyPresentIllness || '') + '</textarea><div class="suggestions-box" id="suggestions-historyPresentIllness-' + v.visitId + '"></div><div class="live-save-bar" id="save-bar-historyPresentIllness-' + v.visitId + '"><span>Save: "<strong id="line-text-historyPresentIllness-' + v.visitId + '"></strong>"</span><button type="button" class="btn-live-save" id="btn-save-historyPresentIllness-' + v.visitId + '" onmousedown="saveLineToDict(event, \'historyPresentIllness\', ' + v.visitId + ')">Save</button></div></div></div>' : '') +
+            (cfg.reviewSystems ? '<div class="field-box"><span class="field-label">Review of Other Systems - ROS</span><div class="input-wrapper" style="position: relative;"><textarea id="vReviewSystems-' + v.visitId + '" rows="2" oninput="handleLiveInput(this, \'reviewSystems\', ' + v.visitId + ')" onblur="hideSuggestions(\'reviewSystems\', ' + v.visitId + ')">' + (v.reviewSystems || '') + '</textarea><div class="suggestions-box" id="suggestions-reviewSystems-' + v.visitId + '"></div><div class="live-save-bar" id="save-bar-reviewSystems-' + v.visitId + '"><span>Save: "<strong id="line-text-reviewSystems-' + v.visitId + '"></strong>"</span><button type="button" class="btn-live-save" id="btn-save-reviewSystems-' + v.visitId + '" onmousedown="saveLineToDict(event, \'reviewSystems\', ' + v.visitId + ')">Save</button></div></div></div>' : '') +
+            (cfg.vitals ? '<button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(' + v.visitId + ')"><span><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> Vital Signs & BMI Calculator</span><span style="font-size:0.75rem; background:#e0f2fe; padding:2px 8px; border-radius:6px;">Score: ' + (v.bmiScore || '—') + '</span></button><div class="vital-box" style="margin-bottom: 12px;"><div class="vital-row"><div class="vital-item"><span class="vital-label">Systolic BP</span><div class="vital-inputs"><input type="number" id="vBpSys-' + v.visitId + '" value="' + bpSys + '" oninput="updateBpFields(' + v.visitId + ')"><span>mmHg</span></div></div><div class="vital-item"><span class="vital-label">Diastolic BP</span><div class="vital-inputs"><input type="number" id="vBpDias-' + v.visitId + '" value="' + bpDias + '" oninput="updateBpFields(' + v.visitId + ')"><span>mmHg</span></div></div></div><div class="vital-row"><div class="vital-item"><span class="vital-label">Heart Rate</span><div class="vital-inputs"><input type="number" value="' + (v.hr || '') + '" oninput="updateVisitFieldData(' + v.visitId + ', \'hr\', this.value)"><span>bpm</span></div></div><div class="vital-item"><span class="vital-label">Temperature</span><div class="vital-inputs"><input type="number" step="0.1" value="' + (v.temp || '') + '" oninput="updateVisitFieldData(' + v.visitId + ', \'temp\', this.value)"><span>°C</span></div></div></div></div>' : '') +
+            (cfg.labs ? '<div class="field-box"><span class="field-label">Lab Tests</span><div class="input-wrapper" style="position: relative;"><textarea id="vLabs-' + v.visitId + '" rows="1" oninput="handleLiveInput(this, \'labs\', ' + v.visitId + ')" onblur="hideSuggestions(\'labs\', ' + v.visitId + ')">' + (v.labs || '') + '</textarea><div class="suggestions-box" id="suggestions-labs-' + v.visitId + '"></div></div></div>' : '') +
+            (cfg.scans ? '<div class="field-box"><span class="field-label">Radiology & Scans</span><div class="input-wrapper" style="position: relative;"><textarea id="vScans-' + v.visitId + '" rows="1" oninput="handleLiveInput(this, \'scans\', ' + v.visitId + ')" onblur="hideSuggestions(\'scans\', ' + v.visitId + ')">' + (v.scans || '') + '</textarea><div class="suggestions-box" id="suggestions-scans-' + v.visitId + '"></div></div></div>' : '') +
+            (cfg.notes ? '<div class="field-box"><span class="field-label">Diagnosis & Notes</span><div class="input-wrapper" style="position: relative;"><textarea id="vNotes-' + v.visitId + '" rows="2" oninput="handleLiveInput(this, \'notes\', ' + v.visitId + ')" onblur="hideSuggestions(\'notes\', ' + v.visitId + ')">' + (v.notes || '') + '</textarea><div class="suggestions-box" id="suggestions-notes-' + v.visitId + '"></div></div></div>' : '') +
+            (cfg.rx ? '<div class="field-box"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><span class="field-label" style="margin-bottom:0;">Prescribed Medications (RX)</span><button type="button" onclick="printPrescriptionOnly(' + v.visitId + ')" style="background:#fae8ff; color:#c084fc; border:none; border-radius:8px; padding:6px 14px; font-size:0.8rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-file-prescription"></i> Print RX</button></div><div class="input-wrapper" style="position: relative;"><textarea id="vDrugs-' + v.visitId + '" rows="3" oninput="handleDrugsInput(this, ' + v.visitId + ')" onkeydown="handleDrugsKeyDown(event, this, ' + v.visitId + ')" onblur="hideSuggestions(\'drugs\', ' + v.visitId + ')">' + (v.drugs || '') + '</textarea><div class="suggestions-box" id="suggestions-drugs-' + v.visitId + '"></div></div></div>' : '') +
+            (cfg.attachments ? '<div class="field-box"><span class="field-label">Attachments & Medical Reports</span><div style="display:flex; gap:8px; margin-bottom:8px;"><label style="flex:1; background:#f1f5f9; border:1px dashed #cbd5e1; border-radius:10px; padding:10px; text-align:center; font-size:0.8rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-cloud-arrow-up"></i> رفع صور<input type="file" accept="image/*,.pdf" multiple style="display:none;" onchange="handleFileUpload(this, ' + v.visitId + ')"></label><button type="button" onclick="scanFromDesktopScanner(' + v.visitId + ')" style="flex:1; background:#f0fdfa; border:1px dashed #0d9488; border-radius:10px; padding:10px; font-size:0.8rem; font-weight:700; color:#0d9488; cursor:pointer;"><i class="fa-solid fa-print"></i> سحب من السكانر</button></div><div style="margin-top: 10px; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; background: #ffffff;"><div onclick="toggleMedicalReportInputs(' + v.visitId + ')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 700; color: #0d9488; font-size: 0.9rem;"><span><i class="fa-solid fa-file-medical"></i> تقرير طبي</span><i class="fa-solid fa-chevron-down" id="repChevron_' + v.visitId + '"></i></div><div id="repContainer_' + v.visitId + '" style="display: none; margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;"><div class="field-box" style="margin-bottom: 8px;"><span class="field-label">عنوان التقرير</span><div class="input-wrapper"><input type="text" id="rep_title_' + v.visitId + '" value="' + (repData.title || 'تقرير طبي') + '" oninput="updateReportFieldData(' + v.visitId + ', \'title\', this.value)"></div></div><div class="field-box" style="margin-bottom: 8px;"><span class="field-label">الجهة الموجه لها</span><div class="input-wrapper"><input type="text" id="rep_to_' + v.visitId + '" value="' + (repData.to || '') + '" oninput="updateReportFieldData(' + v.visitId + ', \'to\', this.value)"></div></div><div class="field-box" style="margin-bottom: 10px;"><span class="field-label">التفاصيل</span><div class="input-wrapper"><textarea id="rep_details_' + v.visitId + '" rows="3" oninput="updateReportFieldData(' + v.visitId + ', \'details\', this.value)">' + (repData.details || '') + '</textarea></div></div><button type="button" class="btn-main" onclick="openMedicalReportModal(' + v.visitId + ')" style="background: #0284c7; padding: 8px; font-size: 0.85rem;"><i class="fa-solid fa-print"></i> معاينة وطباعة التقرير الطبي</button></div></div><div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">' + (v.attachments || []).map((att, aIdx) => '<div style="position:relative; width:65px; height:65px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; cursor:pointer;" data-visit-id="' + v.visitId + '" data-attachment-index="' + aIdx + '" onclick="previewAttachmentByIndex(this)"><img src="' + att.dataUrl + '" style="width:100%; height:100%; object-fit:cover;"></div>').join('') + '</div></div>' : '') +
             '</div>';
     }).join('');
-
-    visits.forEach(v => {
-        ['notes', 'drugs', 'labs', 'scans', 'chiefComplaint', 'historyPresentIllness', 'reviewSystems'].forEach(field => {
-            const el = document.getElementById('v' + field.charAt(0).toUpperCase() + field.slice(1) + '-' + v.visitId);
-            if (el) autoResizeTextarea(el);
-        });
-    });
 }
