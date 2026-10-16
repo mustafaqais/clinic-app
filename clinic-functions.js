@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.51
-// (محدث: فصل طباعة الروشتة عن التقرير الطبي، وفصل إعدادات الأجهزة: حاسبة، آيباد، وموبايل)
+// (محدث: تفعيل عنوان Rx الأحمر والترقيم الإنجليزي التلقائي للأدوية لكافة الأجهزة)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -2034,6 +2034,28 @@ function closeMedHistoryModal() {
     document.getElementById('medHistoryModal').style.display = 'none';
 }
 
+// دالة مركزية لتنسيق الأدوية مع عنوان Rx الأحمر والترقيم التلقائي بالإنجليزية لكافة الأجهزة
+function formatTreatmentForPrintOrView(rawText) {
+    if (!rawText) return 'No medications prescribed.';
+    
+    let lines = rawText.split('\n').filter(line => line.trim() !== '');
+    
+    let htmlOutput = `<div class="rx-rx-title" style="color: #b91c1c; font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.4rem; margin-bottom: 6px; text-align: left; direction: ltr;">Rx</div>`;
+    htmlOutput += `<div class="rx-treatment-list" style="text-align: left; direction: ltr;">`;
+    
+    let counter = 1;
+    lines.forEach(line => {
+        let cleanLine = line.replace(/^\d+[\.\-\)]\s*/, '').trim();
+        if (cleanLine) {
+            htmlOutput += `<div style="margin-bottom: 4px; font-weight: 700; color: #000000; font-size: 1.05rem;">${counter}. ${cleanLine}</div>`;
+            counter++;
+        }
+    });
+    
+    htmlOutput += `</div>`;
+    return htmlOutput;
+}
+
 function openRxModal(visitId) {
     currentVisitIdForModal = visitId;
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
@@ -2050,7 +2072,12 @@ function openRxModal(visitId) {
     const bmiVal = visit.bmiScore ? 'BMI: ' + visit.bmiScore : 'BMI: _____';
 
     document.getElementById('rxDragVitalsText').innerText = bpVal + ' | ' + hrVal + ' | ' + tempVal + ' | ' + bmiVal;
-    document.getElementById('rxDragTreatmentText').innerText = visit.drugs || 'No medications prescribed.';
+    
+    // حقن الأدوية باستخدام الدالة المركزية لتظهر مرقمة ومع عنوان Rx الأحمر في الـ Modal والطباعة
+    const treatmentEl = document.getElementById('rxDragTreatmentText');
+    if (treatmentEl) {
+        treatmentEl.innerHTML = formatTreatmentForPrintOrView(visit.drugs);
+    }
 
     const container = document.getElementById('rxCanvasContainer');
     const oldImg = container.querySelector('.rx-bg-img');
@@ -2188,7 +2215,7 @@ function loadSavedRxLayout() {
     setRxPaperSize(savedSize);
 }
 
-// دالة طباعة الروشتة المفصولة تماماً عن التقرير الطبي ومجهزة لكافة الأجهزة (حاسبة، آيباد، موبايل)
+// دالة طباعة الروشتة المفصولة تماماً ومجهزة لكافة الأجهزة مع تنسيق الأدوية وعنوان Rx
 function printPrescriptionDirectly() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
@@ -2198,7 +2225,7 @@ function printPrescriptionDirectly() {
     if (!container) return;
 
     let bgImg = container.querySelector('.rx-bg-img');
-    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image'] || '';
     
     if (!bgImg && savedRxImg) {
         bgImg = document.createElement('img');
@@ -2213,7 +2240,6 @@ function printPrescriptionDirectly() {
     const controls = container.querySelectorAll('.box-font-controls');
     controls.forEach(c => c.style.display = 'none');
     
-    // تفعيل كلاس طباعة الروشتة حصراً وإلغاء أي تداخل مع التقرير
     document.body.classList.add('is-printing-rx-only');
     document.body.classList.remove('is-printing-report-only');
     
@@ -2246,7 +2272,6 @@ function printMedicalReportDirectly() {
     const controls = container ? container.querySelectorAll('.box-font-controls') : [];
     controls.forEach(c => c.style.display = 'none');
 
-    // تفعيل كلاس طباعة التقرير حصراً وإلغاء أي تداخل مع الروشتة
     document.body.classList.add('is-printing-report-only');
     document.body.classList.remove('is-printing-rx-only');
 
@@ -2423,7 +2448,7 @@ function openMedicalReportModal(visitId) {
     if (!modal) return;
     modal.style.display = 'flex';
 
-    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image'] || '';
     const container = document.getElementById('repCanvasContainer');
     if (container) {
         let bgImg = container.querySelector('.rep-bg-img');
