@@ -82,7 +82,6 @@ function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', save
     const target = document.getElementById(screenId);
     if (target) target.style.display = 'block';
 
-    // [إصلاح المشكلة الثالثة]: إذا كانت الشاشة هي صفحة مريض جديد، يتم تفريغ جميع الحقول بالكامل لتكون فارغة تماماً
     if (screenId === 'addPatientScreen') {
         const fieldsToReset = ['pName', 'pSubName', 'pAge', 'pGender', 'pMarital', 'pJob', 'pPhone'];
         fieldsToReset.forEach(id => {
@@ -1606,7 +1605,6 @@ function handleLiveInput(textarea, category, visitId) {
     updateVisitFieldData(visitId, category, textarea.value);
 }
 
-// [إصلاح المشكلة الثانية]: دالة اختيار الاقتراحات وإكمال الكلمة بالكامل داخل الحقل بسلاسة
 function selectSuggestion(category, visitId, term) {
     const textarea = document.getElementById('v' + category.charAt(0).toUpperCase() + category.slice(1) + '-' + visitId);
     if (!textarea) return;
@@ -1996,7 +1994,11 @@ function openMedHistoryModal(visitId) {
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
 
-    const mh = visit.medHistory || {};
+    if (!visit.medHistory) {
+        visit.medHistory = { conditions: [], otherCondition: '', admission: '', surgery: '', family: '', allergy: '', chronicDrugs: '', smoking: 'Non-smoker', alcohol: 'Non-drinker', notes: '' };
+    }
+
+    const mh = visit.medHistory;
     const checkboxes = document.querySelectorAll('.mh-cd');
     checkboxes.forEach(cb => {
         cb.checked = mh.conditions && mh.conditions.includes(cb.value);
@@ -2015,7 +2017,8 @@ function openMedHistoryModal(visitId) {
     document.getElementById('mh-alcohol').value = mh.alcohol || 'Non-drinker';
     document.getElementById('mh-notes').value = mh.notes || '';
 
-    document.getElementById('medHistoryModal').style.display = 'flex';
+    const modal = document.getElementById('medHistoryModal');
+    if (modal) modal.style.display = 'flex';
 }
 
 function closeMedHistoryModal() {
@@ -2045,7 +2048,8 @@ function closeMedHistoryModal() {
             }
         }
     }
-    document.getElementById('medHistoryModal').style.display = 'none';
+    const modal = document.getElementById('medHistoryModal');
+    if (modal) modal.style.display = 'none';
 }
 
 function formatTreatmentForPrintOrView(rawText) {
@@ -2421,6 +2425,7 @@ function initDraggableElements() {
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
     const container = document.getElementById('rxCanvasContainer');
+    if (!container) return;
 
     document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
         box.style.touchAction = 'none';
@@ -2933,7 +2938,6 @@ function closeBulkAddModal() {
     document.getElementById('bulkAddDictModal').style.display = 'none';
 }
 
-// [إصلاح المشكلة الأولى]: معالجة النصوص المستنسخة دفعة واحدة ولصقها بشكل صحيح في القاموس
 function processAndSaveBulkDict() {
     const text = document.getElementById('bulkDictInput').value;
     if (!text.trim()) {
