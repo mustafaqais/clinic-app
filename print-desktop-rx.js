@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Full & Complete Fixed
+// Clinic Master - Desktop RX Print (print-desktop-rx.js) - Ultimate Direct Print Fix
 // ==========================================
 
 let isConfigMode = false;
@@ -80,7 +80,9 @@ function printPrescriptionDirectly() {
     const container = document.getElementById('rxCanvasContainer');
     if (!container) return;
 
+    // جلب رابط الصورة المحفوظة
     let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    
     let bgImg = container.querySelector('#rxBgImg') || container.querySelector('.rx-bg-img');
     
     if (!bgImg) {
@@ -92,9 +94,8 @@ function printPrescriptionDirectly() {
 
     if (savedRxImg) {
         bgImg.src = savedRxImg;
-        bgImg.style.display = 'block';
-        bgImg.style.visibility = 'visible';
-        bgImg.style.opacity = '1';
+        // إجبار ظهور الصورة وتنسيقها لتملأ الحاوي أثناء الطباعة
+        bgImg.style.cssText = "position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 1; display: block !important; visibility: visible !important; opacity: 1 !important;";
     }
 
     const controls = container.querySelectorAll('.box-font-controls');
@@ -110,7 +111,8 @@ function printPrescriptionDirectly() {
         reportWasOpen = true;
     }
 
-    const executePrint = () => {
+    // الانتظار حتى يتم تحميل الصورة تماماً قبل إعطاء أمر الـ print
+    const runPrint = () => {
         setTimeout(() => {
             window.print();
             setTimeout(() => {
@@ -120,17 +122,17 @@ function printPrescriptionDirectly() {
                     reportModal.style.display = 'flex';
                 }
             }, 1000);
-        }, 600);
+        }, 500);
     };
 
-    if (bgImg && savedRxImg) {
-        if (bgImg.complete) {
-            executePrint();
+    if (savedRxImg) {
+        if (bgImg.complete && bgImg.naturalWidth !== 0) {
+            runPrint();
         } else {
-            bgImg.onload = executePrint;
-            bgImg.onerror = executePrint;
+            bgImg.onload = runPrint;
+            bgImg.onerror = runPrint;
         }
     } else {
-        executePrint();
+        runPrint();
     }
 }
