@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.52
-// (محدث: إصلاح السحب والإفلات لبوكسات التقرير الطبي، الإضافة الجماعية، وإكمال الاقتراحات)
+// (محدث: فحص التكرار الصامت، حقل المحافظة، وإصلاح السحب والإفلات للتقرير الطبي)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -82,9 +82,8 @@ function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', save
     const target = document.getElementById(screenId);
     if (target) target.style.display = 'block';
 
-    // [إصلاح المشكلة الثالثة]: إذا كانت الشاشة هي صفحة مريض جديد، يتم تفريغ جميع الحقول بالكامل لتكون فارغة تماماً
     if (screenId === 'addPatientScreen') {
-        const fieldsToReset = ['pName', 'pSubName', 'pAge', 'pGender', 'pMarital', 'pJob', 'pPhone'];
+        const fieldsToReset = ['pName', 'pAge', 'pGender', 'pProvince', 'pMarital', 'pJob', 'pPhone'];
         fieldsToReset.forEach(id => {
             const el = document.getElementById(id);
             if (el) {
@@ -1887,9 +1886,9 @@ function openEditPatientModal() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
     document.getElementById('editPName').value = patient.name || '';
-    document.getElementById('editPSubName').value = patient.subName || '';
     document.getElementById('editPAge').value = patient.age || '';
     document.getElementById('editPGender').value = patient.gender || '';
+    document.getElementById('editPProvince').value = patient.province || '';
     document.getElementById('editPMarital').value = patient.marital || '';
     document.getElementById('editPJob').value = patient.job || '';
     document.getElementById('editPPhone').value = patient.phone || '';
@@ -1902,7 +1901,6 @@ function closeEditPatientModal() {
 
 function saveEditedPatient() {
     const name = document.getElementById('editPName').value.trim();
-    const subName = document.getElementById('editPSubName').value.trim();
     const age = Number(document.getElementById('editPAge').value);
     if (!name || !age) return;
 
@@ -1910,17 +1908,17 @@ function saveEditedPatient() {
     if (!patient) return;
 
     patient.name = name;
-    patient.subName = subName;
     patient.age = age;
     patient.gender = document.getElementById('editPGender').value || 'Unspecified';
+    patient.province = document.getElementById('editPProvince').value || 'ميسان';
     patient.marital = document.getElementById('editPMarital').value || 'Single';
     patient.job = document.getElementById('editPJob').value || 'Unspecified';
     patient.phone = document.getElementById('editPPhone').value || 'N/A';
 
     savePatientToCloudAndLocal(patient);
     closeEditPatientModal();
-    document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ' (' + patient.subName + ')' : '');
-    document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + patient.gender + ' | Marital: ' + patient.marital + ' | Job: ' + patient.job + ' | Phone: ' + patient.phone;
+    document.getElementById('recPatientName').innerText = patient.name;
+    document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + patient.gender + ' | Province: ' + patient.province + ' | Marital: ' + patient.marital + ' | Job: ' + patient.job + ' | Phone: ' + patient.phone;
 }
 
 function confirmDeletePatientRecord() {
@@ -1995,7 +1993,11 @@ function openMedHistoryModal(visitId) {
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
 
-    const mh = visit.medHistory || {};
+    if (!visit.medHistory) {
+        visit.medHistory = { conditions: [], otherCondition: '', admission: '', surgery: '', family: '', allergy: '', chronicDrugs: '', smoking: 'Non-smoker', alcohol: 'Non-drinker', notes: '' };
+    }
+
+    const mh = visit.medHistory;
     const checkboxes = document.querySelectorAll('.mh-cd');
     checkboxes.forEach(cb => {
         cb.checked = mh.conditions && mh.conditions.includes(cb.value);
@@ -2014,7 +2016,8 @@ function openMedHistoryModal(visitId) {
     document.getElementById('mh-alcohol').value = mh.alcohol || 'Non-drinker';
     document.getElementById('mh-notes').value = mh.notes || '';
 
-    document.getElementById('medHistoryModal').style.display = 'flex';
+    const modalEl = document.getElementById('medHistoryModal');
+    if (modalEl) modalEl.style.display = 'flex';
 }
 
 function closeMedHistoryModal() {
@@ -2044,7 +2047,8 @@ function closeMedHistoryModal() {
             }
         }
     }
-    document.getElementById('medHistoryModal').style.display = 'none';
+    const modalEl = document.getElementById('medHistoryModal');
+    if (modalEl) modalEl.style.display = 'none';
 }
 
 function formatTreatmentForPrintOrView(rawText) {
@@ -2075,7 +2079,7 @@ function openRxModal(visitId) {
     const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
     if (!visit) return;
 
-    document.getElementById('rxDragPatientDetailsText').innerText = 'Name: ' + (patient.name + (patient.subName ? ' (' + patient.subName + ')' : '')) + ' | Age: ' + patient.age + ' | ' + (patient.gender || '');
+    document.getElementById('rxDragPatientDetailsText').innerText = 'Name: ' + patient.name + ' | Age: ' + patient.age + ' | ' + (patient.gender || '');
     document.getElementById('rxDragDateText').innerText = visit.date || getTodayFormatted();
     
     const bpVal = visit.bp ? 'BP: ' + visit.bp : 'BP: _____ / _____ mmHg';
@@ -2543,7 +2547,6 @@ function updateReportFieldData(visitId, fieldName, value) {
     savePatientToCloudAndLocal(patient);
 }
 
-// [إصلاح وتحسين دالة فتح نافذة التقرير الطبي لتهيئة السحب والإفلات وتنشيط البوكسات فوراً]
 function openMedicalReportModal(visitId) {
     currentVisitIdForModal = visitId;
     const modal = document.getElementById('medicalReportModal');
@@ -2571,12 +2574,13 @@ function openMedicalReportModal(visitId) {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     const visit = patient ? patient.visits.find(v => Number(v.visitId) === Number(visitId)) : null;
 
-    let pName = patient ? (patient.name + (patient.subName ? ' (' + patient.subName + ')' : '')) : 'مريض';
+    let pName = patient ? patient.name : 'مريض';
     let pAge = patient ? patient.age : '';
     let pGender = patient ? (patient.gender || '') : '';
+    let pProvince = patient ? (patient.province || '') : '';
     let visitDate = visit ? (visit.date || getTodayFormatted()) : getTodayFormatted();
 
-    let patDetailsStr = `الاسم: ${pName} | العمر: ${pAge} | الجنس: ${pGender} | التاريخ: ${visitDate}`;
+    let patDetailsStr = `الاسم: ${pName} | العمر: ${pAge} | الجنس: ${pGender} | المحافظة: ${pProvince} | التاريخ: ${visitDate}`;
     const repPatText = document.getElementById('repPatientText');
     if (repPatText) repPatText.textContent = patDetailsStr;
 
@@ -2609,8 +2613,6 @@ function openMedicalReportModal(visitId) {
     }
 
     loadRepLayoutPositions();
-    
-    // استدعاء دالة تفعيل السحب والإفلات فور فتح النافذة لضمان عملها 100%
     initReportDraggableElements();
 }
 
@@ -2747,7 +2749,6 @@ function printMedicalReportOnly(visitId) {
     }, 400);
 }
 
-// [تحويل منطق السحب والإفلات للتقرير إلى دالة مستقلة تُستدعى عند فتح النافذة لضمان عملها]
 function initReportDraggableElements() {
     const draggableBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
     let activeBox = null;
@@ -2944,21 +2945,20 @@ function processAndSaveBulkDict() {
 function saveNewPatient(e) {
     e.preventDefault();
     const rawName = document.getElementById('pName').value.trim();
-    const rawSubName = document.getElementById('pSubName').value.trim();
 
-    const nameExists = patients.some(p => p.name.toLowerCase() === rawName.toLowerCase());
-    if (nameExists && !rawSubName) {
-        alert('⚠️ تنبيه: يوجد مريض بنفس الاسم مسجل مسبقاً! يرجى إدخال اسم الجد الرابع أو العشيرة أو ملاحظة تمييز في حقل "اسم الجد الرابع/العشيرة" للمتابعة.');
-        document.getElementById('pSubName').focus();
+    const nameExists = patients.some(p => p.name.trim().toLowerCase() === rawName.toLowerCase());
+    if (nameExists) {
+        alert('⚠️ تنبيه: اسم المريض مكرر تماماً! يرجى إضافة اسم الجد الرابع أو ملاحظة تمييز في نفس حقل الاسم.');
+        document.getElementById('pName').focus();
         return;
     }
 
     const newPatient = {
         id: Date.now(),
         name: rawName,
-        subName: rawSubName,
         age: Number(document.getElementById('pAge').value),
         gender: document.getElementById('pGender').value || 'Unspecified',
+        province: document.getElementById('pProvince').value.trim() || 'ميسان',
         marital: document.getElementById('pMarital').value || 'Single',
         job: document.getElementById('pJob').value || 'Unspecified',
         phone: document.getElementById('pPhone').value || 'N/A',
@@ -2969,19 +2969,23 @@ function saveNewPatient(e) {
     openMedicalRecord(newPatient.id);
 }
 
+// تعديل دالة عرض قائمة المرضى لتكون تسلسلية طولانية مضغوطة تعرض حوالي 10 مرضى أمامك مباشرة
 function renderPatientsList(list) {
     const container = document.getElementById('patientsList');
     container.innerHTML = list.length === 0 
-        ? '<p style="text-align:center; color:#64748b;">No matching patients found.</p>'
-        : list.map(p => 
-            '<div class="patient-card" onclick="openMedicalRecord(' + p.id + ')">' +
-            '<div class="patient-info">' +
-            '<h4>' + p.name + (p.subName ? ' <span style="font-size:0.75rem; color:#0d9488; font-weight:normal;">(' + p.subName + ')</span>' : '') + '</h4>' +
-            '<p><i class="fa-solid fa-phone"></i> ' + p.phone + ' | Age: ' + p.age + '</p>' +
+        ? '<p style="text-align:center; color:#64748b; padding:20px;">No matching patients found.</p>'
+        : '<div style="display: flex; flex-direction: column; gap: 5px;">' +
+          list.map(p => 
+            '<div class="patient-card" onclick="openMedicalRecord(' + p.id + ')" style="padding: 6px 10px; margin-bottom: 0; display: flex; justify-content: space-between; align-items: center; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; cursor: pointer; transition: background 0.15s;" onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'#ffffff\'">' +
+            '<div class="patient-info" style="display: flex; align-items: center; gap: 12px; overflow: hidden;">' +
+            '<h4 style="margin: 0; font-size: 0.88rem; font-weight: 700; color: #0f172a; white-space: nowrap;">' + p.name + '</h4>' +
+            '<span style="font-size: 0.75rem; color: #64748b;"><i class="fa-solid fa-phone" style="font-size: 0.68rem; color: #0d9488;"></i> ' + (p.phone || 'N/A') + '</span>' +
+            '<span style="font-size: 0.75rem; color: #64748b;">| العمر: ' + p.age + '</span>' +
+            '<span style="font-size: 0.75rem; color: #64748b;">| ' + (p.province || 'ميسان') + '</span>' +
             '</div>' +
-            '<span class="badge-gender ' + (p.gender === 'Female' ? 'gender-female' : 'gender-male') + '">' + (p.gender || 'N/A') + '</span>' +
+            '<span class="badge-gender ' + (p.gender === 'Female' ? 'gender-female' : 'gender-male') + '" style="font-size: 0.68rem; padding: 2px 6px; border-radius: 4px; white-space: nowrap;">' + (p.gender || 'N/A') + '</span>' +
             '</div>'
-        ).join('');
+        ).join('') + '</div>';
 }
 
 function filterPatients() {
@@ -3006,7 +3010,7 @@ function filterPatients() {
 
         let filtered = patients.filter(p => {
             if (!p) return false;
-            const fullNameFull = ((p.name || '') + " " + (p.subName || "")).toLowerCase();
+            const fullNameFull = (p.name || '').toLowerCase();
             const matchQuery = fullNameFull.includes(query) || (p.phone && String(p.phone).includes(query));
             const matchGender = !gender || p.gender === gender;
             let matchAge = true;
@@ -3035,8 +3039,8 @@ function openMedicalRecord(id, saveState = true) {
     navigateTo('medicalRecordScreen', 'Patient Medical Record', 'View details', saveState);
     const patient = patients.find(p => Number(p.id) === Number(id));
     if (patient) {
-        document.getElementById('recPatientName').innerText = patient.name + (patient.subName ? ' (' + patient.subName + ')' : '');
-        document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + (patient.gender || 'N/A') + ' | Marital: ' + (patient.marital || 'N/A') + ' | Job: ' + (patient.job || 'N/A') + ' | Phone: ' + (patient.phone || 'N/A');
+        document.getElementById('recPatientName').innerText = patient.name;
+        document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + (patient.gender || 'N/A') + ' | المحافظة: ' + (patient.province || 'ميسان') + ' | Marital: ' + (patient.marital || 'N/A') + ' | Job: ' + (patient.job || 'N/A') + ' | Phone: ' + (patient.phone || 'N/A');
         renderVisits(patient.visits || [], true);
     }
 }
