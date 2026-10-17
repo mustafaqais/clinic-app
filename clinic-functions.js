@@ -1,6 +1,5 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.52
-// (الكود الكامل والمحدث: دمج الجد الرابع، التنبيه الذكي للتكرار، حقل المحافظة، وإصلاح الدخول والـ Bulk Add)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1688,7 +1687,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \'\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2924,7 +2923,7 @@ function removeDictTerm(category, index) {
     let dictKey = category;
     if (category === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (category === 'historyPresentIllness') dictKey = 'history_present';
-    else if (category === 'reviewSystems') dictKey = 'review_systems';
+    else if (cat === 'reviewSystems') dictKey = 'review_systems';
 
     if (medicalDict[dictKey]) {
         medicalDict[dictKey].splice(index, 1);
