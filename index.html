@@ -283,7 +283,8 @@
         <div class="activ-title" id="authTitle">User Login</div>
         <div class="activ-sub" id="authSubText">تسجيل الدخول إلى نظام العيادة السحابي</div>
 
-        <form id="authForm" class="auth-form" onsubmit="event.preventDefault();">
+        <!-- تم تحديث الـ onsubmit هنا لتشغيل دالة handleAuthSubmit مباشرة -->
+        <form id="authForm" class="auth-form" onsubmit="handleAuthSubmit(event); return false;">
             <div class="field-box" style="text-align: left; margin-bottom: 8px;">
                 <span class="field-label" id="lblEmail">البريد الإلكتروني / رقم الموبايل</span>
                 <div class="input-wrapper"><input type="text" id="authEmail" placeholder="user@clinic.com أو 07700000000" required></div>
@@ -303,7 +304,7 @@
             </div>
 
             <div class="forgot-pass" id="forgotPassBtn" onclick="resetPassword()">هل نسيت كلمة المرور؟</div>
-            <button type="button" class="btn-main" id="authSubmitBtn" style="margin-top: 6px;" onclick="handleAuthSubmit()">تسجيل الدخول</button>
+            <button type="submit" class="btn-main" id="authSubmitBtn" style="margin-top: 6px;">تسجيل الدخول</button>
         </form>
 
         <div class="auth-switch" id="authSwitchText">
@@ -892,7 +893,7 @@
     </div>
 </div>
 
-<!-- نافذة تعديل بيانات المريض (محدثة بدون حقل العشيرة المستقل) -->
+<!-- نافذة تعديل بيانات المريض -->
 <div id="editPatientModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 450px; text-align: left; direction: ltr; background: #ffffff; border-radius: 14px; padding: 20px;">
         <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -1240,6 +1241,14 @@
 <script>eruda.init();</script>
 
 <script>
+    // إضافة حماية أمان إضافية لضمان عدم ظهور خطأ handleAuthSubmit حتى لو تأخر الملف الخارجي
+    if (typeof window.handleAuthSubmit !== 'function') {
+        window.handleAuthSubmit = function(event) {
+            if (event) event.preventDefault();
+            console.warn("جاري تحميل الوظائف البرمجية...");
+        };
+    }
+
     window.toggleLanguage = function() {
         let lang = localStorage.getItem('clinic_lang') || 'en';
         lang = (lang === 'ar') ? 'en' : 'ar';
