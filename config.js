@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Config v17.58
+// Clinic Master System - Cloud Ultimate Edition v17.42
 // ==========================================
 
 const firebaseConfig = {
@@ -17,16 +17,10 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-// تعريف وتصدير الكائنات بصفتها عالمية (Global) لتفادي خطأ الـ auth تماماً
-window.auth = firebase.auth();
-window.db = firebase.firestore();
-
-const auth = window.auth;
-const db = window.db;
+const auth = firebase.auth();
+const db = firebase.firestore();
 
 const FOUNDER_EMAIL = "musqaqa009@gmail.com"; 
-
-// المتغيرات الأساسية المعرفة لضمان عدم حدوث خطأ ReferenceError
 let isRegisterMode = false;
 let pendingUserPass = "";
 let currentUserId = null;
@@ -40,10 +34,6 @@ let patientsListenerUnsubscribe = null;
 let targetNodeUidToDelete = null;
 let targetNodeEmailToDelete = null;
 let targetNodeUidForNameEdit = null;
-
-let screenHistory = ['mainScreen'];
-let repConfigModeActive = false;
-let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
 
 let specialtyConfig = JSON.parse(localStorage.getItem('clinic_specialty_config')) || {
     medHistory: true,
@@ -128,7 +118,7 @@ const translations = {
         networkDb: "قاعدة بيانات الشبكة",
         networkDbSub: "المستخدمين وبيانات الدخول",
 
-        footer: "نظام عيادة ماستر المتقدم v17.58",
+        footer: "نظام عيادة ماستر المتقدم v17.42",
 
         patInfoTitle: "المعلومات الشخصية",
         lblPatName: "الاسم الكامل *",
@@ -292,7 +282,7 @@ const translations = {
         networkDb: "Network Database",
         networkDbSub: "Users & credentials",
 
-        footer: "Clinic Master Network v17.58",
+        footer: "Clinic Master Network v17.42",
 
         patInfoTitle: "Personal Information",
         lblPatName: "Full Name *",
@@ -414,12 +404,3 @@ let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || {
 };
 
 let secretaryAccount = JSON.parse(localStorage.getItem('clinic_sec_account')) || { email: "", password: "" };
-
-// دوال التحكم بالواجهة ومقاومة الأخطاء
-function toggleAuthMode() {
-    isRegisterMode = !isRegisterMode;
-    const registerPhoneBox = document.getElementById('registerPhoneBox');
-    if (registerPhoneBox) {
-        registerPhoneBox.style.display = isRegisterMode ? 'block' : 'none';
-    }
-}
