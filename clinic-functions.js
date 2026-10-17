@@ -1,59 +1,7 @@
 // ==========================================
-// أداة كشف الأخطاء الشاملة (Debug Master Tool)
+// Clinic Master System - Cloud Ultimate Edition v17.52
+// (محدث نهائياً: دمج الجد الرابع في حقل الاسم، التنبيه الذكي للتكرار، وحقل المحافظة الاختياري)
 // ==========================================
-window.onerror = function(message, source, lineno, colno, error) {
-    console.error("🚨 خطأ برمجي مكتشف:", { message, source, lineno, colno, error });
-    return false;
-};
-
-window.addEventListener('unhandledrejection', function(event) {
-    console.error("🚨 خطأ وعد غير مُعالج (Promise Rejection):", event.reason);
-});
-
-// ==========================================
-// 🛠️ التعريفات العامة الأساسية لمنع أخطاء الـ ReferenceError
-// ==========================================
-let currentLang = localStorage.getItem('clinic_lang') || 'ar';
-let isDarkMode = localStorage.getItem('clinic_dark_mode') === 'true';
-let currentUserId = null;
-let isUserSecretary = false;
-let isSubscriptionExpired = false;
-let patients = [];
-let trashBin = [];
-let medicalDict = {
-    chief_complaint: ["Cough and fever", "Severe headache", "Chest pain"],
-    history_present: ["Started 3 days ago, progressive"],
-    review_systems: ["No fever, no shortness of breath"],
-    mh_history: ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"]
-};
-let currentDoctorRxImage = localStorage.getItem('doctor_rx_template') || '';
-let specialtyConfig = JSON.parse(localStorage.getItem('clinic_specialty_config') || '{}');
-let secretaryAccount = JSON.parse(localStorage.getItem('clinic_sec_account') || '{"email":"","password":""}');
-let currentPatientId = null;
-let currentVisitIdForModal = null;
-let isConfigMode = false;
-let patientsListenerUnsubscribe = null;
-let targetNodeUidForNameEdit = null;
-let targetNodeUidToDelete = null;
-let targetNodeEmailToDelete = null;
-let pendingUserPass = "";
-let repConfigModeActive = false;
-let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
-let screenHistory = ['mainScreen'];
-
-if (typeof translations === 'undefined') {
-    var translations = {
-        ar: { headerSub: "نظام إدارة العيادة الذكي", newPatient: "مريض جديد", newPatientSub: "تسجيل مريض جديد", archive: "الأرشيف" },
-        en: { headerSub: "Smart Clinic Management System", newPatient: "New Patient", newPatientSub: "Register new patient", archive: "Archive" }
-    };
-}
-
-// ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.56
-// (الكود المحدث والمصحح بالكامل)
-// ==========================================
-
-let isRegisterMode = false;
 
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
@@ -123,6 +71,8 @@ async function generateNewKey(type) {
     }
 }
 
+let screenHistory = ['mainScreen'];
+
 function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', saveState = true) {
     if (!isSubscriptionExpired) {
         autoSaveMedicalRecord();
@@ -144,13 +94,6 @@ function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', save
                 }
             }
         });
-        const nameWarn = document.getElementById('nameDuplicateWarning');
-        if (nameWarn) nameWarn.style.display = 'none';
-        const nameInput = document.getElementById('pName');
-        if (nameInput) {
-            nameInput.style.borderColor = '';
-            nameInput.style.backgroundColor = '';
-        }
     }
 
     const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
@@ -235,8 +178,8 @@ window.addEventListener('popstate', function(event) {
         closeEditPatientModal();
         return;
     }
-    if (document.getElementById('supportCustomModal')) {
-        document.getElementById('supportCustomModal').remove();
+    if (document.getElementById('supportModal').style.display === 'flex') {
+        closeSupportModal();
         return;
     }
     if (document.getElementById('bulkAddDictModal').style.display === 'flex') {
@@ -290,30 +233,6 @@ function toggleDarkMode() {
     isDarkMode = !isDarkMode;
     localStorage.setItem('clinic_dark_mode', isDarkMode);
     applyDarkModeState();
-}
-
-function checkNameDuplicateLive(inputEl) {
-    const rawName = inputEl.value.trim().toLowerCase();
-    const warningEl = document.getElementById('nameDuplicateWarning');
-    
-    if (!rawName) {
-        if (warningEl) warningEl.style.display = 'none';
-        inputEl.style.borderColor = '';
-        inputEl.style.backgroundColor = '';
-        return;
-    }
-
-    const nameExists = patients.some(p => p && p.name && p.name.trim().toLowerCase() === rawName);
-    
-    if (nameExists) {
-        if (warningEl) warningEl.style.display = 'block';
-        inputEl.style.borderColor = '#ef4444';
-        inputEl.style.backgroundColor = '#fef2f2';
-    } else {
-        if (warningEl) warningEl.style.display = 'none';
-        inputEl.style.borderColor = '#10b981';
-        inputEl.style.backgroundColor = '#f0fdf4';
-    }
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -616,34 +535,11 @@ function executeMandatoryBackup() {
 }
 
 function openSupportModal() {
-    const whatsappPhone = "9647739114548";
-    const telegramUsername = "AAAAMQ";
-    const customMessage = encodeURIComponent("السلام عليكم ورحمة الله مصطفى قيس هل يمكن التواصل معك بخصوص تطبيق عيادتي");
+    document.getElementById('supportModal').style.display = 'flex';
+}
 
-    let existingModal = document.getElementById('supportCustomModal');
-    if (existingModal) existingModal.remove();
-
-    const modalDiv = document.createElement('div');
-    modalDiv.id = 'supportCustomModal';
-    modalDiv.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:99995;";
-    
-    modalDiv.innerHTML = `
-        <div style="background:#ffffff; padding:20px; border-radius:16px; width:90%; max-width:350px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.2); font-family:'El Messiri', sans-serif;">
-            <div style="font-size:1.2rem; font-weight:800; color:#0f172a; margin-bottom:8px;"><i class="fa-solid fa-headset" style="color:#0284c7;"></i> الدعم الفني لنظام العيادة</div>
-            <p style="font-size:0.82rem; color:#64748b; margin-bottom:16px;">اختر وسيلة التواصل المفضلة لديك:</p>
-            
-            <a href="https://wa.me/${whatsappPhone}?text=${customMessage}" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:#25d366; color:white; padding:10px; border-radius:10px; text-decoration:none; font-weight:700; margin-bottom:10px; font-size:0.9rem;">
-                <i class="fa-brands fa-whatsapp" style="font-size:1.2rem;"></i> مراسلة عبر الواتساب
-            </a>
-            
-            <a href="https://t.me/${telegramUsername}?text=${customMessage}" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:#229ed9; color:white; padding:10px; border-radius:10px; text-decoration:none; font-weight:700; margin-bottom:14px; font-size:0.9rem;">
-                <i class="fa-brands fa-telegram" style="font-size:1.2rem;"></i> مراسلة عبر التليجرام
-            </a>
-            
-            <button onclick="document.getElementById('supportCustomModal').remove()" style="background:#64748b; color:white; border:none; border-radius:8px; padding:6px 16px; font-size:0.8rem; cursor:pointer; font-weight:700;">إغلاق</button>
-        </div>
-    `;
-    document.body.appendChild(modalDiv);
+function closeSupportModal() {
+    document.getElementById('supportModal').style.display = 'none';
 }
 
 function openActivationScreenForRenewal() {
@@ -839,18 +735,14 @@ function togglePasswordVisibility() {
     }
 }
 
-async function handleAuthSubmit() {
+async function handleAuthSubmit(e) {
+    e.preventDefault();
     const identifier = document.getElementById('authEmail').value.trim();
     const pass = document.getElementById('authPassword').value;
     const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
 
-    if (!identifier || !pass) {
-        alert('الرجاء إدخال البريد الإلكتروني وكلمة المرور.');
-        return;
-    }
-
     if (isRegisterMode) {
-        const phone = document.getElementById('regPhoneInput') ? document.getElementById('regPhoneInput').value.trim() : '';
+        const phone = document.getElementById('regPhoneInput').value.trim();
         auth.createUserWithEmailAndPassword(identifier, pass)
             .then(async res => {
                 pendingUserPass = pass;
@@ -880,7 +772,7 @@ async function handleAuthSubmit() {
                     document.getElementById('activationScreen').style.display = 'flex';
                 }
             })
-            .catch(err => alert('خطأ في التسجيل: ' + err.message));
+            .catch(err => alert('خطأ: ' + err.message));
     } else {
         let loginEmail = identifier;
         if (!identifier.includes('@')) {
@@ -1185,7 +1077,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.56",
+        version: "17.52",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1792,7 +1684,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2614,6 +2506,9 @@ function initDraggableElements() {
     });
 }
 
+let repConfigModeActive = false;
+let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
+
 function getReportDeviceStorageKey() {
     const width = window.innerWidth;
     if (width <= 768) {
@@ -3082,7 +2977,7 @@ function saveNewPatient(e) {
     const rawName = document.getElementById('pName').value.trim();
     const rawCity = document.getElementById('pCity') ? document.getElementById('pCity').value.trim() : '';
 
-    const nameExists = patients.some(p => p && p.name && p.name.trim().toLowerCase() === rawName.toLowerCase());
+    const nameExists = patients.some(p => p.name.toLowerCase() === rawName.toLowerCase());
     if (nameExists) {
         alert('⚠️ تنبيه: هذا الاسم مكرر تماماً! يرجى إضافة اسم الجد الرابع داخل نفس حقل الاسم (مثال: سيف قيس قاسم محمد) لكي يقبل النظام تخزين ملف المريض بنجاح.');
         document.getElementById('pName').focus();
