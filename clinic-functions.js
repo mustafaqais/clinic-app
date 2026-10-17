@@ -1,6 +1,22 @@
 // ==========================================
+// أداة كشف الأخطاء الشاملة (Debug Master Tool)
+// ==========================================
+window.onerror = function(message, source, lineno, colno, error) {
+    console.error("🚨 خطأ برمجي مكتشف:", { message, source, lineno, colno, error });
+    alert("⚠️ خطأ في التطبيق:\n" + message + "\nسطر: " + lineno);
+    return false;
+};
+
+window.addEventListener('unhandledrejection', function(event) {
+    console.error("🚨 خطأ وعد غير مُعالج (Promise Rejection):", event.reason);
+    alert("⚠️ خطأ سحابي أو وعد غير مُعالج:\n" + (event.reason.message || event.reason));
+});
+
+console.log("✅ تم تفعيل أداة تتبع الأخطاء بنجاح.");
+
+// ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.56
-// (الكود المحدث والمصحح: تعريف متغيرات المصادقة، التحقق الفوري للتكرار، حقل المحافظة، وإصلاح الحفظ)
+// (الكود المحدث والمصحح مع أداة تتبع الأخطاء)
 // ==========================================
 
 let isRegisterMode = false;
