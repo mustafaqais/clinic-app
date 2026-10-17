@@ -1,7 +1,12 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.52
-// (الكود المحدث: التحقق الفوري للتكرار، حقل المحافظة، وإصلاح الحفظ)
+// Clinic Master System - Cloud Ultimate Edition v17.56
+// (الكود المحدث والمصحح: تعريف متغيرات المصادقة، التحقق الفوري للتكرار، حقل المحافظة، وإصلاح الحفظ)
 // ==========================================
+
+let isRegisterMode = false;
+let screenHistory = ['mainScreen'];
+let repConfigModeActive = false;
+let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
 
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
@@ -70,8 +75,6 @@ async function generateNewKey(type) {
         alert('Error generating key: ' + e.message);
     }
 }
-
-let screenHistory = ['mainScreen'];
 
 function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', saveState = true) {
     if (!isSubscriptionExpired) {
@@ -242,7 +245,6 @@ function toggleDarkMode() {
     applyDarkModeState();
 }
 
-// دالة الفحص الفوري المباشر للتكرار (Inline Validation)
 function checkNameDuplicateLive(inputEl) {
     const rawName = inputEl.value.trim().toLowerCase();
     const warningEl = document.getElementById('nameDuplicateWarning');
@@ -1136,7 +1138,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.52",
+        version: "17.56",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1743,7 +1745,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2564,9 +2566,6 @@ function initDraggableElements() {
         });
     });
 }
-
-let repConfigModeActive = false;
-let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
 
 function getReportDeviceStorageKey() {
     const width = window.innerWidth;
