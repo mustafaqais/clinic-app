@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.42
+// Clinic Master System - Cloud Ultimate Edition v17.42 (Corrected & Complete)
 // ==========================================
 
 const firebaseConfig = {
@@ -21,6 +21,8 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 const FOUNDER_EMAIL = "musqaqa009@gmail.com"; 
+
+// المتغيرات الأساسية المعرفة لضمان عدم حدوث خطأ ReferenceError
 let isRegisterMode = false;
 let pendingUserPass = "";
 let currentUserId = null;
@@ -34,6 +36,10 @@ let patientsListenerUnsubscribe = null;
 let targetNodeUidToDelete = null;
 let targetNodeEmailToDelete = null;
 let targetNodeUidForNameEdit = null;
+
+let screenHistory = ['mainScreen'];
+let repConfigModeActive = false;
+let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
 
 let specialtyConfig = JSON.parse(localStorage.getItem('clinic_specialty_config')) || {
     medHistory: true,
@@ -57,7 +63,7 @@ let specialtyConfig = JSON.parse(localStorage.getItem('clinic_specialty_config')
 };
 
 let currentLang = localStorage.getItem('clinic_lang') || 'ar';
-let isDarkMode = localStorage.getItem('clinic_dark_mode') === 'true';
+let isDarkMode = localStorage.getItem('clinic_dark_mode'] === 'true';
 
 const translations = {
     ar: {
@@ -404,3 +410,12 @@ let medicalDict = JSON.parse(localStorage.getItem('clinic_dict')) || {
 };
 
 let secretaryAccount = JSON.parse(localStorage.getItem('clinic_sec_account')) || { email: "", password: "" };
+
+// دوال التحكم بالواجهة ومقاومة الأخطاء
+function toggleAuthMode() {
+    isRegisterMode = !isRegisterMode;
+    const registerPhoneBox = document.getElementById('registerPhoneBox');
+    if (registerPhoneBox) {
+        registerPhoneBox.style.display = isRegisterMode ? 'block' : 'none';
+    }
+}
