@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.54
+// Clinic Master System - Cloud Ultimate Edition v17.54 (Modified with Debug Logs)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -249,11 +249,13 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     auth.onAuthStateChanged(async user => {
+        console.log("1. Auth state changed fired. User:", user ? user.email : "No user");
         const activScreen = document.getElementById('activationScreen');
         const appCont = document.getElementById('appContainer');
         const authScreen = document.getElementById('authScreen');
 
         if (user) {
+            console.log("2. User is logged in, starting data load...");
             currentUserId = user.uid;
             let dataOwnerUid = user.uid;
             isUserSecretary = false;
@@ -351,6 +353,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 checkUserSubscriptionStatus(user.uid, isUserSecretary);
             }
         } else {
+            console.log("3. No user logged in, showing auth screen.");
             if (patientsListenerUnsubscribe) patientsListenerUnsubscribe();
             currentUserId = null;
             isUserSecretary = false;
@@ -1688,7 +1691,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \'\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
