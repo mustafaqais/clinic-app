@@ -3,26 +3,57 @@
 // ==========================================
 window.onerror = function(message, source, lineno, colno, error) {
     console.error("🚨 خطأ برمجي مكتشف:", { message, source, lineno, colno, error });
-    alert("⚠️ خطأ في التطبيق:\n" + message + "\nسطر: " + lineno);
     return false;
 };
 
 window.addEventListener('unhandledrejection', function(event) {
     console.error("🚨 خطأ وعد غير مُعالج (Promise Rejection):", event.reason);
-    alert("⚠️ خطأ سحابي أو وعد غير مُعالج:\n" + (event.reason.message || event.reason));
 });
 
-console.log("✅ تم تفعيل أداة تتبع الأخطاء بنجاح.");
+// ==========================================
+// 🛠️ التعريفات العامة الأساسية لمنع أخطاء الـ ReferenceError
+// ==========================================
+let currentLang = localStorage.getItem('clinic_lang') || 'ar';
+let isDarkMode = localStorage.getItem('clinic_dark_mode') === 'true';
+let currentUserId = null;
+let isUserSecretary = false;
+let isSubscriptionExpired = false;
+let patients = [];
+let trashBin = [];
+let medicalDict = {
+    chief_complaint: ["Cough and fever", "Severe headache", "Chest pain"],
+    history_present: ["Started 3 days ago, progressive"],
+    review_systems: ["No fever, no shortness of breath"],
+    mh_history: ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"]
+};
+let currentDoctorRxImage = localStorage.getItem('doctor_rx_template') || '';
+let specialtyConfig = JSON.parse(localStorage.getItem('clinic_specialty_config') || '{}');
+let secretaryAccount = JSON.parse(localStorage.getItem('clinic_sec_account') || '{"email":"","password":""}');
+let currentPatientId = null;
+let currentVisitIdForModal = null;
+let isConfigMode = false;
+let patientsListenerUnsubscribe = null;
+let targetNodeUidForNameEdit = null;
+let targetNodeUidToDelete = null;
+let targetNodeEmailToDelete = null;
+let pendingUserPass = "";
+let repConfigModeActive = false;
+let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
+let screenHistory = ['mainScreen'];
+
+if (typeof translations === 'undefined') {
+    var translations = {
+        ar: { headerSub: "نظام إدارة العيادة الذكي", newPatient: "مريض جديد", newPatientSub: "تسجيل مريض جديد", archive: "الأرشيف" },
+        en: { headerSub: "Smart Clinic Management System", newPatient: "New Patient", newPatientSub: "Register new patient", archive: "Archive" }
+    };
+}
 
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.56
-// (الكود المحدث والمصحح مع أداة تتبع الأخطاء)
+// (الكود المحدث والمصحح بالكامل)
 // ==========================================
 
 let isRegisterMode = false;
-let screenHistory = ['mainScreen'];
-let repConfigModeActive = false;
-let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
 
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
