@@ -1,7 +1,56 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.52
-// (محدث نهائياً: دمج الجد الرابع في حقل الاسم، التنبيه الذكي للتكرار، وحقل المحافظة الاختياري)
+// (محدث ومصحح نهائياً: منع مشاكل تسجيل الدخول، الحماية من الـ Silent Crashes، والتعامل الآمن مع الجلسات)
 // ==========================================
+
+window.currentLang = localStorage.getItem('clinic_lang') || 'ar';
+window.isDarkMode = localStorage.getItem('clinic_dark_mode') === 'true';
+
+window.translations = {
+    ar: {
+        headerSub: "لوحة التحكم السحابية الآمنة",
+        archive: "أرشيف المرضى",
+        newPatient: "مريض جديد",
+        newPatientSub: "تسجيل وحفظ السجلات"
+    },
+    en: {
+        headerSub: "Cloud Secure Dashboard",
+        archive: "Patients Archive",
+        newPatient: "New Patient",
+        newPatientSub: "Register & save records"
+    }
+};
+
+let screenHistory = ['mainScreen'];
+let currentVisitIdForModal = null;
+let repConfigModeActive = false;
+let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
+let targetNodeUidForNameEdit = null;
+let targetNodeUidToDelete = null;
+let targetNodeEmailToDelete = null;
+let pendingUserPass = '';
+let isRegisterMode = false;
+let currentUserId = null;
+let isUserSecretary = false;
+let isSubscriptionExpired = false;
+let currentPatientId = null;
+let patients = [];
+let trashBin = [];
+let medicalDict = { 
+    drugs: [], labs: [], scans: [], notes: [], 
+    mh_history: ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"], 
+    chief_complaint: ["Cough and fever", "Severe headache", "Chest pain"], 
+    history_present: ["Started 3 days ago, progressive"], 
+    review_systems: ["No fever, no shortness of breath"] 
+};
+let secretaryAccount = { email: "", password: "" };
+let specialtyConfig = {
+    medHistory: true, chiefComplaint: true, historyPresentIllness: true, reviewSystems: true,
+    vitals: true, labs: true, scans: true, notes: true, rx: true, attachments: true
+};
+let currentDoctorRxImage = '';
+let isConfigMode = false;
+let patientsListenerUnsubscribe = null;
 
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
@@ -70,8 +119,6 @@ async function generateNewKey(type) {
         alert('Error generating key: ' + e.message);
     }
 }
-
-let screenHistory = ['mainScreen'];
 
 function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', saveState = true) {
     if (!isSubscriptionExpired) {
@@ -221,18 +268,6 @@ function applyDarkModeState() {
     } else {
         document.body.classList.remove('dark-mode');
     }
-}
-
-function toggleLanguage() {
-    currentLang = currentLang === 'ar' ? 'en' : 'ar';
-    applyLanguage();
-    location.reload();
-}
-
-function toggleDarkMode() {
-    isDarkMode = !isDarkMode;
-    localStorage.setItem('clinic_dark_mode', isDarkMode);
-    applyDarkModeState();
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -736,100 +771,131 @@ function togglePasswordVisibility() {
 }
 
 async function handleAuthSubmit(e) {
-    e.preventDefault();
-    const identifier = document.getElementById('authEmail').value.trim();
-    const pass = document.getElementById('authPassword').value;
+    if (e && typeof e.preventDefault === 'function') {
+        e.preventDefault();
+    }
+    
+    const emailInputEl = document.getElementById('authEmail');
+    const passInputEl = document.getElementById('authPassword');
+    
+    if (!emailInputEl || !passInputEl) {
+        alert('خطأ في عناصر واجهة تسجيل الدخول.');
+        return;
+    }
+
+    const identifier = emailInputEl.value.trim();
+    const pass = passInputEl.value;
     const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
 
-    if (isRegisterMode) {
-        const phone = document.getElementById('regPhoneInput').value.trim();
-        auth.createUserWithEmailAndPassword(identifier, pass)
-            .then(async res => {
-                pendingUserPass = pass;
-                currentUserId = res.user.uid;
-                
-                try {
-                    await db.collection('network_hierarchy').doc(currentUserId).set({
-                        email: identifier.toLowerCase(),
-                        phone: phone || '',
-                        password: pass,
-                        role: identifier.toLowerCase() === founderMail ? 'Founder' : 'Client Node',
-                        isActivated: identifier.toLowerCase() === founderMail,
-                        doctorName: "نظام عيادة ماستر",
-                        createdAt: new Date().toISOString()
-                    }, { merge: true });
-                } catch (err) {
-                    console.log("Error:", err);
-                }
+    if (!identifier || !pass) {
+        alert('الرجاء إدخال البريد الإلكتروني (أو رقم الموبايل) وكلمة المرور.');
+        return;
+    }
 
-                if (identifier.toLowerCase() === founderMail) {
-                    const expiryDate = new Date();
-                    expiryDate.setFullYear(expiryDate.getFullYear() + 10);
-                    localStorage.setItem('sub_expiry_' + res.user.uid, expiryDate.toISOString());
-                    setupFounderInterfaceAfterAuth();
-                } else {
-                    document.getElementById('authScreen').style.display = 'none';
-                    document.getElementById('activationScreen').style.display = 'flex';
-                }
-            })
-            .catch(err => alert('خطأ: ' + err.message));
-    } else {
-        let loginEmail = identifier;
-        if (!identifier.includes('@')) {
+    const submitBtn = document.getElementById('authSubmitBtn');
+    const originalBtnText = submitBtn ? submitBtn.innerText : '';
+    if (submitBtn) {
+        submitBtn.innerText = 'جاري التحقق وتسجيل الدخول...';
+        submitBtn.disabled = true;
+    }
+
+    try {
+        if (isRegisterMode) {
+            const phoneEl = document.getElementById('regPhoneInput');
+            const phone = phoneEl ? phoneEl.value.trim() : '';
+            
+            const res = await auth.createUserWithEmailAndPassword(identifier, pass);
+            pendingUserPass = pass;
+            currentUserId = res.user.uid;
+            
             try {
-                const querySnap = await db.collection('network_hierarchy').where('phone', '==', identifier).get();
-                if (!querySnap.empty) {
-                    loginEmail = querySnap.docs[0].data().email;
-                }
+                await db.collection('network_hierarchy').doc(currentUserId).set({
+                    email: identifier.toLowerCase(),
+                    phone: phone || '',
+                    password: pass,
+                    role: identifier.toLowerCase() === founderMail ? 'Founder' : 'Client Node',
+                    isActivated: identifier.toLowerCase() === founderMail,
+                    doctorName: "نظام عيادة ماستر",
+                    createdAt: new Date().toISOString()
+                }, { merge: true });
             } catch (err) {
-                console.log(err);
+                console.log("Hierarchy save error:", err);
             }
-        }
 
-        auth.signInWithEmailAndPassword(loginEmail, pass)
-            .then(async res => {
-                currentUserId = res.user.uid;
-                let dataOwnerUid = res.user.uid;
-                let isSec = false;
-
+            if (identifier.toLowerCase() === founderMail) {
+                const expiryDate = new Date();
+                expiryDate.setFullYear(expiryDate.getFullYear() + 10);
+                localStorage.setItem('sub_expiry_' + res.user.uid, expiryDate.toISOString());
+                setupFounderInterfaceAfterAuth();
+            } else {
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('activationScreen').style.display = 'flex';
+            }
+        } else {
+            let loginEmail = identifier;
+            if (!identifier.includes('@')) {
                 try {
-                    const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', loginEmail.toLowerCase()).get();
-                    if (!secQuery.empty) {
-                        const doctorDoc = secQuery.docs[0];
-                        dataOwnerUid = doctorDoc.id;
+                    const querySnap = await db.collection('network_hierarchy').where('phone', '==', identifier).get();
+                    if (!querySnap.empty) {
+                        loginEmail = querySnap.docs[0].data().email;
+                    }
+                } catch (err) {
+                    console.log("Phone login resolve error:", err);
+                }
+            }
+
+            const res = await auth.signInWithEmailAndPassword(loginEmail, pass);
+            currentUserId = res.user.uid;
+            let dataOwnerUid = res.user.uid;
+            let isSec = false;
+
+            try {
+                const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', loginEmail.toLowerCase()).get();
+                if (!secQuery.empty) {
+                    const doctorDoc = secQuery.docs[0];
+                    dataOwnerUid = doctorDoc.id;
+                    sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
+                    isSec = true;
+                } else {
+                    const directDoc = await db.collection('network_hierarchy').doc(res.user.uid).get();
+                    if (directDoc.exists && directDoc.data().doctorUid) {
+                        dataOwnerUid = directDoc.data().doctorUid;
                         sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
                         isSec = true;
-                    } else {
-                        const directDoc = await db.collection('network_hierarchy').doc(res.user.uid).get();
-                        if (directDoc.exists && directDoc.data().doctorUid) {
-                            dataOwnerUid = directDoc.data().doctorUid;
-                            sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
-                            isSec = true;
-                        }
                     }
-                } catch (e) {
-                    console.log(e);
                 }
+            } catch (e) {
+                console.log("Secretary check error:", e);
+            }
 
-                await loadDoctorBranding(dataOwnerUid);
+            await loadDoctorBranding(dataOwnerUid);
 
-                document.getElementById('authScreen').style.display = 'none';
-                document.getElementById('activationScreen').style.display = 'none';
-                document.getElementById('appContainer').style.display = 'flex';
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('activationScreen').style.display = 'none';
+            document.getElementById('appContainer').style.display = 'flex';
 
-                if (isSec) {
-                    document.getElementById('cardPermissions').style.display = 'none';
-                    document.getElementById('subStatusBanner').style.display = 'none';
-                    isUserSecretary = true;
-                    applySecretaryUIVisibility();
-                    restorePreviousScreenState();
-                } else if (loginEmail.toLowerCase() === founderMail) {
-                    setupFounderInterfaceAfterAuth();
-                } else {
-                    checkUserSubscriptionStatus(res.user.uid, false);
-                }
-            })
-            .catch(err => alert('خطأ في تسجيل الدخول: ' + err.message));
+            if (isSec) {
+                const permCard = document.getElementById('cardPermissions');
+                const subBanner = document.getElementById('subStatusBanner');
+                if (permCard) permCard.style.display = 'none';
+                if (subBanner) subBanner.style.display = 'none';
+                isUserSecretary = true;
+                applySecretaryUIVisibility();
+                restorePreviousScreenState();
+            } else if (loginEmail.toLowerCase() === founderMail) {
+                setupFounderInterfaceAfterAuth();
+            } else {
+                await checkUserSubscriptionStatus(res.user.uid, false);
+            }
+        }
+    } catch (err) {
+        console.error("Auth Error:", err);
+        alert('خطأ في المصادقة: ' + err.message);
+    } finally {
+        if (submitBtn) {
+            submitBtn.innerText = originalBtnText || 'تسجيل الدخول';
+            submitBtn.disabled = false;
+        }
     }
 }
 
@@ -1684,7 +1750,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2505,9 +2571,6 @@ function initDraggableElements() {
         });
     });
 }
-
-let repConfigModeActive = false;
-let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
 
 function getReportDeviceStorageKey() {
     const width = window.innerWidth;
