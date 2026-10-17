@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.52
+// Clinic Master System - Cloud Ultimate Edition v17.53
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -181,7 +181,7 @@ window.addEventListener('popstate', function(event) {
         closeSupportModal();
         return;
     }
-    if (document.getElementById('bulkAddDictModal').style.display === 'flex') {
+    if (document.getElementById('bulkAddDictModal') && document.getElementById('bulkAddDictModal').style.display === 'flex') {
         closeBulkAddModal();
         return;
     }
@@ -1080,7 +1080,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.52",
+        version: "17.53",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1687,7 +1687,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \'\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2863,14 +2863,21 @@ function openDictionaryManager() {
 }
 
 function renderDictTerms() {
-    const cat = document.getElementById('dictCategorySelect').value;
+    const catSelect = document.getElementById('dictCategorySelect');
+    const cat = catSelect ? catSelect.value : 'drugs';
+    
     let dictKey = cat;
     if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (cat === 'historyPresentIllness') dictKey = 'history_present';
     else if (cat === 'reviewSystems') dictKey = 'review_systems';
 
-    const terms = medicalDict[dictKey] || [];
+    if (!medicalDict[dictKey]) {
+        medicalDict[dictKey] = [];
+    }
+
+    const terms = medicalDict[dictKey];
     const container = document.getElementById('dictItemsList');
+    if (!container) return;
 
     container.innerHTML = terms.length === 0 
         ? '<p style="text-align:center; color:#64748b;">No terms in this category.</p>'
@@ -2906,13 +2913,18 @@ function editDictTerm(category, index) {
 
 function addNewDictTerm(cat) {
     const input = document.getElementById('newDictTermInput');
+    if (!input) return;
     const val = input.value.trim();
     let dictKey = cat;
     if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (cat === 'historyPresentIllness') dictKey = 'history_present';
     else if (cat === 'reviewSystems') dictKey = 'review_systems';
 
-    if (val && medicalDict[dictKey] && !medicalDict[dictKey].includes(val)) {
+    if (!medicalDict[dictKey]) {
+        medicalDict[dictKey] = [];
+    }
+
+    if (val && !medicalDict[dictKey].includes(val)) {
         medicalDict[dictKey].push(val);
         saveSettingsToCloudAndLocal();
         renderDictTerms();
@@ -2933,25 +2945,53 @@ function removeDictTerm(category, index) {
 }
 
 function openBulkAddModal() {
-    document.getElementById('bulkDictInput').value = '';
+    let modal = document.getElementById('bulkAddDictModal');
+    if (!modal) {
+        const modalDiv = document.createElement('div');
+        modalDiv.id = 'bulkAddDictModal';
+        modalDiv.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;';
+        modalDiv.innerHTML = `
+            <div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:500px; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+                <h3 style="margin-top:0; color:#0f172a; font-size:1.1rem; margin-bottom:10px;"><i class="fa-solid fa-list-check"></i> إضافة مجموعة مصطلحات دفعة واحدة</h3>
+                <p style="font-size:0.8rem; color:#64748b; margin-bottom:10px;">قم لصق القائمة هنا (كل سطر علاج أو مصطلح في سطر مستقل):</p>
+                <div class="input-wrapper" style="margin-bottom:15px;">
+                    <textarea id="bulkDictInput" rows="6" placeholder="علاج 1&#10;علاج 2&#10;علاج 3" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.9rem; outline:none;"></textarea>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                    <button type="button" onclick="closeBulkAddModal()" style="background:#e2e8f0; color:#334155; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">إلغاء</button>
+                    <button type="button" onclick="processAndSaveBulkDict()" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">حفظ الكل</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+    }
+    
+    const inputEl = document.getElementById('bulkDictInput');
+    if (inputEl) inputEl.value = '';
     document.getElementById('bulkAddDictModal').style.display = 'flex';
 }
 
 function closeBulkAddModal() {
-    document.getElementById('bulkAddDictModal').style.display = 'none';
+    const modal = document.getElementById('bulkAddDictModal');
+    if (modal) modal.style.display = 'none';
 }
 
 function processAndSaveBulkDict() {
     const textElement = document.getElementById('bulkDictInput');
-    if (!textElement) return;
+    if (!textElement) {
+        alert('خطأ: حقل الإدخال غير موجود.');
+        return;
+    }
     
     const text = textElement.value;
     if (!text.trim()) {
-        alert('الرجاء إدخال القائمة أولاً.');
+        alert('الرجاء إدخال أو لصق القائمة أولاً.');
         return;
     }
 
-    const cat = document.getElementById('dictCategorySelect').value;
+    const catSelect = document.getElementById('dictCategorySelect');
+    const cat = catSelect ? catSelect.value : 'drugs';
+    
     let dictKey = cat;
     if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (cat === 'historyPresentIllness') dictKey = 'history_present';
@@ -2982,7 +3022,9 @@ function processAndSaveBulkDict() {
 
     saveSettingsToCloudAndLocal();
     closeBulkAddModal();
-    renderDictTerms();
+    if (typeof renderDictTerms === 'function') {
+        renderDictTerms();
+    }
     alert(`تمت إضافة (${addedCount}) عنصر جديد إلى القاموس بنجاح!`);
 }
 
