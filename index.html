@@ -283,7 +283,7 @@
         <div class="activ-title" id="authTitle">User Login</div>
         <div class="activ-sub" id="authSubText">تسجيل الدخول إلى نظام العيادة السحابي</div>
 
-        <form id="authForm" class="auth-form" onsubmit="handleAuthSubmit(event)">
+        <form id="authForm" class="auth-form" onsubmit="event.preventDefault();">
             <div class="field-box" style="text-align: left; margin-bottom: 8px;">
                 <span class="field-label" id="lblEmail">البريد الإلكتروني / رقم الموبايل</span>
                 <div class="input-wrapper"><input type="text" id="authEmail" placeholder="user@clinic.com أو 07700000000" required></div>
@@ -303,7 +303,7 @@
             </div>
 
             <div class="forgot-pass" id="forgotPassBtn" onclick="resetPassword()">هل نسيت كلمة المرور؟</div>
-            <button type="submit" class="btn-main" id="authSubmitBtn" style="margin-top: 6px;">تسجيل الدخول</button>
+            <button type="button" class="btn-main" id="authSubmitBtn" style="margin-top: 6px;" onclick="handleAuthSubmit()">تسجيل الدخول</button>
         </form>
 
         <div class="auth-switch" id="authSwitchText">
