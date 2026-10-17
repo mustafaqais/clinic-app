@@ -735,11 +735,15 @@ function togglePasswordVisibility() {
     }
 }
 
-async function handleAuthSubmit(e) {
-    e.preventDefault();
+async function handleAuthSubmit() {
     const identifier = document.getElementById('authEmail').value.trim();
     const pass = document.getElementById('authPassword').value;
     const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
+
+    if (!identifier || !pass) {
+        alert('الرجاء إدخال البريد الإلكتروني وكلمة المرور.');
+        return;
+    }
 
     if (isRegisterMode) {
         const phone = document.getElementById('regPhoneInput') ? document.getElementById('regPhoneInput').value.trim() : '';
@@ -1684,7 +1688,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
