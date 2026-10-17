@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.53
+// Clinic Master System - Cloud Ultimate Edition v17.54
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -835,6 +835,7 @@ async function handleAuthSubmit() {
             .catch(err => alert('خطأ في تسجيل الدخول: ' + err.message));
     }
 }
+window.handleAuthSubmit = handleAuthSubmit;
 
 function showAllCardsForDoctor() {
     document.getElementById('cardNewPatient').style.display = 'flex';
@@ -1080,7 +1081,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.53",
+        version: "17.54",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
