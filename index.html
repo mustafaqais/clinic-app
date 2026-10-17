@@ -283,8 +283,7 @@
         <div class="activ-title" id="authTitle">User Login</div>
         <div class="activ-sub" id="authSubText">تسجيل الدخول إلى نظام العيادة السحابي</div>
 
-        <!-- تم تحديث النموذج لمنع أي إعادة تحميل وهمية -->
-        <form id="authForm" class="auth-form" onsubmit="event.preventDefault(); handleAuthSubmit(event);">
+        <form id="authForm" class="auth-form" onsubmit="handleAuthSubmit(event)">
             <div class="field-box" style="text-align: left; margin-bottom: 8px;">
                 <span class="field-label" id="lblEmail">البريد الإلكتروني / رقم الموبايل</span>
                 <div class="input-wrapper"><input type="text" id="authEmail" placeholder="user@clinic.com أو 07700000000" required></div>
@@ -696,11 +695,6 @@
                             <div class="input-wrapper"><input type="text" id="pName" placeholder="Enter patient full name..." required></div>
                         </div>
 
-                        <div class="field-box">
-                            <span class="field-label" id="lblPatSubName">Grandfather Name / Tribe / Note (Optional)</span>
-                            <div class="input-wrapper"><input type="text" id="pSubName" placeholder="e.g. محمد / العشيرة لتمييز الاسم التشابه"></div>
-                        </div>
-
                         <div style="display: flex; gap: 10px;">
                             <div class="field-box" style="flex: 1;">
                                 <span class="field-label" id="lblPatAge">Age *</span>
@@ -716,6 +710,11 @@
                                         <option value="Female" id="optFemale">Female</option>
                                     </select>
                                 </div>
+                            </div>
+
+                            <div class="field-box" style="flex: 1;">
+                                <span class="field-label">المحافظة (اختياري)</span>
+                                <div class="input-wrapper"><input type="text" id="pCity" placeholder="مثال: بغداد، ميسان..."></div>
                             </div>
                         </div>
 
@@ -893,6 +892,171 @@
     </div>
 </div>
 
+<!-- نافذة تعديل بيانات المريض (محدثة بدون حقل العشيرة المستقل) -->
+<div id="editPatientModal" class="modal-overlay" style="display: none;">
+    <div class="modal-body" style="max-width: 450px; text-align: left; direction: ltr; background: #ffffff; border-radius: 14px; padding: 20px;">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="margin:0; color:#0f172a;"><i class="fa-solid fa-pen-to-square" style="color:#0d9488;"></i> تعديل بيانات المريض</h3>
+            <button class="modal-close" onclick="closeEditPatientModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div class="field-box" style="margin-bottom: 10px;">
+            <span class="field-label">Full Name</span>
+            <div class="input-wrapper"><input type="text" id="editPName"></div>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <div class="field-box" style="flex: 1; margin-bottom: 10px;">
+                <span class="field-label">Age</span>
+                <div class="input-wrapper"><input type="number" id="editPAge"></div>
+            </div>
+            <div class="field-box" style="flex: 1; margin-bottom: 10px;">
+                <span class="field-label">Gender</span>
+                <div class="input-wrapper">
+                    <select id="editPGender">
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+            </div>
+            <div class="field-box" style="flex: 1; margin-bottom: 10px;">
+                <span class="field-label">المحافظة (اختياري)</span>
+                <div class="input-wrapper"><input type="text" id="editPCity" placeholder="المحافظة..."></div>
+            </div>
+        </div>
+        <div class="field-box" style="margin-bottom: 10px;">
+            <span class="field-label">Marital Status</span>
+            <div class="input-wrapper">
+                <select id="editPMarital">
+                    <option value="Single">Single</option>
+                    <option value="Married">Married</option>
+                    <option value="Divorced">Divorced</option>
+                    <option value="Widow">Widow</option>
+                </select>
+            </div>
+        </div>
+        <div class="field-box" style="margin-bottom: 10px;">
+            <span class="field-label">Occupation</span>
+            <div class="input-wrapper">
+                <select id="editPJob">
+                    <option value="Employee">Employee</option>
+                    <option value="Free Business">Free Business</option>
+                    <option value="Housewife">Housewife</option>
+                    <option value="Student">Student</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+        </div>
+        <div class="field-box" style="margin-bottom: 16px;">
+            <span class="field-label">Phone Number</span>
+            <div class="input-wrapper"><input type="tel" id="editPPhone"></div>
+        </div>
+
+        <button type="button" class="btn-main" onclick="saveEditedPatient()" style="background: #0d9488; width: 100%;">
+            <i class="fa-solid fa-floppy-disk"></i> حفظ التعديلات
+        </button>
+    </div>
+</div>
+
+<!-- نافذة التاريخ المرضي والأمراض المزمنة -->
+<div id="medHistoryModal" class="modal-overlay" style="display: none;">
+    <div class="modal-body" style="max-width: 500px; text-align: left; direction: ltr; background: #ffffff; border-radius: 14px; padding: 20px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="margin:0; color:#0f172a;"><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> التاريخ المرضي والأمراض المزمنة</h3>
+            <button class="modal-close" onclick="closeMedHistoryModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div style="margin-bottom: 12px; font-weight: 700; font-size: 0.85rem; color: #0f766e;">الأمراض المزمنة الشائعة:</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; direction: rtl; text-align: right;">
+            <label style="font-size: 0.8rem; display:flex; align-items:center; gap:6px;"><input type="checkbox" class="mh-cd" value="HTN (ضغط الدم)"> HTN (ضغط الدم)</label>
+            <label style="font-size: 0.8rem; display:flex; align-items:center; gap:6px;"><input type="checkbox" class="mh-cd" value="DM (السكري)"> DM (السكري)</label>
+            <label style="font-size: 0.8rem; display:flex; align-items:center; gap:6px;"><input type="checkbox" class="mh-cd" value="Asthma (الربو)"> Asthma (الربو)</label>
+            <label style="font-size: 0.8rem; display:flex; align-items:center; gap:6px;"><input type="checkbox" class="mh-cd" value="Heart Disease"> Heart Disease</label>
+        </div>
+
+        <div class="field-box" style="margin-bottom: 10px;">
+            <label style="font-size: 0.8rem; display:flex; align-items:center; gap:6px; margin-bottom:6px;"><input type="checkbox" id="mh-other-check" onchange="toggleOtherInput()"> أمراض أخرى</label>
+            <div class="input-wrapper" id="mh-other-box" style="display: none;"><input type="text" id="mh-cd-other" placeholder="اكتب الأمراض الأخرى..."></div>
+        </div>
+
+        <div class="field-box" style="margin-bottom: 10px;">
+            <span class="field-label">دخول المستشفى السابق (Previous Admissions)</span>
+            <div class="input-wrapper"><input type="text" id="mh-prev-admission"></div>
+        </div>
+        <div class="field-box" style="margin-bottom: 10px;">
+            <span class="field-label">العمليات الجراحية السابقة (Past Surgeries)</span>
+            <div class="input-wrapper"><input type="text" id="mh-past-surgery"></div>
+        </div>
+        <div class="field-box" style="margin-bottom: 10px;">
+            <span class="field-label">التاريخ العائلي (Family History)</span>
+            <div class="input-wrapper"><input type="text" id="mh-family-history"></div>
+        </div>
+        <div class="field-box" style="margin-bottom: 10px;">
+            <span class="field-label">حساسية الأدوية (Drug Allergies)</span>
+            <div class="input-wrapper"><input type="text" id="mh-drug-allergy"></div>
+        </div>
+        <div class="field-box" style="margin-bottom: 10px;">
+            <span class="field-label">الأدوية المزمنة الحالية (Chronic Medications)</span>
+            <div class="input-wrapper"><input type="text" id="mh-chronic-drugs"></div>
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+            <div class="field-box" style="flex: 1; margin-bottom: 0;">
+                <span class="field-label">التدخين</span>
+                <div class="input-wrapper">
+                    <select id="mh-smoking">
+                        <option value="Non-smoker">غير مدخن</option>
+                        <option value="Smoker">مدخن</option>
+                        <option value="Ex-smoker">مدخن سابق</option>
+                    </select>
+                </div>
+            </div>
+            <div class="field-box" style="flex: 1; margin-bottom: 0;">
+                <span class="field-label">الكحول</span>
+                <div class="input-wrapper">
+                    <select id="mh-alcohol">
+                        <option value="Non-drinker">لا يتعاطى</option>
+                        <option value="Drinker">يتعاطى</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="field-box" style="margin-bottom: 16px;">
+            <span class="field-label">ملاحظات إضافية</span>
+            <div class="input-wrapper"><textarea id="mh-notes" rows="2" placeholder="ملاحظات..."></textarea></div>
+        </div>
+
+        <button type="button" class="btn-main" onclick="closeMedHistoryModal()" style="background: #0d9488; width: 100%;">
+            <i class="fa-solid fa-floppy-disk"></i> حفظ وإغلاق
+        </button>
+    </div>
+</div>
+
+<!-- نافذة حاسبة مؤشر كتلة الجسم (BMI) -->
+<div id="bmiCalculatorModal" class="modal-overlay" style="display: none;">
+    <div class="modal-body" style="max-width: 400px; text-align: left; direction: ltr; background: #ffffff; border-radius: 14px; padding: 20px;">
+        <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h3 style="margin:0; color:#0f172a;"><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> حساب مؤشر كتلة الجسم (BMI)</h3>
+            <button class="modal-close" onclick="closeBmiModal()" style="background:none; border:none; font-size:1.2rem; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="field-box" style="margin-bottom: 10px;">
+            <span class="field-label">الوزن (kg)</span>
+            <div class="input-wrapper"><input type="number" id="bmiWeight" placeholder="70" oninput="calculateBmiLive()"></div>
+        </div>
+        <div class="field-box" style="margin-bottom: 14px;">
+            <span class="field-label">الطول (cm)</span>
+            <div class="input-wrapper"><input type="number" id="bmiHeight" placeholder="175" oninput="calculateBmiLive()"></div>
+        </div>
+        <div style="text-align: center; background: #f8fafc; padding: 12px; border-radius: 10px; margin-bottom: 14px;">
+            <span style="font-size: 0.8rem; color: #64748b; display: block;">النتيجة:</span>
+            <div id="bmiScoreDisplay" style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin: 4px 0;">—</div>
+            <div id="bmiBadgeContainer"><span class="bmi-badge" style="background:#f1f5f9; color:#64748b;">أدخل الوزن والطول للحساب</span></div>
+        </div>
+        <button type="button" class="btn-main" onclick="closeBmiModal()" style="background: #0284c7; width: 100%;">حفظ وإغلاق</button>
+    </div>
+</div>
+
+<!-- نافذة الروشتة العلاجية (Modal) -->
 <div id="rxModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 580px; text-align: left; direction: ltr; background: #f8fafc; border-radius: 14px; padding: 15px;">
         <div class="modal-header" style="direction: ltr; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -973,6 +1137,7 @@
     </div>
 </div>
 
+<!-- نافذة معاينة وطباعة التقرير الطبي المستقل -->
 <div id="medicalReportModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 580px; text-align: left; direction: ltr; background: #f8fafc; border-radius: 14px; padding: 15px;">
         <div class="modal-header" style="direction: ltr; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
