@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.42 (Corrected & Complete)
+// Clinic Master System - Cloud Config v17.58
 // ==========================================
 
 const firebaseConfig = {
@@ -17,8 +17,12 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+// تعريف وتصدير الكائنات بصفتها عالمية (Global) لتفادي خطأ الـ auth تماماً
+window.auth = firebase.auth();
+window.db = firebase.firestore();
+
+const auth = window.auth;
+const db = window.db;
 
 const FOUNDER_EMAIL = "musqaqa009@gmail.com"; 
 
@@ -63,7 +67,7 @@ let specialtyConfig = JSON.parse(localStorage.getItem('clinic_specialty_config')
 };
 
 let currentLang = localStorage.getItem('clinic_lang') || 'ar';
-let isDarkMode = localStorage.getItem('clinic_dark_mode'] === 'true';
+let isDarkMode = localStorage.getItem('clinic_dark_mode') === 'true';
 
 const translations = {
     ar: {
@@ -124,7 +128,7 @@ const translations = {
         networkDb: "قاعدة بيانات الشبكة",
         networkDbSub: "المستخدمين وبيانات الدخول",
 
-        footer: "نظام عيادة ماستر المتقدم v17.42",
+        footer: "نظام عيادة ماستر المتقدم v17.58",
 
         patInfoTitle: "المعلومات الشخصية",
         lblPatName: "الاسم الكامل *",
@@ -288,7 +292,7 @@ const translations = {
         networkDb: "Network Database",
         networkDbSub: "Users & credentials",
 
-        footer: "Clinic Master Network v17.42",
+        footer: "Clinic Master Network v17.58",
 
         patInfoTitle: "Personal Information",
         lblPatName: "Full Name *",
