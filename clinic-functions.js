@@ -1,6 +1,6 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.52
-// (الكود الكامل والمحدث: دمج الجد الرابع، التنبيه الذكي للتكرار، حقل المحافظة، وإصلاح الدخول)
+// (الكود المحدث: التحقق الفوري للتكرار، حقل المحافظة، وإصلاح الحفظ)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -94,6 +94,13 @@ function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', save
                 }
             }
         });
+        const nameWarn = document.getElementById('nameDuplicateWarning');
+        if (nameWarn) nameWarn.style.display = 'none';
+        const nameInput = document.getElementById('pName');
+        if (nameInput) {
+            nameInput.style.borderColor = '';
+            nameInput.style.backgroundColor = '';
+        }
     }
 
     const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
@@ -178,8 +185,8 @@ window.addEventListener('popstate', function(event) {
         closeEditPatientModal();
         return;
     }
-    if (document.getElementById('supportModal').style.display === 'flex') {
-        closeSupportModal();
+    if (document.getElementById('supportCustomModal')) {
+        document.getElementById('supportCustomModal').remove();
         return;
     }
     if (document.getElementById('bulkAddDictModal').style.display === 'flex') {
@@ -233,6 +240,31 @@ function toggleDarkMode() {
     isDarkMode = !isDarkMode;
     localStorage.setItem('clinic_dark_mode', isDarkMode);
     applyDarkModeState();
+}
+
+// دالة الفحص الفوري المباشر للتكرار (Inline Validation)
+function checkNameDuplicateLive(inputEl) {
+    const rawName = inputEl.value.trim().toLowerCase();
+    const warningEl = document.getElementById('nameDuplicateWarning');
+    
+    if (!rawName) {
+        if (warningEl) warningEl.style.display = 'none';
+        inputEl.style.borderColor = '';
+        inputEl.style.backgroundColor = '';
+        return;
+    }
+
+    const nameExists = patients.some(p => p && p.name && p.name.trim().toLowerCase() === rawName);
+    
+    if (nameExists) {
+        if (warningEl) warningEl.style.display = 'block';
+        inputEl.style.borderColor = '#ef4444';
+        inputEl.style.backgroundColor = '#fef2f2';
+    } else {
+        if (warningEl) warningEl.style.display = 'none';
+        inputEl.style.borderColor = '#10b981';
+        inputEl.style.backgroundColor = '#f0fdf4';
+    }
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -535,11 +567,34 @@ function executeMandatoryBackup() {
 }
 
 function openSupportModal() {
-    document.getElementById('supportModal').style.display = 'flex';
-}
+    const whatsappPhone = "9647739114548";
+    const telegramUsername = "AAAAMQ";
+    const customMessage = encodeURIComponent("السلام عليكم ورحمة الله مصطفى قيس هل يمكن التواصل معك بخصوص تطبيق عيادتي");
 
-function closeSupportModal() {
-    document.getElementById('supportModal').style.display = 'none';
+    let existingModal = document.getElementById('supportCustomModal');
+    if (existingModal) existingModal.remove();
+
+    const modalDiv = document.createElement('div');
+    modalDiv.id = 'supportCustomModal';
+    modalDiv.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:99995;";
+    
+    modalDiv.innerHTML = `
+        <div style="background:#ffffff; padding:20px; border-radius:16px; width:90%; max-width:350px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.2); font-family:'El Messiri', sans-serif;">
+            <div style="font-size:1.2rem; font-weight:800; color:#0f172a; margin-bottom:8px;"><i class="fa-solid fa-headset" style="color:#0284c7;"></i> الدعم الفني لنظام العيادة</div>
+            <p style="font-size:0.82rem; color:#64748b; margin-bottom:16px;">اختر وسيلة التواصل المفضلة لديك:</p>
+            
+            <a href="https://wa.me/${whatsappPhone}?text=${customMessage}" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:#25d366; color:white; padding:10px; border-radius:10px; text-decoration:none; font-weight:700; margin-bottom:10px; font-size:0.9rem;">
+                <i class="fa-brands fa-whatsapp" style="font-size:1.2rem;"></i> مراسلة عبر الواتساب
+            </a>
+            
+            <a href="https://t.me/${telegramUsername}?text=${customMessage}" target="_blank" style="display:flex; align-items:center; justify-content:center; gap:8px; background:#229ed9; color:white; padding:10px; border-radius:10px; text-decoration:none; font-weight:700; margin-bottom:14px; font-size:0.9rem;">
+                <i class="fa-brands fa-telegram" style="font-size:1.2rem;"></i> مراسلة عبر التليجرام
+            </a>
+            
+            <button onclick="document.getElementById('supportCustomModal').remove()" style="background:#64748b; color:white; border:none; border-radius:8px; padding:6px 16px; font-size:0.8rem; cursor:pointer; font-weight:700;">إغلاق</button>
+        </div>
+    `;
+    document.body.appendChild(modalDiv);
 }
 
 function openActivationScreenForRenewal() {
@@ -1688,7 +1743,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2981,7 +3036,7 @@ function saveNewPatient(e) {
     const rawName = document.getElementById('pName').value.trim();
     const rawCity = document.getElementById('pCity') ? document.getElementById('pCity').value.trim() : '';
 
-    const nameExists = patients.some(p => p.name.toLowerCase() === rawName.toLowerCase());
+    const nameExists = patients.some(p => p && p.name && p.name.trim().toLowerCase() === rawName.toLowerCase());
     if (nameExists) {
         alert('⚠️ تنبيه: هذا الاسم مكرر تماماً! يرجى إضافة اسم الجد الرابع داخل نفس حقل الاسم (مثال: سيف قيس قاسم محمد) لكي يقبل النظام تخزين ملف المريض بنجاح.');
         document.getElementById('pName').focus();
