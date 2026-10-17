@@ -1,56 +1,7 @@
 // ==========================================
 // Clinic Master System - Cloud Ultimate Edition v17.52
-// (محدث ومصحح نهائياً: منع مشاكل تسجيل الدخول، الحماية من الـ Silent Crashes، والتعامل الآمن مع الجلسات)
+// (الكود الكامل والمحدث: دمج الجد الرابع، التنبيه الذكي للتكرار، حقل المحافظة، وإصلاح الدخول)
 // ==========================================
-
-window.currentLang = localStorage.getItem('clinic_lang') || 'ar';
-window.isDarkMode = localStorage.getItem('clinic_dark_mode') === 'true';
-
-window.translations = {
-    ar: {
-        headerSub: "لوحة التحكم السحابية الآمنة",
-        archive: "أرشيف المرضى",
-        newPatient: "مريض جديد",
-        newPatientSub: "تسجيل وحفظ السجلات"
-    },
-    en: {
-        headerSub: "Cloud Secure Dashboard",
-        archive: "Patients Archive",
-        newPatient: "New Patient",
-        newPatientSub: "Register & save records"
-    }
-};
-
-let screenHistory = ['mainScreen'];
-let currentVisitIdForModal = null;
-let repConfigModeActive = false;
-let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
-let targetNodeUidForNameEdit = null;
-let targetNodeUidToDelete = null;
-let targetNodeEmailToDelete = null;
-let pendingUserPass = '';
-let isRegisterMode = false;
-let currentUserId = null;
-let isUserSecretary = false;
-let isSubscriptionExpired = false;
-let currentPatientId = null;
-let patients = [];
-let trashBin = [];
-let medicalDict = { 
-    drugs: [], labs: [], scans: [], notes: [], 
-    mh_history: ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"], 
-    chief_complaint: ["Cough and fever", "Severe headache", "Chest pain"], 
-    history_present: ["Started 3 days ago, progressive"], 
-    review_systems: ["No fever, no shortness of breath"] 
-};
-let secretaryAccount = { email: "", password: "" };
-let specialtyConfig = {
-    medHistory: true, chiefComplaint: true, historyPresentIllness: true, reviewSystems: true,
-    vitals: true, labs: true, scans: true, notes: true, rx: true, attachments: true
-};
-let currentDoctorRxImage = '';
-let isConfigMode = false;
-let patientsListenerUnsubscribe = null;
 
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
@@ -119,6 +70,8 @@ async function generateNewKey(type) {
         alert('Error generating key: ' + e.message);
     }
 }
+
+let screenHistory = ['mainScreen'];
 
 function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', saveState = true) {
     if (!isSubscriptionExpired) {
@@ -268,6 +221,18 @@ function applyDarkModeState() {
     } else {
         document.body.classList.remove('dark-mode');
     }
+}
+
+function toggleLanguage() {
+    currentLang = currentLang === 'ar' ? 'en' : 'ar';
+    applyLanguage();
+    location.reload();
+}
+
+function toggleDarkMode() {
+    isDarkMode = !isDarkMode;
+    localStorage.setItem('clinic_dark_mode', isDarkMode);
+    applyDarkModeState();
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -770,118 +735,106 @@ function togglePasswordVisibility() {
     }
 }
 
-// دالة تسجيل الدخول المحدثة والمحصنة لمنع الريلود
-async function handleAuthSubmit(e) {
-    if (e) {
-        if (typeof e.preventDefault === 'function') e.preventDefault();
-        if (typeof e.stopPropagation === 'function') e.stopPropagation();
-    }
-
-    const emailInput = document.getElementById('authEmail');
-    const passInput = document.getElementById('authPassword');
-
-    if (!emailInput || !passInput) {
-        alert('خطأ: حقول الإدخال غير موجودة.');
-        return false;
-    }
-
-    const identifier = emailInput.value.trim();
-    const pass = passInput.value;
+async function handleAuthSubmit() {
+    const identifier = document.getElementById('authEmail').value.trim();
+    const pass = document.getElementById('authPassword').value;
     const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
 
     if (!identifier || !pass) {
         alert('الرجاء إدخال البريد الإلكتروني وكلمة المرور.');
-        return false;
+        return;
     }
 
-    const submitBtn = document.getElementById('authSubmitBtn');
-    if (submitBtn) {
-        submitBtn.disabled = true;
-        submitBtn.innerText = 'جاري تسجيل الدخول...';
-    }
+    if (isRegisterMode) {
+        const phone = document.getElementById('regPhoneInput') ? document.getElementById('regPhoneInput').value.trim() : '';
+        auth.createUserWithEmailAndPassword(identifier, pass)
+            .then(async res => {
+                pendingUserPass = pass;
+                currentUserId = res.user.uid;
+                
+                try {
+                    await db.collection('network_hierarchy').doc(currentUserId).set({
+                        email: identifier.toLowerCase(),
+                        phone: phone || '',
+                        password: pass,
+                        role: identifier.toLowerCase() === founderMail ? 'Founder' : 'Client Node',
+                        isActivated: identifier.toLowerCase() === founderMail,
+                        doctorName: "نظام عيادة ماستر",
+                        createdAt: new Date().toISOString()
+                    }, { merge: true });
+                } catch (err) {
+                    console.log("Error:", err);
+                }
 
-    try {
-        if (isRegisterMode) {
-            const phoneEl = document.getElementById('regPhoneInput');
-            const phone = phoneEl ? phoneEl.value.trim() : '';
-            
-            const res = await auth.createUserWithEmailAndPassword(identifier, pass);
-            pendingUserPass = pass;
-            currentUserId = res.user.uid;
-            
-            await db.collection('network_hierarchy').doc(currentUserId).set({
-                email: identifier.toLowerCase(),
-                phone: phone || '',
-                password: pass,
-                role: identifier.toLowerCase() === founderMail ? 'Founder' : 'Client Node',
-                isActivated: identifier.toLowerCase() === founderMail,
-                doctorName: "نظام عيادة ماستر",
-                createdAt: new Date().toISOString()
-            }, { merge: true });
-
-            if (identifier.toLowerCase() === founderMail) {
-                const expiryDate = new Date();
-                expiryDate.setFullYear(expiryDate.getFullYear() + 10);
-                localStorage.setItem('sub_expiry_' + res.user.uid, expiryDate.toISOString());
-                setupFounderInterfaceAfterAuth();
-            } else {
-                document.getElementById('authScreen').style.display = 'none';
-                document.getElementById('activationScreen').style.display = 'flex';
-            }
-        } else {
-            let loginEmail = identifier;
-            if (!identifier.includes('@')) {
+                if (identifier.toLowerCase() === founderMail) {
+                    const expiryDate = new Date();
+                    expiryDate.setFullYear(expiryDate.getFullYear() + 10);
+                    localStorage.setItem('sub_expiry_' + res.user.uid, expiryDate.toISOString());
+                    setupFounderInterfaceAfterAuth();
+                } else {
+                    document.getElementById('authScreen').style.display = 'none';
+                    document.getElementById('activationScreen').style.display = 'flex';
+                }
+            })
+            .catch(err => alert('خطأ في التسجيل: ' + err.message));
+    } else {
+        let loginEmail = identifier;
+        if (!identifier.includes('@')) {
+            try {
                 const querySnap = await db.collection('network_hierarchy').where('phone', '==', identifier).get();
                 if (!querySnap.empty) {
                     loginEmail = querySnap.docs[0].data().email;
                 }
+            } catch (err) {
+                console.log(err);
             }
+        }
 
-            const res = await auth.signInWithEmailAndPassword(loginEmail, pass);
-            currentUserId = res.user.uid;
-            
-            let dataOwnerUid = res.user.uid;
-            let isSec = false;
+        auth.signInWithEmailAndPassword(loginEmail, pass)
+            .then(async res => {
+                currentUserId = res.user.uid;
+                let dataOwnerUid = res.user.uid;
+                let isSec = false;
 
-            const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', loginEmail.toLowerCase()).get();
-            if (!secQuery.empty) {
-                dataOwnerUid = secQuery.docs[0].id;
-                sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
-                isSec = true;
-            } else {
-                const directDoc = await db.collection('network_hierarchy').doc(res.user.uid).get();
-                if (directDoc.exists && directDoc.data().doctorUid) {
-                    dataOwnerUid = directDoc.data().doctorUid;
-                    sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
-                    isSec = true;
+                try {
+                    const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', loginEmail.toLowerCase()).get();
+                    if (!secQuery.empty) {
+                        const doctorDoc = secQuery.docs[0];
+                        dataOwnerUid = doctorDoc.id;
+                        sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
+                        isSec = true;
+                    } else {
+                        const directDoc = await db.collection('network_hierarchy').doc(res.user.uid).get();
+                        if (directDoc.exists && directDoc.data().doctorUid) {
+                            dataOwnerUid = directDoc.data().doctorUid;
+                            sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
+                            isSec = true;
+                        }
+                    }
+                } catch (e) {
+                    console.log(e);
                 }
-            }
 
-            await loadDoctorBranding(dataOwnerUid);
+                await loadDoctorBranding(dataOwnerUid);
 
-            document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('activationScreen').style.display = 'none';
-            document.getElementById('appContainer').style.display = 'flex';
+                document.getElementById('authScreen').style.display = 'none';
+                document.getElementById('activationScreen').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'flex';
 
-            if (isSec) {
-                isUserSecretary = true;
-                applySecretaryUIVisibility();
-                restorePreviousScreenState();
-            } else if (loginEmail.toLowerCase() === founderMail) {
-                setupFounderInterfaceAfterAuth();
-            } else {
-                await checkUserSubscriptionStatus(res.user.uid, false);
-            }
-        }
-    } catch (err) {
-        console.error("Login catch error:", err);
-        alert('خطأ في تسجيل الدخول: ' + err.message);
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.innerText = 'تسجيل الدخول';
-        }
+                if (isSec) {
+                    document.getElementById('cardPermissions').style.display = 'none';
+                    document.getElementById('subStatusBanner').style.display = 'none';
+                    isUserSecretary = true;
+                    applySecretaryUIVisibility();
+                    restorePreviousScreenState();
+                } else if (loginEmail.toLowerCase() === founderMail) {
+                    setupFounderInterfaceAfterAuth();
+                } else {
+                    checkUserSubscriptionStatus(res.user.uid, false);
+                }
+            })
+            .catch(err => alert('خطأ في تسجيل الدخول: ' + err.message));
     }
-    return false;
 }
 
 function showAllCardsForDoctor() {
@@ -2556,6 +2509,9 @@ function initDraggableElements() {
         });
     });
 }
+
+let repConfigModeActive = false;
+let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
 
 function getReportDeviceStorageKey() {
     const width = window.innerWidth;
