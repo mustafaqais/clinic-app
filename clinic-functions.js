@@ -770,33 +770,34 @@ function togglePasswordVisibility() {
     }
 }
 
+// دالة تسجيل الدخول المحدثة والمحصنة لمنع الريلود
 async function handleAuthSubmit(e) {
-    if (e && typeof e.preventDefault === 'function') {
-        e.preventDefault();
-    }
-    
-    const emailInputEl = document.getElementById('authEmail');
-    const passInputEl = document.getElementById('authPassword');
-    
-    if (!emailInputEl || !passInputEl) {
-        alert('خطأ في عناصر واجهة تسجيل الدخول.');
-        return;
+    if (e) {
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
     }
 
-    const identifier = emailInputEl.value.trim();
-    const pass = passInputEl.value;
+    const emailInput = document.getElementById('authEmail');
+    const passInput = document.getElementById('authPassword');
+
+    if (!emailInput || !passInput) {
+        alert('خطأ: حقول الإدخال غير موجودة.');
+        return false;
+    }
+
+    const identifier = emailInput.value.trim();
+    const pass = passInput.value;
     const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
 
     if (!identifier || !pass) {
-        alert('الرجاء إدخال البريد الإلكتروني (أو رقم الموبايل) وكلمة المرور.');
-        return;
+        alert('الرجاء إدخال البريد الإلكتروني وكلمة المرور.');
+        return false;
     }
 
     const submitBtn = document.getElementById('authSubmitBtn');
-    const originalBtnText = submitBtn ? submitBtn.innerText : '';
     if (submitBtn) {
-        submitBtn.innerText = 'جاري التحقق وتسجيل الدخول...';
         submitBtn.disabled = true;
+        submitBtn.innerText = 'جاري تسجيل الدخول...';
     }
 
     try {
@@ -808,19 +809,15 @@ async function handleAuthSubmit(e) {
             pendingUserPass = pass;
             currentUserId = res.user.uid;
             
-            try {
-                await db.collection('network_hierarchy').doc(currentUserId).set({
-                    email: identifier.toLowerCase(),
-                    phone: phone || '',
-                    password: pass,
-                    role: identifier.toLowerCase() === founderMail ? 'Founder' : 'Client Node',
-                    isActivated: identifier.toLowerCase() === founderMail,
-                    doctorName: "نظام عيادة ماستر",
-                    createdAt: new Date().toISOString()
-                }, { merge: true });
-            } catch (err) {
-                console.log("Hierarchy save error:", err);
-            }
+            await db.collection('network_hierarchy').doc(currentUserId).set({
+                email: identifier.toLowerCase(),
+                phone: phone || '',
+                password: pass,
+                role: identifier.toLowerCase() === founderMail ? 'Founder' : 'Client Node',
+                isActivated: identifier.toLowerCase() === founderMail,
+                doctorName: "نظام عيادة ماستر",
+                createdAt: new Date().toISOString()
+            }, { merge: true });
 
             if (identifier.toLowerCase() === founderMail) {
                 const expiryDate = new Date();
@@ -834,38 +831,30 @@ async function handleAuthSubmit(e) {
         } else {
             let loginEmail = identifier;
             if (!identifier.includes('@')) {
-                try {
-                    const querySnap = await db.collection('network_hierarchy').where('phone', '==', identifier).get();
-                    if (!querySnap.empty) {
-                        loginEmail = querySnap.docs[0].data().email;
-                    }
-                } catch (err) {
-                    console.log("Phone login resolve error:", err);
+                const querySnap = await db.collection('network_hierarchy').where('phone', '==', identifier).get();
+                if (!querySnap.empty) {
+                    loginEmail = querySnap.docs[0].data().email;
                 }
             }
 
             const res = await auth.signInWithEmailAndPassword(loginEmail, pass);
             currentUserId = res.user.uid;
+            
             let dataOwnerUid = res.user.uid;
             let isSec = false;
 
-            try {
-                const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', loginEmail.toLowerCase()).get();
-                if (!secQuery.empty) {
-                    const doctorDoc = secQuery.docs[0];
-                    dataOwnerUid = doctorDoc.id;
+            const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', loginEmail.toLowerCase()).get();
+            if (!secQuery.empty) {
+                dataOwnerUid = secQuery.docs[0].id;
+                sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
+                isSec = true;
+            } else {
+                const directDoc = await db.collection('network_hierarchy').doc(res.user.uid).get();
+                if (directDoc.exists && directDoc.data().doctorUid) {
+                    dataOwnerUid = directDoc.data().doctorUid;
                     sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
                     isSec = true;
-                } else {
-                    const directDoc = await db.collection('network_hierarchy').doc(res.user.uid).get();
-                    if (directDoc.exists && directDoc.data().doctorUid) {
-                        dataOwnerUid = directDoc.data().doctorUid;
-                        sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
-                        isSec = true;
-                    }
                 }
-            } catch (e) {
-                console.log("Secretary check error:", e);
             }
 
             await loadDoctorBranding(dataOwnerUid);
@@ -875,10 +864,6 @@ async function handleAuthSubmit(e) {
             document.getElementById('appContainer').style.display = 'flex';
 
             if (isSec) {
-                const permCard = document.getElementById('cardPermissions');
-                const subBanner = document.getElementById('subStatusBanner');
-                if (permCard) permCard.style.display = 'none';
-                if (subBanner) subBanner.style.display = 'none';
                 isUserSecretary = true;
                 applySecretaryUIVisibility();
                 restorePreviousScreenState();
@@ -889,14 +874,14 @@ async function handleAuthSubmit(e) {
             }
         }
     } catch (err) {
-        console.error("Auth Error:", err);
-        alert('خطأ في المصادقة: ' + err.message);
-    } finally {
+        console.error("Login catch error:", err);
+        alert('خطأ في تسجيل الدخول: ' + err.message);
         if (submitBtn) {
-            submitBtn.innerText = originalBtnText || 'تسجيل الدخول';
             submitBtn.disabled = false;
+            submitBtn.innerText = 'تسجيل الدخول';
         }
     }
+    return false;
 }
 
 function showAllCardsForDoctor() {
