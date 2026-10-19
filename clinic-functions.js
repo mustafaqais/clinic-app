@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.54 (Modified with Debug Logs)
+// Clinic Master System - Cloud Ultimate Edition v17.54 (Fully Fixed & Optimized)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -111,11 +111,29 @@ function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', save
         }
     }
 
+    // التحكم التام بظهور وإخفاء أزرار التنقل (Back + القائمة الرئيسية)
+    const topNavButtons = document.getElementById('topNavButtons');
+    const backBtn = document.getElementById('backBtn');
+    const mainMenuBtn = document.getElementById('mainMenuBtn');
+
     if (screenId === 'mainScreen') {
-        document.getElementById('backBtn').style.display = 'none';
+        if (topNavButtons) topNavButtons.style.display = 'none';
+        if (backBtn) backBtn.style.display = 'none';
+        if (mainMenuBtn) mainMenuBtn.style.display = 'none';
         screenHistory = ['mainScreen'];
     } else {
-        document.getElementById('backBtn').style.display = 'flex';
+        if (topNavButtons) {
+            topNavButtons.style.display = 'flex';
+            topNavButtons.style.flexDirection = 'column';
+            topNavButtons.style.gap = '6px';
+            topNavButtons.style.position = 'absolute';
+            topNavButtons.style.top = '15px';
+            topNavButtons.style.left = '15px';
+            topNavButtons.style.zIndex = '100';
+        }
+        if (backBtn) backBtn.style.display = 'flex';
+        if (mainMenuBtn) mainMenuBtn.style.display = 'flex';
+
         if (screenHistory[screenHistory.length - 1] !== screenId) {
             screenHistory.push(screenId);
         }
@@ -136,19 +154,33 @@ function goBackScreen() {
 
         const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
 
+        // تحديث ظهور الأزرار بناءً على الشاشة السابقة
+        const topNavButtons = document.getElementById('topNavButtons');
+        const backBtn = document.getElementById('backBtn');
+        const mainMenuBtn = document.getElementById('mainMenuBtn');
+
         if (prevScreen === 'mainScreen') {
-            document.getElementById('backBtn').style.display = 'none';
+            if (topNavButtons) topNavButtons.style.display = 'none';
+            if (backBtn) backBtn.style.display = 'none';
+            if (mainMenuBtn) mainMenuBtn.style.display = 'none';
+
             document.getElementById('headerTitle').innerText = customBrandName;
             document.getElementById('headerSub').innerText = translations[currentLang].headerSub;
             sessionStorage.setItem('header_title', customBrandName);
             sessionStorage.setItem('header_sub', translations[currentLang].headerSub);
             sessionStorage.removeItem('current_patient_id');
             currentPatientId = null;
-        } else if (prevScreen === 'archiveScreen') {
-            document.getElementById('headerTitle').innerText = translations[currentLang].archive;
-            document.getElementById('headerSub').innerText = 'Advanced search, filters & records';
-            sessionStorage.removeItem('current_patient_id');
-            currentPatientId = null;
+        } else {
+            if (topNavButtons) topNavButtons.style.display = 'flex';
+            if (backBtn) backBtn.style.display = 'flex';
+            if (mainMenuBtn) mainMenuBtn.style.display = 'flex';
+
+            if (prevScreen === 'archiveScreen') {
+                document.getElementById('headerTitle').innerText = translations[currentLang].archive;
+                document.getElementById('headerSub').innerText = 'Advanced search, filters & records';
+                sessionStorage.removeItem('current_patient_id');
+                currentPatientId = null;
+            }
         }
     } else {
         showMainMenu();
@@ -249,13 +281,11 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     auth.onAuthStateChanged(async user => {
-        console.log("1. Auth state changed fired. User:", user ? user.email : "No user");
         const activScreen = document.getElementById('activationScreen');
         const appCont = document.getElementById('appContainer');
         const authScreen = document.getElementById('authScreen');
 
         if (user) {
-            console.log("2. User is logged in, starting data load...");
             currentUserId = user.uid;
             let dataOwnerUid = user.uid;
             isUserSecretary = false;
@@ -353,7 +383,6 @@ window.addEventListener("DOMContentLoaded", () => {
                 checkUserSubscriptionStatus(user.uid, isUserSecretary);
             }
         } else {
-            console.log("3. No user logged in, showing auth screen.");
             if (patientsListenerUnsubscribe) patientsListenerUnsubscribe();
             currentUserId = null;
             isUserSecretary = false;
