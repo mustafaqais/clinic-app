@@ -283,7 +283,6 @@
         <div class="activ-title" id="authTitle">User Login</div>
         <div class="activ-sub" id="authSubText">تسجيل الدخول إلى نظام العيادة السحابي</div>
 
-        <!-- تم تحديث الـ onsubmit هنا لتشغيل دالة handleAuthSubmit مباشرة -->
         <form id="authForm" class="auth-form" onsubmit="handleAuthSubmit(event); return false;">
             <div class="field-box" style="text-align: left; margin-bottom: 8px;">
                 <span class="field-label" id="lblEmail">البريد الإلكتروني / رقم الموبايل</span>
@@ -325,10 +324,17 @@
     </div>
 
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column; overflow: hidden;">
-        <div class="header">
-            <button id="backBtn" class="back-btn" onclick="goBackScreen()" style="display: none;">
-                <i class="fa-solid fa-arrow-left"></i> <span id="txtBack">Back</span>
-            </button>
+        <div class="header" style="position: relative;">
+            
+            <!-- أزرار التنقل العلوية (Back + زر القائمة الرئيسية الجديد) -->
+            <div id="topNavButtons" style="display: none; flex-direction: column; gap: 6px; position: absolute; top: 15px; left: 15px; z-index: 100;">
+                <button id="backBtn" class="back-btn" onclick="goBackScreen()" style="display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 8px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; font-weight: 700;">
+                    <i class="fa-solid fa-arrow-left"></i> <span id="txtBack">Back</span>
+                </button>
+                <button id="mainMenuBtn" onclick="showMainMenu()" style="display: flex; align-items: center; gap: 5px; background: #0d9488; color: #fff; border: none; border-radius: 8px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; font-weight: 700; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+                    <i class="fa-solid fa-house"></i> القائمة
+                </button>
+            </div>
 
             <div class="menu-dropdown-container">
                 <button class="hamburger-btn" onclick="toggleDropdownMenu(event)" title="Menu">
@@ -1241,7 +1247,6 @@
 <script>eruda.init();</script>
 
 <script>
-    // إضافة حماية أمان إضافية لضمان عدم ظهور خطأ handleAuthSubmit حتى لو تأخر الملف الخارجي
     if (typeof window.handleAuthSubmit !== 'function') {
         window.handleAuthSubmit = function(event) {
             if (event) event.preventDefault();
@@ -1266,7 +1271,7 @@
 
         const modalDiv = document.createElement('div');
         modalDiv.id = 'supportCustomModal';
-        modalDiv.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:99999;";
+        modalDiv.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:99995;";
         
         modalDiv.innerHTML = `
             <div style="background:#ffffff; padding:20px; border-radius:16px; width:90%; max-width:350px; text-align:center; box-shadow:0 10px 25px rgba(0,0,0,0.2); font-family:'El Messiri', sans-serif;">
