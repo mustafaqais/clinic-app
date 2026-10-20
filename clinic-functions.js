@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.58 (Optimized & Fixed Login)
+// Clinic Master System - Cloud Ultimate Edition v17.59 (Optimized & Fixed Report Dragging)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1113,7 +1113,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.58",
+        version: "17.59",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2709,14 +2709,14 @@ function saveRepLayoutPositions() {
     boxes.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-            const leftPct = (el.offsetLeft / cWidth) * 100;
-            const topPct = (el.offsetTop / cHeight) * 100;
-            const widthPct = (el.offsetWidth / cWidth) * 100;
+            const leftPx = el.offsetLeft;
+            const topPx = el.offsetTop;
+            const widthPx = el.offsetWidth;
 
             positions[id] = {
-                top: topPct + '%',
-                left: leftPct + '%',
-                width: widthPct + '%'
+                top: ((topPx / cHeight) * 100) + '%',
+                left: ((leftPx / cWidth) * 100) + '%',
+                width: ((widthPx / cWidth) * 100) + '%'
             };
         }
     });
@@ -2791,7 +2791,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const draggableBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
     let activeBox = null;
-    let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
+    let startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
 
     draggableBoxes.forEach(box => {
         box.style.touchAction = 'none';
@@ -2803,68 +2803,104 @@ document.addEventListener('DOMContentLoaded', () => {
             startX = e.clientX;
             startY = e.clientY;
 
-            const cWidth = container.clientWidth;
-            const cHeight = container.clientHeight;
+            const rect = box.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            initialLeft = rect.left - containerRect.left;
+            initialTop = rect.top - containerRect.top;
 
-            initialLeftPct = (box.offsetLeft / cWidth) * 100;
-            initialTopPct = (box.offsetTop / cHeight) * 100;
+            box.style.left = initialLeft + 'px';
+            box.style.top = initialTop + 'px';
+            box.style.right = 'auto';
+            box.style.transform = 'none';
 
             e.preventDefault();
             e.stopPropagation();
         });
+    });
 
-        window.addEventListener('mousemove', (e) => {
-            if (!activeBox || !container) return;
-            let dx = e.clientX - startX;
-            let dy = e.clientY - startY;
+    window.addEventListener('mousemove', (e) => {
+        if (!activeBox || !container || !repConfigModeActive) return;
+        
+        let dx = e.clientX - startX;
+        let dy = e.clientY - startY;
 
-            const cWidth = container.clientWidth;
-            const cHeight = container.clientHeight;
+        let newLeft = initialLeft + dx;
+        let newTop = initialTop + dy;
 
-            let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
-            let newTopPct = initialTopPct + (dy / cHeight) * 100;
+        if (newLeft < 0) newLeft = 0;
+        if (newTop < 0) newTop = 0;
 
-            activeBox.style.left = newLeftPct + '%';
-            activeBox.style.top = newTopPct + '%';
-        });
+        activeBox.style.left = newLeft + 'px';
+        activeBox.style.top = newTop + 'px';
+    });
 
-        window.addEventListener('mouseup', () => {
-            if (activeBox) {
-                activeBox = null;
+    window.addEventListener('mouseup', () => {
+        if (activeBox) {
+            const container = document.getElementById('repCanvasContainer');
+            if (container) {
+                const cWidth = container.clientWidth;
+                const cHeight = container.clientHeight;
+                const leftPx = parseFloat(activeBox.style.left) || 0;
+                const topPx = parseFloat(activeBox.style.top) || 0;
+
+                activeBox.style.left = ((leftPx / cWidth) * 100) + '%';
+                activeBox.style.top = ((topPx / cHeight) * 100) + '%';
             }
-        });
+            activeBox = null;
+        }
+    });
 
+    draggableBoxes.forEach(box => {
         box.addEventListener('touchstart', (e) => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             if (e.touches.length === 1 && container) {
                 activeBox = box;
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
-                const cWidth = container.clientWidth;
-                const cHeight = container.clientHeight;
-                initialLeftPct = (box.offsetLeft / cWidth) * 100;
-                initialTopPct = (box.offsetTop / cHeight) * 100;
+
+                const rect = box.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                
+                initialLeft = rect.left - containerRect.left;
+                initialTop = rect.top - containerRect.top;
+
+                box.style.left = initialLeft + 'px';
+                box.style.top = initialTop + 'px';
+                box.style.right = 'auto';
+                box.style.transform = 'none';
+
                 e.stopPropagation();
             }
         }, { passive: true });
 
         box.addEventListener('touchmove', (e) => {
-            if (!activeBox || !container) return;
+            if (!activeBox || !container || !repConfigModeActive) return;
             if (e.touches.length === 1) {
                 let dx = e.touches[0].clientX - startX;
                 let dy = e.touches[0].clientY - startY;
-                const cWidth = container.clientWidth;
-                const cHeight = container.clientHeight;
-                let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
-                let newTopPct = initialTopPct + (dy / cHeight) * 100;
-                activeBox.style.left = newLeftPct + '%';
-                activeBox.style.top = newTopPct + '%';
+
+                let newLeft = initialLeft + dx;
+                let newTop = initialTop + dy;
+
+                activeBox.style.left = newLeft + 'px';
+                activeBox.style.top = newTop + 'px';
                 e.preventDefault();
             }
         }, { passive: false });
 
         box.addEventListener('touchend', () => {
             if (activeBox) {
+                const container = document.getElementById('repCanvasContainer');
+                if (container) {
+                    const cWidth = container.clientWidth;
+                    const cHeight = container.clientHeight;
+                    const leftPx = parseFloat(activeBox.style.left) || 0;
+                    const topPx = parseFloat(activeBox.style.top) || 0;
+
+                    activeBox.style.left = ((leftPx / cWidth) * 100) + '%';
+                    activeBox.style.top = ((topPx / cHeight) * 100) + '%';
+                }
                 activeBox = null;
             }
         });
