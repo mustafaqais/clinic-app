@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.57 (Optimized Archive & Clean)
+// Clinic Master System - Cloud Ultimate Edition v17.58 (Optimized & Fixed Login)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -840,7 +840,7 @@ async function handleAuthSubmit() {
                         }
                     }
                 } catch (e) {
-                    console.log(e);
+                    console.log("Auth Hierarchy check warning:", e);
                 }
 
                 await loadDoctorBranding(dataOwnerUid);
@@ -861,7 +861,10 @@ async function handleAuthSubmit() {
                     checkUserSubscriptionStatus(res.user.uid, false);
                 }
             })
-            .catch(err => alert('خطأ في تسجيل الدخول: ' + err.message));
+            .catch(err => {
+                console.error("Login error details:", err);
+                alert('خطأ في تسجيل الدخول: تأكد من صحة البريد الإلكتروني وكلمة المرور أو اتصال الإنترنت.');
+            });
     }
 }
 window.handleAuthSubmit = handleAuthSubmit;
@@ -1110,7 +1113,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.57",
+        version: "17.58",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1717,7 +1720,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \'\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2782,7 +2785,6 @@ function printMedicalReportOnly(visitId) {
     }, 400);
 }
 
-// التحديث الجديد لدعم السحب بالماوس (Desktop) واللمس (Touch)
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('repCanvasContainer');
     if (!container) return;
@@ -2795,7 +2797,6 @@ document.addEventListener('DOMContentLoaded', () => {
         box.style.touchAction = 'none';
         box.style.cursor = 'move';
 
-        // 1. دعم الماوس (للحاسبة Desktop)
         box.addEventListener('mousedown', (e) => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             activeBox = box;
@@ -2833,7 +2834,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // 2. دعم اللمس (للهواتف والتابلت Touch)
         box.addEventListener('touchstart', (e) => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             if (e.touches.length === 1 && container) {
