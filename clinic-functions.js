@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.54 (Fully Fixed & Optimized)
+// Clinic Master System - Cloud Ultimate Edition v17.57 (Optimized Archive & Clean)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -111,7 +111,6 @@ function navigateTo(screenId, title = null, sub = 'Cloud Secure Dashboard', save
         }
     }
 
-    // التحكم التام بظهور وإخفاء أزرار التنقل (Back + القائمة الرئيسية)
     const topNavButtons = document.getElementById('topNavButtons');
     const backBtn = document.getElementById('backBtn');
     const mainMenuBtn = document.getElementById('mainMenuBtn');
@@ -153,8 +152,6 @@ function goBackScreen() {
         sessionStorage.setItem('current_screen', prevScreen);
 
         const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
-
-        // تحديث ظهور الأزرار بناءً على الشاشة السابقة
         const topNavButtons = document.getElementById('topNavButtons');
         const backBtn = document.getElementById('backBtn');
         const mainMenuBtn = document.getElementById('mainMenuBtn');
@@ -1113,7 +1110,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.54",
+        version: "17.57",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2968,7 +2965,7 @@ function removeDictTerm(category, index) {
     let dictKey = category;
     if (category === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (category === 'historyPresentIllness') dictKey = 'history_present';
-    else if (cat === 'reviewSystems') dictKey = 'review_systems';
+    else if (category === 'reviewSystems') dictKey = 'review_systems';
 
     if (medicalDict[dictKey]) {
         medicalDict[dictKey].splice(index, 1);
@@ -3094,12 +3091,12 @@ function renderPatientsList(list) {
     container.innerHTML = list.length === 0 
         ? '<p style="text-align:center; color:#64748b;">No matching patients found.</p>'
         : list.map(p => 
-            '<div class="patient-card" onclick="openMedicalRecord(' + p.id + ')">' +
-            '<div class="patient-info">' +
-            '<h4>' + p.name + (p.city ? ' <span style="font-size:0.75rem; color:#0d9488; font-weight:normal;">(' + p.city + ')</span>' : '') + '</h4>' +
-            '<p><i class="fa-solid fa-phone"></i> ' + p.phone + ' | Age: ' + p.age + '</p>' +
+            '<div class="patient-card" onclick="openMedicalRecord(' + p.id + ')" style="padding: 6px 10px !important; margin-bottom: 3px !important; min-height: 40px; display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer;">' +
+            '<div class="patient-info" style="display: flex; align-items: center; gap: 8px; overflow: hidden;">' +
+            '<h4 style="margin: 0; font-size: 0.82rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">' + p.name + '</h4>' +
+            '<p style="margin: 0; font-size: 0.68rem; color: #64748b; white-space: nowrap;">' + (p.city ? '(' + p.city + ') ' : '') + '<i class="fa-solid fa-phone" style="font-size:0.6rem;"></i> ' + p.phone + ' | Age: ' + p.age + '</p>' +
             '</div>' +
-            '<span class="badge-gender ' + (p.gender === 'Female' ? 'gender-female' : 'gender-male') + '">' + (p.gender || 'N/A') + '</span>' +
+            '<span class="badge-gender ' + (p.gender === 'Female' ? 'gender-female' : 'gender-male') + '" style="font-size: 0.62rem; padding: 1px 6px; border-radius: 4px; white-space: nowrap;">' + (p.gender || 'N/A') + '</span>' +
             '</div>'
         ).join('');
 }
