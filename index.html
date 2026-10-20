@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.55</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.56</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -91,47 +91,45 @@
             border: none;
         }
 
-        /* --- تعديل وتصغير بطاقات أرشيف المرضى (Compact Patient Cards) --- */
+        /* --- تصميم مكثف للغاية لبطاقات أرشيف المرضى لعرض أقصى عدد ممكن --- */
         #patientsList {
             display: flex;
             flex-direction: column;
-            gap: 6px !important; /* تقليل المسافة بين البطاقات */
+            gap: 4px !important; 
             padding-bottom: 20px;
         }
         
         .patient-card, #patientsList > div {
-            padding: 8px 12px !important; /* تصغير الهوامش الداخلية للكارد */
+            padding: 6px 10px !important; 
             margin-bottom: 0 !important;
-            border-radius: 10px !important;
+            border-radius: 8px !important;
             background: #ffffff;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
             border: 1px solid #e2e8f0;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            transition: all 0.2s ease;
+            min-height: 42px;
         }
         .patient-card:hover, #patientsList > div:hover {
             border-color: #0d9488;
             background: #f8fafc;
         }
-        /* ضبط حجم خط أسماء المرضى والتفاصيل لكي يعرض أكبر عدد */
         .patient-card h3, #patientsList > div h3, .patient-name {
-            font-size: 0.92rem !important;
+            font-size: 0.84rem !important;
             font-weight: 700 !important;
             color: #0f172a !important;
-            margin: 0 0 2px 0 !important;
+            margin: 0 0 1px 0 !important;
         }
         .patient-card p, #patientsList > div p, .patient-meta {
-            font-size: 0.72rem !important;
+            font-size: 0.65rem !important;
             color: #64748b !important;
             margin: 0 !important;
         }
-        /* تصغير شارات النوع (Male/Female) لتأخذ مساحة أقل */
         .patient-card .badge, #patientsList > div .badge, .gender-badge {
-            padding: 2px 8px !important;
-            font-size: 0.68rem !important;
-            border-radius: 6px !important;
+            padding: 1px 6px !important;
+            font-size: 0.62rem !important;
+            border-radius: 4px !important;
         }
         /* ------------------------------------------------------------- */
         
@@ -312,7 +310,7 @@
             }
 
             body.is-printing-rx-only .rx-bg-img,
-            body.is-printing-report-only .rx-bg-img {
+            body.is-printing-report-only .rep-bg-img {
                 display: block !important;
                 visibility: visible !important;
                 position: absolute !important;
@@ -973,7 +971,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.55</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.56</div>
     </div>
 </div>
 
@@ -1299,7 +1297,7 @@
 </div>
 
 <script src="config.js"></script>
-<script src="clinic-functions.js?v=17.55"></script>
+<script src="clinic-functions.js?v=17.56"></script>
 
 <script src="print-core.js"></script>
 <script>
@@ -1320,9 +1318,6 @@
     document.body.appendChild(script1);
     document.body.appendChild(script2);
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-<script>eruda.init();</script>
 
 <script>
     if (typeof window.handleAuthSubmit !== 'function') {
@@ -1375,7 +1370,7 @@
         document.getElementById('activationScreen').style.display = 'flex';
     };
 
-    window.cancelRetention = function() {
+    window.cancelRenewal = function() {
         document.getElementById('activationScreen').style.display = 'none';
         document.getElementById('mainScreen').style.display = 'block';
     };
