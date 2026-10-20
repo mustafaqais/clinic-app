@@ -1717,7 +1717,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \'\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2782,55 +2782,58 @@ function printMedicalReportOnly(visitId) {
     }, 400);
 }
 
+// التحديث الجديد لدعم السحب بالماوس (Desktop) واللمس (Touch)
 document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('repCanvasContainer');
+    if (!container) return;
+
     const draggableBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
-    const container = document.getElementById('repCanvasContainer');
 
     draggableBoxes.forEach(box => {
         box.style.touchAction = 'none';
+        box.style.cursor = 'move';
 
-        box.addEventListener('pointerdown', (e) => {
+        // 1. دعم الماوس (للحاسبة Desktop)
+        box.addEventListener('mousedown', (e) => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             activeBox = box;
             startX = e.clientX;
             startY = e.clientY;
-            
+
             const cWidth = container.clientWidth;
             const cHeight = container.clientHeight;
-            
+
             initialLeftPct = (box.offsetLeft / cWidth) * 100;
             initialTopPct = (box.offsetTop / cHeight) * 100;
-            
-            box.setPointerCapture(e.pointerId);
+
+            e.preventDefault();
             e.stopPropagation();
         });
 
-        box.addEventListener('pointermove', (e) => {
-            if (!activeBox || activeBox !== box || !container) return;
+        window.addEventListener('mousemove', (e) => {
+            if (!activeBox || !container) return;
             let dx = e.clientX - startX;
             let dy = e.clientY - startY;
-            
+
             const cWidth = container.clientWidth;
             const cHeight = container.clientHeight;
 
             let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
             let newTopPct = initialTopPct + (dy / cHeight) * 100;
 
-            box.style.left = newLeftPct + '%';
-            box.style.top = newTopPct + '%';
+            activeBox.style.left = newLeftPct + '%';
+            activeBox.style.top = newTopPct + '%';
         });
 
-        box.addEventListener('pointerup', (e) => {
-            if (activeBox === box) {
-                if (box.hasPointerCapture(e.pointerId)) {
-                    box.releasePointerCapture(e.pointerId);
-                }
+        window.addEventListener('mouseup', () => {
+            if (activeBox) {
                 activeBox = null;
             }
         });
 
+        // 2. دعم اللمس (للهواتف والتابلت Touch)
         box.addEventListener('touchstart', (e) => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             if (e.touches.length === 1 && container) {
@@ -2846,7 +2849,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { passive: true });
 
         box.addEventListener('touchmove', (e) => {
-            if (!activeBox || activeBox !== box || !container) return;
+            if (!activeBox || !container) return;
             if (e.touches.length === 1) {
                 let dx = e.touches[0].clientX - startX;
                 let dy = e.touches[0].clientY - startY;
@@ -2854,14 +2857,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const cHeight = container.clientHeight;
                 let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
                 let newTopPct = initialTopPct + (dy / cHeight) * 100;
-                box.style.left = newLeftPct + '%';
-                box.style.top = newTopPct + '%';
+                activeBox.style.left = newLeftPct + '%';
+                activeBox.style.top = newTopPct + '%';
                 e.preventDefault();
             }
         }, { passive: false });
 
-        box.addEventListener('touchend', (e) => {
-            if (activeBox === box) {
+        box.addEventListener('touchend', () => {
+            if (activeBox) {
                 activeBox = null;
             }
         });
