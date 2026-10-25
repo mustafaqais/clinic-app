@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.63 (Scanner Protocol Final)
+// Clinic Master System - Cloud Ultimate Edition v17.64 (One-Click Scan Final)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1104,7 +1104,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.63",
+        version: "17.64",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1285,13 +1285,13 @@ function saveRxTemplateImage() {
 }
 
 // ==========================================
-// الدالة النهائية والمحدثة لسحب السكانر (بمهلة 7 ثوانٍ لضمان الحفظ الكامل)
+// الدالة النهائية والمحدثة لسحب السكانر بضغطة زر واحدة صامتة وسريعة
 // ==========================================
 async function scanFromDesktopScanner(visitId) {
-    // 1. إطلاق أمر تشغيل السكانر التلقائي عبر بروتوكول ويندوز المسجل
+    // 1. إطلاق أمر السحب عبر بروتوكول الويندوز لتشغيل ملف الـ vbs في الخلفية تلقائياً
     window.location.href = "clinicscan://";
 
-    // 2. مهلة 7 ثوانٍ لضمان إتمام سحب الورقة وحفظ الصورة بالكامل
+    // 2. الانتظار لثوانٍ معدودة ريثما تكتمل عملية السحب والحفظ، ثم جلب الصورة وإدراجها ذاتياً
     setTimeout(async () => {
         try {
             const localScanPath = "file:///C:/ClinicScans/scan_temp.jpg?t=" + Date.now();
@@ -1312,7 +1312,7 @@ async function scanFromDesktopScanner(visitId) {
 
                 if (!visit.attachments) visit.attachments = [];
                 
-                // تخزين الصورة نهائياً في ملف المريض وقاعدة البيانات
+                // 3. تخزين الصورة المسحوبة فوراً في ملف المريض وقاعدة البيانات
                 visit.attachments.push({ 
                     name: "Scan_" + Date.now() + ".jpg", 
                     dataUrl: base64data 
@@ -1320,16 +1320,15 @@ async function scanFromDesktopScanner(visitId) {
 
                 savePatientToCloudAndLocal(patient);
                 renderVisits(patient.visits, false);
-                alert("تم سحب وتخزين المستند في ملف المريض بنجاح تام!");
             };
             
             reader.readAsDataURL(blob);
 
         } catch (err) {
             console.error(err);
-            alert("تنبيه: تأكد من وضع الورقة في السكانر وإتمام عملية السحب، ثم حاول مرة أخرى.");
+            alert("تنبيه: تأكد من وضع الورقة في السكانر، ثم حاول مرة أخرى.");
         }
-    }, 7000); 
+    }, 5000); // مهلة 5 ثوانٍ كافية لتنفيذ الحفظ في الخلفية
 }
 
 function openNetworkHierarchy() {
@@ -1633,7 +1632,7 @@ function handleLiveInput(textarea, category, visitId) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
