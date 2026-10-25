@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.56 (Optimized & Cleaned)
+// Clinic Master System - Cloud Ultimate Edition v17.56 (Optimized & Cleaned + Local Agent Printer Integration)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1626,7 +1626,7 @@ function handleLiveInput(textarea, category, visitId) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1718,7 +1718,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2286,104 +2286,54 @@ function injectPrintStyle(type = 'rx') {
     document.head.appendChild(link);
 }
 
-function printPrescriptionDirectly() {
-    const isMobile = window.innerWidth <= 768;
+// ---------------------------------------------------------------------------
+// التعديل الجذري: إرسال الروشتة مباشرة إلى الوكيل المحلي (Local Agent) على البورت 5000
+// ---------------------------------------------------------------------------
+async function printPrescriptionDirectly() {
+    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+    const patientName = patient ? patient.name : "مريض غير معروف";
+    
+    // جمع النص الموجود في خانة الأدوية أو الروشتة الحالية
+    const treatmentTextEl = document.getElementById('rxDragTreatmentText');
+    const treatmentContent = treatmentTextEl ? treatmentTextEl.innerText : "لا توجد تفاصيل أدوية مسجلة.";
 
-    if (isMobile) {
-        isConfigMode = false;
-        document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
-        updateConfigModeUI();
+    const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "عيادة الأسنان التخصصية";
 
-        const container = document.getElementById('rxCanvasContainer');
-        if (!container) return;
+    const printPayload = 
+`----------------------------------------
+       ${customBrandName}
+----------------------------------------
+اسم المريض: ${patientName}
+التاريخ والوقت: ${new Date().toLocaleString('ar-IQ')}
+----------------------------------------
+الوصـفة الطبية (Rx):
+${treatmentContent}
+----------------------------------------
+ملاحظة: هذه الوصفة صادرة إلكترونياً
+`;
 
-        let bgImg = container.querySelector('.rx-bg-img');
-        let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
-        
-        if (!bgImg && savedRxImg) {
-            bgImg = document.createElement('img');
-            bgImg.src = savedRxImg;
-            bgImg.className = 'rx-bg-img';
-            container.insertBefore(bgImg, container.firstChild);
-        } else if (bgImg && savedRxImg) {
-            bgImg.src = savedRxImg;
-            bgImg.style.display = 'block';
-        }
+    try {
+        console.log("جاري إرسال أمر الطباعة إلى الحاسوب المحلي عبر Local Agent...");
 
-        const controls = container.querySelectorAll('.box-font-controls');
-        controls.forEach(c => c.style.display = 'none');
-
-        const reportModal = document.getElementById('medicalReportModal');
-        let reportWasOpen = false;
-        if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
-            reportModal.style.display = 'none';
-            reportWasOpen = true;
-        }
-
-        html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
-            const imgData = canvas.toDataURL('image/jpeg', 0.90);
-            
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write('<html><head><title>Print Prescription</title><style>body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #fff; display: flex; justify-content: center; align-items: center; } img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; } @page { size: auto; margin: 0; }</style></head><body><img src="' + imgData + '" onload="window.print(); window.close();" /></body></html>');
-            printWindow.document.close();
-
-            controls.forEach(c => c.style.display = '');
-            if (reportWasOpen && reportModal) {
-                reportModal.style.display = 'flex';
-            }
-        }).catch(err => {
-            console.error("Mobile print canvas error:", err);
-            alert("تعذر إنشاء صورة الطباعة للموبايل.");
-            controls.forEach(c => c.style.display = '');
+        const response = await fetch('http://localhost:5000/print', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain; charset=utf-8'
+            },
+            body: printPayload
         });
 
-    } else {
-        injectPrintStyle('rx');
-
-        isConfigMode = false;
-        document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
-        updateConfigModeUI();
-
-        const container = document.getElementById('rxCanvasContainer');
-        if (!container) return;
-
-        let bgImg = container.querySelector('.rx-bg-img');
-        let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
-        
-        if (!bgImg && savedRxImg) {
-            bgImg = document.createElement('img');
-            bgImg.src = savedRxImg;
-            bgImg.className = 'rx-bg-img';
-            container.insertBefore(bgImg, container.firstChild);
-        } else if (bgImg && savedRxImg) {
-            bgImg.src = savedRxImg;
-            bgImg.style.display = 'block';
+        if (!response.ok) {
+            throw new Error(`خطأ في الاتصال بالخادم المحلي: ${response.statusText}`);
         }
 
-        const controls = container.querySelectorAll('.box-font-controls');
-        controls.forEach(c => c.style.display = 'none');
-        
-        document.body.classList.add('is-printing-rx-only');
-        document.body.classList.remove('is-printing-report-only');
-        
-        const reportModal = document.getElementById('medicalReportModal');
-        let reportWasOpen = false;
-        if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
-            reportModal.style.display = 'none';
-            reportWasOpen = true;
-        }
+        const result = await response.json();
+        console.log("استجابة الوكيل المحلي:", result);
+        alert("تم إرسال الوصفة الطبية إلى الطابعة بنجاح عبر الـ Local Agent!");
 
-        setTimeout(() => {
-            window.print();
-        }, 400);
-
-        setTimeout(() => {
-            document.body.classList.remove('is-printing-rx-only');
-            controls.forEach(c => c.style.display = '');
-            if (reportWasOpen && reportModal) {
-                reportModal.style.display = 'flex';
-            }
-        }, 1500);
+    } catch (error) {
+        console.error("خطأ في الطباعة المحلية:", error);
+        alert("فشلت عملية الطباعة! تأكد من أن تطبيق Local Agent يعمل على الحاسوب (Port 5000).");
     }
 }
 
