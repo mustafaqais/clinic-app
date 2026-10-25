@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.61 (Fully Debugged & Optimized)
+// Clinic Master System - Cloud Ultimate Edition v17.62 (Fully Debugged & Optimized)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1104,7 +1104,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.61",
+        version: "17.62",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
