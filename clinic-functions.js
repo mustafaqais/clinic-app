@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.64 (One-Click Scan Final)
+// Clinic Master System - Cloud Ultimate Edition v17.56 (Optimized & Cleaned)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1104,7 +1104,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.64",
+        version: "17.56",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1284,14 +1284,9 @@ function saveRxTemplateImage() {
     }
 }
 
-// ==========================================
-// الدالة النهائية والمحدثة لسحب السكانر بضغطة زر واحدة صامتة وسريعة
-// ==========================================
 async function scanFromDesktopScanner(visitId) {
-    // 1. إطلاق أمر السحب عبر بروتوكول الويندوز لتشغيل ملف الـ vbs في الخلفية تلقائياً
     window.location.href = "clinicscan://";
 
-    // 2. الانتظار لثوانٍ معدودة ريثما تكتمل عملية السحب والحفظ، ثم جلب الصورة وإدراجها ذاتياً
     setTimeout(async () => {
         try {
             const localScanPath = "file:///C:/ClinicScans/scan_temp.jpg?t=" + Date.now();
@@ -1312,7 +1307,6 @@ async function scanFromDesktopScanner(visitId) {
 
                 if (!visit.attachments) visit.attachments = [];
                 
-                // 3. تخزين الصورة المسحوبة فوراً في ملف المريض وقاعدة البيانات
                 visit.attachments.push({ 
                     name: "Scan_" + Date.now() + ".jpg", 
                     dataUrl: base64data 
@@ -1328,7 +1322,7 @@ async function scanFromDesktopScanner(visitId) {
             console.error(err);
             alert("تنبيه: تأكد من وضع الورقة في السكانر، ثم حاول مرة أخرى.");
         }
-    }, 5000); // مهلة 5 ثوانٍ كافية لتنفيذ الحفظ في الخلفية
+    }, 5000);
 }
 
 function openNetworkHierarchy() {
@@ -1632,7 +1626,7 @@ function handleLiveInput(textarea, category, visitId) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2096,19 +2090,19 @@ function formatTreatmentForPrintOrView(rawText) {
     
     let lines = rawText.split('\n').filter(line => line.trim() !== '');
     
-    let htmlOutput = `<div class="rx-rx-title" style="color: #b91c1c; font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.4rem; margin-bottom: 6px; text-align: left; direction: ltr;">Rx</div>`;
-    htmlOutput += `<div class="rx-treatment-list" style="text-align: left; direction: ltr;">`;
+    let htmlOutput = '<div class="rx-rx-title" style="color: #b91c1c; font-family: \'Playfair Display\', serif; font-weight: 900; font-size: 1.4rem; margin-bottom: 6px; text-align: left; direction: ltr;">Rx</div>';
+    htmlOutput += '<div class="rx-treatment-list" style="text-align: left; direction: ltr;">';
     
     let counter = 1;
     lines.forEach(line => {
         let cleanLine = line.replace(/^\d+[\.\-\)]\s*/, '').trim();
         if (cleanLine) {
-            htmlOutput += `<div style="margin-bottom: 4px; font-weight: 700; color: #000000; font-size: 1.05rem;">${counter}. ${cleanLine}</div>`;
+            htmlOutput += '<div style="margin-bottom: 4px; font-weight: 700; color: #000000; font-size: 1.05rem;">' + counter + '. ' + cleanLine + '</div>';
             counter++;
         }
     });
     
-    htmlOutput += `</div>`;
+    htmlOutput += '</div>';
     return htmlOutput;
 }
 
@@ -2280,7 +2274,7 @@ function injectPrintStyle(type = 'rx') {
         deviceType = 'tablet';
     }
 
-    const styleFileName = `print-${type}-${deviceType}.css`;
+    const styleFileName = 'print-' + type + '-' + deviceType + '.css';
 
     let oldLink = document.getElementById('activePrintStyle');
     if (oldLink) oldLink.remove();
@@ -2330,21 +2324,7 @@ function printPrescriptionDirectly() {
             const imgData = canvas.toDataURL('image/jpeg', 0.90);
             
             const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                    <head>
-                        <title>Print Prescription</title>
-                        <style>
-                            body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #fff; display: flex; justify-content: center; align-items: center; }
-                            img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; }
-                            @page { size: auto; margin: 0; }
-                        </style>
-                    </head>
-                    <body>
-                        <img src="${imgData}" onload="window.print(); window.close();" />
-                    </body>
-                </html>
-            `);
+            printWindow.document.write('<html><head><title>Print Prescription</title><style>body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #fff; display: flex; justify-content: center; align-items: center; } img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; } @page { size: auto; margin: 0; }</style></head><body><img src="' + imgData + '" onload="window.print(); window.close();" /></body></html>');
             printWindow.document.close();
 
             controls.forEach(c => c.style.display = '');
@@ -2561,8 +2541,8 @@ function getReportDeviceStorageKey() {
 }
 
 function toggleMedicalReportInputs(visitId) {
-    const container = document.getElementById(`repContainer_${visitId}`);
-    const chevron = document.getElementById(`repChevron_${visitId}`);
+    const container = document.getElementById('repContainer_' + visitId);
+    const chevron = document.getElementById('repChevron_' + visitId);
     if (container) {
         if (container.style.display === 'none') {
             container.style.display = 'block';
@@ -2621,19 +2601,19 @@ function openMedicalReportModal(visitId) {
     let pCity = patient && patient.city ? ' | المحافظة: ' + patient.city : '';
     let visitDate = visit ? (visit.date || getTodayFormatted()) : getTodayFormatted();
 
-    let patDetailsStr = `الاسم: ${pName} | العمر: ${pAge} | الجنس: ${pGender}${pCity} | التاريخ: ${visitDate}`;
+    let patDetailsStr = 'الاسم: ' + pName + ' | العمر: ' + pAge + ' | الجنس: ' + pGender + pCity + ' | التاريخ: ' + visitDate;
     const repPatText = document.getElementById('repPatientText');
     if (repPatText) repPatText.textContent = patDetailsStr;
 
     const repData = (visit && visit.medicalReport) ? visit.medicalReport : {};
     
-    let titleVal = repData.title || (document.getElementById(`rep_title_${visitId}`) ? document.getElementById(`rep_title_${visitId}`).value : "تقرير طبي");
-    let toVal = repData.to || (document.getElementById(`rep_to_${visitId}`) ? document.getElementById(`rep_to_${visitId}`).value : "");
-    let detailsVal = repData.details || (document.getElementById(`rep_details_${visitId}`) ? document.getElementById(`rep_details_${visitId}`).value : "");
+    let titleVal = repData.title || (document.getElementById('rep_title_' + visitId) ? document.getElementById('rep_title_' + visitId).value : "تقرير طبي");
+    let toVal = repData.to || (document.getElementById('rep_to_' + visitId) ? document.getElementById('rep_to_' + visitId).value : "");
+    let detailsVal = repData.details || (document.getElementById('rep_details_' + visitId) ? document.getElementById('rep_details_' + visitId).value : "");
 
-    if (document.getElementById(`rep_title_${visitId}`)) document.getElementById(`rep_title_${visitId}`).value = titleVal;
-    if (document.getElementById(`rep_to_${visitId}`)) document.getElementById(`rep_to_${visitId}`).value = toVal;
-    if (document.getElementById(`rep_details_${visitId}`)) document.getElementById(`rep_details_${visitId}`).value = detailsVal;
+    if (document.getElementById('rep_title_' + visitId)) document.getElementById('rep_title_' + visitId).value = titleVal;
+    if (document.getElementById('rep_to_' + visitId)) document.getElementById('rep_to_' + visitId).value = toVal;
+    if (document.getElementById('rep_details_' + visitId)) document.getElementById('rep_details_' + visitId).value = detailsVal;
 
     const repTitleText = document.getElementById('repTitleText');
     const repToText = document.getElementById('repToText');
@@ -2642,7 +2622,7 @@ function openMedicalReportModal(visitId) {
     if (repTitleText) repTitleText.textContent = titleVal || "تقرير طبي";
     
     if (repToText) {
-        repToText.textContent = toVal ? `إلى: ${toVal}` : "";
+        repToText.textContent = toVal ? 'إلى: ' + toVal : "";
     }
     
     if (repDetailsText) {
@@ -3023,19 +3003,16 @@ function openBulkAddModal() {
         const modalDiv = document.createElement('div');
         modalDiv.id = 'bulkAddDictModal';
         modalDiv.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;';
-        modalDiv.innerHTML = `
-            <div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:500px; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
-                <h3 style="margin-top:0; color:#0f172a; font-size:1.1rem; margin-bottom:10px;"><i class="fa-solid fa-list-check"></i> إضافة مجموعة مصطلحات دفعة واحدة</h3>
-                <p style="font-size:0.8rem; color:#64748b; margin-bottom:10px;">قم لصق القائمة هنا (كل سطر علاج أو مصطلح في سطر مستقل):</p>
-                <div class="input-wrapper" style="margin-bottom:15px;">
-                    <textarea id="bulkDictInput" rows="6" placeholder="علاج 1&#10;علاج 2&#10;علاج 3" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.9rem; outline:none;"></textarea>
-                </div>
-                <div style="display:flex; justify-content:flex-end; gap:8px;">
-                    <button type="button" onclick="closeBulkAddModal()" style="background:#e2e8f0; color:#334155; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">إلغاء</button>
-                    <button type="button" onclick="processAndSaveBulkDict()" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">حفظ الكل</button>
-                </div>
-            </div>
-        `;
+        modalDiv.innerHTML = '<div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:500px; box-shadow:0 4px 20px rgba(0,0,0,0.2);">' +
+            '<h3 style="margin-top:0; color:#0f172a; font-size:1.1rem; margin-bottom:10px;"><i class="fa-solid fa-list-check"></i> إضافة مجموعة مصطلحات دفعة واحدة</h3>' +
+            '<p style="font-size:0.8rem; color:#64748b; margin-bottom:10px;">قم لصق القائمة هنا (كل سطر علاج أو مصطلح في سطر مستقل):</p>' +
+            '<div class="input-wrapper" style="margin-bottom:15px;">' +
+            '<textarea id="bulkDictInput" rows="6" placeholder="علاج 1&#10;علاج 2&#10;علاج 3" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.9rem; outline:none;"></textarea>' +
+            '</div>' +
+            '<div style="display:flex; justify-content:flex-end; gap:8px;">' +
+            '<button type="button" onclick="closeBulkAddModal()" style="background:#e2e8f0; color:#334155; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">إلغاء</button>' +
+            '<button type="button" onclick="processAndSaveBulkDict()" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">حفظ الكل</button>' +
+            '</div></div>';
         document.body.appendChild(modalDiv);
     }
     
@@ -3098,7 +3075,7 @@ function processAndSaveBulkDict() {
     if (typeof renderDictTerms === 'function') {
         renderDictTerms();
     }
-    alert(`تمت إضافة (${addedCount}) عنصر جديد إلى القاموس بنجاح!`);
+    alert('تمت إضافة (' + addedCount + ') عنصر جديد إلى القاموس بنجاح!');
 }
 
 function saveNewPatient(e) {
