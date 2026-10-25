@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.59 (Optimized & Fixed Report Dragging)
+// Clinic Master System - Cloud Ultimate Edition v17.60 (Full Complete & Scanner Bridge Fixed)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1113,7 +1113,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.59",
+        version: "17.60",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1319,11 +1319,11 @@ async function scanFromDesktopScanner(visitId) {
             renderVisits(patient.visits, false);
             alert("تم سحب المستند من السكانر وتخزينه بنجاح!");
         } else {
-            alert("تعذر السحب من السكانر: " + (data.error || "تأكد من توصيل الجهاز."));
+            alert("تعذر السحب من السكانر: " + (data.error || "تأكد من توصيل الجهاز وتفعيل جسر بايثون."));
         }
     } catch (err) {
         console.error(err);
-        alert("فشل الاتصال بالجسر المحلي. تأكد أن نافذة البايثون السوداء تعمل على حاسوب العيادة.");
+        alert("فشل الاتصال بجسر البايثون (Python Bridge). تأكد أن نافذة البايثون تعمل على المنفذ 5000 في حاسوب العيادة.");
     }
 }
 
