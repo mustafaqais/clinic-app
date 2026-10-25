@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.62 (Fully Debugged & Optimized)
+// Clinic Master System - Cloud Ultimate Edition v17.62 (Scanner Integrated)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1284,47 +1284,52 @@ function saveRxTemplateImage() {
     }
 }
 
+// ==========================================
+// الدالة النهائية والمحدثة لسحب السكانر عبر بروتوكول الويندوز المخصص
+// ==========================================
 async function scanFromDesktopScanner(visitId) {
-    alert("جاري الاتصال بالسكانر المكتبي وسحب المستند، يرجى الانتظار...");
+    // 1. إطلاق أمر تشغيل السكانر التلقائي عبر بروتوكول ويندوز المسجل
+    window.location.href = "clinicscan://";
 
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000);
+    // 2. الانتظار لثوانٍ معدودة ريثما تنتهي الطابعة من السحب والحفظ، ثم جلب الصورة تلقائياً
+    setTimeout(async () => {
+        try {
+            const localScanPath = "file:///C:/ClinicScans/scan_temp.jpg?t=" + Date.now();
+            const response = await fetch(localScanPath);
+            
+            if (!response.ok) throw new Error("لم يتم العثور على الصورة المسحوبة.");
+            
+            const blob = await response.blob();
+            const reader = new FileReader();
+            
+            reader.onloadend = function() {
+                const base64data = reader.result;
+                
+                const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+                if (!patient) return;
+                const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+                if (!visit) return;
 
-        const response = await fetch('http://localhost:5000/scan', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            signal: controller.signal
-        });
+                if (!visit.attachments) visit.attachments = [];
+                
+                // تخزين الصورة نهائياً في ملف المريض وقاعدة البيانات
+                visit.attachments.push({ 
+                    name: "Scan_" + Date.now() + ".jpg", 
+                    dataUrl: base64data 
+                });
 
-        clearTimeout(timeoutId);
-        const data = await response.json();
+                savePatientToCloudAndLocal(patient);
+                renderVisits(patient.visits, false);
+                alert("تم سحب المستند وتخزينه في ملف المريض بنجاح تام وبشكل آلي!");
+            };
+            
+            reader.readAsDataURL(blob);
 
-        if (data.success && data.image) {
-            const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-            if (!patient) return;
-            const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-            if (!visit) return;
-
-            if (!visit.attachments) visit.attachments = [];
-            visit.attachments.push({ name: "Desktop_Scan_" + Date.now() + ".jpg", dataUrl: data.image });
-
-            savePatientToCloudAndLocal(patient);
-            renderVisits(patient.visits, false);
-            alert("تم سحب المستند من السكانر وتخزينه بنجاح!");
-        } else {
-            alert("تعذر السحب من السكانر: " + (data.error || "تأكد من توصيل الجهاز وتفعيل جسر بايثون."));
+        } catch (err) {
+            console.error(err);
+            alert("تنبيه: تأكد من وضع الورقة في السكانر، ثم حاول مرة أخرى.");
         }
-    } catch (err) {
-        console.error(err);
-        if (err.name === 'AbortError') {
-            alert("انتهت مهلة الانتظار (Timeout)، عملية المعالجة استغرقت وقتاً أطول من المعتاد.");
-        } else {
-            alert("فشل الاتصال بجسر البايثون (Python Bridge). تأكد أن نافذة البايثون تعمل على المنفذ 5000 في حاسوب العيادة.");
-        }
-    }
+    }, 4000); // مهلة 4 ثوانٍ لإتمام السحب
 }
 
 function openNetworkHierarchy() {
