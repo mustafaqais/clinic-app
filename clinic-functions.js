@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.56 (Optimized & Cleaned + Local Agent Printer Integration)
+// Clinic Master System - Cloud Ultimate Edition v17.56 (Optimized & Cleaned)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1284,45 +1284,9 @@ function saveRxTemplateImage() {
     }
 }
 
+// دالة السكانر المعدلة والنظيفة بالكامل (تمت إزالة الروابط الوهمية لمنع أي أخطاء)
 async function scanFromDesktopScanner(visitId) {
-    window.location.href = "clinicscan://";
-
-    setTimeout(async () => {
-        try {
-            const localScanPath = "file:///C:/ClinicScans/scan_temp.jpg?t=" + Date.now();
-            const response = await fetch(localScanPath);
-            
-            if (!response.ok) throw new Error("لم يتم العثور على الصورة المسحوبة.");
-            
-            const blob = await response.blob();
-            const reader = new FileReader();
-            
-            reader.onloadend = function() {
-                const base64data = reader.result;
-                
-                const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-                if (!patient) return;
-                const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-                if (!visit) return;
-
-                if (!visit.attachments) visit.attachments = [];
-                
-                visit.attachments.push({ 
-                    name: "Scan_" + Date.now() + ".jpg", 
-                    dataUrl: base64data 
-                });
-
-                savePatientToCloudAndLocal(patient);
-                renderVisits(patient.visits, false);
-            };
-            
-            reader.readAsDataURL(blob);
-
-        } catch (err) {
-            console.error(err);
-            alert("تنبيه: تأكد من وضع الورقة في السكانر، ثم حاول مرة أخرى.");
-        }
-    }, 5000);
+    alert("خاصية السحب المباشر من السكانر المحلي غير مفعلة حالياً. يمكنك استخدام زر 'رفع صور متعددة / ملف' لرفع الصور مباشرة من حاسوبك بسهولة.");
 }
 
 function openNetworkHierarchy() {
@@ -2292,9 +2256,7 @@ function injectPrintStyle(type = 'rx') {
     document.head.appendChild(link);
 }
 
-// ---------------------------------------------------------------------------
-// دالة الطباعة المباشرة عبر الـ Local Agent على البورت 5000 (مصصححة وآمنة)
-// ---------------------------------------------------------------------------
+// دالة الطباعة المباشرة عبر الـ Local Agent على البورت 5000
 async function printPrescriptionDirectly() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     const patientName = patient ? patient.name : "مريض غير معروف";
