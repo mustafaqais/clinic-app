@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.60 (Full Complete & Scanner Bridge Timeout Fixed)
+// Clinic Master System - Cloud Ultimate Edition v17.61 (Fully Debugged & Optimized)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -224,19 +224,11 @@ window.addEventListener('popstate', function(event) {
 history.pushState(null, '', window.location.href);
 
 function hideAllScreensInner() {
-    document.getElementById('mainScreen').style.display = 'none';
-    document.getElementById('addPatientScreen').style.display = 'none';
-    document.getElementById('rxTemplateScreen').style.display = 'none';
-    document.getElementById('specialtiesDashboardScreen').style.display = 'none';
-    document.getElementById('archiveScreen').style.display = 'none';
-    document.getElementById('trashScreen').style.display = 'none';
-    document.getElementById('medicalRecordScreen').style.display = 'none';
-    document.getElementById('dictScreen').style.display = 'none';
-    document.getElementById('networkScreen').style.display = 'none';
-    document.getElementById('analyticsScreen').style.display = 'none';
-    document.getElementById('settingsScreen').style.display = 'none';
-    document.getElementById('backupScreen').style.display = 'none';
-    document.getElementById('permissionsScreen').style.display = 'none';
+    const screens = ['mainScreen', 'addPatientScreen', 'rxTemplateScreen', 'specialtiesDashboardScreen', 'archiveScreen', 'trashScreen', 'medicalRecordScreen', 'dictScreen', 'networkScreen', 'analyticsScreen', 'settingsScreen', 'backupScreen', 'permissionsScreen'];
+    screens.forEach(s => {
+        const el = document.getElementById(s);
+        if (el) el.style.display = 'none';
+    });
 }
 
 function applyLanguage() {
@@ -359,9 +351,12 @@ window.addEventListener("DOMContentLoaded", () => {
                         localStorage.setItem('clinic_patients_' + dataOwnerUid, JSON.stringify(patients));
                         localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
-                        if (document.getElementById('archiveScreen').style.display === 'block') {
+                        const archiveScreen = document.getElementById('archiveScreen');
+                        const medScreen = document.getElementById('medicalRecordScreen');
+
+                        if (archiveScreen && archiveScreen.style.display === 'block') {
                             filterPatients();
-                        } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
+                        } else if (medScreen && medScreen.style.display === 'block' && currentPatientId) {
                             const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
                             if (pat) {
                                 if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) return;
@@ -746,12 +741,14 @@ function getTodayFormatted() {
 
 function toggleAuthMode() {
     isRegisterMode = !isRegisterMode;
-    document.getElementById('registerPhoneBox').style.display = isRegisterMode ? 'block' : 'none';
+    const regBox = document.getElementById('registerPhoneBox');
+    if (regBox) regBox.style.display = isRegisterMode ? 'block' : 'none';
 }
 
 function togglePasswordVisibility() {
     const passInput = document.getElementById('authPassword');
     const toggleBtn = document.getElementById('togglePasswordBtn');
+    if (!passInput || !toggleBtn) return;
     if (passInput.type === 'password') {
         passInput.type = 'text';
         toggleBtn.classList.remove('fa-eye');
@@ -850,8 +847,10 @@ async function handleAuthSubmit() {
                 document.getElementById('appContainer').style.display = 'flex';
 
                 if (isSec) {
-                    document.getElementById('cardPermissions').style.display = 'none';
-                    document.getElementById('subStatusBanner').style.display = 'none';
+                    const cp = document.getElementById('cardPermissions');
+                    const sb = document.getElementById('subStatusBanner');
+                    if (cp) cp.style.display = 'none';
+                    if (sb) sb.style.display = 'none';
                     isUserSecretary = true;
                     applySecretaryUIVisibility();
                     restorePreviousScreenState();
@@ -870,29 +869,21 @@ async function handleAuthSubmit() {
 window.handleAuthSubmit = handleAuthSubmit;
 
 function showAllCardsForDoctor() {
-    document.getElementById('cardNewPatient').style.display = 'flex';
-    document.getElementById('cardArchive').style.display = 'flex';
-    document.getElementById('cardRxTemplate').style.display = 'flex';
-    document.getElementById('cardSpecialtiesDashboard').style.display = 'flex';
-    document.getElementById('cardDict').style.display = 'flex';
-    document.getElementById('cardAnalytics').style.display = 'flex';
-    document.getElementById('cardBackup').style.display = 'flex';
-    document.getElementById('cardTrash').style.display = 'flex';
-    document.getElementById('cardSettings').style.display = 'flex';
-    document.getElementById('cardPermissions').style.display = 'flex';
+    ['cardNewPatient', 'cardArchive', 'cardRxTemplate', 'cardSpecialtiesDashboard', 'cardDict', 'cardAnalytics', 'cardBackup', 'cardTrash', 'cardSettings', 'cardPermissions'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'flex';
+    });
 }
 
 function applySecretaryUIVisibility() {
-    document.getElementById('cardNewPatient').style.display = 'flex';
-    document.getElementById('cardArchive').style.display = 'flex';
-    document.getElementById('cardRxTemplate').style.display = 'none';
-    document.getElementById('cardSpecialtiesDashboard').style.display = 'none';
-    document.getElementById('cardDict').style.display = 'none';
-    document.getElementById('cardAnalytics').style.display = 'none';
-    document.getElementById('cardBackup').style.display = 'none';
-    document.getElementById('cardTrash').style.display = 'none';
-    document.getElementById('cardSettings').style.display = 'none';
-    document.getElementById('cardPermissions').style.display = 'none';
+    ['cardNewPatient', 'cardArchive'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'flex';
+    });
+    ['cardRxTemplate', 'cardSpecialtiesDashboard', 'cardDict', 'cardAnalytics', 'cardBackup', 'cardTrash', 'cardSettings', 'cardPermissions'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
 }
 
 function calculateVisitChildGrowth(visitId) {
@@ -1113,7 +1104,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.60",
+        version: "17.61",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1293,7 +1284,6 @@ function saveRxTemplateImage() {
     }
 }
 
-// دالة السكانر المحدثة بمهلة انتظار 60 ثانية لمنع انقطاع الاتصال
 async function scanFromDesktopScanner(visitId) {
     alert("جاري الاتصال بالسكانر المكتبي وسحب المستند، يرجى الانتظار...");
 
@@ -1730,7 +1720,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2770,7 +2760,7 @@ function loadRepLayoutPositions() {
                 repFontSizes = data.fontSizes;
             }
             
-            if (document.getElementById('repPatientText')) document.getElementById('repPatientText'].style.fontSize = (repFontSizes.patient || 14) + 'px';
+            if (document.getElementById('repPatientText')) document.getElementById('repPatientText').style.fontSize = (repFontSizes.patient || 14) + 'px';
             if (document.getElementById('repTitleText')) document.getElementById('repTitleText').style.fontSize = (repFontSizes.title || 16) + 'px';
             if (document.getElementById('repToText')) document.getElementById('repToText').style.fontSize = (repFontSizes.to || 15) + 'px';
             
@@ -3137,6 +3127,7 @@ function saveNewPatient(e) {
 
 function renderPatientsList(list) {
     const container = document.getElementById('patientsList');
+    if (!container) return;
     container.innerHTML = list.length === 0 
         ? '<p style="text-align:center; color:#64748b;">No matching patients found.</p>'
         : list.map(p => 
@@ -3217,6 +3208,7 @@ function addNewVisit() {
 
 function renderVisits(visits, forceFullRender = true) {
     const container = document.getElementById('visitsContainer');
+    if (!container) return;
     container.innerHTML = visits.map((v, index) => {
         const mh = v.medHistory || {};
         let mhSummaryParts = [];
