@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.60 (Full Complete & Scanner Bridge Fixed)
+// Clinic Master System - Cloud Ultimate Edition v17.60 (Full Complete & Scanner Bridge Timeout Fixed)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1293,17 +1293,23 @@ function saveRxTemplateImage() {
     }
 }
 
+// دالة السكانر المحدثة بمهلة انتظار 60 ثانية لمنع انقطاع الاتصال
 async function scanFromDesktopScanner(visitId) {
-    alert("جاري الاتصال بالسكانر المكتبي وسحب المستند...");
+    alert("جاري الاتصال بالسكانر المكتبي وسحب المستند، يرجى الانتظار...");
 
     try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000);
+
         const response = await fetch('http://localhost:5000/scan', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
-            }
+            },
+            signal: controller.signal
         });
 
+        clearTimeout(timeoutId);
         const data = await response.json();
 
         if (data.success && data.image) {
@@ -1323,7 +1329,11 @@ async function scanFromDesktopScanner(visitId) {
         }
     } catch (err) {
         console.error(err);
-        alert("فشل الاتصال بجسر البايثون (Python Bridge). تأكد أن نافذة البايثون تعمل على المنفذ 5000 في حاسوب العيادة.");
+        if (err.name === 'AbortError') {
+            alert("انتهت مهلة الانتظار (Timeout)، عملية المعالجة استغرقت وقتاً أطول من المعتاد.");
+        } else {
+            alert("فشل الاتصال بجسر البايثون (Python Bridge). تأكد أن نافذة البايثون تعمل على المنفذ 5000 في حاسوب العيادة.");
+        }
     }
 }
 
@@ -1720,7 +1730,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2760,7 +2770,7 @@ function loadRepLayoutPositions() {
                 repFontSizes = data.fontSizes;
             }
             
-            if (document.getElementById('repPatientText')) document.getElementById('repPatientText').style.fontSize = (repFontSizes.patient || 14) + 'px';
+            if (document.getElementById('repPatientText')) document.getElementById('repPatientText'].style.fontSize = (repFontSizes.patient || 14) + 'px';
             if (document.getElementById('repTitleText')) document.getElementById('repTitleText').style.fontSize = (repFontSizes.title || 16) + 'px';
             if (document.getElementById('repToText')) document.getElementById('repToText').style.fontSize = (repFontSizes.to || 15) + 'px';
             
