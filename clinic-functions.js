@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.62 (Scanner Integrated)
+// Clinic Master System - Cloud Ultimate Edition v17.63 (Scanner Protocol Final)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1104,7 +1104,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.62",
+        version: "17.63",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1285,13 +1285,13 @@ function saveRxTemplateImage() {
 }
 
 // ==========================================
-// الدالة النهائية والمحدثة لسحب السكانر عبر بروتوكول الويندوز المخصص
+// الدالة النهائية والمحدثة لسحب السكانر (بمهلة 7 ثوانٍ لضمان الحفظ الكامل)
 // ==========================================
 async function scanFromDesktopScanner(visitId) {
     // 1. إطلاق أمر تشغيل السكانر التلقائي عبر بروتوكول ويندوز المسجل
     window.location.href = "clinicscan://";
 
-    // 2. الانتظار لثوانٍ معدودة ريثما تنتهي الطابعة من السحب والحفظ، ثم جلب الصورة تلقائياً
+    // 2. مهلة 7 ثوانٍ لضمان إتمام سحب الورقة وحفظ الصورة بالكامل
     setTimeout(async () => {
         try {
             const localScanPath = "file:///C:/ClinicScans/scan_temp.jpg?t=" + Date.now();
@@ -1320,16 +1320,16 @@ async function scanFromDesktopScanner(visitId) {
 
                 savePatientToCloudAndLocal(patient);
                 renderVisits(patient.visits, false);
-                alert("تم سحب المستند وتخزينه في ملف المريض بنجاح تام وبشكل آلي!");
+                alert("تم سحب وتخزين المستند في ملف المريض بنجاح تام!");
             };
             
             reader.readAsDataURL(blob);
 
         } catch (err) {
             console.error(err);
-            alert("تنبيه: تأكد من وضع الورقة في السكانر، ثم حاول مرة أخرى.");
+            alert("تنبيه: تأكد من وضع الورقة في السكانر وإتمام عملية السحب، ثم حاول مرة أخرى.");
         }
-    }, 4000); // مهلة 4 ثوانٍ لإتمام السحب
+    }, 7000); 
 }
 
 function openNetworkHierarchy() {
