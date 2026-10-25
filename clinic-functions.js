@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.56 (Optimized & Cleaned)
+// Clinic Master System - Cloud Ultimate Edition v17.56 (Optimized & Local Agent Scanner Integrated)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1284,9 +1284,55 @@ function saveRxTemplateImage() {
     }
 }
 
-// دالة السكانر المعدلة والنظيفة بالكامل (تمت إزالة الروابط الوهمية لمنع أي أخطاء)
+// دالة السحب المباشر الحقيقية عبر الـ Local Agent (Port 5000)
 async function scanFromDesktopScanner(visitId) {
-    alert("خاصية السحب المباشر من السكانر المحلي غير مفعلة حالياً. يمكنك استخدام زر 'رفع صور متعددة / ملف' لرفع الصور مباشرة من حاسوبك بسهولة.");
+    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+    if (!patient) {
+        alert("تنبيه: لم يتم تحديد ملف المريض!");
+        return;
+    }
+    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+    if (!visit) {
+        alert("تنبيه: لم يتم العثور على تفاصيل الزيارة!");
+        return;
+    }
+
+    try {
+        console.log("جاري إرسال طلب المسح الضوئي إلى تطبيق الـ Local Agent المحلي...");
+        
+        const response = await fetch('http://localhost:5000/scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ visitId: visitId })
+        });
+
+        if (!response.ok) {
+            throw new Error(`فشل الاتصال بالوكيل المحلي: ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        
+        if (result && result.dataUrl) {
+            if (!visit.attachments) visit.attachments = [];
+            
+            visit.attachments.push({ 
+                name: "Scan_" + Date.now() + ".jpg", 
+                dataUrl: result.dataUrl 
+            });
+
+            savePatientToCloudAndLocal(patient);
+            renderVisits(patient.visits, false);
+            alert("تم سحب الورقة وإضافتها من السكانر بنجاح!");
+        } else {
+            throw new Error("لم يتم استلام صورة صحيحة من السيرفر المحلي.");
+        }
+
+    } catch (err) {
+        console.error("خطأ في السحب المحلي:", err);
+        alert("فشلت عملية السحب من السكانر! تأكد من أن تطبيق الـ Local Agent يعمل على الحاسوب (Port 5000) وأن السكانر متصل بشكل صحيح.");
+    }
 }
 
 function openNetworkHierarchy() {
