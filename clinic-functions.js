@@ -1284,7 +1284,6 @@ function saveRxTemplateImage() {
     }
 }
 
-// دالة السحب المباشر الحقيقية عبر الـ Local Agent (Port 5000)
 async function scanFromDesktopScanner(visitId) {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) {
@@ -2302,7 +2301,6 @@ function injectPrintStyle(type = 'rx') {
     document.head.appendChild(link);
 }
 
-// دالة الطباعة المباشرة عبر الـ Local Agent على البورت 5000
 async function printPrescriptionDirectly() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     const patientName = patient ? patient.name : "مريض غير معروف";
@@ -2732,6 +2730,7 @@ function printMedicalReportOnly(visitId) {
     }, 400);
 }
 
+// دالة تحديث أحداث التحريك للماوس (حاسوب) واللمس (موبايل) بشكل تام ونظيف
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.getElementById('repCanvasContainer');
     if (!container) return;
@@ -2744,6 +2743,7 @@ document.addEventListener('DOMContentLoaded', () => {
         box.style.touchAction = 'none';
         box.style.cursor = 'move';
 
+        // 1. أحداث الماوس (للحاسوب Desktop)
         box.addEventListener('mousedown', (e) => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             activeBox = box;
@@ -2764,41 +2764,8 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             e.stopPropagation();
         });
-    });
 
-    window.addEventListener('mousemove', (e) => {
-        if (!activeBox || !container || !repConfigModeActive) return;
-        
-        let dx = e.clientX - startX;
-        let dy = e.clientY - startY;
-
-        let newLeft = initialLeft + dx;
-        let newTop = initialTop + dy;
-
-        if (newLeft < 0) newLeft = 0;
-        if (newTop < 0) newTop = 0;
-
-        activeBox.style.left = newLeft + 'px';
-        activeBox.style.top = newTop + 'px';
-    });
-
-    window.addEventListener('mouseup', () => {
-        if (activeBox) {
-            const container = document.getElementById('repCanvasContainer');
-            if (container) {
-                const cWidth = container.clientWidth;
-                const cHeight = container.clientHeight;
-                const leftPx = parseFloat(activeBox.style.left) || 0;
-                const topPx = parseFloat(activeBox.style.top) || 0;
-
-                activeBox.style.left = ((leftPx / cWidth) * 100) + '%';
-                activeBox.style.top = ((topPx / cHeight) * 100) + '%';
-            }
-            activeBox = null;
-        }
-    });
-
-    draggableBoxes.forEach(box => {
+        // 2. أحداث اللمس (للهواتف والأجهزة اللوحية)
         box.addEventListener('touchstart', (e) => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             if (e.touches.length === 1 && container) {
@@ -2820,37 +2787,69 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
             }
         }, { passive: true });
+    });
 
-        box.addEventListener('touchmove', (e) => {
-            if (!activeBox || !container || !repConfigModeActive) return;
-            if (e.touches.length === 1) {
-                let dx = e.touches[0].clientX - startX;
-                let dy = e.touches[0].clientY - startY;
+    // حركة الماوس العامة
+    window.addEventListener('mousemove', (e) => {
+        if (!activeBox || !container || !repConfigModeActive) return;
+        
+        let dx = e.clientX - startX;
+        let dy = e.clientY - startY;
 
-                let newLeft = initialLeft + dx;
-                let newTop = initialTop + dy;
+        let newLeft = initialLeft + dx;
+        let newTop = initialTop + dy;
 
-                activeBox.style.left = newLeft + 'px';
-                activeBox.style.top = newTop + 'px';
-                e.preventDefault();
+        activeBox.style.left = newLeft + 'px';
+        activeBox.style.top = newTop + 'px';
+    });
+
+    // رفع الماوس وتحويل الإحداثيات إلى نسب مئوية (%)
+    window.addEventListener('mouseup', () => {
+        if (activeBox) {
+            const container = document.getElementById('repCanvasContainer');
+            if (container) {
+                const cWidth = container.clientWidth;
+                const cHeight = container.clientHeight;
+                const leftPx = parseFloat(activeBox.style.left) || 0;
+                const topPx = parseFloat(activeBox.style.top) || 0;
+
+                activeBox.style.left = ((leftPx / cWidth) * 100) + '%';
+                activeBox.style.top = ((topPx / cHeight) * 100) + '%';
             }
-        }, { passive: false });
+            activeBox = null;
+        }
+    });
 
-        box.addEventListener('touchend', () => {
-            if (activeBox) {
-                const container = document.getElementById('repCanvasContainer');
-                if (container) {
-                    const cWidth = container.clientWidth;
-                    const cHeight = container.clientHeight;
-                    const leftPx = parseFloat(activeBox.style.left) || 0;
-                    const topPx = parseFloat(activeBox.style.top) || 0;
+    // حركة اللمس العامة للهواتف
+    window.addEventListener('touchmove', (e) => {
+        if (!activeBox || !container || !repConfigModeActive) return;
+        if (e.touches.length === 1) {
+            let dx = e.touches[0].clientX - startX;
+            let dy = e.touches[0].clientY - startY;
 
-                    activeBox.style.left = ((leftPx / cWidth) * 100) + '%';
-                    activeBox.style.top = ((topPx / cHeight) * 100) + '%';
-                }
-                activeBox = null;
+            let newLeft = initialLeft + dx;
+            let newTop = initialTop + dy;
+
+            activeBox.style.left = newLeft + 'px';
+            activeBox.style.top = newTop + 'px';
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    window.addEventListener('touchend', () => {
+        if (activeBox) {
+            const container = document.getElementById('repCanvasContainer');
+            if (container) {
+                const cWidth = container.clientWidth;
+                const cHeight = container.clientHeight;
+                const leftPx = parseFloat(activeBox.style.left) || 0;
+                const topPx = parseFloat(activeBox.style.top) || 0;
+
+                activeBox.style.left = ((leftPx / cWidth) * 100) + '%';
+                activeBox.style.top = ((topPx / cHeight) * 100) + '%';
             }
-        });
+            activeBox = null;
+        }
     });
 });
 
