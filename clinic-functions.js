@@ -1626,7 +1626,10 @@ function handleLiveInput(textarea, category, visitId) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => {
+                const escapedTerm = m.replace(/'/g, "\\'");
+                return '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + escapedTerm + '\')">' + m + '</div>';
+            }).join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1718,7 +1721,10 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => {
+                const escapedTerm = m.replace(/'/g, "\\'");
+                return '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + escapedTerm + '\')">' + m + '</div>';
+            }).join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2287,13 +2293,12 @@ function injectPrintStyle(type = 'rx') {
 }
 
 // ---------------------------------------------------------------------------
-// التعديل الجذري: إرسال الروشتة مباشرة إلى الوكيل المحلي (Local Agent) على البورت 5000
+// دالة الطباعة المباشرة عبر الـ Local Agent على البورت 5000 (مصصححة وآمنة)
 // ---------------------------------------------------------------------------
 async function printPrescriptionDirectly() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     const patientName = patient ? patient.name : "مريض غير معروف";
     
-    // جمع النص الموجود في خانة الأدوية أو الروشتة الحالية
     const treatmentTextEl = document.getElementById('rxDragTreatmentText');
     const treatmentContent = treatmentTextEl ? treatmentTextEl.innerText : "لا توجد تفاصيل أدوية مسجلة.";
 
