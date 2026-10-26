@@ -1637,7 +1637,7 @@ function handleLiveInput(textarea, category, visitId) {
         if (matches.length > 0 && box) {
             box.innerHTML = matches.map(m => {
                 const escapedTerm = m.replace(/'/g, "\\'");
-                return '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + escapedTerm + \')">' + m + '</div>';
+                return '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + escapedTerm + '\')">' + m + '</div>';
             }).join('');
             box.style.display = 'block';
         } else if (box) {
