@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition (Report Drag & Drop Fix)
+// Clinic Master System - Cloud Ultimate Edition (Final Syntax Fix)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1809,7 +1809,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         if (matches.length > 0 && box) {
             box.innerHTML = matches.map(m => {
                 const escapedTerm = m.replace(/'/g, "\\'");
-                return '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + escapedTerm + \')">' + m + '</div>';
+                return `<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion('${inputKey}', '${escapedTerm}')">${m}</div>`;
             }).join('');
             box.style.display = 'block';
         } else if (box) {
@@ -2663,15 +2663,12 @@ function loadRepLayoutPositions() {
     }
 }
 
-// دالة السحب والإفطار المحدثة والمستقرة للتقرير الطبي (تعمل باستمرار ودون أي توقف)
 function initReportDraggables() {
     const container = document.getElementById('repCanvasContainer');
     if (!container) return;
 
     document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
         box.style.touchAction = 'none';
-
-        // إزالة أي مستمعات قديمة لمنع تراكم الأحداث
         const newBox = box.cloneNode(true);
         box.parentNode.replaceChild(newBox, box);
     });
