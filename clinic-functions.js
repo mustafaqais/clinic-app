@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.60 (Attachment Delete Fixed)
+// Clinic Master System - Cloud Ultimate Edition v17.61 (Final Fix for Attachment Deletion)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1118,7 +1118,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.60",
+        version: "17.61",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1908,17 +1908,22 @@ function promptDeleteAttachment(patientId, visitId, attIndex) {
         return;
     }
     if (confirm('هل أنت متأكد من حذف هذا المرفق؟')) {
-        const patient = patients.find(p => Number(p.id) === Number(patientId) || String(p.id) === String(patientId));
+        let patient = patients.find(p => Number(p.id) === Number(currentPatientId) || Number(p.id) === Number(patientId) || String(p.id) === String(patientId));
+        if (!patient && currentPatientId) {
+            patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        }
         if (!patient) {
             alert('تعذر العثور على المريض المرتبط بالمرفق.');
             return;
         }
-        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId) || String(v.visitId) === String(visitId));
+
+        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId) || String(v.visitId) === String(visitId)) || patient.visits[0];
         if (!visit) {
             alert('تعذر العثور على الزيارة المطلوبة لحذف المرفق.');
             return;
         }
-        if (!visit.attachments || !visit.attachments[attIndex]) {
+
+        if (!visit.attachments || visit.attachments[attIndex] === undefined) {
             alert('تعذر العثور على المرفق المطلوب لحذفه.');
             return;
         }
