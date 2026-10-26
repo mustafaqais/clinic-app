@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.65 (Clean Arrow Fix)
+// Clinic Master System - Cloud Ultimate Edition v17.66 (Final Safe Fix)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1104,7 +1104,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.65",
+        version: "17.66",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2581,7 +2581,6 @@ function toggleRepConfigMode() {
                 arrowsPanel.className = 'directional-arrows-panel';
                 arrowsPanel.style.cssText = 'position: absolute; top: -45px; right: 0; background: #0f172a; border-radius: 6px; padding: 3px; display: flex; gap: 3px; z-index: 999; box-shadow: 0 2px 8px rgba(0,0,0,0.3);';
                 
-                // تم فصل الـ HTML الخاص بالأزرار بشكل نظيف تماماً لتجنب أي أخطاء في الـ Syntax
                 const upBtn = document.createElement('button');
                 upBtn.type = 'button';
                 upBtn.innerHTML = '<i class="fa-solid fa-arrow-up"></i>';
