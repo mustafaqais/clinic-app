@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.59 (Optimized & Syntax Fixed)
+// Clinic Master System - Cloud Ultimate Edition v17.59 (Fully Optimized & Fixed)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -2632,10 +2632,7 @@ function openMedicalReportModal(visitId) {
     const repDetailsText = document.getElementById('repDetailsText');
 
     if (repTitleText) repTitleText.textContent = titleVal || "تقرير طبي";
-    
-    if (repToText) {
-        repToText.textContent = toVal ? `إلى: ${toVal}` : "";
-    }
+    if (repToText) repToText.textContent = toVal ? `إلى: ${toVal}` : "";
     
     if (repDetailsText) {
         repDetailsText.textContent = detailsVal;
@@ -2723,6 +2720,11 @@ function saveRepLayoutPositions() {
     const storageKey = getReportDeviceStorageKey();
     localStorage.setItem(storageKey, JSON.stringify(positions));
     localStorage.setItem('clinic_rep_custom_layout', JSON.stringify(positions));
+    localStorage.setItem('clinic_rep_layout_v1', JSON.stringify(positions));
+
+    if (typeof saveSettingsToCloudAndLocal === 'function') {
+        saveSettingsToCloudAndLocal();
+    }
     
     loadRepLayoutPositions();
     alert('تم حفظ أماكن التقرير الطبي بنجاح ولن تتغير بعد الآن!');
