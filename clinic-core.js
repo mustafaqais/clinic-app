@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition (Unified Report & RX Dragging)
+// Clinic Master System - Cloud Ultimate Edition (Unified Report & RX Printing Fixed)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1321,6 +1321,31 @@ function printMedicalReportDirectly() {
     }, 1500);
 }
 
+// الدالة المحدثة كلياً لضمان طباعة الروشتة بسلاسة تامة دون أي إغلاق مفاجئ
+function printPrescriptionOnly(visitId) {
+    openRxModal(visitId);
+    
+    document.body.classList.add('is-printing-rx-only');
+    const rxModal = document.getElementById('rxModal');
+    
+    if (rxModal) {
+        rxModal.style.background = '#ffffff';
+        const controlPanels = rxModal.querySelectorAll('button, .rx-controls-bar, .config-mode');
+        controlPanels.forEach(el => el.style.display = 'none');
+    }
+
+    setTimeout(() => {
+        window.print();
+        
+        document.body.classList.remove('is-printing-rx-only');
+        if (rxModal) {
+            rxModal.style.background = '';
+            const controlPanels = rxModal.querySelectorAll('button, .rx-controls-bar, .config-mode');
+            controlPanels.forEach(el => el.style.display = '');
+        }
+    }, 400);
+}
+
 async function scanFromDesktopScanner(visitId) {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) {
@@ -2192,10 +2217,6 @@ function openRxModal(visitId) {
 
 function closeRxModal() {
     document.getElementById('rxModal').style.display = 'none';
-}
-
-function printPrescriptionOnly(visitId) {
-    openRxModal(visitId);
 }
 
 function toggleRxConfigMode() {
