@@ -1286,7 +1286,7 @@
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
-            <button id="repSaveLayoutBtn" class="btn-main" onclick="saveRepLayoutPositions()" style="display: none; background: #0284c7;">
+            <button id="repSaveLayoutBtn" class="btn-main" onclick="saveRepLayoutPositions()" style="display: flex; background: #0284c7; align-items: center; justify-content: center; gap: 6px;">
                 <i class="fa-solid fa-floppy-disk"></i> حفظ مواقع التقرير والترتيب الثابت
             </button>
             <button type="button" class="btn-main" onclick="printMedicalReportDirectly()" style="font-family: 'El Messiri', sans-serif; background: #16a34a; width: 100%;">
@@ -1389,9 +1389,60 @@
     });
 </script>
 
-<!-- كود السحب والإفلات والتحريك الشامل والمحسن للتقرير الطبي والروشتة -->
+<!-- كود السحب والإفلات الشامل وحفظ المواقع للتقرير الطبي والروشتة -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // 1. استرجاع المواقع المحفوظة مسبقاً للتقرير الطبي والروشتة
+    function loadSavedLayouts() {
+        setTimeout(() => {
+            // استرجاع التقرير الطبي
+            const savedRep = localStorage.getItem('clinic_rep_custom_layout');
+            if (savedRep) {
+                try {
+                    const repData = JSON.parse(savedRep);
+                    for (const id in repData) {
+                        const box = document.getElementById(id);
+                        if (box) {
+                            box.style.left = repData[id].left;
+                            box.style.top = repData[id].top;
+                        }
+                    }
+                } catch(e) {}
+            }
+
+            // استرجاع الروشتة
+            const savedRx = localStorage.getItem('clinic_rx_custom_layout');
+            if (savedRx) {
+                try {
+                    const rxData = JSON.parse(savedRx);
+                    for (const id in rxData) {
+                        const box = document.getElementById(id);
+                        if (box) {
+                            box.style.left = rxData[id].left;
+                            box.style.top = rxData[id].top;
+                        }
+                    }
+                } catch(e) {}
+            }
+        }, 500);
+    }
+
+    loadSavedLayouts();
+
+    // 2. دوال الحفظ اليدوية والتلقائية
+    window.saveRepLayoutPositions = function() {
+        const container = document.getElementById('repCanvasContainer');
+        if (!container) return;
+        const boxes = container.querySelectorAll('.draggable-box');
+        const layoutData = {};
+        boxes.forEach(box => {
+            layoutData[box.id] = { left: box.style.left, top: box.style.top };
+        });
+        localStorage.setItem('clinic_rep_custom_layout', JSON.stringify(layoutData));
+        alert('تم حفظ مواقع التقرير الطبي بنجاح ولن تتغير بعد الآن!');
+    };
+
+    // 3. تفعيل السحب واللمس الشامل
     function makeBoxesDraggable(containerId) {
         const container = document.getElementById(containerId);
         if (!container) return;
@@ -1415,7 +1466,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 initialTop = (box.offsetTop / cH) * 100;
             };
 
-            // الماوس للكمبيوتر
             box.addEventListener('mousedown', (e) => {
                 if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
                 startDrag(e.clientX, e.clientY);
@@ -1423,7 +1473,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.stopPropagation();
             });
 
-            // اللمس للموبايل والتابلت
             box.addEventListener('touchstart', (e) => {
                 if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
                 if (e.touches.length === 1) {
@@ -1460,6 +1509,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }, { passive: false });
 
         const endDrag = () => {
+            if (activeBox) {
+                // حفظ تلقائي فوري عند الإفلات لضمان عدم الضياع
+                if (containerId === 'repCanvasContainer') {
+                    window.saveRepLayoutPositions();
+                }
+            }
             activeBox = null;
         };
 
@@ -1467,7 +1522,6 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('touchend', endDrag);
     }
 
-    // تفعيل فوري مع مؤقت لضمان تحميل العناصر
     setTimeout(() => {
         makeBoxesDraggable('repCanvasContainer');
         makeBoxesDraggable('rxCanvasContainer');
