@@ -206,7 +206,7 @@ window.addEventListener('popstate', function(event) {
         closeEditPatientModal();
         return;
     }
-    if (document.getElementById('supportModal').style.display === 'flex') {
+    if (document.getElementById('supportModal') && document.getElementById('supportModal').style.display === 'flex') {
         closeSupportModal();
         return;
     }
@@ -550,7 +550,8 @@ function checkMandatoryMonthlyBackup() {
     const lastMandatoryBackupDate = localStorage.getItem('last_mandatory_backup_date');
 
     if (dayOfMonth === 1 && lastMandatoryBackupDate !== todayDateStr) {
-        document.getElementById('mandatoryBackupModal').style.display = 'flex';
+        const modal = document.getElementById('mandatoryBackupModal');
+        if (modal) modal.style.display = 'flex';
     }
 }
 
@@ -558,16 +559,20 @@ function executeMandatoryBackup() {
     exportJsonBackup();
     const todayDateStr = getTodayFormatted();
     localStorage.setItem('last_mandatory_backup_date', todayDateStr);
-    document.getElementById('mandatoryBackupModal').style.display = 'none';
+    const modal = document.getElementById('mandatoryBackupModal');
+    if (modal) modal.style.display = 'none';
     alert('تم حفظ النسخة الاحتياطية بنجاح!');
 }
 
 function openSupportModal() {
-    document.getElementById('supportModal').style.display = 'flex';
+    if (typeof window.openSupportModal === 'function') {
+        window.openSupportModal();
+    }
 }
 
 function closeSupportModal() {
-    document.getElementById('supportModal').style.display = 'none';
+    const modal = document.getElementById('supportCustomModal');
+    if (modal) modal.remove();
 }
 
 function openActivationScreenForRenewal() {
@@ -1906,16 +1911,16 @@ function previewAttachmentByIndex(el) {
     if (!visit || !visit.attachments || !visit.attachments[index]) return;
     
     const att = visit.attachments[index];
-    previewAttachmentImage(att.dataUrl);
+    viewAttachment(att.dataUrl, 'image');
 }
 
 function previewAttachmentImage(imgSrc) {
-    document.getElementById('previewModalImg').src = imgSrc;
-    document.getElementById('imagePreviewModal').style.display = 'flex';
+    viewAttachment(imgSrc, 'image');
 }
 
 function closeImagePreview() {
-    document.getElementById('imagePreviewModal').style.display = 'none';
+    const modal = document.getElementById('viewAttachmentModal');
+    if (modal) modal.remove();
 }
 
 function openEditPatientModal() {
@@ -3346,14 +3351,26 @@ function renderVisits(visits, forceFullRender = true) {
             '</button>' +
             '</div></div>' +
 
-            '<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;" id="attachments-container-' + v.visitId + '">' +
+            '<div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;" id="attachments-container-' + v.visitId + '">' +
             (v.attachments || []).map((att, aIdx) => {
                 if (!att || !att.dataUrl || att.dataUrl.length < 50) {
                     return '<div style="padding:6px 10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; font-size:0.7rem; color:#b91c1c;">⚠️ صورة تالفة</div>';
                 }
-                return '<div style="position:relative; width:65px; height:65px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; cursor:pointer;" data-visit-id="' + v.visitId + '" data-attachment-index="' + aIdx + '" onclick="previewAttachmentByIndex(this)">' +
-                    '<img src="' + att.dataUrl + '" style="width:100%; height:100%; object-fit:cover;">' +
-                    '</div>';
+                return `
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
+                        <span style="font-size:0.75rem; color:#334155; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:55%;">
+                            <i class="fa-solid fa-paperclip" style="color:#0d9488; margin-left:4px;"></i> ${att.name || 'مرفق رقم ' + (aIdx + 1)}
+                        </span>
+                        <div style="display:flex; gap:6px;">
+                            <button type="button" onclick="viewAttachment('${att.dataUrl}', 'image')" style="background:#0284c7; color:white; border:none; border-radius:6px; padding:4px 10px; font-size:0.72rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="معاينة المرفق">
+                                <i class="fa-solid fa-eye"></i> معاينة
+                            </button>
+                            <button type="button" onclick="promptDeleteAttachment('${currentPatientId}', '${v.visitId}', ${aIdx})" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:4px 10px; font-size:0.72rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="حذف المرفق">
+                                <i class="fa-solid fa-trash"></i> حذف
+                            </button>
+                        </div>
+                    </div>
+                `;
             }).join('') +
             '</div></div>' : '') +
             '</div>';
