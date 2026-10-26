@@ -278,7 +278,7 @@
                 margin: 0 !important;
                 border-radius: 0 !important;
                 background: #ffffff !important;
-                overflow: visible !important; /* ضمان عدم قص أي جزء من صورة التقرير عند الطباعة */
+                overflow: visible !important; 
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -288,7 +288,6 @@
                 visibility: visible !important;
             }
 
-            /* طباعة صورة التقرير الخلفية كاملة 100% */
             body.is-printing-report-only #repBgImg {
                 display: block !important;
                 visibility: visible !important;
@@ -1279,7 +1278,7 @@
     <div class="modal-body" style="max-width: 340px; text-align: center; background: #ffffff; border-radius: 16px; padding: 22px; font-family: 'El Messiri', sans-serif;">
         <div style="font-size: 2.2rem; color: #ef4444; margin-bottom: 10px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
         <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">تأكيد الحذف</div>
-        <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 18px;">هل أنت متأكد من حذف صورة المرفق؟ لا يمكن التراجع عن هذا الإجراء.</p>
+        <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 18px;">هل أنت متأكد من حذف هذا المرفق؟ لا يمكن التراجع عن هذا الإجراء.</p>
         
         <div style="display: flex; gap: 8px;">
             <button type="button" id="confirmDeleteAttachBtn" style="flex: 1; background: #ef4444; color: white; border: none; border-radius: 8px; padding: 9px; font-weight: 700; cursor: pointer; font-family: 'El Messiri', sans-serif;">نعم، حذف</button>
@@ -1362,7 +1361,7 @@
     });
 </script>
 
-<!-- كود إدارة وحفظ إحداثيات التقرير الطبي ومرفقات الصور وتدعم اللمس للـ موبايل والتابلت -->
+<!-- كود إدارة التقرير الطبي، سحب الموبايل، ومشاهدة وحذف المرفقات مع التأكيد -->
 <script>
 let isDesktopRepConfigMode = false;
 const REP_KEYS = ['doctor_rep_layout_desktop', 'clinic_rep_custom_layout', 'clinic_rep_layout_v1'];
@@ -1442,7 +1441,6 @@ function loadSavedRepLayoutPositions() {
     }
 }
 
-// ربط فتح النافذة بالتحميل الفوري والإجباري للإحداثيات المحفوظة
 const oldOpenRep = window.openMedicalReportModal;
 if (typeof oldOpenRep === 'function') {
     window.openMedicalReportModal = function(visitId) {
@@ -1453,7 +1451,40 @@ if (typeof oldOpenRep === 'function') {
     };
 }
 
-// دالة عامة لإظهار نافذة تأكيد حذف المرفق
+// 👁️ وظائف معاينة ومضان ومشاهدة المرفقات
+function viewAttachment(fileUrl, fileType) {
+    if (!fileUrl) {
+        alert("⚠️ عذراً، رابط الملف غير متوفر أو تالف.");
+        return;
+    }
+
+    if ((fileType && fileType.includes('image')) || fileUrl.startsWith('data:image') || fileUrl.match(/\.(jpeg|jpg|png|gif|webp)$/i)) {
+        let existingModal = document.getElementById('viewAttachmentModal');
+        if (existingModal) existingModal.remove();
+
+        const modalDiv = document.createElement('div');
+        modalDiv.id = 'viewAttachmentModal';
+        modalDiv.style.cssText = "position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); display:flex; align-items:center; justify-content:center; z-index:99999;";
+        
+        modalDiv.innerHTML = `
+            <div style="position:relative; max-width:92%; max-height:92%; text-align:center;">
+                <button onclick="document.getElementById('viewAttachmentModal').remove()" style="position:absolute; top:-45px; right:0; background:#ef4444; color:white; border:none; border-radius:50%; width:38px; height:38px; font-size:1.2rem; cursor:pointer; font-weight:bold; box-shadow:0 2px 8px rgba(0,0,0,0.3);"><i class="fa-solid fa-xmark"></i></button>
+                <img src="${fileUrl}" alt="Attachment View" style="max-width:100%; max-height:85vh; border-radius:12px; box-shadow:0 8px 30px rgba(0,0,0,0.6);">
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+    } else {
+        window.open(fileUrl, '_blank');
+    }
+}
+
+// 🗑️ وظائف حذف المرفق مع نافذة التأكيد
+function promptDeleteAttachment(patientId, visitId, attachmentIndex) {
+    confirmDeleteAttachment(() => {
+        executeDeleteAttachment(patientId, visitId, attachmentIndex);
+    });
+}
+
 function confirmDeleteAttachment(callback) {
     const modal = document.getElementById('confirmDeleteAttachmentModal');
     const btn = document.getElementById('confirmDeleteAttachBtn');
@@ -1472,6 +1503,47 @@ function confirmDeleteAttachment(callback) {
 function closeConfirmDeleteAttachmentModal() {
     const modal = document.getElementById('confirmDeleteAttachmentModal');
     if (modal) modal.style.display = 'none';
+}
+
+function executeDeleteAttachment(patientId, visitId, attachmentIndex) {
+    try {
+        let patients = JSON.parse(localStorage.getItem('clinic_patients') || '[]');
+        let patient = patients.find(p => p.id == patientId);
+        
+        if (!patient) {
+            alert("⚠️ لم يتم العثور على بيانات المريض.");
+            return;
+        }
+
+        let isDeleted = false;
+
+        if (visitId && patient.visits) {
+            let visit = patient.visits.find(v => v.id == visitId);
+            if (visit && visit.attachments && visit.attachments[attachmentIndex] !== undefined) {
+                visit.attachments.splice(attachmentIndex, 1);
+                isDeleted = true;
+            }
+        } else if (patient.attachments && patient.attachments[attachmentIndex] !== undefined) {
+            patient.attachments.splice(attachmentIndex, 1);
+            isDeleted = true;
+        }
+
+        if (isDeleted) {
+            localStorage.setItem('clinic_patients', JSON.stringify(patients));
+            
+            if (typeof openMedicalRecord === 'function') {
+                openMedicalRecord(patientId);
+            } else {
+                location.reload();
+            }
+            console.log("✅ تم حذف المرفق وتحديث السجل بنجاح.");
+        } else {
+            alert("⚠️ تعذر العثور على المرفق المطلوب لحذفه.");
+        }
+    } catch (e) {
+        console.error("Error deleting attachment:", e);
+        alert("⚠️ حدث خطأ أثناء محاولة حذف المرفق.");
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1520,14 +1592,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
         box.style.touchAction = 'none';
 
-        // للكمبيوتر (مواس)
         box.addEventListener('mousedown', e => {
             if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             startDrag(box, e.clientX, e.clientY);
             e.stopPropagation();
         });
 
-        // للموبايل والتابلت (لمس)
         box.addEventListener('touchstart', e => {
             if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             if (e.touches.length === 1) {
