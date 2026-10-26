@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.56</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.59</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -57,7 +57,6 @@
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
         }
 
-        /* تنسيق الأزرار العلوية لمنع التداخل */
         #topNavButtons {
             display: none;
             flex-direction: column;
@@ -91,7 +90,6 @@
             border: none;
         }
 
-        /* --- تصميم مكثف للغاية لبطاقات أرشيف المرضى لعرض أقصى عدد ممكن --- */
         #patientsList {
             display: flex;
             flex-direction: column;
@@ -131,7 +129,6 @@
             font-size: 0.62rem !important;
             border-radius: 4px !important;
         }
-        /* ------------------------------------------------------------- */
         
         .rx-canvas-container {
             position: relative !important;
@@ -237,21 +234,7 @@
                 display: none !important;
             }
 
-            body.is-printing-rx-only #rxModal {
-                display: flex !important;
-                position: fixed !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100vw !important;
-                height: 100vh !important;
-                background: #ffffff !important;
-                z-index: 999999 !important;
-                align-items: center !important;
-                justify-content: center !important;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-
+            body.is-printing-rx-only #rxModal,
             body.is-printing-report-only #medicalReportModal {
                 display: flex !important;
                 position: fixed !important;
@@ -402,7 +385,6 @@
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column; overflow: hidden;">
         <div class="header" style="position: relative;">
             
-            <!-- أزرار التنقل العلوية مرتبة بدون تداخل -->
             <div id="topNavButtons">
                 <button id="backBtn" onclick="goBackScreen()">
                     <i class="fa-solid fa-arrow-left"></i> <span id="txtBack">Back</span>
@@ -971,7 +953,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.56</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.59</div>
     </div>
 </div>
 
@@ -1297,7 +1279,7 @@
 </div>
 
 <script src="config.js"></script>
-<script src="clinic-functions.js?v=17.56"></script>
+<script src="clinic-functions.js?v=17.59"></script>
 
 <script src="print-core.js"></script>
 <script>
@@ -1389,10 +1371,9 @@
     });
 </script>
 
-<!-- كود السحب والإفلات والحفظ المباشر والقوي للتقرير الطبي والروشتة -->
+<!-- كود السحب والإفلات والحفظ المباشر والموحد للتقرير الطبي والروشتة -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // دالة لتطبيق وإجبار المواقع المحفوظة بالظهور فوراً وبتكرار ذكي لمنع أي تداخل خارجي
     function enforceSavedLayout(containerId, storageKey) {
         const container = document.getElementById(containerId);
         if (!container) return;
@@ -1404,38 +1385,45 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = JSON.parse(saved);
                     for (const id in data) {
                         const box = document.getElementById(id);
-                        if (box) {
-                            box.style.left = data[id].left;
-                            box.style.top = data[id].top;
+                        if (box && data[id]) {
+                            if (data[id].left) box.style.left = data[id].left;
+                            if (data[id].top) box.style.top = data[id].top;
+                            if (data[id].width) box.style.width = data[id].width;
                         }
                     }
-                } catch(e) {}
+                } catch(e) {
+                    console.log("Error applying layout:", e);
+                }
             }
         };
 
         applyLayout();
         setTimeout(applyLayout, 200);
-        setTimeout(applyLayout, 800);
+        setTimeout(applyLayout, 600);
     }
 
-    // استرجاع دائم للمواقع
     enforceSavedLayout('repCanvasContainer', 'clinic_rep_custom_layout');
     enforceSavedLayout('rxCanvasContainer', 'clinic_rx_custom_layout');
 
-    // دالة الحفظ اليدوي للتقرير الطبي
     window.saveRepLayoutPositions = function() {
         const container = document.getElementById('repCanvasContainer');
         if (!container) return;
         const boxes = container.querySelectorAll('.draggable-box');
         const layoutData = {};
         boxes.forEach(box => {
-            layoutData[box.id] = { left: box.style.left, top: box.style.top };
+            layoutData[box.id] = { 
+                left: box.style.left, 
+                top: box.style.top,
+                width: box.style.width 
+            };
         });
+        
         localStorage.setItem('clinic_rep_custom_layout', JSON.stringify(layoutData));
-        alert('تم حفظ مواقع وتنسيق التقرير الطبي بنجاح ولن تتغير أبداً!');
+        localStorage.setItem('clinic_rep_layout_v1', JSON.stringify(layoutData));
+        
+        alert('✨ تم حفظ مواقع وتنسيق التقرير الطبي بنجاح ولن تتغير أبداً!');
     };
 
-    // دالة السحب والإفلات واللمس الذكية مع الحفظ التلقائي الفوري
     function makeBoxesDraggable(containerId, storageKey) {
         const container = document.getElementById(containerId);
         if (!container) return;
@@ -1452,8 +1440,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 startX = clientX;
                 startY = clientY;
 
-                const cW = container.clientWidth;
-                const cH = container.clientHeight;
+                const cW = container.clientWidth || 1;
+                const cH = container.clientHeight || 1;
 
                 initialLeft = (box.offsetLeft / cW) * 100;
                 initialTop = (box.offsetTop / cH) * 100;
@@ -1480,8 +1468,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const dx = clientX - startX;
             const dy = clientY - startY;
 
-            const cW = container.clientWidth;
-            const cH = container.clientHeight;
+            const cW = container.clientWidth || 1;
+            const cH = container.clientHeight || 1;
 
             let newLeft = initialLeft + (dx / cW) * 100;
             let newTop = initialTop + (dy / cH) * 100;
@@ -1503,13 +1491,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const endDrag = () => {
             if (activeBox) {
-                // حفظ تلقائي فوري بمجرد إفلات الصندوق لضمان عدم ضياع التعديل
                 const boxesAll = container.querySelectorAll('.draggable-box');
                 const layoutData = {};
                 boxesAll.forEach(b => {
-                    layoutData[b.id] = { left: b.style.left, top: b.style.top };
+                    layoutData[b.id] = { 
+                        left: b.style.left, 
+                        top: b.style.top,
+                        width: b.style.width 
+                    };
                 });
                 localStorage.setItem(storageKey, JSON.stringify(layoutData));
+                if (storageKey === 'clinic_rep_custom_layout') {
+                    localStorage.setItem('clinic_rep_layout_v1', JSON.stringify(layoutData));
+                }
             }
             activeBox = null;
         };
@@ -1521,7 +1515,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setTimeout(() => {
         makeBoxesDraggable('repCanvasContainer', 'clinic_rep_custom_layout');
         makeBoxesDraggable('rxCanvasContainer', 'clinic_rx_custom_layout');
-    }, 500);
+    }, 400);
 });
 </script>
 
