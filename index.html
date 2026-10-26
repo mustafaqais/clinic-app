@@ -1451,7 +1451,7 @@ if (typeof oldOpenRep === 'function') {
     };
 }
 
-// 👁️ وظائف معاينة ومضان ومشاهدة المرفقات
+// 👁️ وظائف معاينة ومشاهدة المرفقات (مع سد ثغرة الخطأ الظاهر في الكونسول)
 function viewAttachment(fileUrl, fileType) {
     if (!fileUrl) {
         alert("⚠️ عذراً، رابط الملف غير متوفر أو تالف.");
@@ -1477,6 +1477,10 @@ function viewAttachment(fileUrl, fileType) {
         window.open(fileUrl, '_blank');
     }
 }
+
+// تعريف دوال التوافق البديلة لكي لا يظهر خطأ في الكونسول إذا كانت مستدعاة بالقديم
+window.previewAttachmentImage = function(url, type) { viewAttachment(url, type); };
+window.previewAttachmentByIndex = function(idx) { console.log("Index preview:", idx); };
 
 // 🗑️ وظائف حذف المرفق مع نافذة التأكيد
 function promptDeleteAttachment(patientId, visitId, attachmentIndex) {
