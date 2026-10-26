@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.67 (Direct Attachment Delete)
+// Clinic Master System - Cloud Ultimate Edition v17.68 (Attachment Delete Hidden)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1118,7 +1118,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.67",
+        version: "17.68",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1901,37 +1901,6 @@ function handleFileUpload(input, visitId) {
             };
             reader.readAsDataURL(file);
         });
-    }
-}
-
-// دالة حذف المرفق المحدثة (حذف فوري ومباشر دون سلة محذوفات)
-function promptDeleteAttachment(patientId, visitId, attIndex) {
-    if (isSubscriptionExpired) {
-        alert('التطبيق في وضع القراءة فقط.');
-        return;
-    }
-    
-    let patient = patients.find(p => Number(p.id) === Number(currentPatientId) || Number(p.id) === Number(patientId) || String(p.id) === String(patientId));
-    if (!patient && patients.length > 0) {
-        patient = patients.find(p => p.visits && p.visits.some(v => Number(v.visitId) === Number(visitId) || String(v.visitId) === String(visitId)));
-    }
-    if (!patient && patients.length > 0) {
-        patient = patients[0];
-    }
-
-    if (!patient || !patient.visits || patient.visits.length === 0) {
-        return;
-    }
-
-    let visit = patient.visits.find(v => Number(v.visitId) === Number(visitId) || String(v.visitId) === String(visitId));
-    if (!visit) {
-        visit = patient.visits[0];
-    }
-
-    if (visit && visit.attachments && visit.attachments.length > attIndex) {
-        visit.attachments.splice(attIndex, 1);
-        savePatientToCloudAndLocal(patient);
-        renderVisits(patient.visits, false);
     }
 }
 
@@ -3398,11 +3367,8 @@ function renderVisits(visits, forceFullRender = true) {
                             </span>
                         </div>
                         <div style="display:flex; gap:6px; flex-shrink:0;">
-                            <button type="button" onclick="viewAttachment('${att.dataUrl}', 'image')" style="background:#0284c7; color:white; border:none; border-radius:6px; padding:6px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="معاينة المرفق">
+                            <button type="button" onclick="viewAttachment('${att.dataUrl}', 'image')" style="background:#0284c7; color:white; border:none; border-radius:6px; padding:6px 14px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="معاينة المرفق">
                                 <i class="fa-solid fa-eye"></i> معاينة
-                            </button>
-                            <button type="button" onclick="promptDeleteAttachment('${currentPatientId || ''}', '${v.visitId}', ${aIdx})" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:6px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="حذف المرفق">
-                                <i class="fa-solid fa-trash"></i> حذف
                             </button>
                         </div>
                     </div>
