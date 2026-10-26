@@ -278,7 +278,7 @@
                 margin: 0 !important;
                 border-radius: 0 !important;
                 background: #ffffff !important;
-                overflow: hidden !important;
+                overflow: visible !important; /* ضمان عدم قص أي جزء من صورة التقرير */
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -288,8 +288,8 @@
                 visibility: visible !important;
             }
 
-            body.is-printing-rx-only .rx-bg-img,
-            body.is-printing-report-only .rx-bg-img {
+            /* ضبط صورة الخلفية للتقرير لتطبع كاملة 100% بدون نقصان */
+            body.is-printing-report-only #repBgImg {
                 display: block !important;
                 visibility: visible !important;
                 position: absolute !important;
@@ -1274,6 +1274,20 @@
     </div>
 </div>
 
+<!-- نافذة تأكيد حذف المرفق (Confirmation Modal) -->
+<div id="confirmDeleteAttachmentModal" class="modal-overlay" style="display: none; z-index: 99999;">
+    <div class="modal-body" style="max-width: 340px; text-align: center; background: #ffffff; border-radius: 16px; padding: 22px; font-family: 'El Messiri', sans-serif;">
+        <div style="font-size: 2.2rem; color: #ef4444; margin-bottom: 10px;"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin-bottom: 6px;">تأكيد الحذف</div>
+        <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 18px;">هل أنت متأكد من حذف صورة المرفق؟ لا يمكن التراجع عن هذا الإجراء.</p>
+        
+        <div style="display: flex; gap: 8px;">
+            <button type="button" id="confirmDeleteAttachBtn" style="flex: 1; background: #ef4444; color: white; border: none; border-radius: 8px; padding: 9px; font-weight: 700; cursor: pointer; font-family: 'El Messiri', sans-serif;">نعم، حذف</button>
+            <button type="button" onclick="closeConfirmDeleteAttachmentModal()" style="flex: 1; background: #64748b; color: white; border: none; border-radius: 8px; padding: 9px; font-weight: 700; cursor: pointer; font-family: 'El Messiri', sans-serif;">إلغاء</button>
+        </div>
+    </div>
+</div>
+
 <script src="config.js"></script>
 <script src="clinic-functions.js?v=17.59"></script>
 <script src="print-core.js"></script>
@@ -1348,7 +1362,7 @@
     });
 </script>
 
-<!-- كود إدارة وحفظ إحداثيات التقرير الطبي المدمج والمضمون 100% -->
+<!-- كود إدارة وحفظ إحداثيات التقرير الطبي ومرفقات الصور مع تأكيد الحذف -->
 <script>
 let isDesktopRepConfigMode = false;
 const REP_KEYS = ['doctor_rep_layout_desktop', 'clinic_rep_custom_layout', 'clinic_rep_layout_v1'];
@@ -1437,6 +1451,28 @@ if (typeof oldOpenRep === 'function') {
         setTimeout(loadSavedRepLayoutPositions, 200);
         setTimeout(loadSavedRepLayoutPositions, 500);
     };
+}
+
+// دالة عامة لإظهار نافذة تأكيد حذف المرفق
+function confirmDeleteAttachment(callback) {
+    const modal = document.getElementById('confirmDeleteAttachmentModal');
+    const btn = document.getElementById('confirmDeleteAttachBtn');
+    if (!modal || !btn) return;
+    modal.style.display = 'flex';
+
+    // تنظيف أي مستمع قديم للحدث وإضافة الجديد
+    const newBtn = btn.cloneNode(true);
+    btn.parentNode.replaceChild(newBtn, btn);
+
+    newBtn.addEventListener('click', () => {
+        closeConfirmDeleteAttachmentModal();
+        if (typeof callback === 'function') callback();
+    });
+}
+
+function closeConfirmDeleteAttachmentModal() {
+    const modal = document.getElementById('confirmDeleteAttachmentModal');
+    if (modal) modal.style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
