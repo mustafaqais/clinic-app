@@ -1725,7 +1725,10 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
+            // [تم التعديل هنا لإصلاح خطأ الـ Syntax باستخدام Template Literals بشكل نظيف]
+            box.innerHTML = matches.map(m => 
+                `<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion('${inputKey}', '${m.replace(/'/g, "\\'")}')">${m}</div>`
+            ).join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1902,7 +1905,6 @@ function handleFileUpload(input, visitId) {
     }
 }
 
-// دالة حذف المرفقات المحدثة والمضمونة 100%
 function promptDeleteAttachment(patientId, visitId, attIndex) {
     if (isSubscriptionExpired) {
         alert('التطبيق في وضع القراءة فقط.');
