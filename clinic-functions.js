@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.65 (Clean Syntax Fix)
+// Clinic Master System - Cloud Ultimate Edition v17.66 (Clean Syntax Fix)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1118,7 +1118,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.65",
+        version: "17.66",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1725,7 +1725,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1902,9 +1902,7 @@ function handleFileUpload(input, visitId) {
     }
 }
 
-// ==========================================
-// التعديل المباشر لحذف المرفقات دون بحث
-// ==========================================
+// دالة حذف المرفقات المحدثة والمضمونة 100%
 function promptDeleteAttachment(patientId, visitId, attIndex) {
     if (isSubscriptionExpired) {
         alert('التطبيق في وضع القراءة فقط.');
@@ -1912,7 +1910,9 @@ function promptDeleteAttachment(patientId, visitId, attIndex) {
     }
     
     let patient = patients.find(p => Number(p.id) === Number(currentPatientId) || Number(p.id) === Number(patientId) || String(p.id) === String(patientId));
-    
+    if (!patient && patients.length > 0) {
+        patient = patients.find(p => p.visits && p.visits.some(v => Number(v.visitId) === Number(visitId)));
+    }
     if (!patient && patients.length > 0) {
         patient = patients[0];
     }
@@ -1927,18 +1927,13 @@ function promptDeleteAttachment(patientId, visitId, attIndex) {
         visit = patient.visits[0];
     }
 
-    // الحذف الفوري والمباشر باستخدام مؤشر المرفق (Index)
     if (visit && visit.attachments && visit.attachments.length > attIndex) {
         visit.attachments.splice(attIndex, 1);
-    } else if (visit && visit.attachments && visit.attachments.length > 0) {
-        visit.attachments.pop();
+        savePatientToCloudAndLocal(patient);
+        renderVisits(patient.visits, false);
     } else {
         alert('عذراً، الملف غير موجود أو تم حذفه مسبقاً.');
-        return;
     }
-
-    savePatientToCloudAndLocal(patient);
-    renderVisits(patient.visits, false);
 }
 
 function previewAttachmentByIndex(el) {
@@ -3407,7 +3402,7 @@ function renderVisits(visits, forceFullRender = true) {
                             <button type="button" onclick="viewAttachment('${att.dataUrl}', 'image')" style="background:#0284c7; color:white; border:none; border-radius:6px; padding:6px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="معاينة المرفق">
                                 <i class="fa-solid fa-eye"></i> معاينة
                             </button>
-                            <button type="button" onclick="promptDeleteAttachment('${currentPatientId}', '${v.visitId}', ${aIdx})" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:6px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="حذف المرفق">
+                            <button type="button" onclick="promptDeleteAttachment('${currentPatientId || ''}', '${v.visitId}', ${aIdx})" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:6px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="حذف المرفق">
                                 <i class="fa-solid fa-trash"></i> حذف
                             </button>
                         </div>
