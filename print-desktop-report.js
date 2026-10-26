@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master - Desktop Medical Report Print (print-desktop-report.js)
+// Clinic Master - Desktop Medical Report Print (print-desktop-report.js) - FIXED
 // ==========================================
 
 let isDesktopRepConfigMode = false;
@@ -68,7 +68,7 @@ function saveRepLayoutPositions() {
     alert('✨ تم حفظ إعدادات أماكن وخطوط التقرير الطبي بنجاح ولن تتغير أبداً!');
 }
 
-// استرجاع المواقع المحفوظة بدقة عالية
+// استرجاع المواقع المحفوظة بدقة فائقة وتطبيقها فوراً
 function loadSavedRepLayoutPositions() {
     let saved = null;
     for (const key of REP_STORAGE_KEYS) {
@@ -94,6 +94,16 @@ function loadSavedRepLayoutPositions() {
     } catch (e) {
         console.error("Error loading report layout:", e);
     }
+}
+
+// ربط فتح النافذة باسترجاع الإحداثيات تلقائياً لضمان عدم ضياعها أبداً
+const originalOpenRepModal = window.openMedicalReportModal;
+if (typeof originalOpenRepModal === 'function') {
+    window.openMedicalReportModal = function(visitId) {
+        originalOpenRepModal(visitId);
+        setTimeout(loadSavedRepLayoutPositions, 50);
+        setTimeout(loadSavedRepLayoutPositions, 150);
+    };
 }
 
 function printMedicalReportDirectly() {
@@ -125,11 +135,9 @@ function printMedicalReportDirectly() {
     }, 1500);
 }
 
-// تفعيل ميزة السحب والافلات وضمان تحميل الإحداثيات فور فتح النافذة
+// تفعيل السحب والإفلات بكل سلاسة
 document.addEventListener('DOMContentLoaded', () => {
     loadSavedRepLayoutPositions();
-    setTimeout(loadSavedRepLayoutPositions, 150);
-    setTimeout(loadSavedRepLayoutPositions, 500);
 
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
@@ -170,7 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('mouseup', () => {
         if (activeBox) {
-            // حفظ تلقائي فوري عند انتهاء السحب لتجنب ضياع التعديل
             const repLayoutData = {};
             const cWidth = container ? container.clientWidth : 1;
             const cHeight = container ? container.clientHeight : 1;
