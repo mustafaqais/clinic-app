@@ -1389,47 +1389,40 @@
     });
 </script>
 
-<!-- كود السحب والإفلات الشامل وحفظ المواقع للتقرير الطبي والروشتة -->
+<!-- كود السحب والإفلات والحفظ المباشر والقوي للتقرير الطبي والروشتة -->
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. استرجاع المواقع المحفوظة مسبقاً للتقرير الطبي والروشتة
-    function loadSavedLayouts() {
-        setTimeout(() => {
-            // استرجاع التقرير الطبي
-            const savedRep = localStorage.getItem('clinic_rep_custom_layout');
-            if (savedRep) {
-                try {
-                    const repData = JSON.parse(savedRep);
-                    for (const id in repData) {
-                        const box = document.getElementById(id);
-                        if (box) {
-                            box.style.left = repData[id].left;
-                            box.style.top = repData[id].top;
-                        }
-                    }
-                } catch(e) {}
-            }
+    // دالة لتطبيق وإجبار المواقع المحفوظة بالظهور فوراً وبتكرار ذكي لمنع أي تداخل خارجي
+    function enforceSavedLayout(containerId, storageKey) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
 
-            // استرجاع الروشتة
-            const savedRx = localStorage.getItem('clinic_rx_custom_layout');
-            if (savedRx) {
+        const applyLayout = () => {
+            const saved = localStorage.getItem(storageKey);
+            if (saved) {
                 try {
-                    const rxData = JSON.parse(savedRx);
-                    for (const id in rxData) {
+                    const data = JSON.parse(saved);
+                    for (const id in data) {
                         const box = document.getElementById(id);
                         if (box) {
-                            box.style.left = rxData[id].left;
-                            box.style.top = rxData[id].top;
+                            box.style.left = data[id].left;
+                            box.style.top = data[id].top;
                         }
                     }
                 } catch(e) {}
             }
-        }, 500);
+        };
+
+        applyLayout();
+        setTimeout(applyLayout, 200);
+        setTimeout(applyLayout, 800);
     }
 
-    loadSavedLayouts();
+    // استرجاع دائم للمواقع
+    enforceSavedLayout('repCanvasContainer', 'clinic_rep_custom_layout');
+    enforceSavedLayout('rxCanvasContainer', 'clinic_rx_custom_layout');
 
-    // 2. دوال الحفظ اليدوية والتلقائية
+    // دالة الحفظ اليدوي للتقرير الطبي
     window.saveRepLayoutPositions = function() {
         const container = document.getElementById('repCanvasContainer');
         if (!container) return;
@@ -1439,11 +1432,11 @@ document.addEventListener('DOMContentLoaded', () => {
             layoutData[box.id] = { left: box.style.left, top: box.style.top };
         });
         localStorage.setItem('clinic_rep_custom_layout', JSON.stringify(layoutData));
-        alert('تم حفظ مواقع التقرير الطبي بنجاح ولن تتغير بعد الآن!');
+        alert('تم حفظ مواقع وتنسيق التقرير الطبي بنجاح ولن تتغير أبداً!');
     };
 
-    // 3. تفعيل السحب واللمس الشامل
-    function makeBoxesDraggable(containerId) {
+    // دالة السحب والإفلات واللمس الذكية مع الحفظ التلقائي الفوري
+    function makeBoxesDraggable(containerId, storageKey) {
         const container = document.getElementById(containerId);
         if (!container) return;
 
@@ -1510,10 +1503,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const endDrag = () => {
             if (activeBox) {
-                // حفظ تلقائي فوري عند الإفلات لضمان عدم الضياع
-                if (containerId === 'repCanvasContainer') {
-                    window.saveRepLayoutPositions();
-                }
+                // حفظ تلقائي فوري بمجرد إفلات الصندوق لضمان عدم ضياع التعديل
+                const boxesAll = container.querySelectorAll('.draggable-box');
+                const layoutData = {};
+                boxesAll.forEach(b => {
+                    layoutData[b.id] = { left: b.style.left, top: b.style.top };
+                });
+                localStorage.setItem(storageKey, JSON.stringify(layoutData));
             }
             activeBox = null;
         };
@@ -1523,9 +1519,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     setTimeout(() => {
-        makeBoxesDraggable('repCanvasContainer');
-        makeBoxesDraggable('rxCanvasContainer');
-    }, 800);
+        makeBoxesDraggable('repCanvasContainer', 'clinic_rep_custom_layout');
+        makeBoxesDraggable('rxCanvasContainer', 'clinic_rx_custom_layout');
+    }, 500);
 });
 </script>
 
