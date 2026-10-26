@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition (RX Preview Fixed & Attachments Preview Fixed)
+// Clinic Master System - Cloud Ultimate Edition (Attachments Preview & Print Preview Fix)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -200,6 +200,10 @@ window.addEventListener('popstate', function(event) {
     }
     if (document.getElementById('medicalReportModal') && document.getElementById('medicalReportModal').style.display === 'flex') {
         closeMedicalReportModal();
+        return;
+    }
+    if (document.getElementById('imagePreviewModal') && document.getElementById('imagePreviewModal').style.display === 'flex') {
+        closeImagePreview();
         return;
     }
     if (document.getElementById('editPatientModal').style.display === 'flex') {
@@ -1285,7 +1289,7 @@ function saveRxTemplateImage() {
 }
 
 // ==========================================
-// الدوال المحدثة (الطباعة والسكانر ومعاينة الصور بدقة)
+// الدوال المحدثة (الطباعة بالمعاينة أولاً + فتح الصور المرفقة بدقة)
 // ==========================================
 
 async function printPrescriptionDirectly() {
@@ -1321,9 +1325,14 @@ function printMedicalReportDirectly() {
     }, 1500);
 }
 
-// دالة فتح معاينة الروشتة فقط دون طباعة مباشرة ليتسنى لك التعديل والمعاينة
+// دالة فتح المعاينة فقط للروشتة دون طباعة مباشرة
 function printPrescriptionOnly(visitId) {
     openRxModal(visitId);
+}
+
+// دالة فتح المعاينة فقط للتقرير الطبي دون طباعة مباشرة (تصحح مشكلة الطباعة المباشرة)
+function printMedicalReportOnly(visitId) {
+    openMedicalReportModal(visitId);
 }
 
 async function scanFromDesktopScanner(visitId) {
@@ -1387,6 +1396,22 @@ function previewAttachmentImage(imgSrc) {
     if (modalImg && modalDiv) {
         modalImg.src = imgSrc;
         modalDiv.style.display = 'flex';
+    } else {
+        // إنشاء عنصر العرض المنبثق للصور في حال لم يكن موجوداً بالصفحة
+        let existingModal = document.getElementById('imagePreviewModal');
+        if (!existingModal) {
+            existingModal = document.createElement('div');
+            existingModal.id = 'imagePreviewModal';
+            existingModal.style.cssText = 'display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center;';
+            existingModal.innerHTML = '<div style="position:relative; max-width:90%; max-height:90%; text-align:center;">' +
+                '<button onclick="closeImagePreview()" style="position:absolute; top:-40px; right:0; background:#ef4444; color:#fff; border:none; border-radius:50%; width:35px; height:35px; font-size:1.1rem; cursor:pointer; font-weight:bold;">&times;</button>' +
+                '<img id="previewModalImg" src="' + imgSrc + '" style="max-width:100%; max-height:85vh; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.5); object-fit:contain;">' +
+                '</div>';
+            document.body.appendChild(existingModal);
+        } else {
+            document.getElementById('previewModalImg').src = imgSrc;
+            existingModal.style.display = 'flex';
+        }
     }
 }
 
@@ -2649,13 +2674,6 @@ function loadRepLayoutPositions() {
     }
 }
 
-function printMedicalReportOnly(visitId) {
-    openMedicalReportModal(visitId);
-    setTimeout(() => {
-        printMedicalReportDirectly();
-    }, 400);
-}
-
 function initReportDraggables() {
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
@@ -3263,8 +3281,8 @@ function renderVisits(visits, forceFullRender = true) {
             '<span class="field-label">تفاصيل التقرير والحالة السريرية</span>' +
             '<div class="input-wrapper"><textarea id="rep_details_' + v.visitId + '" rows="3" placeholder="اكتب تفاصيل التقرير هنا..." oninput="updateReportFieldData(' + v.visitId + ', \'details\', this.value)">' + (repData.details || '') + '</textarea></div>' +
             '</div>' +
-            '<button type="button" class="btn-main" onclick="openMedicalReportModal(' + v.visitId + ')" style="background: #0284c7; padding: 8px; font-size: 0.85rem;">' +
-            '<i class="fa-solid fa-print"></i> معاينة وطباعة التقرير الطبي (بروية الترويسة)' +
+            '<button type="button" class="btn-main" onclick="printMedicalReportOnly(' + v.visitId + ')" style="background: #0284c7; padding: 8px; font-size: 0.85rem;">' +
+            '<i class="fa-solid fa-file-lines"></i> معاينة التقرير الطبي (بروية الترويسة أولاً)' +
             '</button>' +
             '</div></div>' +
 
