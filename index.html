@@ -278,7 +278,7 @@
                 margin: 0 !important;
                 border-radius: 0 !important;
                 background: #ffffff !important;
-                overflow: visible !important; /* ضمان عدم قص أي جزء من صورة التقرير */
+                overflow: visible !important; /* ضمان عدم قص أي جزء من صورة التقرير عند الطباعة */
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
             }
@@ -288,7 +288,7 @@
                 visibility: visible !important;
             }
 
-            /* ضبط صورة الخلفية للتقرير لتطبع كاملة 100% بدون نقصان */
+            /* طباعة صورة التقرير الخلفية كاملة 100% */
             body.is-printing-report-only #repBgImg {
                 display: block !important;
                 visibility: visible !important;
@@ -1362,7 +1362,7 @@
     });
 </script>
 
-<!-- كود إدارة وحفظ إحداثيات التقرير الطبي ومرفقات الصور مع تأكيد الحذف -->
+<!-- كود إدارة وحفظ إحداثيات التقرير الطبي ومرفقات الصور وتدعم اللمس للـ موبايل والتابلت -->
 <script>
 let isDesktopRepConfigMode = false;
 const REP_KEYS = ['doctor_rep_layout_desktop', 'clinic_rep_custom_layout', 'clinic_rep_layout_v1'];
@@ -1460,7 +1460,6 @@ function confirmDeleteAttachment(callback) {
     if (!modal || !btn) return;
     modal.style.display = 'flex';
 
-    // تنظيف أي مستمع قديم للحدث وإضافة الجديد
     const newBtn = btn.cloneNode(true);
     btn.parentNode.replaceChild(newBtn, btn);
 
@@ -1480,29 +1479,26 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeBox = null, startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
     const container = document.getElementById('repCanvasContainer');
 
-    document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
-        box.addEventListener('mousedown', e => {
-            if (!isDesktopRepConfigMode || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            activeBox = box;
-            startX = e.clientX;
-            startY = e.clientY;
-            if (container) {
-                initialLeft = (box.offsetLeft / container.clientWidth) * 100;
-                initialTop = (box.offsetTop / container.clientHeight) * 100;
-            }
-            e.stopPropagation();
-        });
-    });
+    function startDrag(box, clientX, clientY) {
+        if (!isDesktopRepConfigMode) return;
+        activeBox = box;
+        startX = clientX;
+        startY = clientY;
+        if (container) {
+            initialLeft = (box.offsetLeft / container.clientWidth) * 100;
+            initialTop = (box.offsetTop / container.clientHeight) * 100;
+        }
+    }
 
-    document.addEventListener('mousemove', e => {
+    function moveDrag(clientX, clientY) {
         if (!activeBox || !container) return;
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
+        const dx = clientX - startX;
+        const dy = clientY - startY;
         activeBox.style.left = (initialLeft + (dx / container.clientWidth) * 100) + '%';
         activeBox.style.top = (initialTop + (dy / container.clientHeight) * 100) + '%';
-    });
+    }
 
-    document.addEventListener('mouseup', () => {
+    function endDrag() {
         if (activeBox) {
             const repLayoutData = {};
             const cW = container ? container.clientWidth : 1;
@@ -1519,7 +1515,38 @@ document.addEventListener('DOMContentLoaded', () => {
             REP_KEYS.forEach(key => localStorage.setItem(key, jsonStr));
         }
         activeBox = null;
+    }
+
+    document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
+        box.style.touchAction = 'none';
+
+        // للكمبيوتر (مواس)
+        box.addEventListener('mousedown', e => {
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            startDrag(box, e.clientX, e.clientY);
+            e.stopPropagation();
+        });
+
+        // للموبايل والتابلت (لمس)
+        box.addEventListener('touchstart', e => {
+            if (e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            if (e.touches.length === 1) {
+                startDrag(box, e.touches[0].clientX, e.touches[0].clientY);
+                e.stopPropagation();
+            }
+        }, { passive: true });
     });
+
+    document.addEventListener('mousemove', e => moveDrag(e.clientX, e.clientY));
+    document.addEventListener('touchmove', e => {
+        if (activeBox && e.touches.length === 1) {
+            moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    document.addEventListener('mouseup', endDrag);
+    document.addEventListener('touchend', endDrag);
 });
 </script>
 
