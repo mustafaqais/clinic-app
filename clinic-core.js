@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition (Complete Fixed Code)
+// Clinic Master System - Cloud Ultimate Edition (Cleaned Main Code)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1289,7 +1289,7 @@ function saveRxTemplateImage() {
 }
 
 // ==========================================
-// الطباعة والمعاينة
+// الطباعة والمعاينة (للروشتة فقط)
 // ==========================================
 
 async function printPrescriptionDirectly() {
@@ -1302,35 +1302,8 @@ async function printPrescriptionDirectly() {
     }, 300);
 }
 
-function printMedicalReportDirectly() {
-    injectPrintStyle('report');
-    if (repConfigModeActive) toggleRepConfigMode();
-    
-    const container = document.getElementById('repCanvasContainer');
-    const controls = container ? container.querySelectorAll('.box-font-controls') : [];
-    controls.forEach(c => c.style.display = 'none');
-
-    document.body.classList.add('is-printing-report-only');
-    const reportModal = document.getElementById('medicalReportModal');
-    if (reportModal) reportModal.style.display = 'none';
-    
-    setTimeout(() => {
-        window.print();
-    }, 400);
-    
-    setTimeout(() => {
-        document.body.classList.remove('is-printing-report-only');
-        controls.forEach(c => c.style.display = '');
-        if (reportModal) reportModal.style.display = 'flex';
-    }, 1500);
-}
-
 function printPrescriptionOnly(visitId) {
     openRxModal(visitId);
-}
-
-function printMedicalReportOnly(visitId) {
-    openMedicalReportModal(visitId);
 }
 
 async function scanFromDesktopScanner(visitId) {
@@ -2424,20 +2397,7 @@ function initDraggableElements() {
     });
 }
 
-let repConfigModeActive = false;
-let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
-
-function getReportDeviceStorageKey() {
-    const width = window.innerWidth;
-    if (width <= 768) {
-        return 'clinic_rep_layout_mobile';
-    } else if (width > 768 && width <= 1024) {
-        return 'clinic_rep_layout_tablet';
-    } else {
-        return 'clinic_rep_layout_desktop';
-    }
-}
-
+// الدوال المساعدة للتقرير الطبي البسيطة (لضمان عمل الواجهة دون تداخل مع ملف الحاسبة المنفصل)
 function toggleMedicalReportInputs(visitId) {
     const container = document.getElementById('repContainer_' + visitId);
     const chevron = document.getElementById('repChevron_' + visitId);
@@ -2466,273 +2426,11 @@ function updateReportFieldData(visitId, fieldName, value) {
     savePatientToCloudAndLocal(patient);
 }
 
-function openMedicalReportModal(visitId) {
-    currentVisitIdForModal = visitId;
-    const modal = document.getElementById('medicalReportModal');
-    if (!modal) return;
-    modal.style.display = 'flex';
-
-    initReportDraggables();
-
-    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
-    const container = document.getElementById('repCanvasContainer');
-    if (container) {
-        let bgImg = container.querySelector('.rep-bg-img');
-        if (!bgImg) {
-            bgImg = document.createElement('img');
-            bgImg.className = 'rep-bg-img';
-            bgImg.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 1; pointer-events: none; opacity: 1;';
-            container.insertBefore(bgImg, container.firstChild);
-        }
-        if (savedRxImg) {
-            bgImg.src = savedRxImg;
-            bgImg.style.display = 'block';
-        } else {
-            bgImg.style.display = 'none';
-        }
+function printMedicalReportOnly(visitId) {
+    // استدعاء نافذة التقرير الطبي وتعبئتها للطباعة حسب النظام المنفصل
+    if (typeof openMedicalReportModal === 'function') {
+        openMedicalReportModal(visitId);
     }
-
-    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-    const visit = patient ? patient.visits.find(v => Number(v.visitId) === Number(visitId)) : null;
-
-    let pName = patient ? patient.name : 'مريض';
-    let pAge = patient ? patient.age : '';
-    let pGender = patient ? (patient.gender || '') : '';
-    let pCity = patient && patient.city ? ' | المحافظة: ' + patient.city : '';
-    let visitDate = visit ? (visit.date || getTodayFormatted()) : getTodayFormatted();
-
-    let patDetailsStr = 'الاسم: ' + pName + ' | العمر: ' + pAge + ' | الجنس: ' + pGender + pCity + ' | التاريخ: ' + visitDate;
-    const repPatText = document.getElementById('repPatientText');
-    if (repPatText) repPatText.textContent = patDetailsStr;
-
-    const repData = (visit && visit.medicalReport) ? visit.medicalReport : {};
-    
-    let titleVal = repData.title || (document.getElementById('rep_title_' + visitId) ? document.getElementById('rep_title_' + visitId).value : "تقرير طبي");
-    let toVal = repData.to || (document.getElementById('rep_to_' + visitId) ? document.getElementById('rep_to_' + visitId).value : "");
-    let detailsVal = repData.details || (document.getElementById('rep_details_' + visitId) ? document.getElementById('rep_details_' + visitId).value : "");
-
-    if (document.getElementById('rep_title_' + visitId)) document.getElementById('rep_title_' + visitId).value = titleVal;
-    if (document.getElementById('rep_to_' + visitId)) document.getElementById('rep_to_' + visitId).value = toVal;
-    if (document.getElementById('rep_details_' + visitId)) document.getElementById('rep_details_' + visitId).value = detailsVal;
-
-    const repTitleText = document.getElementById('repTitleText');
-    const repToText = document.getElementById('repToText');
-    const repDetailsText = document.getElementById('repDetailsText');
-
-    if (repTitleText) repTitleText.textContent = titleVal || "تقرير طبي";
-    
-    if (repToText) {
-        repToText.textContent = toVal ? 'إلى: ' + toVal : "";
-    }
-    
-    if (repDetailsText) {
-        repDetailsText.textContent = detailsVal;
-        repDetailsText.style.whiteSpace = 'pre-wrap';
-        repDetailsText.style.wordBreak = 'break-word';
-        repDetailsText.style.fontFamily = "'Cairo', 'Tajawal', sans-serif";
-        repDetailsText.style.lineHeight = '1.6';
-    }
-
-    loadRepLayoutPositions();
-}
-
-function closeMedicalReportModal() {
-    const modal = document.getElementById('medicalReportModal');
-    if (modal) modal.style.display = 'none';
-}
-
-function toggleRepConfigMode() {
-    repConfigModeActive = !repConfigModeActive;
-    const boxes = document.querySelectorAll('#medicalReportModal .draggable-box');
-    
-    boxes.forEach(box => {
-        if (repConfigModeActive) {
-            box.classList.add('config-mode');
-        } else {
-            box.classList.remove('config-mode');
-        }
-    });
-
-    const saveBtn = document.getElementById('repSaveLayoutBtn');
-    if (saveBtn) {
-        saveBtn.style.display = repConfigModeActive ? 'block' : 'none';
-    }
-
-    const toggleBtn = document.getElementById('repConfigToggleBtn');
-    if (toggleBtn) {
-        toggleBtn.style.background = repConfigModeActive ? '#0d9488' : '#f0fdfa';
-        toggleBtn.style.color = repConfigModeActive ? '#ffffff' : '#0d9488';
-    }
-}
-
-function changeRepBoxFontSize(boxKey, delta) {
-    repFontSizes[boxKey] = Math.max(10, Math.min(30, (repFontSizes[boxKey] || 14) + delta));
-    let targetId = '';
-    if (boxKey === 'patient') targetId = 'repPatientText';
-    else if (boxKey === 'title') targetId = 'repTitleText';
-    else if (boxKey === 'to') targetId = 'repToText';
-    else if (boxKey === 'details') targetId = 'repDetailsText';
-
-    const el = document.getElementById(targetId);
-    if (el) {
-        el.style.fontSize = repFontSizes[boxKey] + 'px';
-        if (boxKey === 'details') {
-            el.style.whiteSpace = 'pre-wrap';
-            el.style.wordBreak = 'break-word';
-            el.style.fontFamily = "'Cairo', 'Tajawal', sans-serif";
-        }
-    }
-}
-
-function saveRepLayoutPositions() {
-    let positions = {};
-    const container = document.getElementById('repCanvasContainer');
-    const cWidth = container ? container.clientWidth : 1;
-    const cHeight = container ? container.clientHeight : 1;
-
-    const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
-    boxes.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            const leftPx = el.offsetLeft;
-            const topPx = el.offsetTop;
-            const widthPx = el.offsetWidth;
-
-            positions[id] = {
-                top: ((topPx / cHeight) * 100) + '%',
-                left: ((leftPx / cWidth) * 100) + '%',
-                width: ((widthPx / cWidth) * 100) + '%'
-            };
-        }
-    });
-    positions.fontSizes = repFontSizes;
-    
-    const storageKey = getReportDeviceStorageKey();
-    localStorage.setItem(storageKey, JSON.stringify(positions));
-    
-    loadRepLayoutPositions();
-    alert('تم حفظ أماكن التقرير الطبي الخاصة بهذا الجهاز فقط بنجاح!');
-    
-    if (repConfigModeActive) {
-        toggleRepConfigMode();
-    }
-}
-
-function loadRepLayoutPositions() {
-    const storageKey = getReportDeviceStorageKey();
-    let saved = localStorage.getItem(storageKey);
-    
-    if (!saved) {
-        saved = localStorage.getItem('clinic_rep_layout_v1');
-    }
-
-    if (saved) {
-        try {
-            let data = JSON.parse(saved);
-            const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
-            boxes.forEach(id => {
-                const el = document.getElementById(id);
-                if (el && data[id]) {
-                    if (data[id].top) el.style.top = data[id].top;
-                    if (data[id].left) el.style.left = data[id].left;
-                    if (data[id].width) {
-                        el.style.width = data[id].width;
-                        el.style.maxWidth = '100%';
-                    }
-                }
-            });
-            if (data.fontSizes) {
-                repFontSizes = data.fontSizes;
-            }
-            
-            if (document.getElementById('repPatientText')) document.getElementById('repPatientText').style.fontSize = (repFontSizes.patient || 14) + 'px';
-            if (document.getElementById('repTitleText')) document.getElementById('repTitleText').style.fontSize = (repFontSizes.title || 16) + 'px';
-            if (document.getElementById('repToText')) document.getElementById('repToText').style.fontSize = (repFontSizes.to || 15) + 'px';
-            
-            const detailsEl = document.getElementById('repDetailsText');
-            if (detailsEl) {
-                detailsEl.style.fontSize = (repFontSizes.details || 15) + 'px';
-                detailsEl.style.whiteSpace = 'pre-wrap';
-                detailsEl.style.wordBreak = 'break-word';
-                detailsEl.style.fontFamily = "'Cairo', 'Tajawal', sans-serif";
-                detailsEl.style.lineHeight = '1.6';
-            }
-        } catch(e) {
-            console.log("Error loading rep layout:", e);
-        }
-    }
-}
-
-// دالة السحب والإفلات المحدثة والمنسابة للتقرير الطبي
-function initReportDraggables() {
-    const container = document.getElementById('repCanvasContainer');
-    if (!container) return;
-
-    document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
-        box.style.touchAction = 'none';
-        box.style.userSelect = 'none';
-        box.style.webkitUserSelect = 'none';
-
-        const newBox = box.cloneNode(true);
-        box.parentNode.replaceChild(newBox, box);
-    });
-
-    document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
-        box.style.touchAction = 'none';
-        box.style.userSelect = 'none';
-        let isDragging = false;
-        let startX = 0, startY = 0;
-        let initialLeft = 0, initialTop = 0;
-
-        box.addEventListener('pointerdown', e => {
-            if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            
-            const cWidth = container.clientWidth;
-            const cHeight = container.clientHeight;
-            
-            initialLeft = (box.offsetLeft / cWidth) * 100;
-            initialTop = (box.offsetTop / cHeight) * 100;
-            
-            box.setPointerCapture(e.pointerId);
-            e.stopPropagation();
-            e.preventDefault();
-        });
-
-        box.addEventListener('pointermove', e => {
-            if (!isDragging) return;
-            
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            
-            const cWidth = container.clientWidth;
-            const cHeight = container.clientHeight;
-
-            let newLeftPct = initialLeft + (dx / cWidth) * 100;
-            let newTopPct = initialTop + (dy / cHeight) * 100;
-
-            newLeftPct = Math.max(0, Math.min(85, newLeftPct));
-            newTopPct = Math.max(0, Math.min(90, newTopPct));
-
-            box.style.left = newLeftPct + '%';
-            box.style.top = newTopPct + '%';
-        });
-
-        const stopDrag = e => {
-            if (isDragging) {
-                isDragging = false;
-                try {
-                    box.releasePointerCapture(e.pointerId);
-                } catch(err) {}
-            }
-        };
-
-        box.addEventListener('pointerup', stopDrag);
-        box.addEventListener('pointercancel', stopDrag);
-    });
 }
 
 function autoSaveMedicalRecord() {}
@@ -3292,7 +2990,7 @@ function renderVisits(visits, forceFullRender = true) {
             '<div class="input-wrapper"><textarea id="rep_details_' + v.visitId + '" rows="3" placeholder="اكتب تفاصيل التقرير هنا..." oninput="updateReportFieldData(' + v.visitId + ', \'details\', this.value)">' + (repData.details || '') + '</textarea></div>' +
             '</div>' +
             '<button type="button" class="btn-main" onclick="printMedicalReportOnly(' + v.visitId + ')" style="background: #0284c7; padding: 8px; font-size: 0.85rem;">' +
-            '<i class="fa-solid fa-file-lines"></i> معاينة التقرير الطبي (بروية الترويسة أولاً)' +
+            '<i class="fa-solid fa-file-lines"></i> معاينة التقرير الطبي' +
             '</button>' +
             '</div></div>' +
 
