@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master - Desktop Medical Report Print (print-desktop-report.js - Fixed & Optimized)
+// Clinic Master - Desktop Medical Report Print (print-desktop-report.js)
 // ==========================================
 
 let isDesktopRepConfigMode = false;
@@ -61,26 +61,7 @@ function saveRepLayoutPositions() {
     });
 
     localStorage.setItem('doctor_rep_layout_desktop', JSON.stringify(repLayoutData));
-    alert('تم حفظ إعدادات تقرير الحاسبة بنجاح وثبات الأماكن!');
-}
-
-function loadRepLayoutPositions() {
-    const savedJson = localStorage.getItem('doctor_rep_layout_desktop');
-    if (!savedJson) return;
-
-    try {
-        const savedLayout = JSON.parse(savedJson);
-        for (const [boxId, data] of Object.entries(savedLayout)) {
-            const box = document.getElementById(boxId);
-            if (box && data) {
-                if (data.top) box.style.top = data.top;
-                if (data.left) box.style.left = data.left;
-                if (data.width) box.style.width = data.width;
-            }
-        }
-    } catch (e) {
-        console.log("Error loading desktop report layout:", e);
-    }
+    alert('تم حفظ إعدادات تقرير الحاسبة بنجاح!');
 }
 
 function printMedicalReportDirectly() {
@@ -112,20 +93,13 @@ function printMedicalReportDirectly() {
     }, 1500);
 }
 
-// تفعيل السحب والإفلات باستخدام نظام Pointer Events الآمن والثابت
 document.addEventListener('DOMContentLoaded', () => {
+    let activeBox = null;
+    let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
     const container = document.getElementById('repCanvasContainer');
-    if (!container) return;
-
-    // تحميل الأماكن المحفوظة مسبقاً فور تحميل الصفحة
-    loadRepLayoutPositions();
 
     document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
-        box.style.touchAction = 'none';
-        let activeBox = null;
-        let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
-
-        box.addEventListener('pointerdown', e => {
+        box.addEventListener('mousedown', e => {
             if (!isDesktopRepConfigMode || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             activeBox = box;
             startX = e.clientX;
@@ -136,13 +110,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
             initialLeftPct = (box.offsetLeft / cWidth) * 100;
             initialTopPct = (box.offsetTop / cHeight) * 100;
-            
-            box.setPointerCapture(e.pointerId);
             e.stopPropagation();
         });
 
-        box.addEventListener('pointermove', e => {
-            if (!activeBox || activeBox !== box) return;
+        document.addEventListener('mousemove', e => {
+            if (!activeBox || !container) return;
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
             
@@ -152,17 +124,12 @@ document.addEventListener('DOMContentLoaded', () => {
             let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
             let newTopPct = initialTopPct + (dy / cHeight) * 100;
 
-            box.style.left = newLeftPct + '%';
-            box.style.top = newTopPct + '%';
+            activeBox.style.left = newLeftPct + '%';
+            activeBox.style.top = newTopPct + '%';
         });
 
-        box.addEventListener('pointerup', e => {
-            if (activeBox === box) {
-                activeBox = null;
-                if (box.hasPointerCapture(e.pointerId)) {
-                    box.releasePointerCapture(e.pointerId);
-                }
-            }
+        document.addEventListener('mouseup', () => {
+            activeBox = null;
         });
     });
 });
