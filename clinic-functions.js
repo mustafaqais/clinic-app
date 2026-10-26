@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.59 (Optimized & Fixed Report Dragging)
+// Clinic Master System - Cloud Ultimate Edition v17.59 (Optimized & Report Dragging Removed from Main)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -2785,127 +2785,8 @@ function printMedicalReportOnly(visitId) {
     }, 400);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const container = document.getElementById('repCanvasContainer');
-    if (!container) return;
-
-    const draggableBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
-    let activeBox = null;
-    let startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
-
-    draggableBoxes.forEach(box => {
-        box.style.touchAction = 'none';
-        box.style.cursor = 'move';
-
-        box.addEventListener('mousedown', (e) => {
-            if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            activeBox = box;
-            startX = e.clientX;
-            startY = e.clientY;
-
-            const rect = box.getBoundingClientRect();
-            const containerRect = container.getBoundingClientRect();
-            
-            initialLeft = rect.left - containerRect.left;
-            initialTop = rect.top - containerRect.top;
-
-            box.style.left = initialLeft + 'px';
-            box.style.top = initialTop + 'px';
-            box.style.right = 'auto';
-            box.style.transform = 'none';
-
-            e.preventDefault();
-            e.stopPropagation();
-        });
-    });
-
-    window.addEventListener('mousemove', (e) => {
-        if (!activeBox || !container || !repConfigModeActive) return;
-        
-        let dx = e.clientX - startX;
-        let dy = e.clientY - startY;
-
-        let newLeft = initialLeft + dx;
-        let newTop = initialTop + dy;
-
-        if (newLeft < 0) newLeft = 0;
-        if (newTop < 0) newTop = 0;
-
-        activeBox.style.left = newLeft + 'px';
-        activeBox.style.top = newTop + 'px';
-    });
-
-    window.addEventListener('mouseup', () => {
-        if (activeBox) {
-            const container = document.getElementById('repCanvasContainer');
-            if (container) {
-                const cWidth = container.clientWidth;
-                const cHeight = container.clientHeight;
-                const leftPx = parseFloat(activeBox.style.left) || 0;
-                const topPx = parseFloat(activeBox.style.top) || 0;
-
-                activeBox.style.left = ((leftPx / cWidth) * 100) + '%';
-                activeBox.style.top = ((topPx / cHeight) * 100) + '%';
-            }
-            activeBox = null;
-        }
-    });
-
-    draggableBoxes.forEach(box => {
-        box.addEventListener('touchstart', (e) => {
-            if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            if (e.touches.length === 1 && container) {
-                activeBox = box;
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-
-                const rect = box.getBoundingClientRect();
-                const containerRect = container.getBoundingClientRect();
-                
-                initialLeft = rect.left - containerRect.left;
-                initialTop = rect.top - containerRect.top;
-
-                box.style.left = initialLeft + 'px';
-                box.style.top = initialTop + 'px';
-                box.style.right = 'auto';
-                box.style.transform = 'none';
-
-                e.stopPropagation();
-            }
-        }, { passive: true });
-
-        box.addEventListener('touchmove', (e) => {
-            if (!activeBox || !container || !repConfigModeActive) return;
-            if (e.touches.length === 1) {
-                let dx = e.touches[0].clientX - startX;
-                let dy = e.touches[0].clientY - startY;
-
-                let newLeft = initialLeft + dx;
-                let newTop = initialTop + dy;
-
-                activeBox.style.left = newLeft + 'px';
-                activeBox.style.top = newTop + 'px';
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        box.addEventListener('touchend', () => {
-            if (activeBox) {
-                const container = document.getElementById('repCanvasContainer');
-                if (container) {
-                    const cWidth = container.clientWidth;
-                    const cHeight = container.clientHeight;
-                    const leftPx = parseFloat(activeBox.style.left) || 0;
-                    const topPx = parseFloat(activeBox.style.top) || 0;
-
-                    activeBox.style.left = ((leftPx / cWidth) * 100) + '%';
-                    activeBox.style.top = ((topPx / cHeight) * 100) + '%';
-                }
-                activeBox = null;
-            }
-        });
-    });
-});
+// تم حذف كود السحب والإفلات الخاص بالتقرير الطبي من هنا نهائياً
+// لكي لا يحدث أي تضارب مع ملف الـ JS الخارجي الخاص بك.
 
 function autoSaveMedicalRecord() {}
 
