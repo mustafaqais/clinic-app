@@ -2786,7 +2786,7 @@ function printMedicalReportOnly(visitId) {
 }
 
 // تم حذف كود السحب والإفلات الخاص بالتقرير الطبي من هنا نهائياً
-// لكي لا يحدث أي تضارب مع ملف الـ JS الخارجي الخاص بك.
+// لكي لا يحدث أي تضارب مع ملف الـ HTML الخاص بك.
 
 function autoSaveMedicalRecord() {}
 
