@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition (Cleaned & Fixed Main Code)
+// Clinic Master System - Cloud Ultimate Edition v17.59 (Optimized & Fixed Report Dragging)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -202,10 +202,6 @@ window.addEventListener('popstate', function(event) {
         closeMedicalReportModal();
         return;
     }
-    if (document.getElementById('imagePreviewModal') && document.getElementById('imagePreviewModal').style.display === 'flex') {
-        closeImagePreview();
-        return;
-    }
     if (document.getElementById('editPatientModal').style.display === 'flex') {
         closeEditPatientModal();
         return;
@@ -228,11 +224,19 @@ window.addEventListener('popstate', function(event) {
 history.pushState(null, '', window.location.href);
 
 function hideAllScreensInner() {
-    const screens = ['mainScreen', 'addPatientScreen', 'rxTemplateScreen', 'specialtiesDashboardScreen', 'archiveScreen', 'trashScreen', 'medicalRecordScreen', 'dictScreen', 'networkScreen', 'analyticsScreen', 'settingsScreen', 'backupScreen', 'permissionsScreen'];
-    screens.forEach(s => {
-        const el = document.getElementById(s);
-        if (el) el.style.display = 'none';
-    });
+    document.getElementById('mainScreen').style.display = 'none';
+    document.getElementById('addPatientScreen').style.display = 'none';
+    document.getElementById('rxTemplateScreen').style.display = 'none';
+    document.getElementById('specialtiesDashboardScreen').style.display = 'none';
+    document.getElementById('archiveScreen').style.display = 'none';
+    document.getElementById('trashScreen').style.display = 'none';
+    document.getElementById('medicalRecordScreen').style.display = 'none';
+    document.getElementById('dictScreen').style.display = 'none';
+    document.getElementById('networkScreen').style.display = 'none';
+    document.getElementById('analyticsScreen').style.display = 'none';
+    document.getElementById('settingsScreen').style.display = 'none';
+    document.getElementById('backupScreen').style.display = 'none';
+    document.getElementById('permissionsScreen').style.display = 'none';
 }
 
 function applyLanguage() {
@@ -355,12 +359,9 @@ window.addEventListener("DOMContentLoaded", () => {
                         localStorage.setItem('clinic_patients_' + dataOwnerUid, JSON.stringify(patients));
                         localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
-                        const archiveScreen = document.getElementById('archiveScreen');
-                        const medScreen = document.getElementById('medicalRecordScreen');
-
-                        if (archiveScreen && archiveScreen.style.display === 'block') {
+                        if (document.getElementById('archiveScreen').style.display === 'block') {
                             filterPatients();
-                        } else if (medScreen && medScreen.style.display === 'block' && currentPatientId) {
+                        } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
                             const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
                             if (pat) {
                                 if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) return;
@@ -745,14 +746,12 @@ function getTodayFormatted() {
 
 function toggleAuthMode() {
     isRegisterMode = !isRegisterMode;
-    const regBox = document.getElementById('registerPhoneBox');
-    if (regBox) regBox.style.display = isRegisterMode ? 'block' : 'none';
+    document.getElementById('registerPhoneBox').style.display = isRegisterMode ? 'block' : 'none';
 }
 
 function togglePasswordVisibility() {
     const passInput = document.getElementById('authPassword');
     const toggleBtn = document.getElementById('togglePasswordBtn');
-    if (!passInput || !toggleBtn) return;
     if (passInput.type === 'password') {
         passInput.type = 'text';
         toggleBtn.classList.remove('fa-eye');
@@ -851,10 +850,8 @@ async function handleAuthSubmit() {
                 document.getElementById('appContainer').style.display = 'flex';
 
                 if (isSec) {
-                    const cp = document.getElementById('cardPermissions');
-                    const sb = document.getElementById('subStatusBanner');
-                    if (cp) cp.style.display = 'none';
-                    if (sb) sb.style.display = 'none';
+                    document.getElementById('cardPermissions').style.display = 'none';
+                    document.getElementById('subStatusBanner').style.display = 'none';
                     isUserSecretary = true;
                     applySecretaryUIVisibility();
                     restorePreviousScreenState();
@@ -873,21 +870,29 @@ async function handleAuthSubmit() {
 window.handleAuthSubmit = handleAuthSubmit;
 
 function showAllCardsForDoctor() {
-    ['cardNewPatient', 'cardArchive', 'cardRxTemplate', 'cardSpecialtiesDashboard', 'cardDict', 'cardAnalytics', 'cardBackup', 'cardTrash', 'cardSettings', 'cardPermissions'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'flex';
-    });
+    document.getElementById('cardNewPatient').style.display = 'flex';
+    document.getElementById('cardArchive').style.display = 'flex';
+    document.getElementById('cardRxTemplate').style.display = 'flex';
+    document.getElementById('cardSpecialtiesDashboard').style.display = 'flex';
+    document.getElementById('cardDict').style.display = 'flex';
+    document.getElementById('cardAnalytics').style.display = 'flex';
+    document.getElementById('cardBackup').style.display = 'flex';
+    document.getElementById('cardTrash').style.display = 'flex';
+    document.getElementById('cardSettings').style.display = 'flex';
+    document.getElementById('cardPermissions').style.display = 'flex';
 }
 
 function applySecretaryUIVisibility() {
-    ['cardNewPatient', 'cardArchive'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'flex';
-    });
-    ['cardRxTemplate', 'cardSpecialtiesDashboard', 'cardDict', 'cardAnalytics', 'cardBackup', 'cardTrash', 'cardSettings', 'cardPermissions'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-    });
+    document.getElementById('cardNewPatient').style.display = 'flex';
+    document.getElementById('cardArchive').style.display = 'flex';
+    document.getElementById('cardRxTemplate').style.display = 'none';
+    document.getElementById('cardSpecialtiesDashboard').style.display = 'none';
+    document.getElementById('cardDict').style.display = 'none';
+    document.getElementById('cardAnalytics').style.display = 'none';
+    document.getElementById('cardBackup').style.display = 'none';
+    document.getElementById('cardTrash').style.display = 'none';
+    document.getElementById('cardSettings').style.display = 'none';
+    document.getElementById('cardPermissions').style.display = 'none';
 }
 
 function calculateVisitChildGrowth(visitId) {
@@ -1108,7 +1113,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.66",
+        version: "17.59",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1288,108 +1293,37 @@ function saveRxTemplateImage() {
     }
 }
 
-// ==========================================
-// الطباعة والمعاينة (للروشتة والتقرير الطبي)
-// ==========================================
-
-async function printPrescriptionDirectly() {
-    const rxModal = document.getElementById('rxModal');
-    if (rxModal) rxModal.style.display = 'none';
-    
-    setTimeout(() => {
-        window.print();
-        if (rxModal) rxModal.style.display = 'flex';
-    }, 300);
-}
-
-function printPrescriptionOnly(visitId) {
-    openRxModal(visitId);
-}
-
-// الدالة الصحيحة والمربوطة لمعاينة وطباعة التقرير الطبي
-function printMedicalReportOnly(visitId) {
-    if (typeof openMedicalReportModal === 'function') {
-        openMedicalReportModal(visitId);
-    } else {
-        alert('تنبيه: نافذة التقرير الطبي غير متوفرة أو لم يتم تحميل ملف الحاسبة المنفصل.');
-    }
-}
-
 async function scanFromDesktopScanner(visitId) {
-    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-    if (!patient) {
-        alert("تنبيه: لم يتم تحديد ملف المريض!");
-        return;
-    }
-    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-    if (!visit) {
-        alert("تنبيه: لم يتم العثور على تفاصيل الزيارة!");
-        return;
-    }
+    alert("جاري الاتصال بالسكانر المكتبي وسحب المستند...");
 
     try {
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        
-        fileInput.onchange = function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    if (!visit.attachments) visit.attachments = [];
-                    
-                    visit.attachments.push({ 
-                        name: file.name || ("Scan_" + Date.now() + ".jpg"), 
-                        dataUrl: event.target.result 
-                    });
-
-                    savePatientToCloudAndLocal(patient);
-                    renderVisits(patient.visits, false);
-                    alert("تم سحب وإرفاق الصورة بنجاح إلى ملف المريض!");
-                };
-                reader.readAsDataURL(file);
+        const response = await fetch('http://localhost:5000/scan', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
             }
-        };
+        });
 
-        fileInput.click();
+        const data = await response.json();
+
+        if (data.success && data.image) {
+            const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+            if (!patient) return;
+            const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+            if (!visit) return;
+
+            if (!visit.attachments) visit.attachments = [];
+            visit.attachments.push({ name: "Desktop_Scan_" + Date.now() + ".jpg", dataUrl: data.image });
+
+            savePatientToCloudAndLocal(patient);
+            renderVisits(patient.visits, false);
+            alert("تم سحب المستند من السكانر وتخزينه بنجاح!");
+        } else {
+            alert("تعذر السحب من السكانر: " + (data.error || "تأكد من توصيل الجهاز."));
+        }
     } catch (err) {
-        console.error("خطأ في السحب:", err);
-        alert("تعذر إتمام عملية السحب.");
-    }
-}
-
-function previewAttachmentByIndex(visitId, index) {
-    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-    if (!patient) return;
-    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-    if (!visit || !visit.attachments || !visit.attachments[index]) return;
-    
-    const att = visit.attachments[index];
-    previewAttachmentImage(att.dataUrl);
-}
-
-function previewAttachmentImage(imgSrc) {
-    let existingModal = document.getElementById('imagePreviewModal');
-    if (!existingModal) {
-        existingModal = document.createElement('div');
-        existingModal.id = 'imagePreviewModal';
-        existingModal.style.cssText = 'display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center;';
-        existingModal.innerHTML = '<div style="position:relative; max-width:90%; max-height:90%; text-align:center;">' +
-            '<button onclick="closeImagePreview()" style="position:absolute; top:-40px; right:0; background:#ef4444; color:#fff; border:none; border-radius:50%; width:35px; height:35px; font-size:1.1rem; cursor:pointer; font-weight:bold;">&times;</button>' +
-            '<img id="previewModalImg" src="' + imgSrc + '" style="max-width:100%; max-height:85vh; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.5); object-fit:contain;">' +
-            '</div>';
-        document.body.appendChild(existingModal);
-    } else {
-        document.getElementById('previewModalImg').src = imgSrc;
-        existingModal.style.display = 'flex';
-    }
-}
-
-function closeImagePreview() {
-    const modalDiv = document.getElementById('imagePreviewModal');
-    if (modalDiv) {
-        modalDiv.style.display = 'none';
+        console.error(err);
+        alert("فشل الاتصال بالجسر المحلي. تأكد أن نافذة البايثون السوداء تعمل على حاسوب العيادة.");
     }
 }
 
@@ -1694,10 +1628,7 @@ function handleLiveInput(textarea, category, visitId) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => {
-                const escapedTerm = m.replace(/'/g, "\\'");
-                return '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + escapedTerm + '\')">' + m + '</div>';
-            }).join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1789,10 +1720,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => {
-                const escapedTerm = m.replace(/'/g, "\\'");
-                return `<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion('${inputKey}', '${escapedTerm}')">${m}</div>`;
-            }).join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1969,6 +1897,27 @@ function handleFileUpload(input, visitId) {
     }
 }
 
+function previewAttachmentByIndex(el) {
+    const visitId = el.getAttribute('data-visit-id');
+    const index = el.getAttribute('data-attachment-index');
+    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+    if (!patient) return;
+    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+    if (!visit || !visit.attachments || !visit.attachments[index]) return;
+    
+    const att = visit.attachments[index];
+    previewAttachmentImage(att.dataUrl);
+}
+
+function previewAttachmentImage(imgSrc) {
+    document.getElementById('previewModalImg').src = imgSrc;
+    document.getElementById('imagePreviewModal').style.display = 'flex';
+}
+
+function closeImagePreview() {
+    document.getElementById('imagePreviewModal').style.display = 'none';
+}
+
 function openEditPatientModal() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
@@ -2143,19 +2092,19 @@ function formatTreatmentForPrintOrView(rawText) {
     
     let lines = rawText.split('\n').filter(line => line.trim() !== '');
     
-    let htmlOutput = '<div class="rx-rx-title" style="color: #b91c1c; font-family: \'Playfair Display\', serif; font-weight: 900; font-size: 1.4rem; margin-bottom: 6px; text-align: left; direction: ltr;">Rx</div>';
-    htmlOutput += '<div class="rx-treatment-list" style="text-align: left; direction: ltr;">';
+    let htmlOutput = `<div class="rx-rx-title" style="color: #b91c1c; font-family: 'Playfair Display', serif; font-weight: 900; font-size: 1.4rem; margin-bottom: 6px; text-align: left; direction: ltr;">Rx</div>`;
+    htmlOutput += `<div class="rx-treatment-list" style="text-align: left; direction: ltr;">`;
     
     let counter = 1;
     lines.forEach(line => {
         let cleanLine = line.replace(/^\d+[\.\-\)]\s*/, '').trim();
         if (cleanLine) {
-            htmlOutput += '<div style="margin-bottom: 4px; font-weight: 700; color: #000000; font-size: 1.05rem;">' + counter + '. ' + cleanLine + '</div>';
+            htmlOutput += `<div style="margin-bottom: 4px; font-weight: 700; color: #000000; font-size: 1.05rem;">${counter}. ${cleanLine}</div>`;
             counter++;
         }
     });
     
-    htmlOutput += '</div>';
+    htmlOutput += `</div>`;
     return htmlOutput;
 }
 
@@ -2199,6 +2148,10 @@ function openRxModal(visitId) {
 
 function closeRxModal() {
     document.getElementById('rxModal').style.display = 'none';
+}
+
+function printPrescriptionOnly(visitId) {
+    openRxModal(visitId);
 }
 
 function toggleRxConfigMode() {
@@ -2323,7 +2276,7 @@ function injectPrintStyle(type = 'rx') {
         deviceType = 'tablet';
     }
 
-    const styleFileName = 'print-' + type + '-' + deviceType + '.css';
+    const styleFileName = `print-${type}-${deviceType}.css`;
 
     let oldLink = document.getElementById('activePrintStyle');
     if (oldLink) oldLink.remove();
@@ -2333,6 +2286,154 @@ function injectPrintStyle(type = 'rx') {
     link.rel = 'stylesheet';
     link.href = styleFileName;
     document.head.appendChild(link);
+}
+
+function printPrescriptionDirectly() {
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile) {
+        isConfigMode = false;
+        document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
+        updateConfigModeUI();
+
+        const container = document.getElementById('rxCanvasContainer');
+        if (!container) return;
+
+        let bgImg = container.querySelector('.rx-bg-img');
+        let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+        
+        if (!bgImg && savedRxImg) {
+            bgImg = document.createElement('img');
+            bgImg.src = savedRxImg;
+            bgImg.className = 'rx-bg-img';
+            container.insertBefore(bgImg, container.firstChild);
+        } else if (bgImg && savedRxImg) {
+            bgImg.src = savedRxImg;
+            bgImg.style.display = 'block';
+        }
+
+        const controls = container.querySelectorAll('.box-font-controls');
+        controls.forEach(c => c.style.display = 'none');
+
+        const reportModal = document.getElementById('medicalReportModal');
+        let reportWasOpen = false;
+        if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
+            reportModal.style.display = 'none';
+            reportWasOpen = true;
+        }
+
+        html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
+            const imgData = canvas.toDataURL('image/jpeg', 0.90);
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Print Prescription</title>
+                        <style>
+                            body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #fff; display: flex; justify-content: center; align-items: center; }
+                            img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; }
+                            @page { size: auto; margin: 0; }
+                        </style>
+                    </head>
+                    <body>
+                        <img src="${imgData}" onload="window.print(); window.close();" />
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+
+            controls.forEach(c => c.style.display = '');
+            if (reportWasOpen && reportModal) {
+                reportModal.style.display = 'flex';
+            }
+        }).catch(err => {
+            console.error("Mobile print canvas error:", err);
+            alert("تعذر إنشاء صورة الطباعة للموبايل.");
+            controls.forEach(c => c.style.display = '');
+        });
+
+    } else {
+        injectPrintStyle('rx');
+
+        isConfigMode = false;
+        document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
+        updateConfigModeUI();
+
+        const container = document.getElementById('rxCanvasContainer');
+        if (!container) return;
+
+        let bgImg = container.querySelector('.rx-bg-img');
+        let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+        
+        if (!bgImg && savedRxImg) {
+            bgImg = document.createElement('img');
+            bgImg.src = savedRxImg;
+            bgImg.className = 'rx-bg-img';
+            container.insertBefore(bgImg, container.firstChild);
+        } else if (bgImg && savedRxImg) {
+            bgImg.src = savedRxImg;
+            bgImg.style.display = 'block';
+        }
+
+        const controls = container.querySelectorAll('.box-font-controls');
+        controls.forEach(c => c.style.display = 'none');
+        
+        document.body.classList.add('is-printing-rx-only');
+        document.body.classList.remove('is-printing-report-only');
+        
+        const reportModal = document.getElementById('medicalReportModal');
+        let reportWasOpen = false;
+        if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
+            reportModal.style.display = 'none';
+            reportWasOpen = true;
+        }
+
+        setTimeout(() => {
+            window.print();
+        }, 400);
+
+        setTimeout(() => {
+            document.body.classList.remove('is-printing-rx-only');
+            controls.forEach(c => c.style.display = '');
+            if (reportWasOpen && reportModal) {
+                reportModal.style.display = 'flex';
+            }
+        }, 1500);
+    }
+}
+
+function printMedicalReportDirectly() {
+    injectPrintStyle('report');
+
+    if (repConfigModeActive) {
+        toggleRepConfigMode();
+    }
+    const container = document.getElementById('repCanvasContainer');
+    const controls = container ? container.querySelectorAll('.box-font-controls') : [];
+    controls.forEach(c => c.style.display = 'none');
+
+    document.body.classList.add('is-printing-report-only');
+    document.body.classList.remove('is-printing-rx-only');
+
+    const rxModal = document.getElementById('rxModal');
+    let rxWasOpen = false;
+    if (rxModal && (rxModal.style.display === 'flex' || window.getComputedStyle(rxModal).display === 'flex')) {
+        rxModal.style.display = 'none';
+        rxWasOpen = true;
+    }
+    
+    setTimeout(() => {
+        window.print();
+    }, 400);
+    
+    setTimeout(() => {
+        document.body.classList.remove('is-printing-report-only');
+        controls.forEach(c => c.style.display = '');
+        if (rxWasOpen && rxModal) {
+            rxModal.style.display = 'flex';
+        }
+    }, 1500);
 }
 
 function openPrescriptionPDF() {
@@ -2403,12 +2504,61 @@ function initDraggableElements() {
                 }
             }
         });
+
+        box.addEventListener('touchstart', (e) => {
+            if (!isConfigMode || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            if (e.touches.length === 1 && container) {
+                activeBox = box;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                const cWidth = container.clientWidth;
+                const cHeight = container.clientHeight;
+                initialLeftPct = (box.offsetLeft / cWidth) * 100;
+                initialTopPct = (box.offsetTop / cHeight) * 100;
+                e.stopPropagation();
+            }
+        }, { passive: true });
+
+        box.addEventListener('touchmove', (e) => {
+            if (!activeBox || activeBox !== box || !container) return;
+            if (e.touches.length === 1) {
+                let dx = e.touches[0].clientX - startX;
+                let dy = e.touches[0].clientY - startY;
+                const cWidth = container.clientWidth;
+                const cHeight = container.clientHeight;
+                let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
+                let newTopPct = initialTopPct + (dy / cHeight) * 100;
+                box.style.left = newLeftPct + '%';
+                box.style.top = newTopPct + '%';
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        box.addEventListener('touchend', (e) => {
+            if (activeBox === box) {
+                activeBox = null;
+            }
+        });
     });
 }
 
+let repConfigModeActive = false;
+let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
+
+function getReportDeviceStorageKey() {
+    const width = window.innerWidth;
+    if (width <= 768) {
+        return 'clinic_rep_layout_mobile';
+    } else if (width > 768 && width <= 1024) {
+        return 'clinic_rep_layout_tablet';
+    } else {
+        return 'clinic_rep_layout_desktop';
+    }
+}
+
 function toggleMedicalReportInputs(visitId) {
-    const container = document.getElementById('repContainer_' + visitId);
-    const chevron = document.getElementById('repChevron_' + visitId);
+    const container = document.getElementById(`repContainer_${visitId}`);
+    const chevron = document.getElementById(`repChevron_${visitId}`);
     if (container) {
         if (container.style.display === 'none') {
             container.style.display = 'block';
@@ -2433,6 +2583,329 @@ function updateReportFieldData(visitId, fieldName, value) {
     visit.medicalReport[fieldName] = value;
     savePatientToCloudAndLocal(patient);
 }
+
+function openMedicalReportModal(visitId) {
+    currentVisitIdForModal = visitId;
+    const modal = document.getElementById('medicalReportModal');
+    if (!modal) return;
+    modal.style.display = 'flex';
+
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    const container = document.getElementById('repCanvasContainer');
+    if (container) {
+        let bgImg = container.querySelector('.rep-bg-img');
+        if (!bgImg) {
+            bgImg = document.createElement('img');
+            bgImg.className = 'rep-bg-img';
+            bgImg.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 1; pointer-events: none; opacity: 1;';
+            container.insertBefore(bgImg, container.firstChild);
+        }
+        if (savedRxImg) {
+            bgImg.src = savedRxImg;
+            bgImg.style.display = 'block';
+        } else {
+            bgImg.style.display = 'none';
+        }
+    }
+
+    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+    const visit = patient ? patient.visits.find(v => Number(v.visitId) === Number(visitId)) : null;
+
+    let pName = patient ? patient.name : 'مريض';
+    let pAge = patient ? patient.age : '';
+    let pGender = patient ? (patient.gender || '') : '';
+    let pCity = patient && patient.city ? ' | المحافظة: ' + patient.city : '';
+    let visitDate = visit ? (visit.date || getTodayFormatted()) : getTodayFormatted();
+
+    let patDetailsStr = `الاسم: ${pName} | العمر: ${pAge} | الجنس: ${pGender}${pCity} | التاريخ: ${visitDate}`;
+    const repPatText = document.getElementById('repPatientText');
+    if (repPatText) repPatText.textContent = patDetailsStr;
+
+    const repData = (visit && visit.medicalReport) ? visit.medicalReport : {};
+    
+    let titleVal = repData.title || (document.getElementById(`rep_title_${visitId}`) ? document.getElementById(`rep_title_${visitId}`).value : "تقرير طبي");
+    let toVal = repData.to || (document.getElementById(`rep_to_${visitId}`) ? document.getElementById(`rep_to_${visitId}`).value : "");
+    let detailsVal = repData.details || (document.getElementById(`rep_details_${visitId}`) ? document.getElementById(`rep_details_${visitId}`).value : "");
+
+    if (document.getElementById(`rep_title_${visitId}`)) document.getElementById(`rep_title_${visitId}`).value = titleVal;
+    if (document.getElementById(`rep_to_${visitId}`)) document.getElementById(`rep_to_${visitId}`).value = toVal;
+    if (document.getElementById(`rep_details_${visitId}`)) document.getElementById(`rep_details_${visitId}`).value = detailsVal;
+
+    const repTitleText = document.getElementById('repTitleText');
+    const repToText = document.getElementById('repToText');
+    const repDetailsText = document.getElementById('repDetailsText');
+
+    if (repTitleText) repTitleText.textContent = titleVal || "تقرير طبي";
+    
+    if (repToText) {
+        repToText.textContent = toVal ? `إلى: ${toVal}` : "";
+    }
+    
+    if (repDetailsText) {
+        repDetailsText.textContent = detailsVal;
+        repDetailsText.style.whiteSpace = 'pre-wrap';
+        repDetailsText.style.wordBreak = 'break-word';
+        repDetailsText.style.fontFamily = "'Cairo', 'Tajawal', sans-serif";
+        repDetailsText.style.lineHeight = '1.6';
+    }
+
+    loadRepLayoutPositions();
+}
+
+function closeMedicalReportModal() {
+    const modal = document.getElementById('medicalReportModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function toggleRepConfigMode() {
+    repConfigModeActive = !repConfigModeActive;
+    const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
+    boxes.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (repConfigModeActive) el.classList.add('config-mode');
+            else el.classList.remove('config-mode');
+        }
+    });
+
+    const saveBtn = document.getElementById('repSaveLayoutBtn');
+    if (saveBtn) {
+        saveBtn.style.display = repConfigModeActive ? 'block' : 'none';
+    }
+
+    const toggleBtn = document.getElementById('repConfigToggleBtn');
+    if (toggleBtn) {
+        toggleBtn.style.background = repConfigModeActive ? '#0d9488' : '#f0fdfa';
+        toggleBtn.style.color = repConfigModeActive ? '#ffffff' : '#0d9488';
+    }
+}
+
+function changeRepBoxFontSize(boxKey, delta) {
+    repFontSizes[boxKey] = Math.max(10, Math.min(30, (repFontSizes[boxKey] || 14) + delta));
+    let targetId = '';
+    if (boxKey === 'patient') targetId = 'repPatientText';
+    else if (boxKey === 'title') targetId = 'repTitleText';
+    else if (boxKey === 'to') targetId = 'repToText';
+    else if (boxKey === 'details') targetId = 'repDetailsText';
+
+    const el = document.getElementById(targetId);
+    if (el) {
+        el.style.fontSize = repFontSizes[boxKey] + 'px';
+        if (boxKey === 'details') {
+            el.style.whiteSpace = 'pre-wrap';
+            el.style.wordBreak = 'break-word';
+            el.style.fontFamily = "'Cairo', 'Tajawal', sans-serif";
+        }
+    }
+}
+
+function saveRepLayoutPositions() {
+    let positions = {};
+    const container = document.getElementById('repCanvasContainer');
+    const cWidth = container ? container.clientWidth : 1;
+    const cHeight = container ? container.clientHeight : 1;
+
+    const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
+    boxes.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            const leftPx = el.offsetLeft;
+            const topPx = el.offsetTop;
+            const widthPx = el.offsetWidth;
+
+            positions[id] = {
+                top: ((topPx / cHeight) * 100) + '%',
+                left: ((leftPx / cWidth) * 100) + '%',
+                width: ((widthPx / cWidth) * 100) + '%'
+            };
+        }
+    });
+    positions.fontSizes = repFontSizes;
+    
+    const storageKey = getReportDeviceStorageKey();
+    localStorage.setItem(storageKey, JSON.stringify(positions));
+    
+    loadRepLayoutPositions();
+    alert('تم حفظ أماكن التقرير الطبي الخاصة بهذا الجهاز فقط بنجاح!');
+    
+    if (repConfigModeActive) {
+        toggleRepConfigMode();
+    }
+}
+
+function loadRepLayoutPositions() {
+    const storageKey = getReportDeviceStorageKey();
+    let saved = localStorage.getItem(storageKey);
+    
+    if (!saved) {
+        saved = localStorage.getItem('clinic_rep_layout_v1');
+    }
+
+    if (saved) {
+        try {
+            let data = JSON.parse(saved);
+            const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
+            boxes.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && data[id]) {
+                    if (data[id].top) el.style.top = data[id].top;
+                    if (data[id].left) el.style.left = data[id].left;
+                    if (data[id].width) {
+                        el.style.width = data[id].width;
+                        el.style.maxWidth = '100%';
+                    }
+                }
+            });
+            if (data.fontSizes) {
+                repFontSizes = data.fontSizes;
+            }
+            
+            if (document.getElementById('repPatientText')) document.getElementById('repPatientText').style.fontSize = (repFontSizes.patient || 14) + 'px';
+            if (document.getElementById('repTitleText')) document.getElementById('repTitleText').style.fontSize = (repFontSizes.title || 16) + 'px';
+            if (document.getElementById('repToText')) document.getElementById('repToText').style.fontSize = (repFontSizes.to || 15) + 'px';
+            
+            const detailsEl = document.getElementById('repDetailsText');
+            if (detailsEl) {
+                detailsEl.style.fontSize = (repFontSizes.details || 15) + 'px';
+                detailsEl.style.whiteSpace = 'pre-wrap';
+                detailsEl.style.wordBreak = 'break-word';
+                detailsEl.style.fontFamily = "'Cairo', 'Tajawal', sans-serif";
+                detailsEl.style.lineHeight = '1.6';
+            }
+        } catch(e) {
+            console.log("Error loading rep layout:", e);
+        }
+    }
+}
+
+function printMedicalReportOnly(visitId) {
+    openMedicalReportModal(visitId);
+    setTimeout(() => {
+        printMedicalReportDirectly();
+    }, 400);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('repCanvasContainer');
+    if (!container) return;
+
+    const draggableBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
+    let activeBox = null;
+    let startX = 0, startY = 0, initialLeft = 0, initialTop = 0;
+
+    draggableBoxes.forEach(box => {
+        box.style.touchAction = 'none';
+        box.style.cursor = 'move';
+
+        box.addEventListener('mousedown', (e) => {
+            if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            activeBox = box;
+            startX = e.clientX;
+            startY = e.clientY;
+
+            const rect = box.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            initialLeft = rect.left - containerRect.left;
+            initialTop = rect.top - containerRect.top;
+
+            box.style.left = initialLeft + 'px';
+            box.style.top = initialTop + 'px';
+            box.style.right = 'auto';
+            box.style.transform = 'none';
+
+            e.preventDefault();
+            e.stopPropagation();
+        });
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!activeBox || !container || !repConfigModeActive) return;
+        
+        let dx = e.clientX - startX;
+        let dy = e.clientY - startY;
+
+        let newLeft = initialLeft + dx;
+        let newTop = initialTop + dy;
+
+        if (newLeft < 0) newLeft = 0;
+        if (newTop < 0) newTop = 0;
+
+        activeBox.style.left = newLeft + 'px';
+        activeBox.style.top = newTop + 'px';
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (activeBox) {
+            const container = document.getElementById('repCanvasContainer');
+            if (container) {
+                const cWidth = container.clientWidth;
+                const cHeight = container.clientHeight;
+                const leftPx = parseFloat(activeBox.style.left) || 0;
+                const topPx = parseFloat(activeBox.style.top) || 0;
+
+                activeBox.style.left = ((leftPx / cWidth) * 100) + '%';
+                activeBox.style.top = ((topPx / cHeight) * 100) + '%';
+            }
+            activeBox = null;
+        }
+    });
+
+    draggableBoxes.forEach(box => {
+        box.addEventListener('touchstart', (e) => {
+            if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            if (e.touches.length === 1 && container) {
+                activeBox = box;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+
+                const rect = box.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                
+                initialLeft = rect.left - containerRect.left;
+                initialTop = rect.top - containerRect.top;
+
+                box.style.left = initialLeft + 'px';
+                box.style.top = initialTop + 'px';
+                box.style.right = 'auto';
+                box.style.transform = 'none';
+
+                e.stopPropagation();
+            }
+        }, { passive: true });
+
+        box.addEventListener('touchmove', (e) => {
+            if (!activeBox || !container || !repConfigModeActive) return;
+            if (e.touches.length === 1) {
+                let dx = e.touches[0].clientX - startX;
+                let dy = e.touches[0].clientY - startY;
+
+                let newLeft = initialLeft + dx;
+                let newTop = initialTop + dy;
+
+                activeBox.style.left = newLeft + 'px';
+                activeBox.style.top = newTop + 'px';
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        box.addEventListener('touchend', () => {
+            if (activeBox) {
+                const container = document.getElementById('repCanvasContainer');
+                if (container) {
+                    const cWidth = container.clientWidth;
+                    const cHeight = container.clientHeight;
+                    const leftPx = parseFloat(activeBox.style.left) || 0;
+                    const topPx = parseFloat(activeBox.style.top) || 0;
+
+                    activeBox.style.left = ((leftPx / cWidth) * 100) + '%';
+                    activeBox.style.top = ((topPx / cHeight) * 100) + '%';
+                }
+                activeBox = null;
+            }
+        });
+    });
+});
 
 function autoSaveMedicalRecord() {}
 
@@ -2546,16 +3019,19 @@ function openBulkAddModal() {
         const modalDiv = document.createElement('div');
         modalDiv.id = 'bulkAddDictModal';
         modalDiv.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;';
-        modalDiv.innerHTML = '<div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:500px; box-shadow:0 4px 20px rgba(0,0,0,0.2);">' +
-            '<h3 style="margin-top:0; color:#0f172a; font-size:1.1rem; margin-bottom:10px;"><i class="fa-solid fa-list-check"></i> إضافة مجموعة مصطلحات دفعة واحدة</h3>' +
-            '<p style="font-size:0.8rem; color:#64748b; margin-bottom:10px;">قم لصق القائمة هنا (كل سطر علاج أو مصطلح في سطر مستقل):</p>' +
-            '<div class="input-wrapper" style="margin-bottom:15px;">' +
-            '<textarea id="bulkDictInput" rows="6" placeholder="علاج 1&#10;علاج 2&#10;علاج 3" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.9rem; outline:none;"></textarea>' +
-            '</div>' +
-            '<div style="display:flex; justify-content:flex-end; gap:8px;">' +
-            '<button type="button" onclick="closeBulkAddModal()" style="background:#e2e8f0; color:#334155; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">إلغاء</button>' +
-            '<button type="button" onclick="processAndSaveBulkDict()" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">حفظ الكل</button>' +
-            '</div></div>';
+        modalDiv.innerHTML = `
+            <div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:500px; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+                <h3 style="margin-top:0; color:#0f172a; font-size:1.1rem; margin-bottom:10px;"><i class="fa-solid fa-list-check"></i> إضافة مجموعة مصطلحات دفعة واحدة</h3>
+                <p style="font-size:0.8rem; color:#64748b; margin-bottom:10px;">قم لصق القائمة هنا (كل سطر علاج أو مصطلح في سطر مستقل):</p>
+                <div class="input-wrapper" style="margin-bottom:15px;">
+                    <textarea id="bulkDictInput" rows="6" placeholder="علاج 1&#10;علاج 2&#10;علاج 3" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.9rem; outline:none;"></textarea>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                    <button type="button" onclick="closeBulkAddModal()" style="background:#e2e8f0; color:#334155; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">إلغاء</button>
+                    <button type="button" onclick="processAndSaveBulkDict()" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">حفظ الكل</button>
+                </div>
+            </div>
+        `;
         document.body.appendChild(modalDiv);
     }
     
@@ -2618,7 +3094,7 @@ function processAndSaveBulkDict() {
     if (typeof renderDictTerms === 'function') {
         renderDictTerms();
     }
-    alert('تمت إضافة (' + addedCount + ') عنصر جديد إلى القاموس بنجاح!');
+    alert(`تمت إضافة (${addedCount}) عنصر جديد إلى القاموس بنجاح!`);
 }
 
 function saveNewPatient(e) {
@@ -2651,7 +3127,6 @@ function saveNewPatient(e) {
 
 function renderPatientsList(list) {
     const container = document.getElementById('patientsList');
-    if (!container) return;
     container.innerHTML = list.length === 0 
         ? '<p style="text-align:center; color:#64748b;">No matching patients found.</p>'
         : list.map(p => 
@@ -2732,7 +3207,6 @@ function addNewVisit() {
 
 function renderVisits(visits, forceFullRender = true) {
     const container = document.getElementById('visitsContainer');
-    if (!container) return;
     container.innerHTML = visits.map((v, index) => {
         const mh = v.medHistory || {};
         let mhSummaryParts = [];
@@ -2968,7 +3442,7 @@ function renderVisits(visits, forceFullRender = true) {
             '<input type="file" accept="image/*,.pdf" multiple style="display:none;" onchange="handleFileUpload(this, ' + v.visitId + ')">' +
             '</label>' +
             '<button type="button" onclick="scanFromDesktopScanner(' + v.visitId + ')" style="flex:1; background:#f0fdfa; border:1px dashed #0d9488; border-radius:10px; padding:10px; font-size:0.8rem; font-weight:700; color:#0d9488; cursor:pointer;">' +
-            '<i class="fa-solid fa-print"></i> سحب من السكانر' +
+            '<i class="fa-solid fa-print"></i> سحب من السكانر (حاسبة)' +
             '</button>' +
             '</div>' +
             
@@ -2990,8 +3464,8 @@ function renderVisits(visits, forceFullRender = true) {
             '<span class="field-label">تفاصيل التقرير والحالة السريرية</span>' +
             '<div class="input-wrapper"><textarea id="rep_details_' + v.visitId + '" rows="3" placeholder="اكتب تفاصيل التقرير هنا..." oninput="updateReportFieldData(' + v.visitId + ', \'details\', this.value)">' + (repData.details || '') + '</textarea></div>' +
             '</div>' +
-            '<button type="button" class="btn-main" onclick="printMedicalReportOnly(' + v.visitId + ')" style="background: #0284c7; padding: 8px; font-size: 0.85rem;">' +
-            '<i class="fa-solid fa-file-lines"></i> معاينة وطباعة التقرير الطبي' +
+            '<button type="button" class="btn-main" onclick="openMedicalReportModal(' + v.visitId + ')" style="background: #0284c7; padding: 8px; font-size: 0.85rem;">' +
+            '<i class="fa-solid fa-print"></i> معاينة وطباعة التقرير الطبي (بروية الترويسة)' +
             '</button>' +
             '</div></div>' +
 
@@ -3000,7 +3474,7 @@ function renderVisits(visits, forceFullRender = true) {
                 if (!att || !att.dataUrl || att.dataUrl.length < 50) {
                     return '<div style="padding:6px 10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; font-size:0.7rem; color:#b91c1c;">⚠️ صورة تالفة</div>';
                 }
-                return '<div style="position:relative; width:65px; height:65px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; cursor:pointer;" onclick="previewAttachmentByIndex(' + v.visitId + ', ' + aIdx + ')">' +
+                return '<div style="position:relative; width:65px; height:65px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; cursor:pointer;" data-visit-id="' + v.visitId + '" data-attachment-index="' + aIdx + '" onclick="previewAttachmentByIndex(this)">' +
                     '<img src="' + att.dataUrl + '" style="width:100%; height:100%; object-fit:cover;">' +
                     '</div>';
             }).join('') +
