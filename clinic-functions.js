@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.61 (Fixed Desktop & Mobile Drag)
+// Clinic Master System - Cloud Ultimate Edition v17.62 (Directional Arrows Drag & Drop)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1104,7 +1104,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.61",
+        version: "17.62",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2571,12 +2571,28 @@ function closeMedicalReportModal() {
 
 function toggleRepConfigMode() {
     repConfigModeActive = !repConfigModeActive;
-    const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
-    boxes.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            if (repConfigModeActive) el.classList.add('config-mode');
-            else el.classList.remove('config-mode');
+    const boxes = document.querySelectorAll('#medicalReportModal .draggable-box');
+    
+    boxes.forEach(box => {
+        if (repConfigModeActive) {
+            box.classList.add('config-mode');
+            // إضافة لوحة الأسهم الاتجاهية عند تفعيل وضع التعديل إذا لم تكن موجودة
+            if (!box.querySelector('.directional-arrows-panel')) {
+                const arrowsPanel = document.createElement('div');
+                arrowsPanel.className = 'directional-arrows-panel';
+                arrowsPanel.style.cssText = 'position: absolute; top: -45px; right: 0; background: #0f172a; border-radius: 6px; padding: 3px; display: flex; gap: 3px; z-index: 999; box-shadow: 0 2px 8px rgba(0,0,0,0.3);';
+                arrowsPanel.innerHTML = `
+                    <button type="button" onclick="moveBoxDir(this, 'up')" style="background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;"><i class="fa-solid fa-arrow-up"></i></button>
+                    <button type="button" onclick="moveBoxDir(this, 'down')" style="background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;"><i class="fa-solid fa-arrow-down"></i></button>
+                    <button type="button" onclick="moveBoxDir(this, 'left')" style="background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;"><i class="fa-solid fa-arrow-left"></i></button>
+                    <button type="button" onclick="moveBoxDir(this, 'right')" style="background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;"><i class="fa-solid fa-arrow-right"></i></button>
+                `;
+                box.appendChild(arrowsPanel);
+            }
+        } else {
+            box.classList.remove('config-mode');
+            const panel = box.querySelector('.directional-arrows-panel');
+            if (panel) panel.remove();
         }
     });
 
@@ -2590,6 +2606,40 @@ function toggleRepConfigMode() {
         toggleBtn.style.background = repConfigModeActive ? '#0d9488' : '#f0fdfa';
         toggleBtn.style.color = repConfigModeActive ? '#ffffff' : '#0d9488';
     }
+}
+
+// دالة التحريك بالأسهم الأربعة بدقة وثبات تام دائم
+function moveBoxDir(btn, direction) {
+    if (!repConfigModeActive) return;
+    const box = btn.closest('.draggable-box');
+    const container = document.getElementById('repCanvasContainer');
+    if (!box || !container) return;
+
+    const step = 5; // مقدار الحركة بالبكسل لكل ضغطة
+    const cWidth = container.clientWidth;
+    const cHeight = container.clientHeight;
+
+    let currentLeft = box.offsetLeft;
+    let currentTop = box.offsetTop;
+
+    // تثبيت الإحداثيات المطلقة للبوكس لحظياً لضمان دقة التحريك
+    box.style.left = currentLeft + 'px';
+    box.style.top = currentTop + 'px';
+    box.style.transform = 'none';
+    box.style.right = 'auto';
+
+    if (direction === 'up') {
+        currentTop = Math.max(0, currentTop - step);
+    } else if (direction === 'down') {
+        currentTop = Math.min(cHeight - box.offsetHeight, currentTop + step);
+    } else if (direction === 'left') {
+        currentLeft = Math.max(0, currentLeft - step);
+    } else if (direction === 'right') {
+        currentLeft = Math.min(cWidth - box.offsetWidth, currentLeft + step);
+    }
+
+    box.style.left = currentLeft + 'px';
+    box.style.top = currentTop + 'px';
 }
 
 function changeRepBoxFontSize(boxKey, delta) {
@@ -2697,78 +2747,9 @@ function printMedicalReportOnly(visitId) {
     }, 400);
 }
 
-// دالة السحب والإفلات المستقرة والمحدثة خصيصاً لتعمل بثبات كامل على الحاسوب والهواتف دون توقف
+// إلغاء السحب الحر القديم واستبداله بنظام الأزرار الاتجاهية الدائمة المضمونة على الحاسوب
 function initReportDraggables() {
-    const container = document.getElementById('repCanvasContainer');
-    if (!container) return;
-
-    const boxes = document.querySelectorAll('#medicalReportModal .draggable-box');
-
-    boxes.forEach(box => {
-        box.style.touchAction = 'none';
-        box.style.cursor = 'move';
-
-        box.onpointerdown = function(e) {
-            if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            
-            const startX = e.clientX;
-            const startY = e.clientY;
-
-            const initialLeft = box.offsetLeft;
-            const initialTop = box.offsetTop;
-
-            box.style.left = initialLeft + 'px';
-            box.style.top = initialTop + 'px';
-            box.style.transform = 'none';
-            box.style.right = 'auto';
-
-            const pointerId = e.pointerId;
-            box.setPointerCapture(pointerId);
-
-            function onPointerMove(moveEvent) {
-                if (!repConfigModeActive) return;
-
-                const dx = moveEvent.clientX - startX;
-                const dy = moveEvent.clientY - startY;
-
-                const cWidth = container.clientWidth;
-                const cHeight = container.clientHeight;
-
-                let newLeft = initialLeft + dx;
-                let newTop = initialTop + dy;
-
-                newLeft = Math.max(0, Math.min(newLeft, cWidth - box.offsetWidth));
-                newTop = Math.max(0, Math.min(newTop, cHeight - box.offsetHeight));
-
-                box.style.left = newLeft + 'px';
-                box.style.top = newTop + 'px';
-            }
-
-            function onPointerUp(upEvent) {
-                box.removeEventListener('pointermove', onPointerMove);
-                box.removeEventListener('pointerup', onPointerUp);
-                box.removeEventListener('pointercancel', onPointerUp);
-
-                const cWidth = container.clientWidth;
-                const cHeight = container.clientHeight;
-                const leftPx = parseFloat(box.style.left) || 0;
-                const topPx = parseFloat(box.style.top) || 0;
-
-                box.style.left = ((leftPx / cWidth) * 100) + '%';
-                box.style.top = ((topPx / cHeight) * 100) + '%';
-
-                if (box.hasPointerCapture(pointerId)) {
-                    box.releasePointerCapture(pointerId);
-                }
-            }
-
-            box.addEventListener('pointermove', onPointerMove);
-            box.addEventListener('pointerup', onPointerUp);
-            box.addEventListener('pointercancel', onPointerUp);
-
-            e.preventDefault();
-        };
-    });
+    // تم استبدال السحب الحر بأزرار التحكم الاتجاهية (moveBoxDir) لضمان دقة وثبات 100% على الحاسوب
 }
 
 function autoSaveMedicalRecord() {}
