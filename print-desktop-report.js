@@ -17,10 +17,10 @@ function updateDesktopRepConfigModeUI() {
     const hint = document.getElementById('repModeHint');
     const saveBtn = document.getElementById('repSaveLayoutBtn');
     if (isDesktopRepConfigMode) {
-        if (hint) hint.innerText = 'Desktop Report Config Mode Active';
+        if (hint) hint.innerText = 'Desktop Report Config Mode Active (اسحب العناصر لتعديل أماكنها)';
         if (saveBtn) saveBtn.style.display = 'block';
     } else {
-        if (hint) hint.innerText = '';
+        if (hint) hint.innerText = 'تقرير طبي مستقل';
         if (saveBtn) saveBtn.style.display = 'none';
     }
 }
@@ -56,12 +56,36 @@ function saveRepLayoutPositions() {
         repLayoutData[box.id] = {
             top: topPct + '%',
             left: leftPct + '%',
-            width: widthPct + '%'
+            width: widthPct + '%',
+            fontSize: window.getComputedStyle(box.querySelector('div:last-child') || box).fontSize
         };
     });
 
     localStorage.setItem('doctor_rep_layout_desktop', JSON.stringify(repLayoutData));
-    alert('تم حفظ إعدادات تقرير الحاسبة بنجاح!');
+    alert('تم حفظ إعدادات أماكن وخطوط التقرير الطبي بنجاح!');
+}
+
+// استرجاع المواقع المحفوظة عند فتح النافذة أو تحميل الصفحة
+function loadSavedRepLayoutPositions() {
+    const saved = localStorage.getItem('doctor_rep_layout_desktop');
+    if (!saved) return;
+    try {
+        const data = JSON.parse(saved);
+        for (const boxId in data) {
+            const box = document.getElementById(boxId);
+            if (box) {
+                box.style.top = data[boxId].top;
+                box.style.left = data[boxId].left;
+                if (data[boxId].width) box.style.width = data[boxId].width;
+                if (data[boxId].fontSize) {
+                    const innerDiv = box.querySelector('div:last-child');
+                    if (innerDiv) innerDiv.style.fontSize = data[boxId].fontSize;
+                }
+            }
+        }
+    } catch (e) {
+        console.error("Error loading report layout:", e);
+    }
 }
 
 function printMedicalReportDirectly() {
@@ -93,7 +117,10 @@ function printMedicalReportDirectly() {
     }, 1500);
 }
 
+// تفعيل ميزة السحب والافلات (Drag and Drop) بدقة عالية للأجهزة المكتبية
 document.addEventListener('DOMContentLoaded', () => {
+    loadSavedRepLayoutPositions();
+
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
     const container = document.getElementById('repCanvasContainer');
@@ -105,31 +132,33 @@ document.addEventListener('DOMContentLoaded', () => {
             startX = e.clientX;
             startY = e.clientY;
             
-            const cWidth = container.clientWidth;
-            const cHeight = container.clientHeight;
-            
-            initialLeftPct = (box.offsetLeft / cWidth) * 100;
-            initialTopPct = (box.offsetTop / cHeight) * 100;
+            if (container) {
+                const cWidth = container.clientWidth;
+                const cHeight = container.clientHeight;
+                
+                initialLeftPct = (box.offsetLeft / cWidth) * 100;
+                initialTopPct = (box.offsetTop / cHeight) * 100;
+            }
             e.stopPropagation();
         });
+    });
 
-        document.addEventListener('mousemove', e => {
-            if (!activeBox || !container) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            
-            const cWidth = container.clientWidth;
-            const cHeight = container.clientHeight;
+    document.addEventListener('mousemove', e => {
+        if (!activeBox || !container) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        
+        const cWidth = container.clientWidth;
+        const cHeight = container.clientHeight;
 
-            let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
-            let newTopPct = initialTopPct + (dy / cHeight) * 100;
+        let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
+        let newTopPct = initialTopPct + (dy / cHeight) * 100;
 
-            activeBox.style.left = newLeftPct + '%';
-            activeBox.style.top = newTopPct + '%';
-        });
+        activeBox.style.left = newLeftPct + '%';
+        activeBox.style.top = newTopPct + '%';
+    });
 
-        document.addEventListener('mouseup', () => {
-            activeBox = null;
-        });
+    document.addEventListener('mouseup', () => {
+        activeBox = null;
     });
 });
