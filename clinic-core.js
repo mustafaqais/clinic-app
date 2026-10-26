@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition (Unified Report & RX Printing Fixed)
+// Clinic Master System - Cloud Ultimate Edition (RX Preview Fixed & Attachments Preview Fixed)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1285,7 +1285,7 @@ function saveRxTemplateImage() {
 }
 
 // ==========================================
-// الدوال المحدثة (الطباعة والسكانر بشكل نظيف ومستقل تماماً)
+// الدوال المحدثة (الطباعة والسكانر ومعاينة الصور بدقة)
 // ==========================================
 
 async function printPrescriptionDirectly() {
@@ -1321,29 +1321,9 @@ function printMedicalReportDirectly() {
     }, 1500);
 }
 
-// الدالة المحدثة كلياً لضمان طباعة الروشتة بسلاسة تامة دون أي إغلاق مفاجئ
+// دالة فتح معاينة الروشتة فقط دون طباعة مباشرة ليتسنى لك التعديل والمعاينة
 function printPrescriptionOnly(visitId) {
     openRxModal(visitId);
-    
-    document.body.classList.add('is-printing-rx-only');
-    const rxModal = document.getElementById('rxModal');
-    
-    if (rxModal) {
-        rxModal.style.background = '#ffffff';
-        const controlPanels = rxModal.querySelectorAll('button, .rx-controls-bar, .config-mode');
-        controlPanels.forEach(el => el.style.display = 'none');
-    }
-
-    setTimeout(() => {
-        window.print();
-        
-        document.body.classList.remove('is-printing-rx-only');
-        if (rxModal) {
-            rxModal.style.background = '';
-            const controlPanels = rxModal.querySelectorAll('button, .rx-controls-bar, .config-mode');
-            controlPanels.forEach(el => el.style.display = '');
-        }
-    }, 400);
 }
 
 async function scanFromDesktopScanner(visitId) {
@@ -1387,6 +1367,33 @@ async function scanFromDesktopScanner(visitId) {
     } catch (err) {
         console.error("خطأ في السحب:", err);
         alert("تعذر إتمام عملية السحب.");
+    }
+}
+
+// الدوال المحدثة لمعاينة الصور المرفقة بملف المريض بكل سلاسة
+function previewAttachmentByIndex(visitId, index) {
+    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+    if (!patient) return;
+    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+    if (!visit || !visit.attachments || !visit.attachments[index]) return;
+    
+    const att = visit.attachments[index];
+    previewAttachmentImage(att.dataUrl);
+}
+
+function previewAttachmentImage(imgSrc) {
+    const modalImg = document.getElementById('previewModalImg');
+    const modalDiv = document.getElementById('imagePreviewModal');
+    if (modalImg && modalDiv) {
+        modalImg.src = imgSrc;
+        modalDiv.style.display = 'flex';
+    }
+}
+
+function closeImagePreview() {
+    const modalDiv = document.getElementById('imagePreviewModal');
+    if (modalDiv) {
+        modalDiv.style.display = 'none';
     }
 }
 
@@ -1964,27 +1971,6 @@ function handleFileUpload(input, visitId) {
             reader.readAsDataURL(file);
         });
     }
-}
-
-function previewAttachmentByIndex(el) {
-    const visitId = el.getAttribute('data-visit-id');
-    const index = el.getAttribute('data-attachment-index');
-    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-    if (!patient) return;
-    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-    if (!visit || !visit.attachments || !visit.attachments[index]) return;
-    
-    const att = visit.attachments[index];
-    previewAttachmentImage(att.dataUrl);
-}
-
-function previewAttachmentImage(imgSrc) {
-    document.getElementById('previewModalImg').src = imgSrc;
-    document.getElementById('imagePreviewModal').style.display = 'flex';
-}
-
-function closeImagePreview() {
-    document.getElementById('imagePreviewModal').style.display = 'none';
 }
 
 function openEditPatientModal() {
@@ -3287,7 +3273,7 @@ function renderVisits(visits, forceFullRender = true) {
                 if (!att || !att.dataUrl || att.dataUrl.length < 50) {
                     return '<div style="padding:6px 10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; font-size:0.7rem; color:#b91c1c;">⚠️ صورة تالفة</div>';
                 }
-                return '<div style="position:relative; width:65px; height:65px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; cursor:pointer;" data-visit-id="' + v.visitId + '" data-attachment-index="' + aIdx + '" onclick="previewAttachmentByIndex(this)">' +
+                return '<div style="position:relative; width:65px; height:65px; border-radius:10px; overflow:hidden; border:1px solid #cbd5e1; cursor:pointer;" onclick="previewAttachmentByIndex(' + v.visitId + ', ' + aIdx + ')">' +
                     '<img src="' + att.dataUrl + '" style="width:100%; height:100%; object-fit:cover;">' +
                     '</div>';
             }).join('') +
