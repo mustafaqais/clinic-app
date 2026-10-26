@@ -3357,15 +3357,18 @@ function renderVisits(visits, forceFullRender = true) {
                     return '<div style="padding:6px 10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; font-size:0.7rem; color:#b91c1c;">⚠️ صورة تالفة</div>';
                 }
                 return `
-                    <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
-                        <span style="font-size:0.75rem; color:#334155; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:55%;">
-                            <i class="fa-solid fa-paperclip" style="color:#0d9488; margin-left:4px;"></i> ${att.name || 'مرفق رقم ' + (aIdx + 1)}
-                        </span>
-                        <div style="display:flex; gap:6px;">
-                            <button type="button" onclick="viewAttachment('${att.dataUrl}', 'image')" style="background:#0284c7; color:white; border:none; border-radius:6px; padding:4px 10px; font-size:0.72rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="معاينة المرفق">
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+                            <img src="${att.dataUrl}" alt="مرفق" style="width:45px; height:45px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1; cursor:pointer;" onclick="viewAttachment('${att.dataUrl}', 'image')" title="اضغط لتكبير الصورة">
+                            <span style="font-size:0.8rem; color:#334155; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">
+                                ${att.name || 'مرفق رقم ' + (aIdx + 1)}
+                            </span>
+                        </div>
+                        <div style="display:flex; gap:6px; flex-shrink:0;">
+                            <button type="button" onclick="viewAttachment('${att.dataUrl}', 'image')" style="background:#0284c7; color:white; border:none; border-radius:6px; padding:6px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="معاينة المرفق">
                                 <i class="fa-solid fa-eye"></i> معاينة
                             </button>
-                            <button type="button" onclick="promptDeleteAttachment('${currentPatientId}', '${v.visitId}', ${aIdx})" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:4px 10px; font-size:0.72rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="حذف المرفق">
+                            <button type="button" onclick="promptDeleteAttachment('${currentPatientId}', '${v.visitId}', ${aIdx})" style="background:#ef4444; color:white; border:none; border-radius:6px; padding:6px 12px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="حذف المرفق">
                                 <i class="fa-solid fa-trash"></i> حذف
                             </button>
                         </div>
