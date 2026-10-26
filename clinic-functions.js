@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.64 (Fixed Syntax)
+// Clinic Master System - Cloud Ultimate Edition v17.65 (Clean Arrow Fix)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1104,7 +1104,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.64",
+        version: "17.65",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2580,12 +2580,37 @@ function toggleRepConfigMode() {
                 const arrowsPanel = document.createElement('div');
                 arrowsPanel.className = 'directional-arrows-panel';
                 arrowsPanel.style.cssText = 'position: absolute; top: -45px; right: 0; background: #0f172a; border-radius: 6px; padding: 3px; display: flex; gap: 3px; z-index: 999; box-shadow: 0 2px 8px rgba(0,0,0,0.3);';
-                arrowsPanel.innerHTML = `
-                    <button type="button" onclick="moveBoxDir(this, 'up')" style="background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;"><i class="fa-solid fa-arrow-up"></i></button>
-                    <button type="button" onclick="moveBoxDir(this, 'down')" style="background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;"><i class="fa-solid fa-arrow-down"></i></button>
-                    <button type="button" onclick="moveBoxDir(this, 'left')" style="background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;"><i class="fa-solid fa-arrow-left"></i></button>
-                    <button type="button" onclick="moveBoxDir(this, 'right')" style="background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;"><i class="fa-solid fa-arrow-right"></i></button>
-                `;
+                
+                // تم فصل الـ HTML الخاص بالأزرار بشكل نظيف تماماً لتجنب أي أخطاء في الـ Syntax
+                const upBtn = document.createElement('button');
+                upBtn.type = 'button';
+                upBtn.innerHTML = '<i class="fa-solid fa-arrow-up"></i>';
+                upBtn.style.cssText = 'background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;';
+                upBtn.onclick = function() { moveBoxDir(this, 'up'); };
+
+                const downBtn = document.createElement('button');
+                downBtn.type = 'button';
+                downBtn.innerHTML = '<i class="fa-solid fa-arrow-down"></i>';
+                downBtn.style.cssText = 'background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;';
+                downBtn.onclick = function() { moveBoxDir(this, 'down'); };
+
+                const leftBtn = document.createElement('button');
+                leftBtn.type = 'button';
+                leftBtn.innerHTML = '<i class="fa-solid fa-arrow-left"></i>';
+                leftBtn.style.cssText = 'background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;';
+                leftBtn.onclick = function() { moveBoxDir(this, 'left'); };
+
+                const rightBtn = document.createElement('button');
+                rightBtn.type = 'button';
+                rightBtn.innerHTML = '<i class="fa-solid fa-arrow-right"></i>';
+                rightBtn.style.cssText = 'background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;';
+                rightBtn.onclick = function() { moveBoxDir(this, 'right'); };
+
+                arrowsPanel.appendChild(upBtn);
+                arrowsPanel.appendChild(downBtn);
+                arrowsPanel.appendChild(leftBtn);
+                arrowsPanel.appendChild(rightBtn);
+
                 box.appendChild(arrowsPanel);
             }
         } else {
