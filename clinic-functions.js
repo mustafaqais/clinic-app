@@ -1628,7 +1628,7 @@ function handleLiveInput(textarea, category, visitId) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1720,7 +1720,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2580,6 +2580,9 @@ function updateReportFieldData(visitId, fieldName, value) {
     savePatientToCloudAndLocal(patient);
 }
 
+// =========================================================================
+// الدالة المُحدثة والمضمونة: openMedicalReportModal (تفرض تحميل وتثبيت الإحداثيات)
+// =========================================================================
 function openMedicalReportModal(visitId) {
     currentVisitIdForModal = visitId;
     const modal = document.getElementById('medicalReportModal');
@@ -2642,9 +2645,10 @@ function openMedicalReportModal(visitId) {
         repDetailsText.style.lineHeight = '1.6';
     }
 
-    setTimeout(() => {
-        loadRepLayoutPositions();
-    }, 30);
+    // فرض تحميل الإحداثيات وتثبيتها فور الفتح لمنع أي تداخل
+    loadRepLayoutPositions();
+    setTimeout(() => loadRepLayoutPositions(), 50);
+    setTimeout(() => loadRepLayoutPositions(), 150);
 }
 
 function closeMedicalReportModal() {
@@ -2694,6 +2698,9 @@ function changeRepBoxFontSize(boxKey, delta) {
     }
 }
 
+// =========================================================================
+// الدالة المُحدثة والمضمونة: saveRepLayoutPositions (تحفظ في كافة المفاتيح)
+// =========================================================================
 function saveRepLayoutPositions() {
     let positions = {};
     const container = document.getElementById('repCanvasContainer');
@@ -2718,16 +2725,19 @@ function saveRepLayoutPositions() {
     positions.fontSizes = repFontSizes;
     
     const storageKey = getReportDeviceStorageKey();
-    localStorage.setItem(storageKey, JSON.stringify(positions));
-    localStorage.setItem('clinic_rep_custom_layout', JSON.stringify(positions));
-    localStorage.setItem('clinic_rep_layout_v1', JSON.stringify(positions));
+    const jsonStr = JSON.stringify(positions);
+    
+    // الحفظ المزدوج والشامل لضمان عدم ضياع التنسيق أبداً
+    localStorage.setItem(storageKey, jsonStr);
+    localStorage.setItem('clinic_rep_custom_layout', jsonStr);
+    localStorage.setItem('clinic_rep_layout_v1', jsonStr);
 
     if (typeof saveSettingsToCloudAndLocal === 'function') {
         saveSettingsToCloudAndLocal();
     }
     
     loadRepLayoutPositions();
-    alert('تم حفظ أماكن التقرير الطبي بنجاح ولن تتغير بعد الآن!');
+    alert('✨ تم حفظ أماكن وترتيب التقرير الطبي بنجاح وثبيتها نهائياً!');
     
     if (repConfigModeActive) {
         toggleRepConfigMode();
