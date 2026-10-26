@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.62 (Directional Arrows Drag & Drop)
+// Clinic Master System - Cloud Ultimate Edition v17.63 (Universal Directional Arrows)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1104,7 +1104,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.62",
+        version: "17.63",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1637,7 +1637,7 @@ function handleLiveInput(textarea, category, visitId) {
         if (matches.length > 0 && box) {
             box.innerHTML = matches.map(m => {
                 const escapedTerm = m.replace(/'/g, "\\'");
-                return '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + escapedTerm + '\')">' + m + '</div>';
+                return '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + escapedTerm + \')">' + m + '</div>';
             }).join('');
             box.style.display = 'block';
         } else if (box) {
@@ -2576,7 +2576,7 @@ function toggleRepConfigMode() {
     boxes.forEach(box => {
         if (repConfigModeActive) {
             box.classList.add('config-mode');
-            // إضافة لوحة الأسهم الاتجاهية عند تفعيل وضع التعديل إذا لم تكن موجودة
+            // إظهار لوحة الأسهم الاتجاهية دائماً على الحاسوب والهواتف عند تفعيل وضع التعديل
             if (!box.querySelector('.directional-arrows-panel')) {
                 const arrowsPanel = document.createElement('div');
                 arrowsPanel.className = 'directional-arrows-panel';
@@ -2608,7 +2608,7 @@ function toggleRepConfigMode() {
     }
 }
 
-// دالة التحريك بالأسهم الأربعة بدقة وثبات تام دائم
+// دالة التحريك بالأسهم الأربعة بدقة وثبات تام دائم على الحاسوب والهواتف
 function moveBoxDir(btn, direction) {
     if (!repConfigModeActive) return;
     const box = btn.closest('.draggable-box');
@@ -2622,7 +2622,6 @@ function moveBoxDir(btn, direction) {
     let currentLeft = box.offsetLeft;
     let currentTop = box.offsetTop;
 
-    // تثبيت الإحداثيات المطلقة للبوكس لحظياً لضمان دقة التحريك
     box.style.left = currentLeft + 'px';
     box.style.top = currentTop + 'px';
     box.style.transform = 'none';
@@ -2747,10 +2746,7 @@ function printMedicalReportOnly(visitId) {
     }, 400);
 }
 
-// إلغاء السحب الحر القديم واستبداله بنظام الأزرار الاتجاهية الدائمة المضمونة على الحاسوب
-function initReportDraggables() {
-    // تم استبدال السحب الحر بأزرار التحكم الاتجاهية (moveBoxDir) لضمان دقة وثبات 100% على الحاسوب
-}
+function initReportDraggables() {}
 
 function autoSaveMedicalRecord() {}
 
