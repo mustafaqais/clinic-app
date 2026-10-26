@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition (Attachments Preview & Print Preview Fix)
+// Clinic Master System - Cloud Ultimate Edition (Report Drag & Drop Fix)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1289,7 +1289,7 @@ function saveRxTemplateImage() {
 }
 
 // ==========================================
-// الدوال المحدثة (الطباعة بالمعاينة أولاً + فتح الصور المرفقة بدقة)
+// الطباعة والمعاينة
 // ==========================================
 
 async function printPrescriptionDirectly() {
@@ -1325,12 +1325,10 @@ function printMedicalReportDirectly() {
     }, 1500);
 }
 
-// دالة فتح المعاينة فقط للروشتة دون طباعة مباشرة
 function printPrescriptionOnly(visitId) {
     openRxModal(visitId);
 }
 
-// دالة فتح المعاينة فقط للتقرير الطبي دون طباعة مباشرة (تصحح مشكلة الطباعة المباشرة)
 function printMedicalReportOnly(visitId) {
     openMedicalReportModal(visitId);
 }
@@ -1379,7 +1377,6 @@ async function scanFromDesktopScanner(visitId) {
     }
 }
 
-// الدوال المحدثة لمعاينة الصور المرفقة بملف المريض بكل سلاسة
 function previewAttachmentByIndex(visitId, index) {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
@@ -1391,27 +1388,19 @@ function previewAttachmentByIndex(visitId, index) {
 }
 
 function previewAttachmentImage(imgSrc) {
-    const modalImg = document.getElementById('previewModalImg');
-    const modalDiv = document.getElementById('imagePreviewModal');
-    if (modalImg && modalDiv) {
-        modalImg.src = imgSrc;
-        modalDiv.style.display = 'flex';
+    let existingModal = document.getElementById('imagePreviewModal');
+    if (!existingModal) {
+        existingModal = document.createElement('div');
+        existingModal.id = 'imagePreviewModal';
+        existingModal.style.cssText = 'display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center;';
+        existingModal.innerHTML = '<div style="position:relative; max-width:90%; max-height:90%; text-align:center;">' +
+            '<button onclick="closeImagePreview()" style="position:absolute; top:-40px; right:0; background:#ef4444; color:#fff; border:none; border-radius:50%; width:35px; height:35px; font-size:1.1rem; cursor:pointer; font-weight:bold;">&times;</button>' +
+            '<img id="previewModalImg" src="' + imgSrc + '" style="max-width:100%; max-height:85vh; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.5); object-fit:contain;">' +
+            '</div>';
+        document.body.appendChild(existingModal);
     } else {
-        // إنشاء عنصر العرض المنبثق للصور في حال لم يكن موجوداً بالصفحة
-        let existingModal = document.getElementById('imagePreviewModal');
-        if (!existingModal) {
-            existingModal = document.createElement('div');
-            existingModal.id = 'imagePreviewModal';
-            existingModal.style.cssText = 'display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; justify-content:center; align-items:center;';
-            existingModal.innerHTML = '<div style="position:relative; max-width:90%; max-height:90%; text-align:center;">' +
-                '<button onclick="closeImagePreview()" style="position:absolute; top:-40px; right:0; background:#ef4444; color:#fff; border:none; border-radius:50%; width:35px; height:35px; font-size:1.1rem; cursor:pointer; font-weight:bold;">&times;</button>' +
-                '<img id="previewModalImg" src="' + imgSrc + '" style="max-width:100%; max-height:85vh; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.5); object-fit:contain;">' +
-                '</div>';
-            document.body.appendChild(existingModal);
-        } else {
-            document.getElementById('previewModalImg').src = imgSrc;
-            existingModal.style.display = 'flex';
-        }
+        document.getElementById('previewModalImg').src = imgSrc;
+        existingModal.style.display = 'flex';
     }
 }
 
@@ -1820,7 +1809,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         if (matches.length > 0 && box) {
             box.innerHTML = matches.map(m => {
                 const escapedTerm = m.replace(/'/g, "\\'");
-                return '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + escapedTerm + '\')">' + m + '</div>';
+                return '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + escapedTerm + \')">' + m + '</div>';
             }).join('');
             box.style.display = 'block';
         } else if (box) {
@@ -2674,18 +2663,28 @@ function loadRepLayoutPositions() {
     }
 }
 
+// دالة السحب والإفطار المحدثة والمستقرة للتقرير الطبي (تعمل باستمرار ودون أي توقف)
 function initReportDraggables() {
-    let activeBox = null;
-    let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
     const container = document.getElementById('repCanvasContainer');
     if (!container) return;
 
     document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
         box.style.touchAction = 'none';
 
+        // إزالة أي مستمعات قديمة لمنع تراكم الأحداث
+        const newBox = box.cloneNode(true);
+        box.parentNode.replaceChild(newBox, box);
+    });
+
+    document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
+        box.style.touchAction = 'none';
+        let activePointerId = null;
+        let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
+
         box.addEventListener('pointerdown', e => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            activeBox = box;
+            
+            activePointerId = e.pointerId;
             startX = e.clientX;
             startY = e.clientY;
             
@@ -2695,12 +2694,17 @@ function initReportDraggables() {
             initialLeftPct = (box.offsetLeft / cWidth) * 100;
             initialTopPct = (box.offsetTop / cHeight) * 100;
             
-            box.setPointerCapture(e.pointerId);
+            try {
+                box.setPointerCapture(activePointerId);
+            } catch(err) {
+                console.log(err);
+            }
             e.stopPropagation();
         });
 
         box.addEventListener('pointermove', e => {
-            if (!activeBox || activeBox !== box) return;
+            if (activePointerId !== e.pointerId) return;
+            
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
             
@@ -2715,11 +2719,19 @@ function initReportDraggables() {
         });
 
         box.addEventListener('pointerup', e => {
-            if (activeBox === box) {
-                activeBox = null;
-                if (box.hasPointerCapture(e.pointerId)) {
-                    box.releasePointerCapture(e.pointerId);
+            if (activePointerId === e.pointerId) {
+                try {
+                    box.releasePointerCapture(activePointerId);
+                } catch(err) {
+                    console.log(err);
                 }
+                activePointerId = null;
+            }
+        });
+
+        box.addEventListener('pointercancel', e => {
+            if (activePointerId === e.pointerId) {
+                activePointerId = null;
             }
         });
     });
