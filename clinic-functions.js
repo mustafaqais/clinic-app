@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.59 (Optimized & Report Dragging Removed from Main)
+// Clinic Master System - Cloud Ultimate Edition v17.59 (Optimized & Report Dragging Fixed)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -2238,16 +2238,12 @@ function saveRxLayoutPositions() {
         saveSettingsToCloudAndLocal();
     }
 
-    alert('تم حفظ أماكن وأحجام الروشتة الخاصة بهذا الجهاز فقط وبشكل مستقل بنجاح!');
+    alert('تم حفظ أماكن وأحجام الروشتة بنجاح!');
 }
 
 function loadSavedRxLayout() {
     const storageKey = getRxDeviceStorageKey();
-    let savedJson = localStorage.getItem(storageKey);
-    
-    if (!savedJson) {
-        savedJson = localStorage.getItem('doctor_rx_layout');
-    }
+    let savedJson = localStorage.getItem(storageKey) || localStorage.getItem('doctor_rx_layout');
 
     const savedLayout = JSON.parse(savedJson || '{}');
     for (const [boxId, data] of Object.entries(savedLayout)) {
@@ -2590,7 +2586,7 @@ function openMedicalReportModal(visitId) {
     if (!modal) return;
     modal.style.display = 'flex';
 
-    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image'] || '';
     const container = document.getElementById('repCanvasContainer');
     if (container) {
         let bgImg = container.querySelector('.rep-bg-img');
@@ -2649,7 +2645,10 @@ function openMedicalReportModal(visitId) {
         repDetailsText.style.lineHeight = '1.6';
     }
 
-    loadRepLayoutPositions();
+    // فرض تحميل الأماكن المحفوظة فور فتح النافذة
+    setTimeout(() => {
+        loadRepLayoutPositions();
+    }, 30);
 }
 
 function closeMedicalReportModal() {
@@ -2724,9 +2723,10 @@ function saveRepLayoutPositions() {
     
     const storageKey = getReportDeviceStorageKey();
     localStorage.setItem(storageKey, JSON.stringify(positions));
+    localStorage.setItem('clinic_rep_custom_layout', JSON.stringify(positions)); // مفتاح الاعتماد المباشر
     
     loadRepLayoutPositions();
-    alert('تم حفظ أماكن التقرير الطبي الخاصة بهذا الجهاز فقط بنجاح!');
+    alert('تم حفظ أماكن التقرير الطبي بنجاح ولن تتغير بعد الآن!');
     
     if (repConfigModeActive) {
         toggleRepConfigMode();
@@ -2735,11 +2735,7 @@ function saveRepLayoutPositions() {
 
 function loadRepLayoutPositions() {
     const storageKey = getReportDeviceStorageKey();
-    let saved = localStorage.getItem(storageKey);
-    
-    if (!saved) {
-        saved = localStorage.getItem('clinic_rep_layout_v1');
-    }
+    let saved = localStorage.getItem(storageKey) || localStorage.getItem('clinic_rep_custom_layout') || localStorage.getItem('clinic_rep_layout_v1');
 
     if (saved) {
         try {
@@ -2784,9 +2780,6 @@ function printMedicalReportOnly(visitId) {
         printMedicalReportDirectly();
     }, 400);
 }
-
-// تم حذف كود السحب والإفلات الخاص بالتقرير الطبي من هنا نهائياً
-// لكي لا يحدث أي تضارب مع ملف الـ HTML الخاص بك.
 
 function autoSaveMedicalRecord() {}
 
