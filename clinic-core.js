@@ -2579,31 +2579,31 @@ function toggleRepConfigMode() {
             if (!box.querySelector('.directional-arrows-panel')) {
                 const arrowsPanel = document.createElement('div');
                 arrowsPanel.className = 'directional-arrows-panel';
-                arrowsPanel.style.cssText = 'position: absolute; top: -45px; right: 0; background: #0f172a; border-radius: 6px; padding: 3px; display: flex; gap: 3px; z-index: 999; box-shadow: 0 2px 8px rgba(0,0,0,0.3);';
+                arrowsPanel.style.cssText = 'position: absolute; top: -50px; right: 0; background: #0f172a; border-radius: 8px; padding: 4px; display: flex; gap: 4px; z-index: 9999; box-shadow: 0 4px 12px rgba(0,0,0,0.4);';
                 
                 const upBtn = document.createElement('button');
                 upBtn.type = 'button';
                 upBtn.innerHTML = '<i class="fa-solid fa-arrow-up"></i>';
-                upBtn.style.cssText = 'background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;';
-                upBtn.onclick = function() { moveBoxDir(this, 'up'); };
+                upBtn.style.cssText = 'background:#0d9488; color:#fff; border:none; width:28px; height:28px; border-radius:6px; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center;';
+                upBtn.onclick = function(e) { e.stopPropagation(); moveBoxDir(box, 'up'); };
 
                 const downBtn = document.createElement('button');
                 downBtn.type = 'button';
                 downBtn.innerHTML = '<i class="fa-solid fa-arrow-down"></i>';
-                downBtn.style.cssText = 'background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;';
-                downBtn.onclick = function() { moveBoxDir(this, 'down'); };
+                downBtn.style.cssText = 'background:#0d9488; color:#fff; border:none; width:28px; height:28px; border-radius:6px; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center;';
+                downBtn.onclick = function(e) { e.stopPropagation(); moveBoxDir(box, 'down'); };
 
                 const leftBtn = document.createElement('button');
                 leftBtn.type = 'button';
                 leftBtn.innerHTML = '<i class="fa-solid fa-arrow-left"></i>';
-                leftBtn.style.cssText = 'background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;';
-                leftBtn.onclick = function() { moveBoxDir(this, 'left'); };
+                leftBtn.style.cssText = 'background:#0d9488; color:#fff; border:none; width:28px; height:28px; border-radius:6px; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center;';
+                leftBtn.onclick = function(e) { e.stopPropagation(); moveBoxDir(box, 'left'); };
 
                 const rightBtn = document.createElement('button');
                 rightBtn.type = 'button';
                 rightBtn.innerHTML = '<i class="fa-solid fa-arrow-right"></i>';
-                rightBtn.style.cssText = 'background:#0d9488; color:#fff; border:none; width:22px; height:22px; border-radius:4px; cursor:pointer; font-size:10px;';
-                rightBtn.onclick = function() { moveBoxDir(this, 'right'); };
+                rightBtn.style.cssText = 'background:#0d9488; color:#fff; border:none; width:28px; height:28px; border-radius:6px; cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center;';
+                rightBtn.onclick = function(e) { e.stopPropagation(); moveBoxDir(box, 'right'); };
 
                 arrowsPanel.appendChild(upBtn);
                 arrowsPanel.appendChild(downBtn);
@@ -2631,13 +2631,12 @@ function toggleRepConfigMode() {
     }
 }
 
-function moveBoxDir(btn, direction) {
+function moveBoxDir(box, direction) {
     if (!repConfigModeActive) return;
-    const box = btn.closest('.draggable-box');
     const container = document.getElementById('repCanvasContainer');
     if (!box || !container) return;
 
-    const step = 5;
+    const step = 8;
     const cWidth = container.clientWidth;
     const cHeight = container.clientHeight;
 
@@ -2768,7 +2767,7 @@ function printMedicalReportOnly(visitId) {
     }, 400);
 }
 
-// دالة السحب والإفلات الشاملة للتقرير الطبي (تدعم الماوس، اللمس للأجهزة الذكية، والأسهم)
+// دالة السحب والإفلات الشاملة (تدعم الماوس للحاسوب، واللمس للأجهزة الذكية)
 let activeRepBox = null;
 let repStartX = 0, repStartY = 0, repInitialLeft = 0, repInitialTop = 0;
 
@@ -2779,28 +2778,25 @@ function initReportDraggables() {
     document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
         box.style.touchAction = 'none';
 
-        box.addEventListener('pointerdown', e => {
-            if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        const startDrag = (clientX, clientY, target) => {
+            if (!repConfigModeActive || target.tagName === 'BUTTON' || target.closest('button') || target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') return;
             
             activeRepBox = box;
-            repStartX = e.clientX;
-            repStartY = e.clientY;
+            repStartX = clientX;
+            repStartY = clientY;
 
             const cWidth = container.clientWidth;
             const cHeight = container.clientHeight;
 
             repInitialLeft = (box.offsetLeft / cWidth) * 100;
             repInitialTop = (box.offsetTop / cHeight) * 100;
+        };
 
-            box.setPointerCapture(e.pointerId);
-            e.stopPropagation();
-        });
-
-        box.addEventListener('pointermove', e => {
+        const moveDrag = (clientX, clientY) => {
             if (!activeRepBox || activeRepBox !== box) return;
 
-            const dx = e.clientX - repStartX;
-            const dy = e.clientY - repStartY;
+            const dx = clientX - repStartX;
+            const dy = clientY - repStartY;
 
             const cWidth = container.clientWidth;
             const cHeight = container.clientHeight;
@@ -2812,15 +2808,46 @@ function initReportDraggables() {
             box.style.top = newTopPct + '%';
             box.style.transform = 'none';
             box.style.right = 'auto';
-        });
+        };
 
-        box.addEventListener('pointerup', e => {
+        const endDrag = () => {
             if (activeRepBox === box) {
                 activeRepBox = null;
-                if (box.hasPointerCapture(e.pointerId)) {
-                    box.releasePointerCapture(e.pointerId);
-                }
             }
+        };
+
+        // 1. دعم الماوس (للحاسوب)
+        box.addEventListener('mousedown', e => {
+            startDrag(e.clientX, e.clientY, e.target);
+            e.stopPropagation();
+        });
+
+        window.addEventListener('mousemove', e => {
+            if (activeRepBox === box) {
+                moveDrag(e.clientX, e.clientY);
+            }
+        });
+
+        window.addEventListener('mouseup', () => {
+            endDrag();
+        });
+
+        // 2. دعم اللمس (للموبايل والآيباد)
+        box.addEventListener('touchstart', e => {
+            if (e.touches.length === 1) {
+                startDrag(e.touches[0].clientX, e.touches[0].clientY, e.target);
+                e.stopPropagation();
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchmove', e => {
+            if (activeRepBox === box && e.touches.length === 1) {
+                moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => {
+            endDrag();
         });
     });
 }
