@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.59 (Fully Optimized & Fixed)
+// Clinic Master System - Cloud Ultimate Edition v17.59 (Fully Fixed & Cleaned)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1628,7 +1628,7 @@ function handleLiveInput(textarea, category, visitId) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1720,7 +1720,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -2580,9 +2580,6 @@ function updateReportFieldData(visitId, fieldName, value) {
     savePatientToCloudAndLocal(patient);
 }
 
-// =========================================================================
-// الدالة المُحدثة والمضمونة: openMedicalReportModal (تفرض تحميل وتثبيت الإحداثيات)
-// =========================================================================
 function openMedicalReportModal(visitId) {
     currentVisitIdForModal = visitId;
     const modal = document.getElementById('medicalReportModal');
@@ -2616,26 +2613,26 @@ function openMedicalReportModal(visitId) {
     let pCity = patient && patient.city ? ' | المحافظة: ' + patient.city : '';
     let visitDate = visit ? (visit.date || getTodayFormatted()) : getTodayFormatted();
 
-    let patDetailsStr = `الاسم: ${pName} | العمر: ${pAge} | الجنس: ${pGender}${pCity} | التاريخ: ${visitDate}`;
+    let patDetailsStr = "الاسم: " + pName + " | العمر: " + pAge + " | الجنس: " + pGender + pCity + " | التاريخ: " + visitDate;
     const repPatText = document.getElementById('repPatientText');
     if (repPatText) repPatText.textContent = patDetailsStr;
 
     const repData = (visit && visit.medicalReport) ? visit.medicalReport : {};
     
-    let titleVal = repData.title || (document.getElementById(`rep_title_${visitId}`) ? document.getElementById(`rep_title_${visitId}`).value : "تقرير طبي");
-    let toVal = repData.to || (document.getElementById(`rep_to_${visitId}`) ? document.getElementById(`rep_to_${visitId}`).value : "");
-    let detailsVal = repData.details || (document.getElementById(`rep_details_${visitId}`) ? document.getElementById(`rep_details_${visitId}`).value : "");
+    let titleVal = repData.title || (document.getElementById('rep_title_' + visitId) ? document.getElementById('rep_title_' + visitId).value : "تقرير طبي");
+    let toVal = repData.to || (document.getElementById('rep_to_' + visitId) ? document.getElementById('rep_to_' + visitId).value : "");
+    let detailsVal = repData.details || (document.getElementById('rep_details_' + visitId) ? document.getElementById('rep_details_' + visitId).value : "");
 
-    if (document.getElementById(`rep_title_${visitId}`)) document.getElementById(`rep_title_${visitId}`).value = titleVal;
-    if (document.getElementById(`rep_to_${visitId}`)) document.getElementById(`rep_to_${visitId}`).value = toVal;
-    if (document.getElementById(`rep_details_${visitId}`)) document.getElementById(`rep_details_${visitId}`).value = detailsVal;
+    if (document.getElementById('rep_title_' + visitId)) document.getElementById('rep_title_' + visitId).value = titleVal;
+    if (document.getElementById('rep_to_' + visitId)) document.getElementById('rep_to_' + visitId).value = toVal;
+    if (document.getElementById('rep_details_' + visitId)) document.getElementById('rep_details_' + visitId).value = detailsVal;
 
     const repTitleText = document.getElementById('repTitleText');
     const repToText = document.getElementById('repToText');
     const repDetailsText = document.getElementById('repDetailsText');
 
     if (repTitleText) repTitleText.textContent = titleVal || "تقرير طبي";
-    if (repToText) repToText.textContent = toVal ? `إلى: ${toVal}` : "";
+    if (repToText) repToText.textContent = toVal ? "إلى: " + toVal : "";
     
     if (repDetailsText) {
         repDetailsText.textContent = detailsVal;
@@ -2645,10 +2642,9 @@ function openMedicalReportModal(visitId) {
         repDetailsText.style.lineHeight = '1.6';
     }
 
-    // فرض تحميل الإحداثيات وتثبيتها فور الفتح لمنع أي تداخل
     loadRepLayoutPositions();
-    setTimeout(() => loadRepLayoutPositions(), 50);
-    setTimeout(() => loadRepLayoutPositions(), 150);
+    setTimeout(loadRepLayoutPositions, 50);
+    setTimeout(loadRepLayoutPositions, 150);
 }
 
 function closeMedicalReportModal() {
@@ -2698,9 +2694,6 @@ function changeRepBoxFontSize(boxKey, delta) {
     }
 }
 
-// =========================================================================
-// الدالة المُحدثة والمضمونة: saveRepLayoutPositions (تحفظ في كافة المفاتيح)
-// =========================================================================
 function saveRepLayoutPositions() {
     let positions = {};
     const container = document.getElementById('repCanvasContainer');
@@ -2727,7 +2720,6 @@ function saveRepLayoutPositions() {
     const storageKey = getReportDeviceStorageKey();
     const jsonStr = JSON.stringify(positions);
     
-    // الحفظ المزدوج والشامل لضمان عدم ضياع التنسيق أبداً
     localStorage.setItem(storageKey, jsonStr);
     localStorage.setItem('clinic_rep_custom_layout', jsonStr);
     localStorage.setItem('clinic_rep_layout_v1', jsonStr);
