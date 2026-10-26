@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.59 (GPU Smooth Drag & Drop)
+// Clinic Master System - Cloud Ultimate Edition v17.60 (Stable Pointer Drag & Drop)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1104,7 +1104,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.59",
+        version: "17.60",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2697,7 +2697,7 @@ function printMedicalReportOnly(visitId) {
     }, 400);
 }
 
-// دالة السحب والسلاسة المعتمدة على معالج الرسوميات GPU (translate3d)
+// دالة السحب والإفلات المستقرة باستخدام Pointer Events (تمنع القفز وتعمل بكفاءة تامة على الكمبيوتر والهواتف)
 function initReportDraggables() {
     const container = document.getElementById('repCanvasContainer');
     if (!container) return;
@@ -2710,80 +2710,72 @@ function initReportDraggables() {
 
         let isDragging = false;
         let startX = 0, startY = 0;
-        let currentX = 0, currentY = 0;
+        let initialLeft = 0, initialTop = 0;
 
-        function getTranslateValues(element) {
-            const style = window.getComputedStyle(element);
-            const matrix = style.transform || style.webkitTransform;
-            if (matrix === 'none' || !matrix) return { x: 0, y: 0 };
-            const matrixValues = matrix.match(/matrix.*\((.+)\)/);
-            if (matrixValues) {
-                const arr = matrixValues[1].split(', ');
-                return { x: parseFloat(arr[4]) || 0, y: parseFloat(arr[5]) || 0 };
-            }
-            return { x: 0, y: 0 };
-        }
-
-        function dragStart(e) {
+        box.onpointerdown = function(e) {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            
             isDragging = true;
-            
-            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
-            
-            startX = clientX;
-            startY = clientY;
+            startX = e.clientX;
+            startY = e.clientY;
 
-            const currentTranslate = getTranslateValues(box);
-            currentX = currentTranslate.x;
-            currentY = currentTranslate.y;
+            initialLeft = box.offsetLeft;
+            initialTop = box.offsetTop;
 
-            box.style.zIndex = '1000';
-        }
+            box.style.left = initialLeft + 'px';
+            box.style.top = initialTop + 'px';
+            box.style.transform = 'none';
+            box.style.right = 'auto';
 
-        function dragMove(e) {
+            box.setPointerCapture(e.pointerId);
+            e.preventDefault();
+        };
+
+        box.onpointermove = function(e) {
             if (!isDragging || !repConfigModeActive) return;
-            
-            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
 
-            const dx = clientX - startX;
-            const dy = clientY - startY;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
 
-            const newX = currentX + dx;
-            const newY = currentY + dy;
-
-            box.style.transform = `translate3d(${newX}px, ${newY}px, 0)`;
-            
-            if (e.cancelable) e.preventDefault();
-        }
-
-        function dragEnd() {
-            if (!isDragging) return;
-            isDragging = false;
-            box.style.zIndex = '10';
-
-            const rect = box.getBoundingClientRect();
-            const containerRect = container.getBoundingClientRect();
             const cWidth = container.clientWidth;
             const cHeight = container.clientHeight;
 
-            const finalLeft = rect.left - containerRect.left;
-            const finalTop = rect.top - containerRect.top;
+            let newLeft = initialLeft + dx;
+            let newTop = initialTop + dy;
 
-            box.style.transform = 'none';
-            box.style.left = ((finalLeft / cWidth) * 100) + '%';
-            box.style.top = ((finalTop / cHeight) * 100) + '%';
-        }
+            newLeft = Math.max(0, Math.min(newLeft, cWidth - box.offsetWidth));
+            newTop = Math.max(0, Math.min(newTop, cHeight - box.offsetHeight));
 
-        box.onmousedown = dragStart;
-        box.ontouchstart = dragStart;
+            box.style.left = newLeft + 'px';
+            box.style.top = newTop + 'px';
+        };
 
-        window.onmousemove = dragMove;
-        window.ontouchmove = dragMove;
+        box.onpointerup = function(e) {
+            if (isDragging) {
+                isDragging = false;
+                
+                const cWidth = container.clientWidth;
+                const cHeight = container.clientHeight;
+                const leftPx = parseFloat(box.style.left) || 0;
+                const topPx = parseFloat(box.style.top) || 0;
 
-        window.onmouseup = dragEnd;
-        window.ontouchend = dragEnd;
+                box.style.left = ((leftPx / cWidth) * 100) + '%';
+                box.style.top = ((topPx / cHeight) * 100) + '%';
+
+                if (box.hasPointerCapture(e.pointerId)) {
+                    box.releasePointerCapture(e.pointerId);
+                }
+            }
+        };
+
+        box.onpointercancel = function(e) {
+            if (isDragging) {
+                isDragging = false;
+                if (box.hasPointerCapture(e.pointerId)) {
+                    box.releasePointerCapture(e.pointerId);
+                }
+            }
+        };
     });
 }
 
