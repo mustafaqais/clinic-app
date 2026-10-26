@@ -2768,7 +2768,62 @@ function printMedicalReportOnly(visitId) {
     }, 400);
 }
 
-function initReportDraggables() {}
+// دالة السحب والإفلات الشاملة للتقرير الطبي (تدعم الماوس، اللمس للأجهزة الذكية، والأسهم)
+let activeRepBox = null;
+let repStartX = 0, repStartY = 0, repInitialLeft = 0, repInitialTop = 0;
+
+function initReportDraggables() {
+    const container = document.getElementById('repCanvasContainer');
+    if (!container) return;
+
+    document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
+        box.style.touchAction = 'none';
+
+        box.addEventListener('pointerdown', e => {
+            if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            activeRepBox = box;
+            repStartX = e.clientX;
+            repStartY = e.clientY;
+
+            const cWidth = container.clientWidth;
+            const cHeight = container.clientHeight;
+
+            repInitialLeft = (box.offsetLeft / cWidth) * 100;
+            repInitialTop = (box.offsetTop / cHeight) * 100;
+
+            box.setPointerCapture(e.pointerId);
+            e.stopPropagation();
+        });
+
+        box.addEventListener('pointermove', e => {
+            if (!activeRepBox || activeRepBox !== box) return;
+
+            const dx = e.clientX - repStartX;
+            const dy = e.clientY - repStartY;
+
+            const cWidth = container.clientWidth;
+            const cHeight = container.clientHeight;
+
+            let newLeftPct = repInitialLeft + (dx / cWidth) * 100;
+            let newTopPct = repInitialTop + (dy / cHeight) * 100;
+
+            box.style.left = newLeftPct + '%';
+            box.style.top = newTopPct + '%';
+            box.style.transform = 'none';
+            box.style.right = 'auto';
+        });
+
+        box.addEventListener('pointerup', e => {
+            if (activeRepBox === box) {
+                activeRepBox = null;
+                if (box.hasPointerCapture(e.pointerId)) {
+                    box.releasePointerCapture(e.pointerId);
+                }
+            }
+        });
+    });
+}
 
 function autoSaveMedicalRecord() {}
 
