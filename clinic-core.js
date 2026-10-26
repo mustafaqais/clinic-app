@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition (Final Syntax Fix)
+// Clinic Master System - Cloud Ultimate Edition (Complete Fixed Code)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -2663,44 +2663,47 @@ function loadRepLayoutPositions() {
     }
 }
 
+// دالة السحب والإفلات المحدثة والمنسابة للتقرير الطبي
 function initReportDraggables() {
     const container = document.getElementById('repCanvasContainer');
     if (!container) return;
 
     document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
         box.style.touchAction = 'none';
+        box.style.userSelect = 'none';
+        box.style.webkitUserSelect = 'none';
+
         const newBox = box.cloneNode(true);
         box.parentNode.replaceChild(newBox, box);
     });
 
     document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
         box.style.touchAction = 'none';
-        let activePointerId = null;
-        let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
+        box.style.userSelect = 'none';
+        let isDragging = false;
+        let startX = 0, startY = 0;
+        let initialLeft = 0, initialTop = 0;
 
         box.addEventListener('pointerdown', e => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             
-            activePointerId = e.pointerId;
+            isDragging = true;
             startX = e.clientX;
             startY = e.clientY;
             
             const cWidth = container.clientWidth;
             const cHeight = container.clientHeight;
             
-            initialLeftPct = (box.offsetLeft / cWidth) * 100;
-            initialTopPct = (box.offsetTop / cHeight) * 100;
+            initialLeft = (box.offsetLeft / cWidth) * 100;
+            initialTop = (box.offsetTop / cHeight) * 100;
             
-            try {
-                box.setPointerCapture(activePointerId);
-            } catch(err) {
-                console.log(err);
-            }
+            box.setPointerCapture(e.pointerId);
             e.stopPropagation();
+            e.preventDefault();
         });
 
         box.addEventListener('pointermove', e => {
-            if (activePointerId !== e.pointerId) return;
+            if (!isDragging) return;
             
             const dx = e.clientX - startX;
             const dy = e.clientY - startY;
@@ -2708,29 +2711,27 @@ function initReportDraggables() {
             const cWidth = container.clientWidth;
             const cHeight = container.clientHeight;
 
-            let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
-            let newTopPct = initialTopPct + (dy / cHeight) * 100;
+            let newLeftPct = initialLeft + (dx / cWidth) * 100;
+            let newTopPct = initialTop + (dy / cHeight) * 100;
+
+            newLeftPct = Math.max(0, Math.min(85, newLeftPct));
+            newTopPct = Math.max(0, Math.min(90, newTopPct));
 
             box.style.left = newLeftPct + '%';
             box.style.top = newTopPct + '%';
         });
 
-        box.addEventListener('pointerup', e => {
-            if (activePointerId === e.pointerId) {
+        const stopDrag = e => {
+            if (isDragging) {
+                isDragging = false;
                 try {
-                    box.releasePointerCapture(activePointerId);
-                } catch(err) {
-                    console.log(err);
-                }
-                activePointerId = null;
+                    box.releasePointerCapture(e.pointerId);
+                } catch(err) {}
             }
-        });
+        };
 
-        box.addEventListener('pointercancel', e => {
-            if (activePointerId === e.pointerId) {
-                activePointerId = null;
-            }
-        });
+        box.addEventListener('pointerup', stopDrag);
+        box.addEventListener('pointercancel', stopDrag);
     });
 }
 
