@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.56 (Optimized & Fixed Report Dragging)
+// Clinic Master System - Cloud Ultimate Edition v17.57 (Definitive Drag & Drop Fix)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1104,7 +1104,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.56",
+        version: "17.57",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2449,41 +2449,6 @@ function initDraggableElements() {
                 }
             }
         });
-
-        box.addEventListener('touchstart', (e) => {
-            if (!isConfigMode || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            if (e.touches.length === 1 && container) {
-                activeBox = box;
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                const cWidth = container.clientWidth;
-                const cHeight = container.clientHeight;
-                initialLeftPct = (box.offsetLeft / cWidth) * 100;
-                initialTopPct = (box.offsetTop / cHeight) * 100;
-                e.stopPropagation();
-            }
-        }, { passive: true });
-
-        box.addEventListener('touchmove', (e) => {
-            if (!activeBox || activeBox !== box || !container) return;
-            if (e.touches.length === 1) {
-                let dx = e.touches[0].clientX - startX;
-                let dy = e.touches[0].clientY - startY;
-                const cWidth = container.clientWidth;
-                const cHeight = container.clientHeight;
-                let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
-                let newTopPct = initialTopPct + (dy / cHeight) * 100;
-                box.style.left = newLeftPct + '%';
-                box.style.top = newTopPct + '%';
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        box.addEventListener('touchend', (e) => {
-            if (activeBox === box) {
-                activeBox = null;
-            }
-        });
     });
 }
 
@@ -2535,7 +2500,7 @@ function openMedicalReportModal(visitId) {
     if (!modal) return;
     modal.style.display = 'flex';
 
-    // إعادة تفعيل وربط أحداث السحب في كل مرة تُفتح فيها النافذة لضمان عدم توقفها نهائياً
+    // إعادة تفعيل وربط أحداث السحب في كل مرة تُفتح فيها النافذة
     initReportDraggables();
 
     let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
@@ -2733,7 +2698,7 @@ function printMedicalReportOnly(visitId) {
     }, 400);
 }
 
-// دالة تفعيل السحب للتقرير الطبي لتعمل بكفاءة في كل مرة تفتح فيها النافذة
+// دالة تفعيل السحب للتقرير الطبي (محدثة بالكامل لضمان استمرارية الحركة بدون توقف)
 function initReportDraggables() {
     const container = document.getElementById('repCanvasContainer');
     if (!container) return;
@@ -2746,19 +2711,18 @@ function initReportDraggables() {
         box.style.touchAction = 'none';
         box.style.cursor = 'move';
 
-        // إزالة الأحداث القديمة لمنع التكرار
+        // تنظيف الأحداث السابقة لمنع التكرار
         const newBox = box.cloneNode(true);
         box.parentNode.replaceChild(newBox, box);
     });
 
-    // إعادة تعريف البوكسات بعد الـ Replace
     const refreshedBoxes = document.querySelectorAll('#medicalReportModal .draggable-box');
 
     refreshedBoxes.forEach(box => {
         box.style.touchAction = 'none';
         box.style.cursor = 'move';
 
-        // 1. أحداث الماوس (للحاسوب Desktop)
+        // 1. بدء السحب بالماوس
         box.addEventListener('mousedown', (e) => {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             activeBox = box;
@@ -2779,34 +2743,11 @@ function initReportDraggables() {
             e.preventDefault();
             e.stopPropagation();
         });
-
-        // 2. أحداث اللمس (للهواتف والأجهزة اللوحية)
-        box.addEventListener('touchstart', (e) => {
-            if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-            if (e.touches.length === 1 && container) {
-                activeBox = box;
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-
-                const rect = box.getBoundingClientRect();
-                const containerRect = container.getBoundingClientRect();
-                
-                initialLeft = rect.left - containerRect.left;
-                initialTop = rect.top - containerRect.top;
-
-                box.style.left = initialLeft + 'px';
-                box.style.top = initialTop + 'px';
-                box.style.right = 'auto';
-                box.style.transform = 'none';
-
-                e.stopPropagation();
-            }
-        }, { passive: true });
     });
 
-    // تفعيل الحركة العامة مرة واحدة في النافذة
-    if (!window._reportMoveListenerAdded) {
-        window._reportMoveListenerAdded = true;
+    // 2. التحكم بالحركة والإفلات على مستوى الشاشة بالكامل (Global Window Listeners) لمنع التعليق
+    if (!window._reportGlobalMoveListenerAdded) {
+        window._reportGlobalMoveListenerAdded = true;
 
         window.addEventListener('mousemove', (e) => {
             if (!activeBox || !container || !repConfigModeActive) return;
@@ -2822,37 +2763,6 @@ function initReportDraggables() {
         });
 
         window.addEventListener('mouseup', () => {
-            if (activeBox) {
-                const container = document.getElementById('repCanvasContainer');
-                if (container) {
-                    const cWidth = container.clientWidth;
-                    const cHeight = container.clientHeight;
-                    const leftPx = parseFloat(activeBox.style.left) || 0;
-                    const topPx = parseFloat(activeBox.style.top) || 0;
-
-                    activeBox.style.left = ((leftPx / cWidth) * 100) + '%';
-                    activeBox.style.top = ((topPx / cHeight) * 100) + '%';
-                }
-                activeBox = null;
-            }
-        });
-
-        window.addEventListener('touchmove', (e) => {
-            if (!activeBox || !container || !repConfigModeActive) return;
-            if (e.touches.length === 1) {
-                let dx = e.touches[0].clientX - startX;
-                let dy = e.touches[0].clientY - startY;
-
-                let newLeft = initialLeft + dx;
-                let newTop = initialTop + dy;
-
-                activeBox.style.left = newLeft + 'px';
-                activeBox.style.top = newTop + 'px';
-                e.preventDefault();
-            }
-        }, { passive: false });
-
-        window.addEventListener('touchend', () => {
             if (activeBox) {
                 const container = document.getElementById('repCanvasContainer');
                 if (container) {
