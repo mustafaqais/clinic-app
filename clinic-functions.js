@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.60 (Stable Pointer Drag & Drop)
+// Clinic Master System - Cloud Ultimate Edition v17.61 (Fixed Desktop & Mobile Drag)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1104,7 +1104,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.60",
+        version: "17.61",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2697,7 +2697,7 @@ function printMedicalReportOnly(visitId) {
     }, 400);
 }
 
-// دالة السحب والإفلات المستقرة باستخدام Pointer Events (تمنع القفز وتعمل بكفاءة تامة على الكمبيوتر والهواتف)
+// دالة السحب والإفلات المستقرة والمحدثة خصيصاً لتعمل بثبات كامل على الحاسوب والهواتف دون توقف
 function initReportDraggables() {
     const container = document.getElementById('repCanvasContainer');
     if (!container) return;
@@ -2708,52 +2708,47 @@ function initReportDraggables() {
         box.style.touchAction = 'none';
         box.style.cursor = 'move';
 
-        let isDragging = false;
-        let startX = 0, startY = 0;
-        let initialLeft = 0, initialTop = 0;
-
         box.onpointerdown = function(e) {
             if (!repConfigModeActive || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
             
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
+            const startX = e.clientX;
+            const startY = e.clientY;
 
-            initialLeft = box.offsetLeft;
-            initialTop = box.offsetTop;
+            const initialLeft = box.offsetLeft;
+            const initialTop = box.offsetTop;
 
             box.style.left = initialLeft + 'px';
             box.style.top = initialTop + 'px';
             box.style.transform = 'none';
             box.style.right = 'auto';
 
-            box.setPointerCapture(e.pointerId);
-            e.preventDefault();
-        };
+            const pointerId = e.pointerId;
+            box.setPointerCapture(pointerId);
 
-        box.onpointermove = function(e) {
-            if (!isDragging || !repConfigModeActive) return;
+            function onPointerMove(moveEvent) {
+                if (!repConfigModeActive) return;
 
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
+                const dx = moveEvent.clientX - startX;
+                const dy = moveEvent.clientY - startY;
 
-            const cWidth = container.clientWidth;
-            const cHeight = container.clientHeight;
+                const cWidth = container.clientWidth;
+                const cHeight = container.clientHeight;
 
-            let newLeft = initialLeft + dx;
-            let newTop = initialTop + dy;
+                let newLeft = initialLeft + dx;
+                let newTop = initialTop + dy;
 
-            newLeft = Math.max(0, Math.min(newLeft, cWidth - box.offsetWidth));
-            newTop = Math.max(0, Math.min(newTop, cHeight - box.offsetHeight));
+                newLeft = Math.max(0, Math.min(newLeft, cWidth - box.offsetWidth));
+                newTop = Math.max(0, Math.min(newTop, cHeight - box.offsetHeight));
 
-            box.style.left = newLeft + 'px';
-            box.style.top = newTop + 'px';
-        };
+                box.style.left = newLeft + 'px';
+                box.style.top = newTop + 'px';
+            }
 
-        box.onpointerup = function(e) {
-            if (isDragging) {
-                isDragging = false;
-                
+            function onPointerUp(upEvent) {
+                box.removeEventListener('pointermove', onPointerMove);
+                box.removeEventListener('pointerup', onPointerUp);
+                box.removeEventListener('pointercancel', onPointerUp);
+
                 const cWidth = container.clientWidth;
                 const cHeight = container.clientHeight;
                 const leftPx = parseFloat(box.style.left) || 0;
@@ -2762,19 +2757,16 @@ function initReportDraggables() {
                 box.style.left = ((leftPx / cWidth) * 100) + '%';
                 box.style.top = ((topPx / cHeight) * 100) + '%';
 
-                if (box.hasPointerCapture(e.pointerId)) {
-                    box.releasePointerCapture(e.pointerId);
+                if (box.hasPointerCapture(pointerId)) {
+                    box.releasePointerCapture(pointerId);
                 }
             }
-        };
 
-        box.onpointercancel = function(e) {
-            if (isDragging) {
-                isDragging = false;
-                if (box.hasPointerCapture(e.pointerId)) {
-                    box.releasePointerCapture(e.pointerId);
-                }
-            }
+            box.addEventListener('pointermove', onPointerMove);
+            box.addEventListener('pointerup', onPointerUp);
+            box.addEventListener('pointercancel', onPointerUp);
+
+            e.preventDefault();
         };
     });
 }
