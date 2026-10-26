@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.59 (Fully Fixed & Cleaned)
+// Clinic Master System - Cloud Ultimate Edition v17.60 (Attachment Delete Fixed)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1118,7 +1118,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.59",
+        version: "17.60",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1899,6 +1899,33 @@ function handleFileUpload(input, visitId) {
             };
             reader.readAsDataURL(file);
         });
+    }
+}
+
+function promptDeleteAttachment(patientId, visitId, attIndex) {
+    if (isSubscriptionExpired) {
+        alert('التطبيق في وضع القراءة فقط.');
+        return;
+    }
+    if (confirm('هل أنت متأكد من حذف هذا المرفق؟')) {
+        const patient = patients.find(p => Number(p.id) === Number(patientId) || String(p.id) === String(patientId));
+        if (!patient) {
+            alert('تعذر العثور على المريض المرتبط بالمرفق.');
+            return;
+        }
+        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId) || String(v.visitId) === String(visitId));
+        if (!visit) {
+            alert('تعذر العثور على الزيارة المطلوبة لحذف المرفق.');
+            return;
+        }
+        if (!visit.attachments || !visit.attachments[attIndex]) {
+            alert('تعذر العثور على المرفق المطلوب لحذفه.');
+            return;
+        }
+
+        visit.attachments.splice(attIndex, 1);
+        savePatientToCloudAndLocal(patient);
+        renderVisits(patient.visits, false);
     }
 }
 
