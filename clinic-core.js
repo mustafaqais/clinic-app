@@ -1284,6 +1284,7 @@ function saveRxTemplateImage() {
     }
 }
 
+// دالة السحب المحدثة (بدون الحاجة للوكيل المحلي Local Agent وبشكل فوري ونظيف)
 async function scanFromDesktopScanner(visitId) {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) {
@@ -1297,40 +1298,35 @@ async function scanFromDesktopScanner(visitId) {
     }
 
     try {
-        console.log("جاري إرسال طلب المسح الضوئي إلى تطبيق الـ Local Agent المحلي...");
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
         
-        const response = await fetch('http://localhost:5000/scan', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ visitId: visitId })
-        });
+        fileInput.onchange = function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    if (!visit.attachments) visit.attachments = [];
+                    
+                    visit.attachments.push({ 
+                        name: file.name || ("Scan_" + Date.now() + ".jpg"), 
+                        dataUrl: event.target.result 
+                    });
 
-        if (!response.ok) {
-            throw new Error(`فشل الاتصال بالوكيل المحلي: ${response.statusText}`);
-        }
+                    savePatientToCloudAndLocal(patient);
+                    renderVisits(patient.visits, false);
+                    alert("تم إرفاق وسحب الصورة بنجاح إلى ملف المريض!");
+                };
+                reader.readAsDataURL(file);
+            }
+        };
 
-        const result = await response.json();
-        
-        if (result && result.dataUrl) {
-            if (!visit.attachments) visit.attachments = [];
-            
-            visit.attachments.push({ 
-                name: "Scan_" + Date.now() + ".jpg", 
-                dataUrl: result.dataUrl 
-            });
-
-            savePatientToCloudAndLocal(patient);
-            renderVisits(patient.visits, false);
-            alert("تم سحب الورقة وإضافتها من السكانر بنجاح!");
-        } else {
-            throw new Error("لم يتم استلام صورة صحيحة من السيرفر المحلي.");
-        }
+        fileInput.click();
 
     } catch (err) {
-        console.error("خطأ في السحب المحلي:", err);
-        alert("فشلت عملية السحب من السكانر! تأكد من أن تطبيق الـ Local Agent يعمل على الحاسوب (Port 5000) وأن السكانر متصل بشكل صحيح.");
+        console.error("خطأ في عملية السحب:", err);
+        alert("تعذر إتمام عملية السحب. يرجى المحاولة مرة أخرى.");
     }
 }
 
@@ -2302,50 +2298,7 @@ function injectPrintStyle(type = 'rx') {
 }
 
 async function printPrescriptionDirectly() {
-    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-    const patientName = patient ? patient.name : "مريض غير معروف";
-    
-    const treatmentTextEl = document.getElementById('rxDragTreatmentText');
-    const treatmentContent = treatmentTextEl ? treatmentTextEl.innerText : "لا توجد تفاصيل أدوية مسجلة.";
-
-    const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "عيادة الأسنان التخصصية";
-
-    const printPayload = 
-`----------------------------------------
-       ${customBrandName}
-----------------------------------------
-اسم المريض: ${patientName}
-التاريخ والوقت: ${new Date().toLocaleString('ar-IQ')}
-----------------------------------------
-الوصـفة الطبية (Rx):
-${treatmentContent}
-----------------------------------------
-ملاحظة: هذه الوصفة صادرة إلكترونياً
-`;
-
-    try {
-        console.log("جاري إرسال أمر الطباعة إلى الحاسوب المحلي عبر Local Agent...");
-
-        const response = await fetch('http://localhost:5000/print', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'text/plain; charset=utf-8'
-            },
-            body: printPayload
-        });
-
-        if (!response.ok) {
-            throw new Error(`خطأ في الاتصال بالخادم المحلي: ${response.statusText}`);
-        }
-
-        const result = await response.json();
-        console.log("استجابة الوكيل المحلي:", result);
-        alert("تم إرسال الوصفة الطبية إلى الطابعة بنجاح عبر الـ Local Agent!");
-
-    } catch (error) {
-        console.error("خطأ في الطباعة المحلية:", error);
-        alert("فشلت عملية الطباعة! تأكد من أن تطبيق Local Agent يعمل على الحاسوب (Port 5000).");
-    }
+    window.print();
 }
 
 function printMedicalReportDirectly() {
@@ -2698,7 +2651,6 @@ function printMedicalReportOnly(visitId) {
     }, 400);
 }
 
-// توحيد دالة السحب والإفلات للتقرير الطبي لتصبح تماماً نفس دالة الروشتة (Pointer Events)
 function initReportDraggables() {
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
