@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.66 (Clean Syntax Fix)
+// Clinic Master System - Cloud Ultimate Edition v17.67 (Direct Attachment Delete)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1118,7 +1118,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.66",
+        version: "17.67",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1725,7 +1725,6 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            // [تم التعديل هنا لإصلاح خطأ الـ Syntax باستخدام Template Literals بشكل نظيف]
             box.innerHTML = matches.map(m => 
                 `<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion('${inputKey}', '${m.replace(/'/g, "\\'")}')">${m}</div>`
             ).join('');
@@ -1905,6 +1904,7 @@ function handleFileUpload(input, visitId) {
     }
 }
 
+// دالة حذف المرفق المحدثة (حذف فوري ومباشر دون سلة محذوفات)
 function promptDeleteAttachment(patientId, visitId, attIndex) {
     if (isSubscriptionExpired) {
         alert('التطبيق في وضع القراءة فقط.');
@@ -1913,14 +1913,13 @@ function promptDeleteAttachment(patientId, visitId, attIndex) {
     
     let patient = patients.find(p => Number(p.id) === Number(currentPatientId) || Number(p.id) === Number(patientId) || String(p.id) === String(patientId));
     if (!patient && patients.length > 0) {
-        patient = patients.find(p => p.visits && p.visits.some(v => Number(v.visitId) === Number(visitId)));
+        patient = patients.find(p => p.visits && p.visits.some(v => Number(v.visitId) === Number(visitId) || String(v.visitId) === String(visitId)));
     }
     if (!patient && patients.length > 0) {
         patient = patients[0];
     }
 
     if (!patient || !patient.visits || patient.visits.length === 0) {
-        alert('تعذر العثور على سجل المريض.');
         return;
     }
 
@@ -1933,8 +1932,6 @@ function promptDeleteAttachment(patientId, visitId, attIndex) {
         visit.attachments.splice(attIndex, 1);
         savePatientToCloudAndLocal(patient);
         renderVisits(patient.visits, false);
-    } else {
-        alert('عذراً، الملف غير موجود أو تم حذفه مسبقاً.');
     }
 }
 
