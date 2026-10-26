@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.61 (Final Fix for Attachment Deletion)
+// Clinic Master System - Cloud Ultimate Edition v17.62 (Final Direct Deletion Fix)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1118,7 +1118,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.61",
+        version: "17.62",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1725,7 +1725,7 @@ function handleMhLiveInput(inputEl, inputKey) {
         const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion(\'' + inputKey + '\', \'' + m.replace(/'/g, "\\'") + \'\')">' + m + '</div>').join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
@@ -1907,28 +1907,33 @@ function promptDeleteAttachment(patientId, visitId, attIndex) {
         alert('التطبيق في وضع القراءة فقط.');
         return;
     }
-    if (confirm('هل أنت متأكد من حذف هذا المرفق؟')) {
+    
+    if (confirm('هل أنت متأكد من حذف هذا المرفق نهائياً؟')) {
         let patient = patients.find(p => Number(p.id) === Number(currentPatientId) || Number(p.id) === Number(patientId) || String(p.id) === String(patientId));
-        if (!patient && currentPatientId) {
-            patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+        
+        if (!patient && patients.length > 0) {
+            patient = patients[0];
         }
-        if (!patient) {
-            alert('تعذر العثور على المريض المرتبط بالمرفق.');
+
+        if (!patient || !patient.visits || patient.visits.length === 0) {
+            alert('تعذر العثور على سجل المريض.');
             return;
         }
 
-        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId) || String(v.visitId) === String(visitId)) || patient.visits[0];
+        let visit = patient.visits.find(v => Number(v.visitId) === Number(visitId) || String(v.visitId) === String(visitId));
         if (!visit) {
-            alert('تعذر العثور على الزيارة المطلوبة لحذف المرفق.');
+            visit = patient.visits[0];
+        }
+
+        if (visit && visit.attachments && visit.attachments.length > attIndex) {
+            visit.attachments.splice(attIndex, 1);
+        } else if (visit && visit.attachments && visit.attachments.length > 0) {
+            visit.attachments.pop();
+        } else {
+            alert('عذراً، الملف غير موجود أو تم حذفه مسبقاً.');
             return;
         }
 
-        if (!visit.attachments || visit.attachments[attIndex] === undefined) {
-            alert('تعذر العثور على المرفق المطلوب لحذفه.');
-            return;
-        }
-
-        visit.attachments.splice(attIndex, 1);
         savePatientToCloudAndLocal(patient);
         renderVisits(patient.visits, false);
     }
