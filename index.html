@@ -1382,6 +1382,41 @@
         const menu = document.getElementById('headerDropdownMenu');
         if (menu) menu.style.display = 'none';
     });
+
+    // دالة احتياطية مضمونة لفتح نافذة التقرير الطبي في حال لم يتم تحميلها من الملف الخارجي
+    if (typeof openMedicalReportModal !== 'function') {
+        window.openMedicalReportModal = function(visitId) {
+            const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+            if (!patient) {
+                alert("تنبيه: لم يتم العثور على المريض!");
+                return;
+            }
+            const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+            if (!visit) {
+                alert("تنبيه: لم يتم العثور على تفاصيل الزيارة!");
+                return;
+            }
+
+            const rep = visit.medicalReport || { title: "تقرير طبي", to: "", details: "" };
+            
+            const pText = document.getElementById('repPatientText');
+            const tText = document.getElementById('repTitleText');
+            const toText = document.getElementById('repToText');
+            const dText = document.getElementById('repDetailsText');
+
+            if (pText) pText.innerText = 'Name: ' + patient.name + ' | Age: ' + patient.age + ' | ' + (patient.gender || '');
+            if (tText) tText.innerText = rep.title || 'تقرير طبي';
+            if (toText) toText.innerText = rep.to ? 'إلى: ' + rep.to : '';
+            if (dText) dText.innerText = rep.details || 'لا توجد تفاصيل مكتوبة.';
+
+            const modal = document.getElementById('medicalReportModal');
+            if (modal) {
+                modal.style.display = 'flex';
+            } else {
+                alert('نافذة التقرير الطبي غير متوفرة في الصفحة.');
+            }
+        };
+    }
 </script>
 </body>
 </html>
