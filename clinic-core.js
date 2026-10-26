@@ -1284,7 +1284,43 @@ function saveRxTemplateImage() {
     }
 }
 
-// دالة السحب المحدثة (بدون الحاجة للوكيل المحلي Local Agent وبشكل فوري ونظيف)
+// ==========================================
+// الدوال المحدثة (الطباعة والسكانر بشكل نظيف ومستقل تماماً)
+// ==========================================
+
+async function printPrescriptionDirectly() {
+    const rxModal = document.getElementById('rxModal');
+    if (rxModal) rxModal.style.display = 'none';
+    
+    setTimeout(() => {
+        window.print();
+        if (rxModal) rxModal.style.display = 'flex';
+    }, 300);
+}
+
+function printMedicalReportDirectly() {
+    injectPrintStyle('report');
+    if (repConfigModeActive) toggleRepConfigMode();
+    
+    const container = document.getElementById('repCanvasContainer');
+    const controls = container ? container.querySelectorAll('.box-font-controls') : [];
+    controls.forEach(c => c.style.display = 'none');
+
+    document.body.classList.add('is-printing-report-only');
+    const reportModal = document.getElementById('medicalReportModal');
+    if (reportModal) reportModal.style.display = 'none';
+    
+    setTimeout(() => {
+        window.print();
+    }, 400);
+    
+    setTimeout(() => {
+        document.body.classList.remove('is-printing-report-only');
+        controls.forEach(c => c.style.display = '');
+        if (reportModal) reportModal.style.display = 'flex';
+    }, 1500);
+}
+
 async function scanFromDesktopScanner(visitId) {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) {
@@ -1316,17 +1352,16 @@ async function scanFromDesktopScanner(visitId) {
 
                     savePatientToCloudAndLocal(patient);
                     renderVisits(patient.visits, false);
-                    alert("تم إرفاق وسحب الصورة بنجاح إلى ملف المريض!");
+                    alert("تم سحب وإرفاق الصورة بنجاح إلى ملف المريض!");
                 };
                 reader.readAsDataURL(file);
             }
         };
 
         fileInput.click();
-
     } catch (err) {
-        console.error("خطأ في عملية السحب:", err);
-        alert("تعذر إتمام عملية السحب. يرجى المحاولة مرة أخرى.");
+        console.error("خطأ في السحب:", err);
+        alert("تعذر إتمام عملية السحب.");
     }
 }
 
@@ -2297,43 +2332,6 @@ function injectPrintStyle(type = 'rx') {
     document.head.appendChild(link);
 }
 
-async function printPrescriptionDirectly() {
-    window.print();
-}
-
-function printMedicalReportDirectly() {
-    injectPrintStyle('report');
-
-    if (repConfigModeActive) {
-        toggleRepConfigMode();
-    }
-    const container = document.getElementById('repCanvasContainer');
-    const controls = container ? container.querySelectorAll('.box-font-controls') : [];
-    controls.forEach(c => c.style.display = 'none');
-
-    document.body.classList.add('is-printing-report-only');
-    document.body.classList.remove('is-printing-rx-only');
-
-    const rxModal = document.getElementById('rxModal');
-    let rxWasOpen = false;
-    if (rxModal && (rxModal.style.display === 'flex' || window.getComputedStyle(rxModal).display === 'flex')) {
-        rxModal.style.display = 'none';
-        rxWasOpen = true;
-    }
-    
-    setTimeout(() => {
-        window.print();
-    }, 400);
-    
-    setTimeout(() => {
-        document.body.classList.remove('is-printing-report-only');
-        controls.forEach(c => c.style.display = '');
-        if (rxWasOpen && rxModal) {
-            rxModal.style.display = 'flex';
-        }
-    }, 1500);
-}
-
 function openPrescriptionPDF() {
     isConfigMode = false;
     document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
@@ -3236,7 +3234,7 @@ function renderVisits(visits, forceFullRender = true) {
             '<input type="file" accept="image/*,.pdf" multiple style="display:none;" onchange="handleFileUpload(this, ' + v.visitId + ')">' +
             '</label>' +
             '<button type="button" onclick="scanFromDesktopScanner(' + v.visitId + ')" style="flex:1; background:#f0fdfa; border:1px dashed #0d9488; border-radius:10px; padding:10px; font-size:0.8rem; font-weight:700; color:#0d9488; cursor:pointer;">' +
-            '<i class="fa-solid fa-print"></i> سحب من السكانر (حاسبة)' +
+            '<i class="fa-solid fa-print"></i> سحب من السكانر' +
             '</button>' +
             '</div>' +
             
