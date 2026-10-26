@@ -3,6 +3,7 @@
 // ==========================================
 
 let isDesktopRepConfigMode = false;
+const REP_STORAGE_KEYS = ['doctor_rep_layout_desktop', 'clinic_rep_custom_layout', 'clinic_rep_layout_v1'];
 
 function toggleRepConfigMode() {
     isDesktopRepConfigMode = !isDesktopRepConfigMode;
@@ -61,21 +62,28 @@ function saveRepLayoutPositions() {
         };
     });
 
-    localStorage.setItem('doctor_rep_layout_desktop', JSON.stringify(repLayoutData));
-    alert('تم حفظ إعدادات أماكن وخطوط التقرير الطبي بنجاح!');
+    const jsonStr = JSON.stringify(repLayoutData);
+    REP_STORAGE_KEYS.forEach(key => localStorage.setItem(key, jsonStr));
+
+    alert('✨ تم حفظ إعدادات أماكن وخطوط التقرير الطبي بنجاح ولن تتغير أبداً!');
 }
 
-// استرجاع المواقع المحفوظة عند فتح النافذة أو تحميل الصفحة
+// استرجاع المواقع المحفوظة بدقة عالية
 function loadSavedRepLayoutPositions() {
-    const saved = localStorage.getItem('doctor_rep_layout_desktop');
+    let saved = null;
+    for (const key of REP_STORAGE_KEYS) {
+        saved = localStorage.getItem(key);
+        if (saved) break;
+    }
     if (!saved) return;
+    
     try {
         const data = JSON.parse(saved);
         for (const boxId in data) {
             const box = document.getElementById(boxId);
-            if (box) {
-                box.style.top = data[boxId].top;
-                box.style.left = data[boxId].left;
+            if (box && data[boxId]) {
+                if (data[boxId].top) box.style.top = data[boxId].top;
+                if (data[boxId].left) box.style.left = data[boxId].left;
                 if (data[boxId].width) box.style.width = data[boxId].width;
                 if (data[boxId].fontSize) {
                     const innerDiv = box.querySelector('div:last-child');
@@ -117,9 +125,11 @@ function printMedicalReportDirectly() {
     }, 1500);
 }
 
-// تفعيل ميزة السحب والافلات (Drag and Drop) بدقة عالية للأجهزة المكتبية
+// تفعيل ميزة السحب والافلات وضمان تحميل الإحداثيات فور فتح النافذة
 document.addEventListener('DOMContentLoaded', () => {
     loadSavedRepLayoutPositions();
+    setTimeout(loadSavedRepLayoutPositions, 150);
+    setTimeout(loadSavedRepLayoutPositions, 500);
 
     let activeBox = null;
     let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
@@ -159,6 +169,23 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('mouseup', () => {
+        if (activeBox) {
+            // حفظ تلقائي فوري عند انتهاء السحب لتجنب ضياع التعديل
+            const repLayoutData = {};
+            const cWidth = container ? container.clientWidth : 1;
+            const cHeight = container ? container.clientHeight : 1;
+            
+            document.querySelectorAll('#medicalReportModal .draggable-box').forEach(box => {
+                repLayoutData[box.id] = {
+                    top: (box.offsetTop / cHeight) * 100 + '%',
+                    left: (box.offsetLeft / cWidth) * 100 + '%',
+                    width: (box.offsetWidth / cWidth) * 100 + '%',
+                    fontSize: window.getComputedStyle(box.querySelector('div:last-child') || box).fontSize
+                };
+            });
+            const jsonStr = JSON.stringify(repLayoutData);
+            REP_STORAGE_KEYS.forEach(key => localStorage.setItem(key, jsonStr));
+        }
         activeBox = null;
     });
 });
