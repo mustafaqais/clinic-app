@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.57</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.56</title>
     
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="https://i.ibb.co/68n8910/1000111840.png">
@@ -57,6 +57,7 @@
             filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
         }
 
+        /* تنسيق الأزرار العلوية لمنع التداخل */
         #topNavButtons {
             display: none;
             flex-direction: column;
@@ -90,6 +91,7 @@
             border: none;
         }
 
+        /* --- تصميم مكثف للغاية لبطاقات أرشيف المرضى لعرض أقصى عدد ممكن --- */
         #patientsList {
             display: flex;
             flex-direction: column;
@@ -129,6 +131,7 @@
             font-size: 0.62rem !important;
             border-radius: 4px !important;
         }
+        /* ------------------------------------------------------------- */
         
         .rx-canvas-container {
             position: relative !important;
@@ -399,6 +402,7 @@
     <div id="appContainer" style="display: none; flex: 1; flex-direction: column; overflow: hidden;">
         <div class="header" style="position: relative;">
             
+            <!-- أزرار التنقل العلوية مرتبة بدون تداخل -->
             <div id="topNavButtons">
                 <button id="backBtn" onclick="goBackScreen()">
                     <i class="fa-solid fa-arrow-left"></i> <span id="txtBack">Back</span>
@@ -967,10 +971,11 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.57</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.56</div>
     </div>
 </div>
 
+<!-- نافذة تعديل بيانات المريض -->
 <div id="editPatientModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 450px; text-align: left; direction: ltr; background: #ffffff; border-radius: 14px; padding: 20px;">
         <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -1035,6 +1040,7 @@
     </div>
 </div>
 
+<!-- نافذة التاريخ المرضي والأمراض المزمنة -->
 <div id="medHistoryModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 500px; text-align: left; direction: ltr; background: #ffffff; border-radius: 14px; padding: 20px; max-height: 90vh; overflow-y: auto;">
         <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -1109,6 +1115,7 @@
     </div>
 </div>
 
+<!-- نافذة حاسبة مؤشر كتلة الجسم (BMI) -->
 <div id="bmiCalculatorModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 400px; text-align: left; direction: ltr; background: #ffffff; border-radius: 14px; padding: 20px;">
         <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
@@ -1132,6 +1139,7 @@
     </div>
 </div>
 
+<!-- نافذة الروشتة العلاجية (Modal) -->
 <div id="rxModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 580px; text-align: left; direction: ltr; background: #f8fafc; border-radius: 14px; padding: 15px;">
         <div class="modal-header" style="direction: ltr; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -1212,6 +1220,7 @@
     </div>
 </div>
 
+<!-- نافذة معاينة وطباعة التقرير الطبي المستقل -->
 <div id="medicalReportModal" class="modal-overlay" style="display: none;">
     <div class="modal-body" style="max-width: 580px; text-align: left; direction: ltr; background: #f8fafc; border-radius: 14px; padding: 15px;">
         <div class="modal-header" style="direction: ltr; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -1288,7 +1297,7 @@
 </div>
 
 <script src="config.js"></script>
-<script src="clinic-core.js?v=17.57"></script>
+<script src="clinic-functions.js?v=17.56"></script>
 
 <script src="print-core.js"></script>
 <script>
@@ -1374,49 +1383,10 @@
         }
     };
 
-    document.getElementById('headerDropdownMenu')?.addEventListener('click', function(e) {
-        e.stopPropagation();
-    });
-
     document.addEventListener('click', function() {
         const menu = document.getElementById('headerDropdownMenu');
         if (menu) menu.style.display = 'none';
     });
-
-    // دالة احتياطية مضمونة لفتح نافذة التقرير الطبي في حال لم يتم تحميلها من الملف الخارجي
-    if (typeof openMedicalReportModal !== 'function') {
-        window.openMedicalReportModal = function(visitId) {
-            const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-            if (!patient) {
-                alert("تنبيه: لم يتم العثور على المريض!");
-                return;
-            }
-            const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-            if (!visit) {
-                alert("تنبيه: لم يتم العثور على تفاصيل الزيارة!");
-                return;
-            }
-
-            const rep = visit.medicalReport || { title: "تقرير طبي", to: "", details: "" };
-            
-            const pText = document.getElementById('repPatientText');
-            const tText = document.getElementById('repTitleText');
-            const toText = document.getElementById('repToText');
-            const dText = document.getElementById('repDetailsText');
-
-            if (pText) pText.innerText = 'Name: ' + patient.name + ' | Age: ' + patient.age + ' | ' + (patient.gender || '');
-            if (tText) tText.innerText = rep.title || 'تقرير طبي';
-            if (toText) toText.innerText = rep.to ? 'إلى: ' + rep.to : '';
-            if (dText) dText.innerText = rep.details || 'لا توجد تفاصيل مكتوبة.';
-
-            const modal = document.getElementById('medicalReportModal');
-            if (modal) {
-                modal.style.display = 'flex';
-            } else {
-                alert('نافذة التقرير الطبي غير متوفرة في الصفحة.');
-            }
-        };
-    }
 </script>
 </body>
 </html>
