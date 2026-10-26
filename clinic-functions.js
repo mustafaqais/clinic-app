@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.63 (Universal Directional Arrows)
+// Clinic Master System - Cloud Ultimate Edition v17.64 (Fixed Syntax)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1104,7 +1104,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.63",
+        version: "17.64",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -2576,7 +2576,6 @@ function toggleRepConfigMode() {
     boxes.forEach(box => {
         if (repConfigModeActive) {
             box.classList.add('config-mode');
-            // إظهار لوحة الأسهم الاتجاهية دائماً على الحاسوب والهواتف عند تفعيل وضع التعديل
             if (!box.querySelector('.directional-arrows-panel')) {
                 const arrowsPanel = document.createElement('div');
                 arrowsPanel.className = 'directional-arrows-panel';
@@ -2608,14 +2607,13 @@ function toggleRepConfigMode() {
     }
 }
 
-// دالة التحريك بالأسهم الأربعة بدقة وثبات تام دائم على الحاسوب والهواتف
 function moveBoxDir(btn, direction) {
     if (!repConfigModeActive) return;
     const box = btn.closest('.draggable-box');
     const container = document.getElementById('repCanvasContainer');
     if (!box || !container) return;
 
-    const step = 5; // مقدار الحركة بالبكسل لكل ضغطة
+    const step = 5;
     const cWidth = container.clientWidth;
     const cHeight = container.clientHeight;
 
