@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition (Cleaned Main Code)
+// Clinic Master System - Cloud Ultimate Edition (Cleaned & Fixed Main Code)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -1289,7 +1289,7 @@ function saveRxTemplateImage() {
 }
 
 // ==========================================
-// الطباعة والمعاينة (للروشتة فقط)
+// الطباعة والمعاينة (للروشتة والتقرير الطبي)
 // ==========================================
 
 async function printPrescriptionDirectly() {
@@ -1304,6 +1304,15 @@ async function printPrescriptionDirectly() {
 
 function printPrescriptionOnly(visitId) {
     openRxModal(visitId);
+}
+
+// الدالة الصحيحة والمربوطة لمعاينة وطباعة التقرير الطبي
+function printMedicalReportOnly(visitId) {
+    if (typeof openMedicalReportModal === 'function') {
+        openMedicalReportModal(visitId);
+    } else {
+        alert('تنبيه: نافذة التقرير الطبي غير متوفرة أو لم يتم تحميل ملف الحاسبة المنفصل.');
+    }
 }
 
 async function scanFromDesktopScanner(visitId) {
@@ -2397,7 +2406,6 @@ function initDraggableElements() {
     });
 }
 
-// الدوال المساعدة للتقرير الطبي البسيطة (لضمان عمل الواجهة دون تداخل مع ملف الحاسبة المنفصل)
 function toggleMedicalReportInputs(visitId) {
     const container = document.getElementById('repContainer_' + visitId);
     const chevron = document.getElementById('repChevron_' + visitId);
@@ -2424,13 +2432,6 @@ function updateReportFieldData(visitId, fieldName, value) {
     }
     visit.medicalReport[fieldName] = value;
     savePatientToCloudAndLocal(patient);
-}
-
-function printMedicalReportOnly(visitId) {
-    // استدعاء نافذة التقرير الطبي وتعبئتها للطباعة حسب النظام المنفصل
-    if (typeof openMedicalReportModal === 'function') {
-        openMedicalReportModal(visitId);
-    }
 }
 
 function autoSaveMedicalRecord() {}
@@ -2990,7 +2991,7 @@ function renderVisits(visits, forceFullRender = true) {
             '<div class="input-wrapper"><textarea id="rep_details_' + v.visitId + '" rows="3" placeholder="اكتب تفاصيل التقرير هنا..." oninput="updateReportFieldData(' + v.visitId + ', \'details\', this.value)">' + (repData.details || '') + '</textarea></div>' +
             '</div>' +
             '<button type="button" class="btn-main" onclick="printMedicalReportOnly(' + v.visitId + ')" style="background: #0284c7; padding: 8px; font-size: 0.85rem;">' +
-            '<i class="fa-solid fa-file-lines"></i> معاينة التقرير الطبي' +
+            '<i class="fa-solid fa-file-lines"></i> معاينة وطباعة التقرير الطبي' +
             '</button>' +
             '</div></div>' +
 
