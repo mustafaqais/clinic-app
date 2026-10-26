@@ -1902,41 +1902,43 @@ function handleFileUpload(input, visitId) {
     }
 }
 
+// ==========================================
+// التعديل المباشر لحذف المرفقات دون بحث
+// ==========================================
 function promptDeleteAttachment(patientId, visitId, attIndex) {
     if (isSubscriptionExpired) {
         alert('التطبيق في وضع القراءة فقط.');
         return;
     }
     
-    if (confirm('هل أنت متأكد من حذف هذا المرفق نهائياً؟')) {
-        let patient = patients.find(p => Number(p.id) === Number(currentPatientId) || Number(p.id) === Number(patientId) || String(p.id) === String(patientId));
-        
-        if (!patient && patients.length > 0) {
-            patient = patients[0];
-        }
-
-        if (!patient || !patient.visits || patient.visits.length === 0) {
-            alert('تعذر العثور على سجل المريض.');
-            return;
-        }
-
-        let visit = patient.visits.find(v => Number(v.visitId) === Number(visitId) || String(v.visitId) === String(visitId));
-        if (!visit) {
-            visit = patient.visits[0];
-        }
-
-        if (visit && visit.attachments && visit.attachments.length > attIndex) {
-            visit.attachments.splice(attIndex, 1);
-        } else if (visit && visit.attachments && visit.attachments.length > 0) {
-            visit.attachments.pop();
-        } else {
-            alert('عذراً، الملف غير موجود أو تم حذفه مسبقاً.');
-            return;
-        }
-
-        savePatientToCloudAndLocal(patient);
-        renderVisits(patient.visits, false);
+    let patient = patients.find(p => Number(p.id) === Number(currentPatientId) || Number(p.id) === Number(patientId) || String(p.id) === String(patientId));
+    
+    if (!patient && patients.length > 0) {
+        patient = patients[0];
     }
+
+    if (!patient || !patient.visits || patient.visits.length === 0) {
+        alert('تعذر العثور على سجل المريض.');
+        return;
+    }
+
+    let visit = patient.visits.find(v => Number(v.visitId) === Number(visitId) || String(v.visitId) === String(visitId));
+    if (!visit) {
+        visit = patient.visits[0];
+    }
+
+    // الحذف الفوري والمباشر باستخدام مؤشر المرفق (Index)
+    if (visit && visit.attachments && visit.attachments.length > attIndex) {
+        visit.attachments.splice(attIndex, 1);
+    } else if (visit && visit.attachments && visit.attachments.length > 0) {
+        visit.attachments.pop();
+    } else {
+        alert('عذراً، الملف غير موجود أو تم حذفه مسبقاً.');
+        return;
+    }
+
+    savePatientToCloudAndLocal(patient);
+    renderVisits(patient.visits, false);
 }
 
 function previewAttachmentByIndex(el) {
