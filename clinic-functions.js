@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.68 (Attachment Delete Hidden)
+// Clinic Master System - Cloud Ultimate Edition v17.69 (Fixed Permanent Delete & Trash Sync)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -686,6 +686,16 @@ function savePatientToCloudAndLocal(patientObj) {
     }
 }
 
+function deletePatientFromCloudAndLocal(patientId) {
+    if (!currentUserId || isSubscriptionExpired) return;
+    const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
+
+    if (navigator.onLine) {
+        db.collection('users_data').doc(ownerUid).collection('patients').doc(String(patientId)).delete()
+            .catch(err => console.log("Cloud delete error:", err));
+    }
+}
+
 function saveTrashToCloudAndLocal() {
     if (!currentUserId || isSubscriptionExpired) return;
     const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
@@ -1118,7 +1128,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.68",
+        version: "17.69",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1964,25 +1974,47 @@ function saveEditedPatient() {
     document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + patient.gender + (patient.city ? ' | المحافظة: ' + patient.city : '') + ' | Marital: ' + patient.marital + ' | Job: ' + patient.job + ' | Phone: ' + patient.phone;
 }
 
+// دالة حذف ملف المريض (مع نافذة تأكيد نهائية ونقله للسلة دون عودة تلقائية)
 function confirmDeletePatientRecord() {
-    if (confirm('Delete patient record?')) {
+    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+    if (!patient) return;
+
+    if (confirm('⚠️ هل أنت متأكد من رغبتك في حذف ملف المريض (' + patient.name + ')؟ سيتم نقله إلى سلة المحذوفات.')) {
         const idx = patients.findIndex(p => Number(p.id) === Number(currentPatientId));
         if (idx !== -1) {
-            trashBin.unshift({ type: 'patient', deletedAt: new Date().toLocaleString(), data: patients.splice(idx, 1)[0] });
+            const removedPatient = patients.splice(idx, 1)[0];
+            trashBin.unshift({ type: 'patient', deletedAt: new Date().toLocaleString(), data: removedPatient });
+            
+            // تحديث التخزين المحلي والسحابي وحذف السجل المباشر من قاعدة البيانات
+            const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
+            if (ownerUid) {
+                localStorage.setItem('clinic_patients_' + ownerUid, JSON.stringify(patients));
+                localStorage.setItem('clinic_patients', JSON.stringify(patients));
+            }
             saveTrashToCloudAndLocal();
-            localStorage.setItem('clinic_patients', JSON.stringify(patients));
+            deletePatientFromCloudAndLocal(removedPatient.id);
         }
+        
+        sessionStorage.removeItem('current_patient_id');
+        currentPatientId = null;
         openPatientsArchive();
     }
 }
 
+// دالة حذف زيارة/مراجعة المريض (مع نافذة تأكيد ونقلها للسلة)
 function confirmDeleteVisit(visitId) {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-    if (!patient || patient.visits.length <= 1) return;
-    if (confirm('Delete visit?')) {
+    if (!patient || patient.visits.length <= 1) {
+        alert('لا يمكن حذف المراجعة الوحيدة للمريض، يجب أن يبقى سجل واحد على الأقل.');
+        return;
+    }
+
+    if (confirm('⚠️ هل أنت متأكد من حذف هذه المراجعة؟ سيتم نقلها إلى سلة المحذوفات.')) {
         const vIndex = patient.visits.findIndex(v => Number(v.visitId) === Number(visitId));
         if (vIndex !== -1) {
-            trashBin.unshift({ type: 'visit', patientId: patient.id, patientName: patient.name, deletedAt: new Date().toLocaleString(), data: patient.visits.splice(vIndex, 1)[0] });
+            const removedVisit = patient.visits.splice(vIndex, 1)[0];
+            trashBin.unshift({ type: 'visit', patientId: patient.id, patientName: patient.name, deletedAt: new Date().toLocaleString(), data: removedVisit });
+            
             saveTrashToCloudAndLocal();
             savePatientToCloudAndLocal(patient);
             renderVisits(patient.visits, false);
@@ -1998,35 +2030,44 @@ function openTrashBin() {
 function renderTrashItems() {
     const container = document.getElementById('trashItemsContainer');
     container.innerHTML = trashBin.length === 0 
-        ? '<p style="text-align:center; color:#64748b;">Empty.</p>'
+        ? '<p style="text-align:center; color:#64748b;">سلة المحذوفات فارغة.</p>'
         : trashBin.map((item, index) => 
-            '<div class="trash-card">' +
-            '<div><h4>' + (item.data.name || item.patientName) + '</h4></div>' +
-            '<button class="btn-restore" onclick="restoreTrashItem(' + index + ')">Restore</button>' +
+            '<div class="trash-card" style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #cbd5e1; padding:10px 14px; border-radius:10px; margin-bottom:8px;">' +
+            '<div><h4 style="margin:0; font-size:0.9rem; color:#0f172a;">' + (item.type === 'patient' ? 'مريض: ' + (item.data.name || '') : 'مراجعة للمريض: ' + item.patientName) + '</h4>' +
+            '<span style="font-size:0.75rem; color:#64748b;">تاريخ الحذف: ' + item.deletedAt + '</span></div>' +
+            '<button class="btn-restore" onclick="restoreTrashItem(' + index + ')" style="background:#0d9488; color:#fff; border:none; border-radius:6px; padding:6px 12px; font-size:0.8rem; font-weight:700; cursor:pointer;">استعادة</button>' +
             '</div>'
         ).join('');
 }
 
 function restoreTrashItem(index) {
-    const item = trashBin.splice(index, 1)[0];
-    if (item.type === 'patient') {
-        patients.unshift(item.data);
-        savePatientToCloudAndLocal(item.data);
-    } else {
-        const patient = patients.find(p => Number(p.id) === Number(item.patientId));
-        if (patient) {
-            patient.visits.unshift(item.data);
-            savePatientToCloudAndLocal(patient);
+    if (confirm('هل تريد بالتأكيد استعادة هذا العنصر؟')) {
+        const item = trashBin.splice(index, 1)[0];
+        if (item.type === 'patient') {
+            patients.unshift(item.data);
+            savePatientToCloudAndLocal(item.data);
+        } else {
+            const patient = patients.find(p => Number(p.id) === Number(item.patientId));
+            if (patient) {
+                patient.visits.unshift(item.data);
+                savePatientToCloudAndLocal(patient);
+            } else {
+                alert('عذراً، لم يعد ملف المريض الرئيسي موجوداً. يرجى استعادة ملف المريض أولاً.');
+                trashBin.unshift(item); // إرجاع العنصر للسلة
+            }
         }
+        saveTrashToCloudAndLocal();
+        renderTrashItems();
+        alert('تمت الاستعادة بنجاح!');
     }
-    saveTrashToCloudAndLocal();
-    renderTrashItems();
 }
 
 function confirmEmptyTrash() {
-    trashBin = [];
-    saveTrashToCloudAndLocal();
-    renderTrashItems();
+    if (confirm('هل أنت متأكد من تفريغ سلة المحذوفات نهائياً؟')) {
+        trashBin = [];
+        saveTrashToCloudAndLocal();
+        renderTrashItems();
+    }
 }
 
 function openMedHistoryModal(visitId) {
