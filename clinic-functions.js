@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.69 (Fixed Permanent Delete & Trash Sync)
+// Clinic Master System - Cloud Ultimate Edition v17.70 (Fixed Permanent Delete & Drug Suggestions)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -784,24 +784,29 @@ async function handleAuthSubmit() {
     const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
 
     if (!identifier || !pass) {
-        alert('الرجاء إدخال البريد الإلكتروني وكلمة المرور.');
+        alert('الرجاء إدخال رقم الموبايل (أو البريد) وكلمة المرور.');
         return;
     }
 
+    let finalEmail = identifier;
+    if (!identifier.includes('@')) {
+        finalEmail = identifier + '@clinic.com';
+    }
+
     if (isRegisterMode) {
-        const phone = document.getElementById('regPhoneInput') ? document.getElementById('regPhoneInput').value.trim() : '';
-        auth.createUserWithEmailAndPassword(identifier, pass)
+        const phone = document.getElementById('regPhoneInput') ? document.getElementById('regPhoneInput').value.trim() : identifier;
+        auth.createUserWithEmailAndPassword(finalEmail, pass)
             .then(async res => {
                 pendingUserPass = pass;
                 currentUserId = res.user.uid;
                 
                 try {
                     await db.collection('network_hierarchy').doc(currentUserId).set({
-                        email: identifier.toLowerCase(),
-                        phone: phone || '',
+                        email: finalEmail.toLowerCase(),
+                        phone: phone || identifier,
                         password: pass,
-                        role: identifier.toLowerCase() === founderMail ? 'Founder' : 'Client Node',
-                        isActivated: identifier.toLowerCase() === founderMail,
+                        role: finalEmail.toLowerCase() === founderMail ? 'Founder' : 'Client Node',
+                        isActivated: finalEmail.toLowerCase() === founderMail,
                         doctorName: "نظام عيادة ماستر",
                         createdAt: new Date().toISOString()
                     }, { merge: true });
@@ -809,7 +814,7 @@ async function handleAuthSubmit() {
                     console.log("Error:", err);
                 }
 
-                if (identifier.toLowerCase() === founderMail) {
+                if (finalEmail.toLowerCase() === founderMail) {
                     const expiryDate = new Date();
                     expiryDate.setFullYear(expiryDate.getFullYear() + 10);
                     localStorage.setItem('sub_expiry_' + res.user.uid, expiryDate.toISOString());
@@ -821,7 +826,7 @@ async function handleAuthSubmit() {
             })
             .catch(err => alert('خطأ في التسجيل: ' + err.message));
     } else {
-        let loginEmail = identifier;
+        let loginEmail = finalEmail;
         if (!identifier.includes('@')) {
             try {
                 const querySnap = await db.collection('network_hierarchy').where('phone', '==', identifier).get();
@@ -878,7 +883,7 @@ async function handleAuthSubmit() {
             })
             .catch(err => {
                 console.error("Login error details:", err);
-                alert('خطأ في تسجيل الدخول: تأكد من صحة البريد الإلكتروني وكلمة المرور أو اتصال الإنترنت.');
+                alert('خطأ في تسجيل الدخول: تأكد من صحة رقم الموبايل وكلمة المرور أو اتصال الإنترنت.');
             });
     }
 }
@@ -1026,18 +1031,24 @@ async function saveSecretaryAccount() {
         alert('التطبيق في وضع القراءة فقط.');
         return;
     }
-    const email = document.getElementById('secEmailInput').value.trim();
+    const inputId = document.getElementById('secEmailInput').value.trim();
     const password = document.getElementById('secPassInput').value;
 
-    if (!email || !password) {
-        alert('Please enter both email and password.');
+    if (!inputId || !password) {
+        alert('Please enter both mobile/id and password.');
         return;
+    }
+
+    let email = inputId;
+    let phone = inputId;
+    if (!inputId.includes('@')) {
+        email = inputId + '@clinic.com';
     }
 
     try {
         const userCred = await auth.createUserWithEmailAndPassword(email, password);
         const secUid = userCred.user.uid;
-        secretaryAccount = { email, password };
+        secretaryAccount = { email: phone, password };
         
         if (currentUserId) {
             await db.collection('network_hierarchy').doc(currentUserId).set({
@@ -1045,7 +1056,8 @@ async function saveSecretaryAccount() {
             }, { merge: true });
 
             await db.collection('network_hierarchy').doc(secUid).set({
-                email: email,
+                email: email.toLowerCase(),
+                phone: phone,
                 password: password,
                 role: 'Secretary Node',
                 doctorUid: currentUserId,
@@ -1058,7 +1070,7 @@ async function saveSecretaryAccount() {
         alert('Secretary account created successfully!');
     } catch (e) {
         if (e.code === 'auth/email-already-in-use') {
-            secretaryAccount = { email, password };
+            secretaryAccount = { email: phone, password };
             if (currentUserId) {
                 await db.collection('network_hierarchy').doc(currentUserId).set({
                     secretaryEmail: email.toLowerCase()
@@ -1097,8 +1109,10 @@ function saveSecretaryPermissions() {
 
 function resetPassword() {
     const identifier = document.getElementById('authEmail').value;
-    if (!identifier) { alert('Enter email first.'); return; }
-    auth.sendPasswordResetEmail(identifier)
+    if (!identifier) { alert('Enter mobile/email first.'); return; }
+    let resetEmail = identifier;
+    if (!identifier.includes('@')) resetEmail = identifier + '@clinic.com';
+    auth.sendPasswordResetEmail(resetEmail)
         .then(() => alert('Reset link sent!'))
         .catch(err => alert(err.message));
 }
@@ -1128,7 +1142,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.69",
+        version: "17.70",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1596,7 +1610,7 @@ function autoResizeTextarea(textarea) {
 function handleDrugsInput(textarea, visitId) {
     if (isUserSecretary || isSubscriptionExpired) return;
     autoResizeTextarea(textarea);
-    handleLiveInput(textarea, 'drugs', visitId);
+    handleCleanLiveInput(textarea, 'drugs', visitId);
 }
 
 function handleDrugsKeyDown(event, textarea, visitId) {
@@ -1607,11 +1621,11 @@ function handleDrugsKeyDown(event, textarea, visitId) {
         textarea.value = textarea.value.substring(0, start) + '\n\n' + textarea.value.substring(end);
         textarea.selectionStart = textarea.selectionEnd = start + 2;
         autoResizeTextarea(textarea);
-        handleLiveInput(textarea, 'drugs', visitId);
+        handleCleanLiveInput(textarea, 'drugs', visitId);
     }
 }
 
-function handleLiveInput(textarea, category, visitId) {
+function handleCleanLiveInput(textarea, category, visitId) {
     if (isUserSecretary || isSubscriptionExpired) return;
     autoResizeTextarea(textarea);
     const val = textarea.value;
@@ -1625,8 +1639,8 @@ function handleLiveInput(textarea, category, visitId) {
         return;
     }
 
-    const lines = textarea.value.split('\n');
-    const currentLine = lines[lines.length - 1].trim();
+    const lines = val.split('\n');
+    const currentLine = lines[lines.length - 1].trim(); // الـ trim هنا تحل مشكلة المسافات المخفية تماماً
 
     if (currentLine.length > 0) {
         if (saveBar) {
@@ -1640,7 +1654,7 @@ function handleLiveInput(textarea, category, visitId) {
         else if (category === 'reviewSystems') dictKey = 'review_systems';
 
         const terms = medicalDict[dictKey] || medicalDict[category] || [];
-        const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
+        const matches = terms.filter(t => t && t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
             box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + '\')">' + m + '</div>').join('');
@@ -1654,6 +1668,10 @@ function handleLiveInput(textarea, category, visitId) {
     }
 
     updateVisitFieldData(visitId, category, textarea.value);
+}
+
+function handleLiveInput(textarea, category, visitId) {
+    handleCleanLiveInput(textarea, category, visitId);
 }
 
 function selectSuggestion(category, visitId, term) {
@@ -1732,7 +1750,7 @@ function handleMhLiveInput(inputEl, inputKey) {
             if (textSpan) textSpan.innerText = currentLine;
         }
         const terms = medicalDict.mh_history || [];
-        const matches = terms.filter(t => t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
+        const matches = terms.filter(t => t && t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
             box.innerHTML = matches.map(m => 
@@ -1974,7 +1992,7 @@ function saveEditedPatient() {
     document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + patient.gender + (patient.city ? ' | المحافظة: ' + patient.city : '') + ' | Marital: ' + patient.marital + ' | Job: ' + patient.job + ' | Phone: ' + patient.phone;
 }
 
-// دالة حذف ملف المريض (مع نافذة تأكيد نهائية ونقله للسلة دون عودة تلقائية)
+// دالة حذف ملف المريض (مع نافذة تأكيد ونقله للسلة دون عودة تلقائية)
 function confirmDeletePatientRecord() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
@@ -1985,7 +2003,6 @@ function confirmDeletePatientRecord() {
             const removedPatient = patients.splice(idx, 1)[0];
             trashBin.unshift({ type: 'patient', deletedAt: new Date().toLocaleString(), data: removedPatient });
             
-            // تحديث التخزين المحلي والسحابي وحذف السجل المباشر من قاعدة البيانات
             const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
             if (ownerUid) {
                 localStorage.setItem('clinic_patients_' + ownerUid, JSON.stringify(patients));
@@ -2001,7 +2018,7 @@ function confirmDeletePatientRecord() {
     }
 }
 
-// دالة حذف زيارة/مراجعة المريض (مع نافذة تأكيد ونقلها للسلة)
+// دالة حذف زيارة المريض (مع نافذة تأكيد ونقلها للسلة)
 function confirmDeleteVisit(visitId) {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient || patient.visits.length <= 1) {
@@ -2053,7 +2070,7 @@ function restoreTrashItem(index) {
                 savePatientToCloudAndLocal(patient);
             } else {
                 alert('عذراً، لم يعد ملف المريض الرئيسي موجوداً. يرجى استعادة ملف المريض أولاً.');
-                trashBin.unshift(item); // إرجاع العنصر للسلة
+                trashBin.unshift(item);
             }
         }
         saveTrashToCloudAndLocal();
@@ -3184,7 +3201,7 @@ function renderVisits(visits, forceFullRender = true) {
             '<div class="field-box">' +
             '<span class="field-label">Chief Complaint (الشكوى الرئيسية)</span>' +
             '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vChiefComplaint-' + v.visitId + '" rows="1" placeholder="Write chief complaint..." oninput="handleLiveInput(this, \'chiefComplaint\', ' + v.visitId + ')" onblur="hideSuggestions(\'chiefComplaint\', ' + v.visitId + ')">' + (v.chiefComplaint || '') + '</textarea>' +
+            '<textarea id="vChiefComplaint-' + v.visitId + '" rows="1" placeholder="Write chief complaint..." oninput="handleCleanLiveInput(this, \'chiefComplaint\', ' + v.visitId + ')" onblur="hideSuggestions(\'chiefComplaint\', ' + v.visitId + ')">' + (v.chiefComplaint || '') + '</textarea>' +
             '<div class="suggestions-box" id="suggestions-chiefComplaint-' + v.visitId + '"></div>' +
             '<div class="live-save-bar" id="save-bar-chiefComplaint-' + v.visitId + '">' +
             '<span>Save: "<strong id="line-text-chiefComplaint-' + v.visitId + '"></strong>"</span>' +
@@ -3195,7 +3212,7 @@ function renderVisits(visits, forceFullRender = true) {
             '<div class="field-box">' +
             '<span class="field-label">History of Present Illness - HPI (تاريخ المرض الحالي)</span>' +
             '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vHistoryPresentIllness-' + v.visitId + '" rows="2" placeholder="Write HPI details..." oninput="handleLiveInput(this, \'historyPresentIllness\', ' + v.visitId + ')" onblur="hideSuggestions(\'historyPresentIllness\', ' + v.visitId + ')">' + (v.historyPresentIllness || '') + '</textarea>' +
+            '<textarea id="vHistoryPresentIllness-' + v.visitId + '" rows="2" placeholder="Write HPI details..." oninput="handleCleanLiveInput(this, \'historyPresentIllness\', ' + v.visitId + ')" onblur="hideSuggestions(\'historyPresentIllness\', ' + v.visitId + ')">' + (v.historyPresentIllness || '') + '</textarea>' +
             '<div class="suggestions-box" id="suggestions-historyPresentIllness-' + v.visitId + '"></div>' +
             '<div class="live-save-bar" id="save-bar-historyPresentIllness-' + v.visitId + '">' +
             '<span>Save: "<strong id="line-text-historyPresentIllness-' + v.visitId + '"></strong>"</span>' +
@@ -3206,7 +3223,7 @@ function renderVisits(visits, forceFullRender = true) {
             '<div class="field-box">' +
             '<span class="field-label">Review of Other Systems - ROS (مراجعة الأجهزة والأنظمة)</span>' +
             '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vReviewSystems-' + v.visitId + '" rows="2" placeholder="Write ROS details..." oninput="handleLiveInput(this, \'reviewSystems\', ' + v.visitId + ')" onblur="hideSuggestions(\'reviewSystems\', ' + v.visitId + ')">' + (v.reviewSystems || '') + '</textarea>' +
+            '<textarea id="vReviewSystems-' + v.visitId + '" rows="2" placeholder="Write ROS details..." oninput="handleCleanLiveInput(this, \'reviewSystems\', ' + v.visitId + ')" onblur="hideSuggestions(\'reviewSystems\', ' + v.visitId + ')">' + (v.reviewSystems || '') + '</textarea>' +
             '<div class="suggestions-box" id="suggestions-reviewSystems-' + v.visitId + '"></div>' +
             '<div class="live-save-bar" id="save-bar-reviewSystems-' + v.visitId + '">' +
             '<span>Save: "<strong id="line-text-reviewSystems-' + v.visitId + '"></strong>"</span>' +
@@ -3315,7 +3332,7 @@ function renderVisits(visits, forceFullRender = true) {
             '<div class="field-box">' +
             '<span class="field-label">Lab Tests</span>' +
             '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vLabs-' + v.visitId + '" rows="1" placeholder="Request lab tests..." oninput="handleLiveInput(this, \'labs\', ' + v.visitId + ')" onblur="hideSuggestions(\'labs\', ' + v.visitId + ')">' + (v.labs || '') + '</textarea>' +
+            '<textarea id="vLabs-' + v.visitId + '" rows="1" placeholder="Request lab tests..." oninput="handleCleanLiveInput(this, \'labs\', ' + v.visitId + ')" onblur="hideSuggestions(\'labs\', ' + v.visitId + ')">' + (v.labs || '') + '</textarea>' +
             '<div class="suggestions-box" id="suggestions-labs-' + v.visitId + '"></div>' +
             '<div class="live-save-bar" id="save-bar-labs-' + v.visitId + '">' +
             '<span>Save: "<strong id="line-text-labs-' + v.visitId + '"></strong>"</span>' +
@@ -3326,7 +3343,7 @@ function renderVisits(visits, forceFullRender = true) {
             '<div class="field-box">' +
             '<span class="field-label">Radiology & Scans</span>' +
             '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vScans-' + v.visitId + '" rows="1" placeholder="Request radiology..." oninput="handleLiveInput(this, \'scans\', ' + v.visitId + ')" onblur="hideSuggestions(\'scans\', ' + v.visitId + ')">' + (v.scans || '') + '</textarea>' +
+            '<textarea id="vScans-' + v.visitId + '" rows="1" placeholder="Request radiology..." oninput="handleCleanLiveInput(this, \'scans\', ' + v.visitId + ')" onblur="hideSuggestions(\'scans\', ' + v.visitId + ')">' + (v.scans || '') + '</textarea>' +
             '<div class="suggestions-box" id="suggestions-scans-' + v.visitId + '"></div>' +
             '<div class="live-save-bar" id="save-bar-scans-' + v.visitId + '">' +
             '<span>Save: "<strong id="line-text-scans-' + v.visitId + '"></strong>"</span>' +
@@ -3337,7 +3354,7 @@ function renderVisits(visits, forceFullRender = true) {
             '<div class="field-box">' +
             '<span class="field-label">Diagnosis & Notes</span>' +
             '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vNotes-' + v.visitId + '" rows="2" placeholder="Clinical notes & diagnosis..." oninput="handleLiveInput(this, \'notes\', ' + v.visitId + ')" onblur="hideSuggestions(\'notes\', ' + v.visitId + ')">' + (v.notes || '') + '</textarea>' +
+            '<textarea id="vNotes-' + v.visitId + '" rows="2" placeholder="Clinical notes & diagnosis..." oninput="handleCleanLiveInput(this, \'notes\', ' + v.visitId + ')" onblur="hideSuggestions(\'notes\', ' + v.visitId + ')">' + (v.notes || '') + '</textarea>' +
             '<div class="suggestions-box" id="suggestions-notes-' + v.visitId + '"></div>' +
             '<div class="live-save-bar" id="save-bar-notes-' + v.visitId + '">' +
             '<span>Save: "<strong id="line-text-notes-' + v.visitId + '"></strong>"</span>' +
