@@ -1,6 +1,10 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.77 (Fixed Network Buttons & Secretary Hierarchy)
+// Clinic Master System - Cloud Ultimate Edition v17.78 (Definitive Network Buttons Fix)
 // ==========================================
+
+let targetNodeUidForNameEdit = null;
+let targetNodeUidToDelete = null;
+let targetNodeEmailToDelete = null;
 
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
@@ -1154,7 +1158,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.77",
+        version: "17.78",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1383,7 +1387,8 @@ function openNetworkHierarchy() {
             container.innerHTML = '<p style="text-align:center; color:#64748b;">No users found.</p>';
             return;
         }
-        let html = '';
+        container.innerHTML = '';
+        
         snapshot.forEach(doc => {
             const data = doc.data();
             const nodeUid = doc.id;
@@ -1392,34 +1397,44 @@ function openNetworkHierarchy() {
             const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
             const isFounder = userEmail.toLowerCase() === founderMail;
 
-            html += '<div class="node-card" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;">' +
-                    '<div class="node-info">' +
-                    '<h5 style="margin:0; font-size:0.85rem; color:#0f172a;"><i class="fa-solid fa-envelope" style="color:#0d9488;"></i> ' + userEmail + '</h5>' +
-                    '<p style="margin:2px 0; font-size:0.75rem; color:#64748b;"><b>الاسم البارز:</b> <span style="color:#0d9488; font-weight:700;">' + currentDocName + '</span></p>' +
-                    '<p style="margin:0; font-size:0.75rem; color:#64748b;"><b>Password:</b> ' + (data.password || 'N/A') + '</p>' +
-                    '</div>' +
-                    '<div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">' +
-                    '<span class="node-badge" style="font-size:0.68rem; padding:2px 6px; background:#e0f2fe; color:#0369a1; border-radius:4px;">' + (data.role || 'Client') + '</span>' +
-                    '<div style="display:flex; gap:4px;">' +
-                    '<button type="button" onclick="promptFounderEditNameByElement(this)" data-uid="' + nodeUid + '" data-name="' + encodeURIComponent(currentDocName) + '" data-email="' + userEmail + '" style="background:#ccfbf1; color:#0f766e; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-pen"></i> اسم</button>' +
-                    (!isFounder ? '<button type="button" onclick="promptFounderDeleteNodeByElement(this)" data-uid="' + nodeUid + '" data-email="' + userEmail + '" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>' : '') +
-                    '</div></div></div>';
+            const card = document.createElement('div');
+            card.className = 'node-card';
+            card.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;';
+            
+            let deleteBtnHtml = !isFounder ? '<button type="button" class="del-node-btn" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>' : '';
+
+            card.innerHTML = `
+                <div class="node-info">
+                    <h5 style="margin:0; font-size:0.85rem; color:#0f172a;"><i class="fa-solid fa-envelope" style="color:#0d9488;"></i> ${userEmail}</h5>
+                    <p style="margin:2px 0; font-size:0.75rem; color:#64748b;"><b>الاسم البارز:</b> <span style="color:#0d9488; font-weight:700;">${currentDocName}</span></p>
+                    <p style="margin:0; font-size:0.75rem; color:#64748b;"><b>Password:</b> ${data.password || 'N/A'}</p>
+                </div>
+                <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+                    <span class="node-badge" style="font-size:0.68rem; padding:2px 6px; background:#e0f2fe; color:#0369a1; border-radius:4px;">${data.role || 'Client'}</span>
+                    <div style="display:flex; gap:4px;">
+                        <button type="button" class="edit-node-btn" style="background:#ccfbf1; color:#0f766e; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-pen"></i> اسم</button>
+                        ${deleteBtnHtml}
+                    </div>
+                </div>
+            `;
+
+            const editBtn = card.querySelector('.edit-node-btn');
+            if (editBtn) {
+                editBtn.addEventListener('click', () => {
+                    promptFounderEditName(nodeUid, currentDocName, userEmail);
+                });
+            }
+
+            const delBtn = card.querySelector('.del-node-btn');
+            if (delBtn) {
+                delBtn.addEventListener('click', () => {
+                    promptFounderDeleteNode(nodeUid, userEmail);
+                });
+            }
+
+            container.appendChild(card);
         });
-        container.innerHTML = html;
     });
-}
-
-function promptFounderEditNameByElement(btn) {
-    const nodeUid = btn.getAttribute('data-uid');
-    const currentName = decodeURIComponent(btn.getAttribute('data-name'));
-    const userEmail = btn.getAttribute('data-email');
-    promptFounderEditName(nodeUid, currentName, userEmail);
-}
-
-function promptFounderDeleteNodeByElement(btn) {
-    const nodeUid = btn.getAttribute('data-uid');
-    const userEmail = btn.getAttribute('data-email');
-    promptFounderDeleteNode(nodeUid, userEmail);
 }
 
 function promptFounderEditName(nodeUid, currentName, userEmail) {
