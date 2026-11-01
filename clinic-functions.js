@@ -1,8 +1,8 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.80 (Definitive Clean Fix)
+// Clinic Master System - Safe Variable Declaration Fix
 // ==========================================
 
-if (typeof targetNodeUidForNameEdit === 'undefined') {
+if (typeof window.targetNodeUidForNameEdit === 'undefined') {
     var targetNodeUidForNameEdit = null;
     var targetNodeUidToDelete = null;
     var targetNodeEmailToDelete = null;
