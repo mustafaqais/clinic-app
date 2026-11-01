@@ -2,11 +2,9 @@
 // Clinic Master System - Safe Variable Declaration & Optimized Fix
 // ==========================================
 
-if (typeof window.targetNodeUidForNameEdit === 'undefined') {
-    var targetNodeUidForNameEdit = null;
-    var targetNodeUidToDelete = null;
-    var targetNodeEmailToDelete = null;
-}
+window.targetNodeUidForNameEdit = window.targetNodeUidForNameEdit || null;
+window.targetNodeUidToDelete = window.targetNodeUidToDelete || null;
+window.targetNodeEmailToDelete = window.targetNodeEmailToDelete || null;
 
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
