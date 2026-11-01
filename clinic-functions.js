@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.76 (Fixed Secretary Hierarchy & Sub-Account Routing)
+// Clinic Master System - Cloud Ultimate Edition v17.77 (Fixed Network Buttons & Secretary Hierarchy)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -263,7 +263,6 @@ function toggleDarkMode() {
     applyDarkModeState();
 }
 
-// تهيئة النظام والتحقق من حساب السكرتير والطبيب
 window.addEventListener("DOMContentLoaded", () => {
     const pDateEl = document.getElementById('pDate');
     if (pDateEl) pDateEl.value = getTodayFormatted();
@@ -1068,7 +1067,6 @@ async function saveSecretaryAccount() {
                 secretaryEmail: email.toLowerCase()
             }, { merge: true });
 
-            // حفظ حساب السكرتير كحساب فرعي تابع للطبيب حصراً (وليس كحساب رئيسي)
             await db.collection('network_hierarchy').doc(secUid).set({
                 email: email.toLowerCase(),
                 phone: phone,
@@ -1156,7 +1154,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.76",
+        version: "17.77",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1403,8 +1401,8 @@ function openNetworkHierarchy() {
                     '<div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">' +
                     '<span class="node-badge" style="font-size:0.68rem; padding:2px 6px; background:#e0f2fe; color:#0369a1; border-radius:4px;">' + (data.role || 'Client') + '</span>' +
                     '<div style="display:flex; gap:4px;">' +
-                    '<button onclick="promptFounderEditNameByElement(this)" data-uid="' + nodeUid + '" data-name="' + currentDocName + '" data-email="' + userEmail + '" style="background:#ccfbf1; color:#0f766e; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-pen"></i> اسم</button>' +
-                    (!isFounder ? '<button onclick="promptFounderDeleteNodeByElement(this)" data-uid="' + nodeUid + '" data-email="' + userEmail + '" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>' : '') +
+                    '<button type="button" onclick="promptFounderEditNameByElement(this)" data-uid="' + nodeUid + '" data-name="' + encodeURIComponent(currentDocName) + '" data-email="' + userEmail + '" style="background:#ccfbf1; color:#0f766e; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-pen"></i> اسم</button>' +
+                    (!isFounder ? '<button type="button" onclick="promptFounderDeleteNodeByElement(this)" data-uid="' + nodeUid + '" data-email="' + userEmail + '" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>' : '') +
                     '</div></div></div>';
         });
         container.innerHTML = html;
@@ -1413,7 +1411,7 @@ function openNetworkHierarchy() {
 
 function promptFounderEditNameByElement(btn) {
     const nodeUid = btn.getAttribute('data-uid');
-    const currentName = btn.getAttribute('data-name');
+    const currentName = decodeURIComponent(btn.getAttribute('data-name'));
     const userEmail = btn.getAttribute('data-email');
     promptFounderEditName(nodeUid, currentName, userEmail);
 }
