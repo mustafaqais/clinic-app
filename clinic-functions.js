@@ -1,10 +1,12 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.79 (Definitive Fix)
+// Clinic Master System - Cloud Ultimate Edition v17.80 (Definitive Clean Fix)
 // ==========================================
 
-let targetNodeUidForNameEdit = null;
-let targetNodeUidToDelete = null;
-let targetNodeEmailToDelete = null;
+if (typeof targetNodeUidForNameEdit === 'undefined') {
+    var targetNodeUidForNameEdit = null;
+    var targetNodeUidToDelete = null;
+    var targetNodeEmailToDelete = null;
+}
 
 window.addEventListener('online', updateOnlineStatus);
 window.addEventListener('offline', updateOnlineStatus);
@@ -1158,7 +1160,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.79",
+        version: "17.80",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
