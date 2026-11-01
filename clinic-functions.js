@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.78 (Definitive Network & Delete Fix)
+// Clinic Master System - Cloud Ultimate Edition v17.79 (Definitive Fix)
 // ==========================================
 
 let targetNodeUidForNameEdit = null;
@@ -1158,7 +1158,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.78",
+        version: "17.79",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1684,7 +1684,7 @@ function handleCleanLiveInput(textarea, category, visitId) {
         const matches = terms.filter(t => t && t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
 
         if (matches.length > 0 && box) {
-            box.innerHTML = matches.map(m => '<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion(\'' + category + '\', ' + visitId + ', \'' + m.replace(/'/g, "\\'") + \')">' + m + '</div>').join('');
+            box.innerHTML = matches.map(m => `<div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion('${category}', ${visitId}, '${m.replace(/'/g, "\\'")}')">${m}</div>`).join('');
             box.style.display = 'block';
         } else if (box) {
             box.style.display = 'none';
