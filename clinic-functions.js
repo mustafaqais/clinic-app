@@ -1434,6 +1434,9 @@ function openNetworkHierarchy() {
 
             container.appendChild(card);
         });
+    }).catch(err => {
+        container.innerHTML = '<p style="text-align:center; color:#b91c1c;">Error loading network data.</p>';
+        console.error("Network load error:", err);
     });
 }
 
