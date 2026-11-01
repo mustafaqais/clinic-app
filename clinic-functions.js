@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.75 (Fixed Secretary Sync & Data Scoping)
+// Clinic Master System - Cloud Ultimate Edition v17.76 (Fixed Secretary Hierarchy & Sub-Account Routing)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -263,7 +263,7 @@ function toggleDarkMode() {
     applyDarkModeState();
 }
 
-// التعديل الذكي والشامل لربط ومزامنة السكرتير مع حساب الطبيب لحظياً
+// تهيئة النظام والتحقق من حساب السكرتير والطبيب
 window.addEventListener("DOMContentLoaded", () => {
     const pDateEl = document.getElementById('pDate');
     if (pDateEl) pDateEl.value = getTodayFormatted();
@@ -1068,6 +1068,7 @@ async function saveSecretaryAccount() {
                 secretaryEmail: email.toLowerCase()
             }, { merge: true });
 
+            // حفظ حساب السكرتير كحساب فرعي تابع للطبيب حصراً (وليس كحساب رئيسي)
             await db.collection('network_hierarchy').doc(secUid).set({
                 email: email.toLowerCase(),
                 phone: phone,
@@ -1155,7 +1156,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.75",
+        version: "17.76",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
