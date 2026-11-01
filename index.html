@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Clinic Master System - Cloud Ultimate Edition v17.59</title>
+    <title>Clinic Master System - Cloud Ultimate Edition v17.80</title>
     
     <meta name="theme-color" content="#0f172a">
     <meta name="mobile-web-app-capable" content="yes">
@@ -948,7 +948,7 @@
             </div>
         </div>
 
-        <div class="footer" id="footerText">Clinic Master Network v17.59</div>
+        <div class="footer" id="footerText">Clinic Master Network v17.80</div>
     </div>
 </div>
 
@@ -1288,7 +1288,7 @@
 </div>
 
 <script src="config.js"></script>
-<script src="clinic-functions.js?v=17.59"></script>
+<script src="clinic-functions.js?v=17.80"></script>
 <script src="print-core.js"></script>
 
 <script>
@@ -1361,7 +1361,6 @@
     });
 </script>
 
-<!-- كود إدارة التقرير الطبي، سحب الموبايل، ومشاهدة وحذف المرفقات مع التأكيد -->
 <script>
 let isDesktopRepConfigMode = false;
 const REP_KEYS = ['doctor_rep_layout_desktop', 'clinic_rep_custom_layout', 'clinic_rep_layout_v1'];
@@ -1451,7 +1450,6 @@ if (typeof oldOpenRep === 'function') {
     };
 }
 
-// 👁️ وظائف معاينة ومشاهدة المرفقات (مع سد ثغرة الخطأ الظاهر في الكونسول)
 function viewAttachment(fileUrl, fileType) {
     if (!fileUrl) {
         alert("⚠️ عذراً، رابط الملف غير متوفر أو تالف.");
@@ -1478,11 +1476,9 @@ function viewAttachment(fileUrl, fileType) {
     }
 }
 
-// تعريف دوال التوافق البديلة لكي لا يظهر خطأ في الكونسول إذا كانت مستدعاة بالقديم
 window.previewAttachmentImage = function(url, type) { viewAttachment(url, type); };
 window.previewAttachmentByIndex = function(idx) { console.log("Index preview:", idx); };
 
-// 🗑️ وظائف حذف المرفق مع نافذة التأكيد
 function promptDeleteAttachment(patientId, visitId, attachmentIndex) {
     confirmDeleteAttachment(() => {
         executeDeleteAttachment(patientId, visitId, attachmentIndex);
@@ -1540,7 +1536,6 @@ function executeDeleteAttachment(patientId, visitId, attachmentIndex) {
             } else {
                 location.reload();
             }
-            console.log("✅ تم حذف المرفق وتحديث السجل بنجاح.");
         } else {
             alert("⚠️ تعذر العثور على المرفق المطلوب لحذفه.");
         }
