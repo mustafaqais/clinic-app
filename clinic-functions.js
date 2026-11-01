@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.80 (Definitive Fix)
+// Clinic Master System - Cloud Ultimate Edition v17.79 (Definitive Fix)
 // ==========================================
 
 let targetNodeUidForNameEdit = null;
@@ -1158,7 +1158,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.80",
+        version: "17.79",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -3102,4 +3102,369 @@ function renderPatientsList(list) {
             '<h4 style="margin: 0; font-size: 0.82rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">' + p.name + '</h4>' +
             '<p style="margin: 0; font-size: 0.68rem; color: #64748b; white-space: nowrap;">' + (p.city ? '(' + p.city + ') ' : '') + '<i class="fa-solid fa-phone" style="font-size:0.6rem;"></i> ' + p.phone + ' | Age: ' + p.age + '</p>' +
             '</div>' +
-            '<span class="badge-gender ' + (p.gender === 'Female' ? 'gender-female' : 'gender-male') + '" style="font-size: 0.62rem; padding: 1px 6px; border-radius: 4px; white-space: nowrap;">' + (p.gender || 'N/A') + '</span>
+            '<span class="badge-gender ' + (p.gender === 'Female' ? 'gender-female' : 'gender-male') + '" style="font-size: 0.62rem; padding: 1px 6px; border-radius: 4px; white-space: nowrap;">' + (p.gender || 'N/A') + '</span>' +
+            '</div>'
+        ).join('');
+}
+
+function filterPatients() {
+    try {
+        const searchInput = document.getElementById('searchInput');
+        const query = searchInput ? searchInput.value.toLowerCase() : '';
+        
+        const genderEl = document.getElementById('filterGender');
+        const ageGroupEl = document.getElementById('filterAgeGroup');
+        const sortEl = document.getElementById('filterSort');
+
+        const gender = genderEl ? genderEl.value : '';
+        const ageGroup = ageGroupEl ? ageGroupEl.value : '';
+        
+        let sortOrder = sortEl ? sortEl.value : null;
+        if (!sortOrder) {
+            sortOrder = localStorage.getItem('clinic_archive_sort') || 'newest';
+            if (sortEl) sortEl.value = sortOrder;
+        } else {
+            localStorage.setItem('clinic_archive_sort', sortOrder);
+        }
+
+        let filtered = patients.filter(p => {
+            if (!p) return false;
+            const fullNameFull = ((p.name || '') + " " + (p.city || "")).toLowerCase();
+            const matchQuery = fullNameFull.includes(query) || (p.phone && String(p.phone).includes(query));
+            const matchGender = !gender || p.gender === gender;
+            let matchAge = true;
+            const age = Number(p.age) || 0;
+            if (ageGroup === 'child') matchAge = age < 18;
+            else if (ageGroup === 'adult') matchAge = age >= 18 && age <= 50;
+            else if (ageGroup === 'senior') matchAge = age > 50;
+
+            return matchQuery && matchGender && matchAge;
+        });
+
+        filtered.sort((a, b) => {
+            const idA = Number(a && a.id) || 0;
+            const idB = Number(b && b.id) || 0;
+            return sortOrder === 'oldest' ? idA - idB : idB - idA;
+        });
+
+        renderPatientsList(filtered);
+    } catch (e) {
+        console.error("Filter error:", e);
+    }
+}
+
+function openMedicalRecord(id, saveState = true) {
+    currentPatientId = id;
+    navigateTo('medicalRecordScreen', 'Patient Medical Record', 'View details', saveState);
+    const patient = patients.find(p => Number(p.id) === Number(id));
+    if (patient) {
+        document.getElementById('recPatientName').innerText = patient.name;
+        document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + (patient.gender || 'N/A') + (patient.city ? ' | المحافظة: ' + patient.city : '') + ' | Marital: ' + (patient.marital || 'N/A') + ' | Job: ' + (patient.job || 'N/A') + ' | Phone: ' + (patient.phone || 'N/A');
+        renderVisits(patient.visits || [], true);
+    }
+}
+
+function addNewVisit() {
+    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+    if (!patient) return;
+    patient.visits.unshift({ visitId: Date.now(), date: getTodayFormatted(), medHistory: {}, chiefComplaint: '', historyPresentIllness: '', reviewSystems: '', notes: '', attachments: [] });
+    savePatientToCloudAndLocal(patient);
+    renderVisits(patient.visits, true);
+}
+
+function renderVisits(visits, forceFullRender = true) {
+    const container = document.getElementById('visitsContainer');
+    container.innerHTML = visits.map((v, index) => {
+        const mh = v.medHistory || {};
+        let mhSummaryParts = [];
+        
+        if (mh.conditions && mh.conditions.length > 0) {
+            mhSummaryParts.push('<b>الأمراض المزمنة:</b> ' + mh.conditions.join(', '));
+        }
+        if (mh.otherCondition) mhSummaryParts.push('<b>أخرى:</b> ' + mh.otherCondition);
+        if (mh.admission) mhSummaryParts.push('<b>دخول المستشفى:</b> ' + mh.admission);
+        if (mh.surgery) mhSummaryParts.push('<b>العمليات:</b> ' + mh.surgery);
+        if (mh.family) mhSummaryParts.push('<b>التاريخ العائلي:</b> ' + mh.family);
+        if (mh.allergy) mhSummaryParts.push('<b>حساسية الأدوية:</b> ' + mh.allergy);
+        if (mh.chronicDrugs) mhSummaryParts.push('<b>أدوية مزمنة:</b> ' + mh.chronicDrugs);
+        if (mh.smoking) mhSummaryParts.push('<b>التدخين:</b> ' + mh.smoking);
+        if (mh.alcohol) mhSummaryParts.push('<b>الكحول:</b> ' + mh.alcohol);
+        if (mh.notes) mhSummaryParts.push('<b>ملاحظات:</b> ' + mh.notes);
+
+        const mhSummaryText = mhSummaryParts.length > 0 ? mhSummaryParts.join(' | ') : 'لم يتم تسجيل تفاصيل التاريخ المرضي بعد.';
+
+        let bpSys = '';
+        let bpDias = '';
+        if (v.bp && v.bp.includes('/')) {
+            const parts = v.bp.split('/');
+            bpSys = parts[0] !== '___' ? parts[0] : '';
+            bpDias = parts[1] ? parts[1].replace(' mmHg', '').trim() : '';
+        } else if (v.bp) {
+            bpSys = v.bp;
+        }
+
+        const cfg = specialtyConfig;
+        const repData = v.medicalReport || {};
+
+        return '<div class="visit-card" data-visit-id="' + v.visitId + '">' +
+            '<div class="visit-header">' +
+            '<div style="display: flex; align-items: center; gap: 8px;">' +
+            '<span>Visit Date:</span>' +
+            '<input type="date" value="' + (v.date || getTodayFormatted()) + '" onchange="updateVisitDate(' + v.visitId + ', this.value)" style="background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.8rem; font-weight: 700; outline: none; cursor: pointer;">' +
+            '</div>' +
+            (visits.length > 1 ? '<button onclick="confirmDeleteVisit(' + v.visitId + ')" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:2px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i> Delete Visit</button>' : '') +
+            '</div>' +
+
+            (cfg.medHistory ? 
+            '<button type="button" class="btn-med-history" onclick="openMedHistoryModal(' + v.visitId + ')">' +
+            '<span><i class="fa-solid fa-notes-medical" style="color:#0d9488;"></i> Medical History & Chronic Diseases</span>' +
+            '<i class="fa-solid fa-chevron-right"></i>' +
+            '</button>' +
+            '<div class="medical-history-preview-card">' + mhSummaryText + '</div>' : '') +
+
+            (cfg.chiefComplaint ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Chief Complaint (الشكوى الرئيسية)</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vChiefComplaint-' + v.visitId + '" rows="1" placeholder="Write chief complaint..." oninput="handleCleanLiveInput(this, \'chiefComplaint\', ' + v.visitId + ')" onblur="hideSuggestions(\'chiefComplaint\', ' + v.visitId + ')">' + (v.chiefComplaint || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-chiefComplaint-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-chiefComplaint-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-chiefComplaint-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-chiefComplaint-' + v.visitId + '" onmousedown="saveLineToDict(event, \'chiefComplaint\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
+
+            (cfg.historyPresentIllness ? 
+            '<div class="field-box">' +
+            '<span class="field-label">History of Present Illness - HPI (تاريخ المرض الحالي)</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vHistoryPresentIllness-' + v.visitId + '" rows="2" placeholder="Write HPI details..." oninput="handleCleanLiveInput(this, \'historyPresentIllness\', ' + v.visitId + ')" onblur="hideSuggestions(\'historyPresentIllness\', ' + v.visitId + ')">' + (v.historyPresentIllness || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-historyPresentIllness-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-historyPresentIllness-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-historyPresentIllness-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-historyPresentIllness-' + v.visitId + '" onmousedown="saveLineToDict(event, \'historyPresentIllness\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
+
+            (cfg.reviewSystems ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Review of Other Systems - ROS (مراجعة الأجهزة والأنظمة)</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vReviewSystems-' + v.visitId + '" rows="2" placeholder="Write ROS details..." oninput="handleCleanLiveInput(this, \'reviewSystems\', ' + v.visitId + ')" onblur="hideSuggestions(\'reviewSystems\', ' + v.visitId + ')">' + (v.reviewSystems || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-reviewSystems-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-reviewSystems-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-reviewSystems-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-reviewSystems-' + v.visitId + '" onmousedown="saveLineToDict(event, \'reviewSystems\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
+
+            (cfg.vitals ? 
+            '<button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(' + v.visitId + ')">' +
+            '<span><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> Vital Signs & BMI Calculator</span>' +
+            '<span style="font-size:0.75rem; background:#e0f2fe; padding:2px 8px; border-radius:6px;">Score: ' + (v.bmiScore || '—') + '</span>' +
+            '</button>' +
+            '<div class="vital-box" style="margin-bottom: 12px;">' +
+            '<div class="vital-row">' +
+            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-arrow-trend-up"></i> Systolic BP (الضغط العالي)</span>' +
+            '<div class="vital-inputs"><input type="number" id="vBpSys-' + v.visitId + '" value="' + bpSys + '" placeholder="120" oninput="updateBpFields(' + v.visitId + ')"><span>mmHg</span></div></div>' +
+            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-arrow-trend-down"></i> Diastolic BP (الضغط الواطي)</span>' +
+            '<div class="vital-inputs"><input type="number" id="vBpDias-' + v.visitId + '" value="' + bpDias + '" placeholder="80" oninput="updateBpFields(' + v.visitId + ')"><span>mmHg</span></div></div>' +
+            '</div>' +
+            '<div class="vital-row">' +
+            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-heart"></i> Heart Rate (HR)</span>' +
+            '<div class="vital-inputs"><input type="number" value="' + (v.hr || '') + '" placeholder="75" oninput="updateVisitFieldData(' + v.visitId + ', \'hr\', this.value)"><span>bpm</span></div></div>' +
+            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-temperature-high"></i> Temperature</span>' +
+            '<div class="vital-inputs"><input type="number" step="0.1" value="' + (v.temp || '') + '" placeholder="37.0" oninput="updateVisitFieldData(' + v.visitId + ', \'temp\', this.value)"><span>°C</span></div></div>' +
+            '</div>' +
+            '<div class="vital-row">' +
+            '<div class="vital-item" style="grid-column: span 2;"><span class="vital-label"><i class="fa-solid fa-weight-scale"></i> Weight</span>' +
+            '<div class="vital-inputs"><input type="number" value="' + (v.bmiWeight || '') + '" placeholder="70" oninput="updateVisitFieldData(' + v.visitId + ', \'bmiWeight\', this.value)"><span>kg</span></div></div>' +
+            '</div></div>' : '') +
+
+            (cfg.obsGyn ? 
+            '<div class="group-card" style="background:#fce7f3; border-color:#f472b6; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#be185d; display:block; margin-bottom:10px;"><i class="fa-solid fa-person-pregnant"></i> تفاصيل النسائية والتوليد (Obstetrics & Gynecology)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">LMP (آخر دورة)</span><div class="input-wrapper"><input type="date" id="obsLmp-' + v.visitId + '" value="' + (v.obsLmp || '') + '" oninput="handleLmpInput(' + v.visitId + ', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">EDD (موعد الولادة)</span><div class="input-wrapper"><input type="date" id="obsEdd-' + v.visitId + '" value="' + (v.obsEdd || '') + '" oninput="updateVisitFieldData(' + v.visitId + ', \'obsEdd\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Gravidity (G)</span><div class="input-wrapper"><input type="text" value="' + (v.obsG || '') + '" placeholder="G3" oninput="updateVisitFieldData(' + v.visitId + ', \'obsG\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Parity (P)</span><div class="input-wrapper"><input type="text" value="' + (v.obsP || '') + '" placeholder="P2" oninput="updateVisitFieldData(' + v.visitId + ', \'obsP\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Abortions (A)</span><div class="input-wrapper"><input type="text" value="' + (v.obsA || '') + '" placeholder="A1" oninput="updateVisitFieldData(' + v.visitId + ', \'obsA\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات السونار والفحص</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'obsNotes\', this.value)" style="font-size:0.85rem;">' + (v.obsNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.ortho ? 
+            '<div class="group-card" style="background:#fef3c7; border-color:#f59e0b; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#b45309; display:block; margin-bottom:10px;"><i class="fa-solid fa-bone"></i> العظام والمفاصل (Orthopedics)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">المفصل / الإصابة</span><div class="input-wrapper"><input type="text" value="' + (v.orthoJoint || '') + '" placeholder="الركبة اليمنى" oninput="updateVisitFieldData(' + v.visitId + ', \'orthoJoint\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">درجة الخشونة</span><div class="input-wrapper"><input type="text" value="' + (v.orthoGrade || '') + '" placeholder="Grade II" oninput="updateVisitFieldData(' + v.visitId + ', \'orthoGrade\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مدى الحركة</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات الحركة..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'orthoNotes\', this.value)" style="font-size:0.85rem;">' + (v.orthoNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.neuro ? 
+            '<div class="group-card" style="background:#f3e8ff; border-color:#c084fc; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#7e22ce; display:block; margin-bottom:10px;"><i class="fa-solid fa-brain"></i> الجملة العصبية (Neurology)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">GCS</span><div class="input-wrapper"><input type="text" value="' + (v.neuroGcs || '') + '" placeholder="15/15" oninput="updateVisitFieldData(' + v.visitId + ', \'neuroGcs\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Cranial Nerves</span><div class="input-wrapper"><input type="text" value="' + (v.neuroNerves || '') + '" placeholder="Intact" oninput="updateVisitFieldData(' + v.visitId + ', \'neuroNerves\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الأعصاب</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'neuroNotes\', this.value)" style="font-size:0.85rem;">' + (v.neuroNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.peds ? 
+            '<div class="group-card" style="background:#e0f2fe; border-color:#38bdf8; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#0369a1; display:block; margin-bottom:10px;"><i class="fa-solid fa-child"></i> فحص الأطفال والنمو (WHO Pediatrics)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">العمر (أشهر)</span><div class="input-wrapper"><input type="number" id="pedsAgeMonths-' + v.visitId + '" value="' + (v.pedsAgeMonths || '') + '" placeholder="12" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsAgeMonths\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الوزن (كغ)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsWeight-' + v.visitId + '" value="' + (v.pedsWeight || '') + '" placeholder="9.5" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsWeight\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الطول (سم)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsHeight-' + v.visitId + '" value="' + (v.pedsHeight || '') + '" placeholder="75" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsHeight\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div>' +
+            '<button type="button" class="btn-main" onclick="calculateVisitChildGrowth(' + v.visitId + ')" style="background:#0284c7; padding:6px 12px; font-size:0.78rem; margin-top:4px; margin-bottom:8px;"><i class="fa-solid fa-calculator"></i> حساب وتقييم نمو الطفل (WHO)</button>' +
+            '<div id="pedsGrowthResult-' + v.visitId + '" style="display:' + (v.pedsGrowthResult ? 'block' : 'none') + '; background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:8px; font-size:0.78rem; color:#14532d; margin-bottom:8px;">' + (v.pedsGrowthResult || '') + '</div>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">اللقاحات</span><div class="input-wrapper"><input type="text" value="' + (v.pedsVaccine || '') + '" placeholder="مكتملة" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsVaccine\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">التغذية</span><div class="input-wrapper"><input type="text" value="' + (v.pedsFeeding || '') + '" placeholder="طبيعية" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsFeeding\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الأطفال</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'pedsNotes\', this.value)" style="font-size:0.85rem;">' + (v.pedsNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.derm ? 
+            '<div class="group-card" style="background:#ffedd5; border-color:#fb923c; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#c2410c; display:block; margin-bottom:10px;"><i class="fa-solid fa-hand-dots"></i> الجلدية والتناسلية (Dermatology)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع الآفة</span><div class="input-wrapper"><input type="text" value="' + (v.dermType || '') + '" placeholder="Plaque" oninput="updateVisitFieldData(' + v.visitId + ', \'dermType\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">المكان</span><div class="input-wrapper"><input type="text" value="' + (v.dermSite || '') + '" placeholder="الوجه" oninput="updateVisitFieldData(' + v.visitId + ', \'dermSite\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الجلدية</span><div class="input-wrapper"><textarea rows="2" placeholder="وصف الطفح..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'dermNotes\', this.value)" style="font-size:0.85rem;">' + (v.dermNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.ent ? 
+            '<div class="group-card" style="background:#ecfdf5; border-color:#34d399; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#047857; display:block; margin-bottom:10px;"><i class="fa-solid fa-ear-deaf"></i> الأذن والأنف والحنجرة (ENT)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الأذن</span><div class="input-wrapper"><input type="text" value="' + (v.entEar || '') + '" placeholder="طبيعي" oninput="updateVisitFieldData(' + v.visitId + ', \'entEar\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الحلق واللوزتين</span><div class="input-wrapper"><input type="text" value="' + (v.entThroat || '') + '" placeholder="احمرار" oninput="updateVisitFieldData(' + v.visitId + ', \'entThroat\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات ENT</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'entNotes\', this.value)" style="font-size:0.85rem;">' + (v.entNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.ophthal ? 
+            '<div class="group-card" style="background:#e0e7ff; border-color:#818cf8; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#4338ca; display:block; margin-bottom:10px;"><i class="fa-solid fa-eye"></i> العيون (Ophthalmology)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (VA)</span><div class="input-wrapper"><input type="text" value="' + (v.ophthalVa || '') + '" placeholder="6/6" oninput="updateVisitFieldData(' + v.visitId + ', \'ophthalVa\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="' + (v.ophthalIop || '') + '" placeholder="15 mmHg" oninput="updateVisitFieldData(' + v.visitId + ', \'ophthalIop\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات العيون</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'ophthalNotes\', this.value)" style="font-size:0.85rem;">' + (v.ophthalNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.cardio ? 
+            '<div class="group-card" style="background:#fee2e2; border-color:#f87171; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#b91c1c; display:block; margin-bottom:10px;"><i class="fa-solid fa-heart-pulse"></i> القلب والشرايين (Cardiology)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">تخطيط القلب (ECG)</span><div class="input-wrapper"><input type="text" value="' + (v.cardioEcg || '') + '" placeholder="Normal" oninput="updateVisitFieldData(' + v.visitId + ', \'cardioEcg\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">أصوات القلب</span><div class="input-wrapper"><input type="text" value="' + (v.cardioSounds || '') + '" placeholder="S1 S2 normal" oninput="updateVisitFieldData(' + v.visitId + ', \'cardioSounds\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات القلب</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'cardioNotes\', this.value)" style="font-size:0.85rem;">' + (v.cardioNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.labs ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Lab Tests</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vLabs-' + v.visitId + '" rows="1" placeholder="Request lab tests..." oninput="handleCleanLiveInput(this, \'labs\', ' + v.visitId + ')" onblur="hideSuggestions(\'labs\', ' + v.visitId + ')">' + (v.labs || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-labs-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-labs-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-labs-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-labs-' + v.visitId + '" onmousedown="saveLineToDict(event, \'labs\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
+
+            (cfg.scans ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Radiology & Scans</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vScans-' + v.visitId + '" rows="1" placeholder="Request radiology..." oninput="handleCleanLiveInput(this, \'scans\', ' + v.visitId + ')" onblur="hideSuggestions(\'scans\', ' + v.visitId + ')">' + (v.scans || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-scans-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-scans-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-scans-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-scans-' + v.visitId + '" onmousedown="saveLineToDict(event, \'scans\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
+
+            (cfg.notes ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Diagnosis & Notes</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vNotes-' + v.visitId + '" rows="2" placeholder="Clinical notes & diagnosis..." oninput="handleCleanLiveInput(this, \'notes\', ' + v.visitId + ')" onblur="hideSuggestions(\'notes\', ' + v.visitId + ')">' + (v.notes || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-notes-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-notes-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-notes-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-notes-' + v.visitId + '" onmousedown="saveLineToDict(event, \'notes\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
+
+            (cfg.rx ? 
+            '<div class="field-box">' +
+            '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; flex-wrap:wrap; gap:6px;">' +
+            '<span class="field-label" style="margin-bottom:0;">Prescribed Medications (RX)</span>' +
+            '<button type="button" onclick="printPrescriptionOnly(' + v.visitId + ')" style="background:#fae8ff; color:#c084fc; border:none; border-radius:8px; padding:6px 14px; font-size:0.8rem; font-weight:700; cursor:pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><i class="fa-solid fa-file-prescription"></i> Print RX Prescription</button>' +
+            '</div>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vDrugs-' + v.visitId + '" rows="3" placeholder="Write prescription drugs here..." oninput="handleDrugsInput(this, ' + v.visitId + ')" onkeydown="handleDrugsKeyDown(event, this, ' + v.visitId + ')" onblur="hideSuggestions(\'drugs\', ' + v.visitId + ')">' + (v.drugs || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-drugs-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-drugs-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-drugs-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-drugs-' + v.visitId + '" onmousedown="saveLineToDict(event, \'drugs\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
+
+            (cfg.attachments ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Attachments & Medical Reports</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<label style="flex:1; background:#f1f5f9; border:1px dashed #cbd5e1; border-radius:10px; padding:10px; text-align:center; font-size:0.8rem; font-weight:700; color:#475569; cursor:pointer;">' +
+            '<i class="fa-solid fa-cloud-arrow-up"></i> رفع صور متعددة / ملف' +
+            '<input type="file" accept="image/*,.pdf" multiple style="display:none;" onchange="handleFileUpload(this, ' + v.visitId + ')">' +
+            '</label>' +
+            '<button type="button" onclick="scanFromDesktopScanner(' + v.visitId + ')" style="flex:1; background:#f0fdfa; border:1px dashed #0d9488; border-radius:10px; padding:10px; font-size:0.8rem; font-weight:700; color:#0d9488; cursor:pointer;">' +
+            '<i class="fa-solid fa-print"></i> سحب من السكانر (حاسبة)' +
+            '</button>' +
+            '</div>' +
+            
+            '<div style="margin-top: 10px; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; background: #ffffff;">' +
+            '<div onclick="toggleMedicalReportInputs(' + v.visitId + ')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 700; color: #0d9488; font-size: 0.9rem;">' +
+            '<span><i class="fa-solid fa-file-medical"></i> تقرير طبي (محفوظ تلقائياً)</span>' +
+            '<i class="fa-solid fa-chevron-down" id="repChevron_' + v.visitId + '"></i>' +
+            '</div>' +
+            '<div id="repContainer_' + v.visitId + '" style="display: none; margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">' +
+            '<div class="field-box" style="margin-bottom: 8px;">' +
+            '<span class="field-label">عنوان التقرير</span>' +
+            '<div class="input-wrapper"><input type="text" id="rep_title_' + v.visitId + '" value="' + (repData.title || 'تقرير طبي') + '" oninput="updateReportFieldData(' + v.visitId + ', \'title\', this.value)"></div>' +
+            '</div>' +
+            '<div class="field-box" style="margin-bottom: 8px;">' +
+            '<span class="field-label">الجهة الموجه لها التقرير</span>' +
+            '<div class="input-wrapper"><input type="text" id="rep_to_' + v.visitId + '" value="' + (repData.to || '') + '" placeholder="مثال: مستشفى الحكيم التعليمي..." oninput="updateReportFieldData(' + v.visitId + ', \'to\', this.value)"></div>' +
+            '</div>' +
+            '<div class="field-box" style="margin-bottom: 10px;">' +
+            '<span class="field-label">تفاصيل التقرير والحالة السريرية</span>' +
+            '<div class="input-wrapper"><textarea id="rep_details_' + v.visitId + '" rows="3" placeholder="اكتب تفاصيل التقرير هنا..." oninput="updateReportFieldData(' + v.visitId + ', \'details\', this.value)">' + (repData.details || '') + '</textarea></div>' +
+            '</div>' +
+            '<button type="button" class="btn-main" onclick="openMedicalReportModal(' + v.visitId + ')" style="background: #0284c7; padding: 8px; font-size: 0.85rem;">' +
+            '<i class="fa-solid fa-print"></i> معاينة وطباعة التقرير الطبي (بروية الترويسة)' +
+            '</button>' +
+            '</div></div>' +
+
+            '<div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;" id="attachments-container-' + v.visitId + '">' +
+            (v.attachments || []).map((att, aIdx) => {
+                if (!att || !att.dataUrl || att.dataUrl.length < 50) {
+                    return '<div style="padding:6px 10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; font-size:0.7rem; color:#b91c1c;">⚠️ صورة تالفة</div>';
+                }
+                return `
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
+                            <img src="${att.dataUrl}" alt="مرفق" style="width:45px; height:45px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1; cursor:pointer;" onclick="viewAttachment('${att.dataUrl}', 'image')" title="اضغط لتكبير الصورة">
+                            <span style="font-size:0.8rem; color:#334155; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">
+                                ${att.name || 'مرفق رقم ' + (aIdx + 1)}
+                            </span>
+                        </div>
+                        <div style="display:flex; gap:6px; flex-shrink:0;">
+                            <button type="button" onclick="viewAttachment('${att.dataUrl}', 'image')" style="background:#0284c7; color:white; border:none; border-radius:6px; padding:6px 14px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="معاينة المرفق">
+                                <i class="fa-solid fa-eye"></i> معاينة
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('') +
+            '</div></div>' : '') +
+            '</div>';
+    }).join('');
+
+    visits.forEach(v => {
+        ['notes', 'drugs', 'labs', 'scans', 'chiefComplaint', 'historyPresentIllness', 'reviewSystems'].forEach(field => {
+            const el = document.getElementById('v' + field.charAt(0).toUpperCase() + field.slice(1) + '-' + v.visitId);
+            if (el) autoResizeTextarea(el);
+        });
+    });
+}
