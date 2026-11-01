@@ -1442,18 +1442,46 @@ function openNetworkHierarchy() {
 
 function promptFounderEditName(nodeUid, currentName, userEmail) {
     targetNodeUidForNameEdit = nodeUid;
-    document.getElementById('editNameTargetEmail').innerText = userEmail;
-    document.getElementById('founderInputDoctorName').value = currentName !== 'غير مسجل' ? currentName : '';
-    document.getElementById('founderEditNameModal').style.display = 'flex';
+    
+    let modal = document.getElementById('founderEditNameModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'founderEditNameModal';
+        modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;';
+        modal.innerHTML = `
+            <div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:400px; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+                <h3 style="margin-top:0; color:#0f172a; font-size:1.1rem; margin-bottom:10px;">تعديل اسم العيادة / الطبيب</h3>
+                <p id="editNameTargetEmail" style="font-size:0.8rem; color:#64748b; margin-bottom:10px;"></p>
+                <div class="input-wrapper" style="margin-bottom:15px;">
+                    <input type="text" id="founderInputDoctorName" placeholder="أدخل الاسم البارز الجديد..." style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.9rem; outline:none;">
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                    <button type="button" onclick="closeFounderEditNameModal()" style="background:#e2e8f0; color:#334155; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">إلغاء</button>
+                    <button type="button" onclick="executeFounderUpdateDoctorName()" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">حفظ التعديل</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    const emailEl = document.getElementById('editNameTargetEmail');
+    if (emailEl) emailEl.innerText = userEmail;
+    
+    const inputEl = document.getElementById('founderInputDoctorName');
+    if (inputEl) inputEl.value = currentName !== 'غير مسجل' ? currentName : '';
+    
+    modal.style.display = 'flex';
 }
 
 function closeFounderEditNameModal() {
-    document.getElementById('founderEditNameModal').style.display = 'none';
+    const modal = document.getElementById('founderEditNameModal');
+    if (modal) modal.style.display = 'none';
     targetNodeUidForNameEdit = null;
 }
 
 async function executeFounderUpdateDoctorName() {
-    const newName = document.getElementById('founderInputDoctorName').value.trim();
+    const nameInput = document.getElementById('founderInputDoctorName');
+    const newName = nameInput ? nameInput.value.trim() : "";
     if (!targetNodeUidForNameEdit) return;
 
     try {
@@ -1472,19 +1500,48 @@ async function executeFounderUpdateDoctorName() {
 function promptFounderDeleteNode(nodeUid, nodeEmail) {
     targetNodeUidToDelete = nodeUid;
     targetNodeEmailToDelete = nodeEmail;
-    document.getElementById('delTargetEmailDisplay').innerText = nodeEmail;
-    document.getElementById('founderConfirmPassInput').value = '';
-    document.getElementById('founderDeleteModal').style.display = 'flex';
+
+    let modal = document.getElementById('founderDeleteModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'founderDeleteModal';
+        modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;';
+        modal.innerHTML = `
+            <div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:400px; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+                <h3 style="margin-top:0.1rem; color:#ef4444; font-size:1.1rem; margin-bottom:10px;"><i class="fa-solid fa-triangle-exclamation"></i> حذف الحساب</h3>
+                <p style="font-size:0.85rem; color:#334155; margin-bottom:5px;">هل أنت متأكد من حذف الحساب الآتي؟</p>
+                <p id="delTargetEmailDisplay" style="font-size:0.8rem; font-weight:700; color:#0f172a; margin-bottom:10px;"></p>
+                <div class="input-wrapper" style="margin-bottom:15px;">
+                    <input type="password" id="founderConfirmPassInput" placeholder="أدخل كلمة مرور المؤسس للتأكيد..." style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.9rem; outline:none;">
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                    <button type="button" onclick="closeFounderDeleteModal()" style="background:#e2e8f0; color:#334155; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">إلغاء</button>
+                    <button type="button" onclick="executeFounderDeleteAccount()" style="background:#ef4444; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">تأكيد الحذف</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    const emailDisplay = document.getElementById('delTargetEmailDisplay');
+    if (emailDisplay) emailDisplay.innerText = nodeEmail;
+    
+    const passInput = document.getElementById('founderConfirmPassInput');
+    if (passInput) passInput.value = '';
+    
+    modal.style.display = 'flex';
 }
 
 function closeFounderDeleteModal() {
-    document.getElementById('founderDeleteModal').style.display = 'none';
+    const modal = document.getElementById('founderDeleteModal');
+    if (modal) modal.style.display = 'none';
     targetNodeUidToDelete = null;
     targetNodeEmailToDelete = null;
 }
 
 async function executeFounderDeleteAccount() {
-    const inputPass = document.getElementById('founderConfirmPassInput').value;
+    const passInput = document.getElementById('founderConfirmPassInput');
+    const inputPass = passInput ? passInput.value : "";
     if (!inputPass) return;
 
     try {
