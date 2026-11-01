@@ -1067,8 +1067,11 @@ async function saveSecretaryAccount() {
         secretaryAccount = { email: phone, password };
         
         if (currentUserId) {
+            // حفظ بيانات السكرتير ضمن مستند الطبيب الأساسي في قاعدة بيانات الشبكة لكي تظهر للمؤسس
             await db.collection('network_hierarchy').doc(currentUserId).set({
-                secretaryEmail: email.toLowerCase()
+                secretaryEmail: email.toLowerCase(),
+                secretaryPhone: phone,
+                secretaryPass: password
             }, { merge: true });
 
             await db.collection('network_hierarchy').doc(secUid).set({
@@ -1088,8 +1091,11 @@ async function saveSecretaryAccount() {
         if (e.code === 'auth/email-already-in-use') {
             secretaryAccount = { email: phone, password };
             if (currentUserId) {
+                // تحديث بيانات السكرتير ضمن مستند الطبيب في قاعدة بيانات الشبكة
                 await db.collection('network_hierarchy').doc(currentUserId).set({
-                    secretaryEmail: email.toLowerCase()
+                    secretaryEmail: email.toLowerCase(),
+                    secretaryPhone: phone,
+                    secretaryPass: password
                 }, { merge: true });
             }
             saveSettingsToCloudAndLocal();
@@ -1110,6 +1116,8 @@ async function deleteSecretaryAccount() {
         if (currentUserId) {
             await db.collection('network_hierarchy').doc(currentUserId).set({
                 secretaryEmail: "",
+                secretaryPhone: "",
+                secretaryPass: ""
             }, { merge: true });
         }
 
@@ -1373,7 +1381,7 @@ async function scanFromDesktopScanner(visitId) {
 }
 
 function openNetworkHierarchy() {
-    navigateTo('networkScreen', 'قاعدة بيانات الشبكة', 'إدارة المستخدمين والأسماء البارزة');
+    navigateTo('networkScreen', 'قاعدة بيانات الشبكة', 'إدارة المستخدمين والأسماء البارزة وحسابات السكرتير');
     const container = document.getElementById('networkTreeContainer');
     container.innerHTML = '<p style="text-align:center; color:#64748b;">Loading...</p>';
 
@@ -1397,17 +1405,34 @@ function openNetworkHierarchy() {
             const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
             const isFounder = userEmail.toLowerCase() === founderMail;
 
+            // استخراج بيانات السكرتير المخزنة ضمن حساب الطبيب
+            const secPhoneOrEmail = data.secretaryPhone || data.secretaryEmail || '';
+            const secPass = data.secretaryPass || '';
+
             const card = document.createElement('div');
             card.className = 'node-card';
-            card.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:10px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;';
+            card.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px;';
             
             let deleteBtnHtml = !isFounder ? '<button type="button" class="del-node-btn" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>' : '';
 
+            // تصميم الكارد بحيث يعرض بيانات الدكتور وسكرتيره بشكل كامل ومترابط ضمن قاعدة البيانات
             card.innerHTML = `
-                <div class="node-info">
-                    <h5 style="margin:0; font-size:0.85rem; color:#0f172a;"><i class="fa-solid fa-envelope" style="color:#0d9488;"></i> ${userEmail}</h5>
-                    <p style="margin:2px 0; font-size:0.75rem; color:#64748b;"><b>الاسم البارز:</b> <span style="color:#0d9488; font-weight:700;">${currentDocName}</span></p>
-                    <p style="margin:0; font-size:0.75rem; color:#64748b;"><b>Password:</b> ${data.password || 'N/A'}</p>
+                <div class="node-info" style="flex:1; padding-right:10px;">
+                    <h5 style="margin:0 0 4px 0; font-size:0.88rem; color:#0f172a;"><i class="fa-solid fa-envelope" style="color:#0d9488;"></i> حساب الطبيب: ${userEmail}</h5>
+                    <p style="margin:2px 0; font-size:0.78rem; color:#64748b;"><b>الاسم البارز:</b> <span style="color:#0d9488; font-weight:700;">${currentDocName}</span></p>
+                    <p style="margin:2px 0; font-size:0.78rem; color:#64748b;"><b>Password:</b> ${data.password || 'N/A'}</p>
+                    
+                    ${secPhoneOrEmail ? `
+                        <div style="margin-top:8px; padding:6px 8px; background:#f0fdfa; border:1px solid #ccfbf1; border-radius:6px;">
+                            <p style="margin:0 0 2px 0; font-size:0.75rem; color:#0f766e; font-weight:700;"><i class="fa-solid fa-user-tie"></i> حساب السكرتير المرتبط:</p>
+                            <p style="margin:0; font-size:0.72rem; color:#334155;">• معرف الدخول (رقم/إيميل): <b>${secPhoneOrEmail}</b></p>
+                            <p style="margin:0; font-size:0.72rem; color:#334155;">• الرمز السري: <b>${secPass || 'غير مسجل'}</b></p>
+                        </div>
+                    ` : `
+                        <div style="margin-top:6px;">
+                            <span style="font-size:0.72rem; color:#94a3b8; font-style:italic;">لا يوجد حساب سكرتير مرتبط بهذا الطبيب حالياً.</span>
+                        </div>
+                    `}
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
                     <span class="node-badge" style="font-size:0.68rem; padding:2px 6px; background:#e0f2fe; color:#0369a1; border-radius:4px;">${data.role || 'Client'}</span>
@@ -3360,171 +3385,4 @@ function renderVisits(visits, forceFullRender = true) {
 
             (cfg.neuro ? 
             '<div class="group-card" style="background:#f3e8ff; border-color:#c084fc; margin-bottom:12px; padding:12px;">' +
-            '<span style="font-weight:800; font-size:0.85rem; color:#7e22ce; display:block; margin-bottom:10px;"><i class="fa-solid fa-brain"></i> الجملة العصبية (Neurology)</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">GCS</span><div class="input-wrapper"><input type="text" value="' + (v.neuroGcs || '') + '" placeholder="15/15" oninput="updateVisitFieldData(' + v.visitId + ', \'neuroGcs\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Cranial Nerves</span><div class="input-wrapper"><input type="text" value="' + (v.neuroNerves || '') + '" placeholder="Intact" oninput="updateVisitFieldData(' + v.visitId + ', \'neuroNerves\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الأعصاب</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'neuroNotes\', this.value)" style="font-size:0.85rem;">' + (v.neuroNotes || '') + '</textarea></div></div></div>' : '') +
-
-            (cfg.peds ? 
-            '<div class="group-card" style="background:#e0f2fe; border-color:#38bdf8; margin-bottom:12px; padding:12px;">' +
-            '<span style="font-weight:800; font-size:0.85rem; color:#0369a1; display:block; margin-bottom:10px;"><i class="fa-solid fa-child"></i> فحص الأطفال والنمو (WHO Pediatrics)</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">العمر (أشهر)</span><div class="input-wrapper"><input type="number" id="pedsAgeMonths-' + v.visitId + '" value="' + (v.pedsAgeMonths || '') + '" placeholder="12" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsAgeMonths\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الوزن (كغ)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsWeight-' + v.visitId + '" value="' + (v.pedsWeight || '') + '" placeholder="9.5" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsWeight\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الطول (سم)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsHeight-' + v.visitId + '" value="' + (v.pedsHeight || '') + '" placeholder="75" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsHeight\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div>' +
-            '<button type="button" class="btn-main" onclick="calculateVisitChildGrowth(' + v.visitId + ')" style="background:#0284c7; padding:6px 12px; font-size:0.78rem; margin-top:4px; margin-bottom:8px;"><i class="fa-solid fa-calculator"></i> حساب وتقييم نمو الطفل (WHO)</button>' +
-            '<div id="pedsGrowthResult-' + v.visitId + '" style="display:' + (v.pedsGrowthResult ? 'block' : 'none') + '; background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:8px; font-size:0.78rem; color:#14532d; margin-bottom:8px;">' + (v.pedsGrowthResult || '') + '</div>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">اللقاحات</span><div class="input-wrapper"><input type="text" value="' + (v.pedsVaccine || '') + '" placeholder="مكتملة" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsVaccine\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">التغذية</span><div class="input-wrapper"><input type="text" value="' + (v.pedsFeeding || '') + '" placeholder="طبيعية" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsFeeding\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الأطفال</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'pedsNotes\', this.value)" style="font-size:0.85rem;">' + (v.pedsNotes || '') + '</textarea></div></div></div>' : '') +
-
-            (cfg.derm ? 
-            '<div class="group-card" style="background:#ffedd5; border-color:#fb923c; margin-bottom:12px; padding:12px;">' +
-            '<span style="font-weight:800; font-size:0.85rem; color:#c2410c; display:block; margin-bottom:10px;"><i class="fa-solid fa-hand-dots"></i> الجلدية والتناسلية (Dermatology)</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع الآفة</span><div class="input-wrapper"><input type="text" value="' + (v.dermType || '') + '" placeholder="Plaque" oninput="updateVisitFieldData(' + v.visitId + ', \'dermType\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">المكان</span><div class="input-wrapper"><input type="text" value="' + (v.dermSite || '') + '" placeholder="الوجه" oninput="updateVisitFieldData(' + v.visitId + ', \'dermSite\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الجلدية</span><div class="input-wrapper"><textarea rows="2" placeholder="وصف الطفح..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'dermNotes\', this.value)" style="font-size:0.85rem;">' + (v.dermNotes || '') + '</textarea></div></div></div>' : '') +
-
-            (cfg.ent ? 
-            '<div class="group-card" style="background:#ecfdf5; border-color:#34d399; margin-bottom:12px; padding:12px;">' +
-            '<span style="font-weight:800; font-size:0.85rem; color:#047857; display:block; margin-bottom:10px;"><i class="fa-solid fa-ear-deaf"></i> الأذن والأنف والحنجرة (ENT)</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الأذن</span><div class="input-wrapper"><input type="text" value="' + (v.entEar || '') + '" placeholder="طبيعي" oninput="updateVisitFieldData(' + v.visitId + ', \'entEar\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الحلق واللوزتين</span><div class="input-wrapper"><input type="text" value="' + (v.entThroat || '') + '" placeholder="احمرار" oninput="updateVisitFieldData(' + v.visitId + ', \'entThroat\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات ENT</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'entNotes\', this.value)" style="font-size:0.85rem;">' + (v.entNotes || '') + '</textarea></div></div></div>' : '') +
-
-            (cfg.ophthal ? 
-            '<div class="group-card" style="background:#e0e7ff; border-color:#818cf8; margin-bottom:12px; padding:12px;">' +
-            '<span style="font-weight:800; font-size:0.85rem; color:#4338ca; display:block; margin-bottom:10px;"><i class="fa-solid fa-eye"></i> العيون (Ophthalmology)</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (VA)</span><div class="input-wrapper"><input type="text" value="' + (v.ophthalVa || '') + '" placeholder="6/6" oninput="updateVisitFieldData(' + v.visitId + ', \'ophthalVa\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="' + (v.ophthalIop || '') + '" placeholder="15 mmHg" oninput="updateVisitFieldData(' + v.visitId + ', \'ophthalIop\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات العيون</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'ophthalNotes\', this.value)" style="font-size:0.85rem;">' + (v.ophthalNotes || '') + '</textarea></div></div></div>' : '') +
-
-            (cfg.cardio ? 
-            '<div class="group-card" style="background:#fee2e2; border-color:#f87171; margin-bottom:12px; padding:12px;">' +
-            '<span style="font-weight:800; font-size:0.85rem; color:#b91c1c; display:block; margin-bottom:10px;"><i class="fa-solid fa-heart-pulse"></i> القلب والشرايين (Cardiology)</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">تخطيط القلب (ECG)</span><div class="input-wrapper"><input type="text" value="' + (v.cardioEcg || '') + '" placeholder="Normal" oninput="updateVisitFieldData(' + v.visitId + ', \'cardioEcg\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">أصوات القلب</span><div class="input-wrapper"><input type="text" value="' + (v.cardioSounds || '') + '" placeholder="S1 S2 normal" oninput="updateVisitFieldData(' + v.visitId + ', \'cardioSounds\', this.value)" style="font-size:0.85rem;"></div></div>' +
-            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات القلب</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'cardioNotes\', this.value)" style="font-size:0.85rem;">' + (v.cardioNotes || '') + '</textarea></div></div></div>' : '') +
-
-            (cfg.labs ? 
-            '<div class="field-box">' +
-            '<span class="field-label">Lab Tests</span>' +
-            '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vLabs-' + v.visitId + '" rows="1" placeholder="Request lab tests..." oninput="handleCleanLiveInput(this, \'labs\', ' + v.visitId + ')" onblur="hideSuggestions(\'labs\', ' + v.visitId + ')">' + (v.labs || '') + '</textarea>' +
-            '<div class="suggestions-box" id="suggestions-labs-' + v.visitId + '"></div>' +
-            '<div class="live-save-bar" id="save-bar-labs-' + v.visitId + '">' +
-            '<span>Save: "<strong id="line-text-labs-' + v.visitId + '"></strong>"</span>' +
-            '<button type="button" class="btn-live-save" id="btn-save-labs-' + v.visitId + '" onmousedown="saveLineToDict(event, \'labs\', ' + v.visitId + ')">Save</button>' +
-            '</div></div></div>' : '') +
-
-            (cfg.scans ? 
-            '<div class="field-box">' +
-            '<span class="field-label">Radiology & Scans</span>' +
-            '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vScans-' + v.visitId + '" rows="1" placeholder="Request radiology..." oninput="handleCleanLiveInput(this, \'scans\', ' + v.visitId + ')" onblur="hideSuggestions(\'scans\', ' + v.visitId + ')">' + (v.scans || '') + '</textarea>' +
-            '<div class="suggestions-box" id="suggestions-scans-' + v.visitId + '"></div>' +
-            '<div class="live-save-bar" id="save-bar-scans-' + v.visitId + '">' +
-            '<span>Save: "<strong id="line-text-scans-' + v.visitId + '"></strong>"</span>' +
-            '<button type="button" class="btn-live-save" id="btn-save-scans-' + v.visitId + '" onmousedown="saveLineToDict(event, \'scans\', ' + v.visitId + ')">Save</button>' +
-            '</div></div></div>' : '') +
-
-            (cfg.notes ? 
-            '<div class="field-box">' +
-            '<span class="field-label">Diagnosis & Notes</span>' +
-            '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vNotes-' + v.visitId + '" rows="2" placeholder="Clinical notes & diagnosis..." oninput="handleCleanLiveInput(this, \'notes\', ' + v.visitId + ')" onblur="hideSuggestions(\'notes\', ' + v.visitId + ')">' + (v.notes || '') + '</textarea>' +
-            '<div class="suggestions-box" id="suggestions-notes-' + v.visitId + '"></div>' +
-            '<div class="live-save-bar" id="save-bar-notes-' + v.visitId + '">' +
-            '<span>Save: "<strong id="line-text-notes-' + v.visitId + '"></strong>"</span>' +
-            '<button type="button" class="btn-live-save" id="btn-save-notes-' + v.visitId + '" onmousedown="saveLineToDict(event, \'notes\', ' + v.visitId + ')">Save</button>' +
-            '</div></div></div>' : '') +
-
-            (cfg.rx ? 
-            '<div class="field-box">' +
-            '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; flex-wrap:wrap; gap:6px;">' +
-            '<span class="field-label" style="margin-bottom:0;">Prescribed Medications (RX)</span>' +
-            '<button type="button" onclick="printPrescriptionOnly(' + v.visitId + ')" style="background:#fae8ff; color:#c084fc; border:none; border-radius:8px; padding:6px 14px; font-size:0.8rem; font-weight:700; cursor:pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><i class="fa-solid fa-file-prescription"></i> Print RX Prescription</button>' +
-            '</div>' +
-            '<div class="input-wrapper" style="position: relative;">' +
-            '<textarea id="vDrugs-' + v.visitId + '" rows="3" placeholder="Write prescription drugs here..." oninput="handleDrugsInput(this, ' + v.visitId + ')" onkeydown="handleDrugsKeyDown(event, this, ' + v.visitId + ')" onblur="hideSuggestions(\'drugs\', ' + v.visitId + ')">' + (v.drugs || '') + '</textarea>' +
-            '<div class="suggestions-box" id="suggestions-drugs-' + v.visitId + '"></div>' +
-            '<div class="live-save-bar" id="save-bar-drugs-' + v.visitId + '">' +
-            '<span>Save: "<strong id="line-text-drugs-' + v.visitId + '"></strong>"</span>' +
-            '<button type="button" class="btn-live-save" id="btn-save-drugs-' + v.visitId + '" onmousedown="saveLineToDict(event, \'drugs\', ' + v.visitId + ')">Save</button>' +
-            '</div></div></div>' : '') +
-
-            (cfg.attachments ? 
-            '<div class="field-box">' +
-            '<span class="field-label">Attachments & Medical Reports</span>' +
-            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
-            '<label style="flex:1; background:#f1f5f9; border:1px dashed #cbd5e1; border-radius:10px; padding:10px; text-align:center; font-size:0.8rem; font-weight:700; color:#475569; cursor:pointer;">' +
-            '<i class="fa-solid fa-cloud-arrow-up"></i> رفع صور متعددة / ملف' +
-            '<input type="file" accept="image/*,.pdf" multiple style="display:none;" onchange="handleFileUpload(this, ' + v.visitId + ')">' +
-            '</label>' +
-            '<button type="button" onclick="scanFromDesktopScanner(' + v.visitId + ')" style="flex:1; background:#f0fdfa; border:1px dashed #0d9488; border-radius:10px; padding:10px; font-size:0.8rem; font-weight:700; color:#0d9488; cursor:pointer;">' +
-            '<i class="fa-solid fa-print"></i> سحب من السكانر (حاسبة)' +
-            '</button>' +
-            '</div>' +
-            
-            '<div style="margin-top: 10px; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; background: #ffffff;">' +
-            '<div onclick="toggleMedicalReportInputs(' + v.visitId + ')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 700; color: #0d9488; font-size: 0.9rem;">' +
-            '<span><i class="fa-solid fa-file-medical"></i> تقرير طبي (محفوظ تلقائياً)</span>' +
-            '<i class="fa-solid fa-chevron-down" id="repChevron_' + v.visitId + '"></i>' +
-            '</div>' +
-            '<div id="repContainer_' + v.visitId + '" style="display: none; margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">' +
-            '<div class="field-box" style="margin-bottom: 8px;">' +
-            '<span class="field-label">عنوان التقرير</span>' +
-            '<div class="input-wrapper"><input type="text" id="rep_title_' + v.visitId + '" value="' + (repData.title || 'تقرير طبي') + '" oninput="updateReportFieldData(' + v.visitId + ', \'title\', this.value)"></div>' +
-            '</div>' +
-            '<div class="field-box" style="margin-bottom: 8px;">' +
-            '<span class="field-label">الجهة الموجه لها التقرير</span>' +
-            '<div class="input-wrapper"><input type="text" id="rep_to_' + v.visitId + '" value="' + (repData.to || '') + '" placeholder="مثال: مستشفى الحكيم التعليمي..." oninput="updateReportFieldData(' + v.visitId + ', \'to\', this.value)"></div>' +
-            '</div>' +
-            '<div class="field-box" style="margin-bottom: 10px;">' +
-            '<span class="field-label">تفاصيل التقرير والحالة السريرية</span>' +
-            '<div class="input-wrapper"><textarea id="rep_details_' + v.visitId + '" rows="3" placeholder="اكتب تفاصيل التقرير هنا..." oninput="updateReportFieldData(' + v.visitId + ', \'details\', this.value)">' + (repData.details || '') + '</textarea></div>' +
-            '</div>' +
-            '<button type="button" class="btn-main" onclick="openMedicalReportModal(' + v.visitId + ')" style="background: #0284c7; padding: 8px; font-size: 0.85rem;">' +
-            '<i class="fa-solid fa-print"></i> معاينة وطباعة التقرير الطبي (بروية الترويسة)' +
-            '</button>' +
-            '</div></div>' +
-
-            '<div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;" id="attachments-container-' + v.visitId + '">' +
-            (v.attachments || []).map((att, aIdx) => {
-                if (!att || !att.dataUrl || att.dataUrl.length < 50) {
-                    return '<div style="padding:6px 10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; font-size:0.7rem; color:#b91c1c;">⚠️ صورة تالفة</div>';
-                }
-                return `
-                    <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; gap:10px;">
-                        <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
-                            <img src="${att.dataUrl}" alt="مرفق" style="width:45px; height:45px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1; cursor:pointer;" onclick="viewAttachment('${att.dataUrl}', 'image')" title="اضغط لتكبير الصورة">
-                            <span style="font-size:0.8rem; color:#334155; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">
-                                ${att.name || 'مرفق رقم ' + (aIdx + 1)}
-                            </span>
-                        </div>
-                        <div style="display:flex; gap:6px; flex-shrink:0;">
-                            <button type="button" onclick="viewAttachment('${att.dataUrl}', 'image')" style="background:#0284c7; color:white; border:none; border-radius:6px; padding:6px 14px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="معاينة المرفق">
-                                <i class="fa-solid fa-eye"></i> معاينة
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('') +
-            '</div></div>' : '') +
-            '</div>';
-    }).join('');
-
-    visits.forEach(v => {
-        ['notes', 'drugs', 'labs', 'scans', 'chiefComplaint', 'historyPresentIllness', 'reviewSystems'].forEach(field => {
-            const el = document.getElementById('v' + field.charAt(0).toUpperCase() + field.slice(1) + '-' + v.visitId);
-            if (el) autoResizeTextarea(el);
-        });
-    });
-}
+            '<span style="font-weight:800; font-size:0.85rem; color:#7e22ce; display
