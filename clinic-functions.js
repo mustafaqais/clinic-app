@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Safe Variable Declaration Fix
+// Clinic Master System - Safe Variable Declaration & Optimized Fix
 // ==========================================
 
 if (typeof window.targetNodeUidForNameEdit === 'undefined') {
