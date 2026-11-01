@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Cloud Ultimate Edition v17.70 (Fixed Permanent Delete & Drug Suggestions)
+// Clinic Master System - Cloud Ultimate Edition v17.75 (Fixed Secretary Sync & Data Scoping)
 // ==========================================
 
 window.addEventListener('online', updateOnlineStatus);
@@ -263,6 +263,7 @@ function toggleDarkMode() {
     applyDarkModeState();
 }
 
+// التعديل الذكي والشامل لربط ومزامنة السكرتير مع حساب الطبيب لحظياً
 window.addEventListener("DOMContentLoaded", () => {
     const pDateEl = document.getElementById('pDate');
     if (pDateEl) pDateEl.value = getTodayFormatted();
@@ -288,10 +289,22 @@ window.addEventListener("DOMContentLoaded", () => {
             isUserSecretary = false;
 
             try {
-                const secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', user.email.toLowerCase()).get();
+                const userEmailLower = user.email ? user.email.toLowerCase() : '';
+                const phoneOnly = userEmailLower.replace('@clinic.com', '');
+
+                let secQuery = await db.collection('network_hierarchy').where('secretaryEmail', '==', userEmailLower).get();
+                if (secQuery.empty) {
+                    secQuery = await db.collection('network_hierarchy').where('phone', '==', phoneOnly).get();
+                }
+                
                 if (!secQuery.empty) {
                     const doctorDoc = secQuery.docs[0];
-                    dataOwnerUid = doctorDoc.id;
+                    const docData = doctorDoc.data();
+                    if (docData.doctorUid) {
+                        dataOwnerUid = docData.doctorUid;
+                    } else {
+                        dataOwnerUid = doctorDoc.id;
+                    }
                     sessionStorage.setItem('target_doctor_uid', dataOwnerUid);
                     isUserSecretary = true;
                 } else {
@@ -374,7 +387,7 @@ window.addEventListener("DOMContentLoaded", () => {
             }
 
             const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
-            if (user.email.toLowerCase() === founderMail) {
+            if (user.email && user.email.toLowerCase() === founderMail) {
                 setupFounderInterfaceAfterAuth();
             } else {
                 checkUserSubscriptionStatus(user.uid, isUserSecretary);
@@ -1142,7 +1155,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.70",
+        version: "17.75",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1640,7 +1653,7 @@ function handleCleanLiveInput(textarea, category, visitId) {
     }
 
     const lines = val.split('\n');
-    const currentLine = lines[lines.length - 1].trim(); // الـ trim هنا تحل مشكلة المسافات المخفية تماماً
+    const currentLine = lines[lines.length - 1].trim();
 
     if (currentLine.length > 0) {
         if (saveBar) {
@@ -1992,7 +2005,6 @@ function saveEditedPatient() {
     document.getElementById('recPatientMeta').innerHTML = 'Age: ' + patient.age + ' | Gender: ' + patient.gender + (patient.city ? ' | المحافظة: ' + patient.city : '') + ' | Marital: ' + patient.marital + ' | Job: ' + patient.job + ' | Phone: ' + patient.phone;
 }
 
-// دالة حذف ملف المريض (مع نافذة تأكيد ونقله للسلة دون عودة تلقائية)
 function confirmDeletePatientRecord() {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient) return;
@@ -2018,7 +2030,6 @@ function confirmDeletePatientRecord() {
     }
 }
 
-// دالة حذف زيارة المريض (مع نافذة تأكيد ونقلها للسلة)
 function confirmDeleteVisit(visitId) {
     const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
     if (!patient || patient.visits.length <= 1) {
