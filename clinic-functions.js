@@ -1994,6 +1994,40 @@ function updateBpFields(visitId) {
         visit.bp = '';
     }
     savePatientToCloudAndLocal(patient);
+    updateVitalsSummaryBar(visitId);
+}
+
+function toggleVitalsAccordion(visitId) {
+    const content = document.getElementById('vitalsContent-' + visitId);
+    const chevron = document.getElementById('vitalsChevron-' + visitId);
+    if (content) {
+        if (content.style.display === 'none' || content.style.display === '') {
+            content.style.display = 'block';
+            if (chevron) chevron.className = 'fa-solid fa-chevron-up';
+        } else {
+            content.style.display = 'none';
+            if (chevron) chevron.className = 'fa-solid fa-chevron-down';
+        }
+    }
+}
+
+function updateVitalsSummaryBar(visitId) {
+    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+    if (!patient) return;
+    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+    if (!visit) return;
+
+    const summarySpan = document.getElementById('vitalsSummaryText-' + visitId);
+    if (!summarySpan) return;
+
+    let parts = [];
+    if (visit.bp) parts.push('BP: ' + visit.bp);
+    if (visit.hr) parts.push('HR: ' + visit.hr + ' bpm');
+    if (visit.temp) parts.push('Temp: ' + visit.temp + ' °C');
+    if (visit.bmiWeight) parts.push('Wt: ' + visit.bmiWeight + ' kg');
+    if (visit.bmiScore) parts.push('BMI: ' + visit.bmiScore);
+
+    summarySpan.innerHTML = parts.length > 0 ? parts.join(' | ') : 'لا توجد قراءات مسجلة (اضغط للفتح)';
 }
 
 function handleFileUpload(input, visitId) {
@@ -3292,6 +3326,14 @@ function renderVisits(visits, forceFullRender = true) {
             bpSys = v.bp;
         }
 
+        let vitalsParts = [];
+        if (v.bp) vitalsParts.push('BP: ' + v.bp);
+        if (v.hr) vitalsParts.push('HR: ' + v.hr + ' bpm');
+        if (v.temp) vitalsParts.push('Temp: ' + v.temp + ' °C');
+        if (v.bmiWeight) vitalsParts.push('Wt: ' + v.bmiWeight + ' kg');
+        if (v.bmiScore) vitalsParts.push('BMI: ' + v.bmiScore);
+        const vitalsSummaryStr = vitalsParts.length > 0 ? vitalsParts.join(' | ') : 'لا توجد قراءات مسجلة (اضغط للفتح)';
+
         const cfg = specialtyConfig;
         const repData = v.medicalReport || {};
 
@@ -3345,11 +3387,20 @@ function renderVisits(visits, forceFullRender = true) {
             '</div></div></div>' : '') +
 
             (cfg.vitals ? 
-            '<button type="button" class="btn-bmi-trigger" onclick="openBmiCalculator(' + v.visitId + ')">' +
-            '<span><i class="fa-solid fa-calculator" style="color:#0284c7;"></i> Vital Signs & BMI Calculator</span>' +
-            '<span style="font-size:0.75rem; background:#e0f2fe; padding:2px 8px; border-radius:6px;">Score: ' + (v.bmiScore || '—') + '</span>' +
-            '</button>' +
-            '<div class="vital-box" style="margin-bottom: 12px;">' +
+            '<div style="margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 10px; background: #ffffff; overflow: hidden;">' +
+            '<div onclick="toggleVitalsAccordion(' + v.visitId + ')" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #f0fdfa; cursor: pointer; border-bottom: 1px solid #e2e8f0;">' +
+            '<div style="display: flex; align-items: center; gap: 8px;">' +
+            '<i class="fa-solid fa-heart-pulse" style="color: #0d9488;"></i>' +
+            '<span style="font-weight: 700; color: #0f766e; font-size: 0.9rem;">العلامات الحيوية (Vital Signs)</span>' +
+            '<span id="vitalsSummaryText-' + v.visitId + '" style="font-size: 0.75rem; color: #64748b; font-weight: normal; margin-left: 8px;">' + vitalsSummaryStr + '</span>' +
+            '</div>' +
+            '<div style="display: flex; align-items: center; gap: 8px;">' +
+            '<button type="button" onclick="event.stopPropagation(); openBmiCalculator(' + v.visitId + ')" style="background:#e0f2fe; color:#0369a1; border:none; border-radius:6px; padding:2px 8px; font-size:0.75rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-calculator"></i> BMI: ' + (v.bmiScore || '—') + '</button>' +
+            '<i class="fa-solid fa-chevron-down" id="vitalsChevron-' + v.visitId + '" style="color: #0d9488;"></i>' +
+            '</div>' +
+            '</div>' +
+            '<div id="vitalsContent-' + v.visitId + '" style="display: none; padding: 12px;">' +
+            '<div class="vital-box" style="margin-bottom: 0;">' +
             '<div class="vital-row">' +
             '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-arrow-trend-up"></i> Systolic BP (الضغط العالي)</span>' +
             '<div class="vital-inputs"><input type="number" id="vBpSys-' + v.visitId + '" value="' + bpSys + '" placeholder="120" oninput="updateBpFields(' + v.visitId + ')"><span>mmHg</span></div></div>' +
@@ -3365,7 +3416,7 @@ function renderVisits(visits, forceFullRender = true) {
             '<div class="vital-row">' +
             '<div class="vital-item" style="grid-column: span 2;"><span class="vital-label"><i class="fa-solid fa-weight-scale"></i> Weight</span>' +
             '<div class="vital-inputs"><input type="number" value="' + (v.bmiWeight || '') + '" placeholder="70" oninput="updateVisitFieldData(' + v.visitId + ', \'bmiWeight\', this.value)"><span>kg</span></div></div>' +
-            '</div></div>' : '') +
+            '</div></div></div></div>' : '') +
 
             (cfg.obsGyn ? 
             '<div class="group-card" style="background:#fce7f3; border-color:#f472b6; margin-bottom:12px; padding:12px;">' +
