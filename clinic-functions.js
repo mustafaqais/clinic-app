@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Complete & Unified Script
+// Clinic Master System - Complete & Unified Script (Cloud Firestore Native Mode)
 // ==========================================
 
 window.targetNodeUidForNameEdit = window.targetNodeUidForNameEdit || null;
@@ -324,70 +324,65 @@ window.addEventListener("DOMContentLoaded", () => {
 
             await loadDoctorBranding(dataOwnerUid);
 
-            patients = JSON.parse(localStorage.getItem('clinic_patients_' + dataOwnerUid)) || patients;
-            trashBin = JSON.parse(localStorage.getItem('clinic_trash_' + dataOwnerUid)) || trashBin;
+            trashBin = JSON.parse(localStorage.getItem('clinic_trash_' + dataOwnerUid)) || [];
 
             if (patientsListenerUnsubscribe) {
                 patientsListenerUnsubscribe();
             }
 
-            if (navigator.onLine) {
-                db.collection('users_data').doc(dataOwnerUid).get().then(doc => {
-                    if (doc.exists) {
-                        const data = doc.data();
-                        if (data.rxImage) {
-                            currentDoctorRxImage = data.rxImage;
-                            localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
-                        }
-                        if (data.rxLayout) {
-                            localStorage.setItem('doctor_rx_layout', JSON.stringify(data.rxLayout));
-                        }
-                        if (data.dictionary) {
-                            medicalDict = data.dictionary;
-                            if (!medicalDict.mh_history) medicalDict.mh_history = ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"];
-                            if (!medicalDict.chief_complaint) medicalDict.chief_complaint = ["Cough and fever", "Severe headache", "Chest pain"];
-                            if (!medicalDict.history_present) medicalDict.history_present = ["Started 3 days ago, progressive"];
-                            if (!medicalDict.review_systems) medicalDict.review_systems = ["No fever, no shortness of breath"];
-                            localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
-                        }
-                        if (data.trashBin) {
-                            trashBin = data.trashBin;
-                            localStorage.setItem('clinic_trash_' + dataOwnerUid, JSON.stringify(trashBin));
-                        }
-                        if (data.secretaryAccount) {
-                            secretaryAccount = data.secretaryAccount;
-                            localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
-                        }
-                        if (data.specialtyConfig) {
-                            specialtyConfig = data.specialtyConfig;
-                            localStorage.setItem('clinic_specialty_config', JSON.stringify(specialtyConfig));
+            db.collection('users_data').doc(dataOwnerUid).get().then(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.rxImage) {
+                        currentDoctorRxImage = data.rxImage;
+                        localStorage.setItem('doctor_rx_template', currentDoctorRxImage);
+                    }
+                    if (data.rxLayout) {
+                        localStorage.setItem('doctor_rx_layout', JSON.stringify(data.rxLayout));
+                    }
+                    if (data.dictionary) {
+                        medicalDict = data.dictionary;
+                        if (!medicalDict.mh_history) medicalDict.mh_history = ["Appendectomy", "Cholecystectomy", "Penicillin Allergy"];
+                        if (!medicalDict.chief_complaint) medicalDict.chief_complaint = ["Cough and fever", "Severe headache", "Chest pain"];
+                        if (!medicalDict.history_present) medicalDict.history_present = ["Started 3 days ago, progressive"];
+                        if (!medicalDict.review_systems) medicalDict.review_systems = ["No fever, no shortness of breath"];
+                        localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
+                    }
+                    if (data.trashBin) {
+                        trashBin = data.trashBin;
+                        localStorage.setItem('clinic_trash_' + dataOwnerUid, JSON.stringify(trashBin));
+                    }
+                    if (data.secretaryAccount) {
+                        secretaryAccount = data.secretaryAccount;
+                        localStorage.setItem('clinic_sec_account', JSON.stringify(secretaryAccount));
+                    }
+                    if (data.specialtyConfig) {
+                        specialtyConfig = data.specialtyConfig;
+                        localStorage.setItem('clinic_specialty_config', JSON.stringify(specialtyConfig));
+                    }
+                }
+            }).catch(err => console.log(err));
+
+            patientsListenerUnsubscribe = db.collection('users_data').doc(dataOwnerUid).collection('patients')
+                .onSnapshot(snapshot => {
+                    let cloudPatients = [];
+                    snapshot.forEach(doc => {
+                        cloudPatients.push(doc.data());
+                    });
+                    patients = cloudPatients;
+
+                    if (document.getElementById('archiveScreen').style.display === 'block') {
+                        filterPatients();
+                    } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
+                        const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
+                        if (pat) {
+                            if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) return;
+                            renderVisits(pat.visits || [], false);
+                        } else {
+                            showMainMenu();
                         }
                     }
-                }).catch(err => console.log(err));
-
-                patientsListenerUnsubscribe = db.collection('users_data').doc(dataOwnerUid).collection('patients')
-                    .onSnapshot(snapshot => {
-                        let cloudPatients = [];
-                        snapshot.forEach(doc => {
-                            cloudPatients.push(doc.data());
-                        });
-                        patients = cloudPatients;
-                        localStorage.setItem('clinic_patients_' + dataOwnerUid, JSON.stringify(patients));
-                        localStorage.setItem('clinic_patients', JSON.stringify(patients));
-
-                        if (document.getElementById('archiveScreen').style.display === 'block') {
-                            filterPatients();
-                        } else if (document.getElementById('medicalRecordScreen').style.display === 'block' && currentPatientId) {
-                            const pat = patients.find(p => Number(p.id) === Number(currentPatientId));
-                            if (pat) {
-                                if (document.activeElement && (document.activeElement.tagName === 'TEXTAREA' || document.activeElement.tagName === 'INPUT')) return;
-                                renderVisits(pat.visits || [], false);
-                            } else {
-                                showMainMenu();
-                            }
-                        }
-                    }, err => console.log("Real-time listener error:", err));
-            }
+                }, err => console.log("Real-time listener error:", err));
 
             const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
             if (user.email && user.email.toLowerCase() === founderMail) {
@@ -683,19 +678,20 @@ async function verifyActivationCode() {
     }
 }
 
+// دالة الحفظ المحدثة والمباشرة لـ Firestore (تتخطى مشاكل LocalStorage نهائياً)
 function savePatientToCloudAndLocal(patientObj) {
     if (!currentUserId || isSubscriptionExpired) return;
     const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
 
+    // تحديث المصفوفة محلياً في الذاكرة لتجاوز الحاجة لـ LocalStorage
     const idx = patients.findIndex(p => Number(p.id) === Number(patientObj.id));
     if (idx !== -1) {
         patients[idx] = patientObj;
     } else {
         patients.unshift(patientObj);
     }
-    localStorage.setItem('clinic_patients_' + ownerUid, JSON.stringify(patients));
-    localStorage.setItem('clinic_patients', JSON.stringify(patients));
 
+    // الحفظ المباشر والسريع في فايربيس فايراستور
     if (navigator.onLine) {
         db.collection('users_data').doc(ownerUid).collection('patients').doc(String(patientObj.id)).set(patientObj)
             .catch(err => console.log("Cloud save error:", err));
@@ -717,7 +713,6 @@ function saveTrashToCloudAndLocal() {
     const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
 
     localStorage.setItem('clinic_trash_' + ownerUid, JSON.stringify(trashBin));
-    localStorage.setItem('clinic_trash', JSON.stringify(trashBin));
 
     if (navigator.onLine) {
         db.collection('users_data').doc(ownerUid).set({
@@ -1212,7 +1207,6 @@ function restoreFromUploadedFile(input) {
 
                     const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
                     if (ownerUid) {
-                        localStorage.setItem('clinic_patients_' + ownerUid, JSON.stringify(patients));
                         localStorage.setItem('clinic_trash_' + ownerUid, JSON.stringify(trashBin));
                     }
                     saveSettingsToCloudAndLocal();
@@ -2154,8 +2148,7 @@ function confirmDeletePatientRecord() {
             
             const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
             if (ownerUid) {
-                localStorage.setItem('clinic_patients_' + ownerUid, JSON.stringify(patients));
-                localStorage.setItem('clinic_patients', JSON.stringify(patients));
+                localStorage.setItem('clinic_trash_' + ownerUid, JSON.stringify(trashBin));
             }
             saveTrashToCloudAndLocal();
             deletePatientFromCloudAndLocal(removedPatient.id);
@@ -3210,7 +3203,8 @@ function saveNewPatient(e) {
         phone: document.getElementById('pPhone').value || 'N/A',
         visits: [{ visitId: Date.now(), date: getTodayFormatted(), medHistory: {}, chiefComplaint: '', historyPresentIllness: '', reviewSystems: '', notes: '', attachments: [] }]
     };
-    patients.unshift(newPatient);
+    
+    // الحفظ المباشر في السحابة وتجاوز LocalStorage تماماً
     savePatientToCloudAndLocal(newPatient);
     openMedicalRecord(newPatient.id);
 }
