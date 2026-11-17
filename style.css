@@ -1,6 +1,6 @@
 /* ==========================================
    Clinic Master System - Cloud Ultimate Edition
-   تنسيقات الـ CSS (النسخة المنظفة - استعداداً لملفات الطباعة المستقلة)
+   تنسيقات الـ CSS (النسخة المنظفة - معدلة لمرونة التمدد العرضي للروشتة)
    ========================================== */
 
 * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
@@ -242,7 +242,7 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
 .filter-row select { flex: 1; padding: 6px 10px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 0.78rem; font-weight: 600; outline: none; background: #fff; color: #0f172a; }
 
 /* ==========================================
-   حاوية الروشتة ومساحة العمل الشاملة
+   حاوية الروشتة ومساحة العمل الشاملة (مع تعديل المرونة العرضية)
    ========================================== */
 .rx-canvas-container {
     position: relative;
@@ -272,6 +272,10 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
     touch-action: none;
     z-index: 10;
     border-radius: 8px;
+    /* التعديل الجذري هنا: السماح بالمد العرضي الحر ومنع نزول النصوص إجبارياً للأسفل */
+    width: auto !important;
+    max-width: none !important;
+    white-space: nowrap !important;
 }
 
 .draggable-box.config-mode {
@@ -311,11 +315,11 @@ body.dark-mode .founder-code-display { background: #1e293b !important; border-co
     justify-content: center;
 }
 
-.rx-patient-details-text { color: #b91c1c; font-family: 'Amiri', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; background: transparent !important; } 
-.rx-date-text { color: #1e293b; font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; background: transparent !important; border: none !important; padding: 0 !important; }
-.rx-vitals-text { color: #0284c7; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.85rem; line-height: 1.6; direction: ltr; text-align: left; background: transparent !important; } 
+.rx-patient-details-text { color: #b91c1c; font-family: 'Amiri', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; background: transparent !important; white-space: nowrap !important; } 
+.rx-date-text { color: #1e293b; font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.95rem; direction: ltr; text-align: left; background: transparent !important; border: none !important; padding: 0 !important; white-space: nowrap !important; }
+.rx-vitals-text { color: #0284c7; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 0.85rem; line-height: 1.6; direction: ltr; text-align: left; background: transparent !important; white-space: nowrap !important; } 
 
-.rx-treatment-wrapper { direction: ltr; text-align: left; width: 100%; background: transparent !important; }
+.rx-treatment-wrapper { direction: ltr; text-align: left; width: 100%; background: transparent !important; white-space: normal !important; }
 
 .rx-rx-title { 
     color: #b91c1c; 
