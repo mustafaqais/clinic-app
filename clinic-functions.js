@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Complete, Unified & Enhanced Script (v17.85)
+// Clinic Master System - Complete, Unified & Updated Script
 // ==========================================
 
 window.targetNodeUidForNameEdit = window.targetNodeUidForNameEdit || null;
@@ -346,7 +346,6 @@ window.addEventListener("DOMContentLoaded", () => {
                         if (!medicalDict.chief_complaint) medicalDict.chief_complaint = ["Cough and fever", "Severe headache", "Chest pain"];
                         if (!medicalDict.history_present) medicalDict.history_present = ["Started 3 days ago, progressive"];
                         if (!medicalDict.review_systems) medicalDict.review_systems = ["No fever, no shortness of breath"];
-                        if (!medicalDict.medical_reports) medicalDict.medical_reports = ["يعاني المريض من حالة مرضية مزمنة وتحت العلاج المستمر", "يحتاج المريض إلى إجازة مرضية لمدة أسبوعين للراحة التامة"];
                         localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
                     }
                     if (data.trashBin) {
@@ -679,10 +678,12 @@ async function verifyActivationCode() {
     }
 }
 
+// دالة الحفظ المحدثة والمباشرة لـ Firestore (تتخطى مشاكل LocalStorage نهائياً)
 function savePatientToCloudAndLocal(patientObj) {
     if (!currentUserId || isSubscriptionExpired) return;
     const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
 
+    // تحديث المصفوفة محلياً في الذاكرة لتجاوز الحاجة لـ LocalStorage
     const idx = patients.findIndex(p => Number(p.id) === Number(patientObj.id));
     if (idx !== -1) {
         patients[idx] = patientObj;
@@ -690,6 +691,7 @@ function savePatientToCloudAndLocal(patientObj) {
         patients.unshift(patientObj);
     }
 
+    // الحفظ المباشر والسريع في فايربيس فايراستور
     if (navigator.onLine) {
         db.collection('users_data').doc(ownerUid).collection('patients').doc(String(patientObj.id)).set(patientObj)
             .catch(err => console.log("Cloud save error:", err));
@@ -1157,7 +1159,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.85",
+        version: "17.80",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1760,7 +1762,6 @@ function handleCleanLiveInput(textarea, category, visitId) {
         if (category === 'chiefComplaint') dictKey = 'chief_complaint';
         else if (category === 'historyPresentIllness') dictKey = 'history_present';
         else if (category === 'reviewSystems') dictKey = 'review_systems';
-        else if (category === 'repDetails') dictKey = 'medical_reports';
 
         const terms = medicalDict[dictKey] || medicalDict[category] || [];
         const matches = terms.filter(t => t && t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
@@ -1784,26 +1785,20 @@ function handleLiveInput(textarea, category, visitId) {
 }
 
 function selectSuggestion(category, visitId, term) {
-    const textarea = document.getElementById('v' + category.charAt(0).toUpperCase() + category.slice(1) + '-' + visitId) || document.getElementById(category + '_' + visitId);
+    const textarea = document.getElementById('v' + category.charAt(0).toUpperCase() + category.slice(1) + '-' + visitId);
     if (!textarea) return;
 
-    if (category === 'repDetails') {
-        textarea.value = term;
-        updateReportFieldData(visitId, 'details', term);
-        const repDetailsText = document.getElementById('repDetailsText');
-        if (repDetailsText) repDetailsText.textContent = term;
-    } else {
-        const lines = textarea.value.split('\n');
-        lines[lines.length - 1] = term;
-        textarea.value = lines.join('\n') + '\n';
-        autoResizeTextarea(textarea);
-        updateVisitFieldData(visitId, category, textarea.value);
-    }
+    const lines = textarea.value.split('\n');
+    lines[lines.length - 1] = term;
+    textarea.value = lines.join('\n') + '\n';
+    autoResizeTextarea(textarea);
 
     const box = document.getElementById('suggestions-' + category + '-' + visitId);
     const saveBar = document.getElementById('save-bar-' + category + '-' + visitId);
     if (box) box.style.display = 'none';
     if (saveBar) saveBar.style.display = 'none';
+
+    updateVisitFieldData(visitId, category, textarea.value);
     textarea.focus();
 }
 
@@ -1826,11 +1821,8 @@ function saveLineToDict(event, category, visitId) {
     if (category === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (category === 'historyPresentIllness') dictKey = 'history_present';
     else if (category === 'reviewSystems') dictKey = 'review_systems';
-    else if (category === 'repDetails') dictKey = 'medical_reports';
 
-    if (!medicalDict[dictKey]) medicalDict[dictKey] = [];
-
-    if (lineText && !medicalDict[dictKey].includes(lineText)) {
+    if (lineText && medicalDict[dictKey] && !medicalDict[dictKey].includes(lineText)) {
         medicalDict[dictKey].push(lineText);
         saveSettingsToCloudAndLocal();
         const btn = document.getElementById('btn-save-' + category + '-' + visitId);
@@ -1844,6 +1836,93 @@ function saveLineToDict(event, category, visitId) {
             }, 1000);
         }
     }
+}
+
+function handleMhLiveInput(inputEl, inputKey) {
+    autoResizeTextarea(inputEl);
+    const val = inputEl.value.trim();
+    const box = document.getElementById('suggestions-' + inputKey);
+    const saveBar = document.getElementById('save-bar-' + inputKey);
+
+    if (!val || val.length < 1) {
+        if (box) box.style.display = 'none';
+        if (saveBar) saveBar.style.display = 'none';
+        return;
+    }
+
+    const lines = inputEl.value.split('\n');
+    const currentLine = lines[lines.length - 1].trim();
+
+    if (currentLine.length > 0) {
+        if (saveBar) {
+            saveBar.style.display = 'flex';
+            const textSpan = document.getElementById('line-text-' + inputKey);
+            if (textSpan) textSpan.innerText = currentLine;
+        }
+        const terms = medicalDict.mh_history || [];
+        const matches = terms.filter(t => t && t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
+
+        if (matches.length > 0 && box) {
+            box.innerHTML = matches.map(m => 
+                `<div class="suggestion-item" onmousedown="event.preventDefault(); selectMhSuggestion('${inputKey}', '${m.replace(/'/g, "\\'")}')">${m}</div>`
+            ).join('');
+            box.style.display = 'block';
+        } else if (box) {
+            box.style.display = 'none';
+        }
+    } else {
+        if (saveBar) saveBar.style.display = 'none';
+        if (box) box.style.display = 'none';
+    }
+}
+
+function selectMhSuggestion(inputKey, term) {
+    const el = inputKey === 'mh_other' ? document.getElementById('mh-cd-other') : document.getElementById('mh-' + inputKey.replace('mh_', ''));
+    if (!el) return;
+
+    const lines = el.value.split('\n');
+    lines[lines.length - 1] = term;
+    el.value = lines.join('\n') + '\n';
+    autoResizeTextarea(el);
+
+    document.getElementById('suggestions-' + inputKey).style.display = 'none';
+    document.getElementById('save-bar-' + inputKey).style.display = 'none';
+    el.focus();
+}
+
+function hideMhSuggestions(inputKey) {
+    setTimeout(() => {
+        const box = document.getElementById('suggestions-' + inputKey);
+        const bar = document.getElementById('save-bar-' + inputKey);
+        if (box) box.style.display = 'none';
+        if (bar) bar.style.display = 'none';
+    }, 250);
+}
+
+function saveMhLineToDict(event, inputKey) {
+    event.preventDefault();
+    const textSpan = document.getElementById('line-text-' + inputKey);
+    if (!textSpan) return;
+    const lineText = textSpan.innerText.trim();
+    if (lineText && !medicalDict.mh_history.includes(lineText)) {
+        medicalDict.mh_history.push(lineText);
+        saveSettingsToCloudAndLocal();
+        const btn = document.getElementById('btn-save-' + inputKey);
+        if (btn) {
+            btn.innerText = 'Saved!';
+            btn.classList.add('saved');
+            setTimeout(() => {
+                btn.innerText = 'Save';
+                btn.classList.remove('saved');
+                document.getElementById('save-bar-' + inputKey).style.display = 'none';
+            }, 1000);
+        }
+    }
+}
+
+function toggleOtherInput() {
+    const isChecked = document.getElementById('mh-other-check').checked;
+    document.getElementById('mh-other-box').style.display = isChecked ? 'block' : 'none';
 }
 
 function updateVisitFieldData(visitId, category, value) {
@@ -1995,6 +2074,27 @@ function handleFileUpload(input, visitId) {
             reader.readAsDataURL(file);
         });
     }
+}
+
+function previewAttachmentByIndex(el) {
+    const visitId = el.getAttribute('data-visit-id');
+    const index = el.getAttribute('data-attachment-index');
+    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+    if (!patient) return;
+    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+    if (!visit || !visit.attachments || !visit.attachments[index]) return;
+    
+    const att = visit.attachments[index];
+    viewAttachment(att.dataUrl, 'image');
+}
+
+function previewAttachmentImage(imgSrc) {
+    viewAttachment(imgSrc, 'image');
+}
+
+function closeImagePreview() {
+    const modal = document.getElementById('viewAttachmentModal');
+    if (modal) modal.remove();
 }
 
 function openEditPatientModal() {
@@ -2214,6 +2314,436 @@ function formatTreatmentForPrintOrView(rawText) {
     return htmlOutput;
 }
 
+function openRxModal(visitId) {
+    currentVisitIdForModal = visitId;
+    const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+    if (!patient) return;
+    const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
+    if (!visit) return;
+
+    document.getElementById('rxDragPatientDetailsText').innerText = 'Name: ' + patient.name + ' | Age: ' + patient.age + ' | ' + (patient.gender || '');
+    document.getElementById('rxDragDateText').innerText = visit.date || getTodayFormatted();
+    
+    const bpVal = visit.bp ? 'BP: ' + visit.bp : 'BP: _____ / _____ mmHg';
+    const hrVal = visit.hr ? 'HR: ' + visit.hr + ' bpm' : 'HR: _____ bpm';
+    const tempVal = visit.temp ? 'Temp: ' + visit.temp + ' °C' : 'Temp: _____ °C';
+    const bmiVal = visit.bmiScore ? 'BMI: ' + visit.bmiScore : 'BMI: _____';
+
+    document.getElementById('rxDragVitalsText').innerText = bpVal + ' | ' + hrVal + ' | ' + tempVal + ' | ' + bmiVal;
+    
+    const treatmentEl = document.getElementById('rxDragTreatmentText');
+    if (treatmentEl) {
+        treatmentEl.innerHTML = formatTreatmentForPrintOrView(visit.drugs);
+    }
+
+    const container = document.getElementById('rxCanvasContainer');
+    const oldImg = container.querySelector('.rx-bg-img');
+    if (oldImg) oldImg.remove();
+
+    let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+    if (savedRxImg) {
+        const img = document.createElement('img');
+        img.src = savedRxImg;
+        img.className = 'rx-bg-img';
+        container.insertBefore(img, container.firstChild);
+    }
+
+    loadSavedRxLayout();
+    document.getElementById('rxModal').style.display = 'flex';
+}
+
+function closeRxModal() {
+    document.getElementById('rxModal').style.display = 'none';
+}
+
+function printPrescriptionOnly(visitId) {
+    openRxModal(visitId);
+}
+
+function toggleRxConfigMode() {
+    isConfigMode = !isConfigMode;
+    document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
+        if (isConfigMode) box.classList.add('config-mode');
+        else box.classList.remove('config-mode');
+    });
+    updateConfigModeUI();
+}
+
+function updateConfigModeUI() {
+    const hint = document.getElementById('rxModeHint');
+    const saveBtn = document.getElementById('rxSaveLayoutBtn');
+    if (isConfigMode) {
+        if (hint) hint.innerText = 'Config mode active';
+        if (saveBtn) saveBtn.style.display = 'block';
+    } else {
+        if (hint) hint.innerText = '';
+        if (saveBtn) saveBtn.style.display = 'none';
+    }
+}
+
+function changeBoxFontSize(boxType, delta) {
+    const map = {
+        patientDetails: 'rxDragPatientDetailsText',
+        date: 'rxDragDateText',
+        vitals: 'rxDragVitalsText',
+        treatment: 'rxDragTreatmentText'
+    };
+    const el = document.getElementById(map[boxType]);
+    if (!el) return;
+    const currentSize = parseFloat(window.getComputedStyle(el).fontSize);
+    el.style.fontSize = (currentSize + delta) + 'px';
+}
+
+function setRxPaperSize(size) {
+    const container = document.getElementById('rxCanvasContainer');
+    if (!container) return;
+    container.classList.remove('size-a4', 'size-a5');
+    container.classList.add('size-' + size);
+    localStorage.setItem('clinic_rx_paper_size', size);
+}
+
+function getRxDeviceStorageKey() {
+    const width = window.innerWidth;
+    if (width <= 768) {
+        return 'doctor_rx_layout_mobile';
+    } else if (width > 768 && width <= 1024) {
+        return 'doctor_rx_layout_tablet';
+    } else {
+        return 'doctor_rx_layout_desktop';
+    }
+}
+
+function saveRxLayoutPositions() {
+    isConfigMode = false;
+    document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
+    updateConfigModeUI();
+
+    const container = document.getElementById('rxCanvasContainer');
+    const cWidth = container ? container.clientWidth : 1;
+    const cHeight = container ? container.clientHeight : 1;
+
+    const rxLayoutData = {};
+    document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
+        const leftPct = (box.offsetLeft / cWidth) * 100;
+        const topPct = (box.offsetTop / cHeight) * 100;
+        const widthPct = (box.offsetWidth / cWidth) * 100;
+
+        rxLayoutData[box.id] = {
+            top: topPct + '%',
+            left: leftPct + '%',
+            width: widthPct + '%',
+            fontSize: box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text') ? window.getComputedStyle(box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text')).fontSize : '1rem'
+        };
+    });
+
+    const storageKey = getRxDeviceStorageKey();
+    localStorage.setItem(storageKey, JSON.stringify(rxLayoutData));
+    localStorage.setItem('doctor_rx_layout', JSON.stringify(rxLayoutData));
+
+    if (typeof saveSettingsToCloudAndLocal === 'function') {
+        saveSettingsToCloudAndLocal();
+    }
+
+    alert('تم حفظ أماكن وأحجام الروشتة بنجاح!');
+}
+
+function loadSavedRxLayout() {
+    const storageKey = getRxDeviceStorageKey();
+    let savedJson = localStorage.getItem(storageKey) || localStorage.getItem('doctor_rx_layout');
+
+    const savedLayout = JSON.parse(savedJson || '{}');
+    for (const [boxId, data] of Object.entries(savedLayout)) {
+        const box = document.getElementById(boxId);
+        if (box && data) {
+            if (data.top) box.style.top = data.top;
+            if (data.left) box.style.left = data.left;
+            if (data.width) box.style.width = data.width;
+            if (data.fontSize) {
+                const textEl = box.querySelector('.rx-patient-details-text, .rx-date-text, .rx-vitals-text, .rx-treatment-text');
+                if (textEl) textEl.style.fontSize = data.fontSize;
+            }
+        }
+    }
+    const savedSize = localStorage.getItem('clinic_rx_paper_size') || 'a4';
+    setRxPaperSize(savedSize);
+}
+
+function injectPrintStyle(type = 'rx') {
+    const width = window.innerWidth;
+    let deviceType = 'desktop';
+    
+    if (width <= 768) {
+        deviceType = 'mobile';
+    } else if (width > 768 && width <= 1024) {
+        deviceType = 'tablet';
+    }
+
+    const styleFileName = `print-${type}-${deviceType}.css`;
+
+    let oldLink = document.getElementById('activePrintStyle');
+    if (oldLink) oldLink.remove();
+
+    const link = document.createElement('link');
+    link.id = 'activePrintStyle';
+    link.rel = 'stylesheet';
+    link.href = styleFileName;
+    document.head.appendChild(link);
+}
+
+function printPrescriptionDirectly() {
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile) {
+        isConfigMode = false;
+        document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
+        updateConfigModeUI();
+
+        const container = document.getElementById('rxCanvasContainer');
+        if (!container) return;
+
+        let bgImg = container.querySelector('.rx-bg-img');
+        let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+        
+        if (!bgImg && savedRxImg) {
+            bgImg = document.createElement('img');
+            bgImg.src = savedRxImg;
+            bgImg.className = 'rx-bg-img';
+            container.insertBefore(bgImg, container.firstChild);
+        } else if (bgImg && savedRxImg) {
+            bgImg.src = savedRxImg;
+            bgImg.style.display = 'block';
+        }
+
+        const controls = container.querySelectorAll('.box-font-controls');
+        controls.forEach(c => c.style.display = 'none');
+
+        const reportModal = document.getElementById('medicalReportModal');
+        let reportWasOpen = false;
+        if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
+            reportModal.style.display = 'none';
+            reportWasOpen = true;
+        }
+
+        html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
+            const imgData = canvas.toDataURL('image/jpeg', 0.90);
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Print Prescription</title>
+                        <style>
+                            body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #fff; display: flex; justify-content: center; align-items: center; }
+                            img { width: 100%; height: auto; max-height: 100vh; object-fit: contain; }
+                            @page { size: auto; margin: 0; }
+                        </style>
+                    </head>
+                    <body>
+                        <img src="${imgData}" onload="window.print(); window.close();" />
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+
+            controls.forEach(c => c.style.display = '');
+            if (reportWasOpen && reportModal) {
+                reportModal.style.display = 'flex';
+            }
+        }).catch(err => {
+            console.error("Mobile print canvas error:", err);
+            alert("تعذر إنشاء صورة الطباعة للموبايل.");
+            controls.forEach(c => c.style.display = '');
+        });
+
+    } else {
+        injectPrintStyle('rx');
+
+        isConfigMode = false;
+        document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
+        updateConfigModeUI();
+
+        const container = document.getElementById('rxCanvasContainer');
+        if (!container) return;
+
+        let bgImg = container.querySelector('.rx-bg-img');
+        let savedRxImg = currentDoctorRxImage || localStorage.getItem('doctor_rx_template') || localStorage.getItem('clinic_rx_image') || '';
+        
+        if (!bgImg && savedRxImg) {
+            bgImg = document.createElement('img');
+            bgImg.src = savedRxImg;
+            bgImg.className = 'rx-bg-img';
+            container.insertBefore(bgImg, container.firstChild);
+        } else if (bgImg && savedRxImg) {
+            bgImg.src = savedRxImg;
+            bgImg.style.display = 'block';
+        }
+
+        const controls = container.querySelectorAll('.box-font-controls');
+        controls.forEach(c => c.style.display = 'none');
+        
+        document.body.classList.add('is-printing-rx-only');
+        document.body.classList.remove('is-printing-report-only');
+        
+        const reportModal = document.getElementById('medicalReportModal');
+        let reportWasOpen = false;
+        if (reportModal && (reportModal.style.display === 'flex' || window.getComputedStyle(reportModal).display === 'flex')) {
+            reportModal.style.display = 'none';
+            reportWasOpen = true;
+        }
+
+        setTimeout(() => {
+            window.print();
+        }, 400);
+
+        setTimeout(() => {
+            document.body.classList.remove('is-printing-rx-only');
+            controls.forEach(c => c.style.display = '');
+            if (reportWasOpen && reportModal) {
+                reportModal.style.display = 'flex';
+            }
+        }, 1500);
+    }
+}
+
+function printMedicalReportDirectly() {
+    injectPrintStyle('report');
+
+    if (repConfigModeActive) {
+        toggleRepConfigMode();
+    }
+    const container = document.getElementById('repCanvasContainer');
+    const controls = container ? container.querySelectorAll('.box-font-controls') : [];
+    controls.forEach(c => c.style.display = 'none');
+
+    document.body.classList.add('is-printing-report-only');
+    document.body.classList.remove('is-printing-rx-only');
+
+    const rxModal = document.getElementById('rxModal');
+    let rxWasOpen = false;
+    if (rxModal && (rxModal.style.display === 'flex' || window.getComputedStyle(rxModal).display === 'flex')) {
+        rxModal.style.display = 'none';
+        rxWasOpen = true;
+    }
+    
+    setTimeout(() => {
+        window.print();
+    }, 400);
+    
+    setTimeout(() => {
+        document.body.classList.remove('is-printing-report-only');
+        controls.forEach(c => c.style.display = '');
+        if (rxWasOpen && rxModal) {
+            rxModal.style.display = 'flex';
+        }
+    }, 1500);
+}
+
+function openPrescriptionPDF() {
+    isConfigMode = false;
+    document.querySelectorAll('#rxModal .draggable-box').forEach(b => b.classList.remove('config-mode'));
+    updateConfigModeUI();
+
+    const container = document.getElementById('rxCanvasContainer');
+    const controls = container.querySelectorAll('.box-font-controls');
+    controls.forEach(c => c.style.display = 'none');
+
+    html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('portrait', 'mm', 'a4');
+        const imgWidth = 210;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, imgWidth, imgHeight);
+        pdf.save('Prescription_' + Date.now() + '.pdf');
+        controls.forEach(c => c.style.display = '');
+    });
+}
+
+function initDraggableElements() {
+    let activeBox = null;
+    let startX = 0, startY = 0, initialLeftPct = 0, initialTopPct = 0;
+    const container = document.getElementById('rxCanvasContainer');
+    if (!container) return;
+
+    document.querySelectorAll('#rxModal .draggable-box').forEach(box => {
+        box.style.touchAction = 'none';
+
+        box.addEventListener('pointerdown', e => {
+            if (!isConfigMode || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            activeBox = box;
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            const cWidth = container.clientWidth;
+            const cHeight = container.clientHeight;
+            
+            initialLeftPct = (box.offsetLeft / cWidth) * 100;
+            initialTopPct = (box.offsetTop / cHeight) * 100;
+            
+            box.setPointerCapture(e.pointerId);
+            e.stopPropagation();
+        });
+
+        box.addEventListener('pointermove', e => {
+            if (!activeBox || activeBox !== box) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            
+            const cWidth = container.clientWidth;
+            const cHeight = container.clientHeight;
+
+            let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
+            let newTopPct = initialTopPct + (dy / cHeight) * 100;
+
+            box.style.left = newLeftPct + '%';
+            box.style.top = newTopPct + '%';
+        });
+
+        box.addEventListener('pointerup', e => {
+            if (activeBox === box) {
+                activeBox = null;
+                if (box.hasPointerCapture(e.pointerId)) {
+                    box.releasePointerCapture(e.pointerId);
+                }
+            }
+        });
+
+        box.addEventListener('touchstart', (e) => {
+            if (!isConfigMode || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
+            if (e.touches.length === 1 && container) {
+                activeBox = box;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                const cWidth = container.clientWidth;
+                const cHeight = container.clientHeight;
+                initialLeftPct = (box.offsetLeft / cWidth) * 100;
+                initialTopPct = (box.offsetTop / cHeight) * 100;
+                e.stopPropagation();
+            }
+        }, { passive: true });
+
+        box.addEventListener('touchmove', (e) => {
+            if (!activeBox || activeBox !== box || !container) return;
+            if (e.touches.length === 1) {
+                let dx = e.touches[0].clientX - startX;
+                let dy = e.touches[0].clientY - startY;
+                const cWidth = container.clientWidth;
+                const cHeight = container.clientHeight;
+                let newLeftPct = initialLeftPct + (dx / cWidth) * 100;
+                let newTopPct = initialTopPct + (dy / cHeight) * 100;
+                box.style.left = newLeftPct + '%';
+                box.style.top = newTopPct + '%';
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        box.addEventListener('touchend', (e) => {
+            if (activeBox === box) {
+                activeBox = null;
+            }
+        });
+    });
+}
+
 let repConfigModeActive = false;
 let repFontSizes = { patient: 14, title: 16, to: 15, details: 15 };
 
@@ -2295,9 +2825,9 @@ function openMedicalReportModal(visitId) {
 
     const repData = (visit && visit.medicalReport) ? visit.medicalReport : {};
     
-    let titleVal = repData.title || "تقرير طبي";
-    let toVal = repData.to || "";
-    let detailsVal = repData.details || "";
+    let titleVal = repData.title || (document.getElementById('rep_title_' + visitId) ? document.getElementById('rep_title_' + visitId).value : "تقرير طبي");
+    let toVal = repData.to || (document.getElementById('rep_to_' + visitId) ? document.getElementById('rep_to_' + visitId).value : "");
+    let detailsVal = repData.details || (document.getElementById('rep_details_' + visitId) ? document.getElementById('rep_details_' + visitId).value : "");
 
     if (document.getElementById('rep_title_' + visitId)) document.getElementById('rep_title_' + visitId).value = titleVal;
     if (document.getElementById('rep_to_' + visitId)) document.getElementById('rep_to_' + visitId).value = toVal;
@@ -2319,6 +2849,8 @@ function openMedicalReportModal(visitId) {
     }
 
     loadRepLayoutPositions();
+    setTimeout(loadRepLayoutPositions, 50);
+    setTimeout(loadRepLayoutPositions, 150);
 }
 
 function closeMedicalReportModal() {
@@ -2326,72 +2858,358 @@ function closeMedicalReportModal() {
     if (modal) modal.style.display = 'none';
 }
 
-// ==========================================
-// دالة حفظ التقرير الطبي كصورة وإضافته للمرفقات مباشرة
-// ==========================================
-function saveMedicalReportAsAttachment(visitId) {
-    const container = document.getElementById('repCanvasContainer');
-    if (!container) return;
-
-    alert("جاري حفظ التقرير وتحويله إلى صورة لإضافته للمرفقات...");
-
-    html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
-        const imgDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-        const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
-        if (!patient) return;
-        const visit = patient.visits.find(v => Number(v.visitId) === Number(visitId));
-        if (!visit) return;
-
-        if (!visit.attachments) visit.attachments = [];
-        const reportTitleInput = document.getElementById('rep_title_' + visitId);
-        const reportTitle = reportTitleInput ? reportTitleInput.value.trim() : "تقرير طبي";
-        
-        visit.attachments.unshift({ 
-            name: "Medical_Report_" + reportTitle + "_" + Date.now() + ".jpg", 
-            dataUrl: imgDataUrl 
-        });
-
-        savePatientToCloudAndLocal(patient);
-        renderVisits(patient.visits, false);
-        closeMedicalReportModal();
-        alert("✨ تم حفظ نسخة من التقرير الطبي وإضافتها بنجاح إلى مرفقات المريض!");
-    }).catch(err => {
-        console.error("Report canvas error:", err);
-        alert("تعذر حفظ التقرير كصورة.");
+function toggleRepConfigMode() {
+    repConfigModeActive = !repConfigModeActive;
+    const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
+    boxes.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (repConfigModeActive) el.classList.add('config-mode');
+            else el.classList.remove('config-mode');
+        }
     });
+
+    const saveBtn = document.getElementById('repSaveLayoutBtn');
+    if (saveBtn) {
+        saveBtn.style.display = repConfigModeActive ? 'block' : 'none';
+    }
+
+    const toggleBtn = document.getElementById('repConfigToggleBtn');
+    if (toggleBtn) {
+        toggleBtn.style.background = repConfigModeActive ? '#0d9488' : '#f0fdfa';
+        toggleBtn.style.color = repConfigModeActive ? '#ffffff' : '#0d9488';
+    }
 }
 
-function printMedicalReportDirectly() {
-    injectPrintStyle('report');
-    if (repConfigModeActive) toggleRepConfigMode();
+function changeRepBoxFontSize(boxKey, delta) {
+    repFontSizes[boxKey] = Math.max(10, Math.min(30, (repFontSizes[boxKey] || 14) + delta));
+    let targetId = '';
+    if (boxKey === 'patient') targetId = 'repPatientText';
+    else if (boxKey === 'title') targetId = 'repTitleText';
+    else if (boxKey === 'to') targetId = 'repToText';
+    else if (boxKey === 'details') targetId = 'repDetailsText';
+
+    const el = document.getElementById(targetId);
+    if (el) {
+        el.style.fontSize = repFontSizes[boxKey] + 'px';
+        if (boxKey === 'details') {
+            el.style.whiteSpace = 'pre-wrap';
+            el.style.wordBreak = 'break-word';
+            el.style.fontFamily = "'Cairo', 'Tajawal', sans-serif";
+        }
+    }
+}
+
+function saveRepLayoutPositions() {
+    let positions = {};
     const container = document.getElementById('repCanvasContainer');
-    const controls = container ? container.querySelectorAll('.box-font-controls') : [];
-    controls.forEach(c => c.style.display = 'none');
+    const cWidth = container ? container.clientWidth : 1;
+    const cHeight = container ? container.clientHeight : 1;
 
-    document.body.classList.add('is-printing-report-only');
-    document.body.classList.remove('is-printing-rx-only');
+    const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
+    boxes.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            const leftPx = el.offsetLeft;
+            const topPx = el.offsetTop;
+            const widthPx = el.offsetWidth;
 
-    const rxModal = document.getElementById('rxModal');
-    let rxWasOpen = false;
-    if (rxModal && (rxModal.style.display === 'flex' || window.getComputedStyle(rxModal).display === 'flex')) {
-        rxModal.style.display = 'none';
-        rxWasOpen = true;
+            positions[id] = {
+                top: ((topPx / cHeight) * 100) + '%',
+                left: ((leftPx / cWidth) * 100) + '%',
+                width: ((widthPx / cWidth) * 100) + '%'
+            };
+        }
+    });
+    positions.fontSizes = repFontSizes;
+    
+    const storageKey = getReportDeviceStorageKey();
+    const jsonStr = JSON.stringify(positions);
+    
+    localStorage.setItem(storageKey, jsonStr);
+    localStorage.setItem('clinic_rep_custom_layout', jsonStr);
+    localStorage.setItem('clinic_rep_layout_v1', jsonStr);
+
+    if (typeof saveSettingsToCloudAndLocal === 'function') {
+        saveSettingsToCloudAndLocal();
     }
     
-    setTimeout(() => { window.print(); }, 400);
+    loadRepLayoutPositions();
+    alert('✨ تم حفظ أماكن وترتيب التقرير الطبي بنجاح وثبيتها نهائياً!');
     
-    setTimeout(() => {
-        document.body.classList.remove('is-printing-report-only');
-        controls.forEach(c => c.style.display = '');
-        if (rxWasOpen && rxModal) rxModal.style.display = 'flex';
-    }, 1500);
+    if (repConfigModeActive) {
+        toggleRepConfigMode();
+    }
+}
+
+function loadRepLayoutPositions() {
+    const storageKey = getReportDeviceStorageKey();
+    let saved = localStorage.getItem(storageKey) || localStorage.getItem('clinic_rep_custom_layout') || localStorage.getItem('clinic_rep_layout_v1');
+
+    if (saved) {
+        try {
+            let data = JSON.parse(saved);
+            const boxes = ['repDragBoxPatient', 'repDragBoxTitle', 'repDragBoxTo', 'repDragBoxDetails'];
+            boxes.forEach(id => {
+                const el = document.getElementById(id);
+                if (el && data[id]) {
+                    if (data[id].top) el.style.top = data[id].top;
+                    if (data[id].left) el.style.left = data[id].left;
+                    if (data[id].width) {
+                        el.style.width = data[id].width;
+                        el.style.maxWidth = '100%';
+                    }
+                }
+            });
+            if (data.fontSizes) {
+                repFontSizes = data.fontSizes;
+            }
+            
+            if (document.getElementById('repPatientText')) document.getElementById('repPatientText').style.fontSize = (repFontSizes.patient || 14) + 'px';
+            if (document.getElementById('repTitleText')) document.getElementById('repTitleText').style.fontSize = (repFontSizes.title || 16) + 'px';
+            if (document.getElementById('repToText')) document.getElementById('repToText').style.fontSize = (repFontSizes.to || 15) + 'px';
+            
+            const detailsEl = document.getElementById('repDetailsText');
+            if (detailsEl) {
+                detailsEl.style.fontSize = (repFontSizes.details || 15) + 'px';
+                detailsEl.style.whiteSpace = 'pre-wrap';
+                detailsEl.style.wordBreak = 'break-word';
+                detailsEl.style.fontFamily = "'Cairo', 'Tajawal', sans-serif";
+                detailsEl.style.lineHeight = '1.6';
+            }
+        } catch(e) {
+            console.log("Error loading rep layout:", e);
+        }
+    }
 }
 
 function printMedicalReportOnly(visitId) {
     openMedicalReportModal(visitId);
-    setTimeout(() => { printMedicalReportDirectly(); }, 400);
+    setTimeout(() => {
+        printMedicalReportDirectly();
+    }, 400);
 }
 
+function autoSaveMedicalRecord() {}
+
+function showMainMenu() {
+    const customBrandName = localStorage.getItem('clinic_custom_brand_name') || "نظام عيادة ماستر";
+    navigateTo('mainScreen', customBrandName, translations[currentLang].headerSub);
+}
+
+function openPatientsArchive() {
+    navigateTo('archiveScreen', translations[currentLang].archive, 'Search & records');
+    
+    const savedSort = localStorage.getItem('clinic_archive_sort');
+    const sortEl = document.getElementById('filterSort');
+    if (sortEl && savedSort) {
+        sortEl.value = savedSort;
+    }
+
+    filterPatients();
+}
+
+function openDictionaryManager() {
+    navigateTo('dictScreen', 'Dictionary Manager', 'Manage terms');
+    renderDictTerms();
+}
+
+function renderDictTerms() {
+    const catSelect = document.getElementById('dictCategorySelect');
+    const cat = catSelect ? catSelect.value : 'drugs';
+    
+    let dictKey = cat;
+    if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
+    else if (cat === 'historyPresentIllness') dictKey = 'history_present';
+    else if (cat === 'reviewSystems') dictKey = 'review_systems';
+
+    if (!medicalDict[dictKey]) {
+        medicalDict[dictKey] = [];
+    }
+
+    const terms = medicalDict[dictKey];
+    const container = document.getElementById('dictItemsList');
+    if (!container) return;
+
+    container.innerHTML = terms.length === 0 
+        ? '<p style="text-align:center; color:#64748b;">No terms in this category.</p>'
+        : terms.map((term, index) => 
+            '<div style="display:flex; justify-content:space-between; align-items:center; background:#f8fafc; border:1px solid #cbd5e1; padding:8px 12px; border-radius:8px; margin-bottom:6px;">' +
+            '<span style="font-size:0.85rem; font-weight:600; color:#0f172a;">' + term + '</span>' +
+            '<div style="display:flex; gap:4px;">' +
+            '<button onclick="editDictTerm(\'' + cat + '\', ' + index + ')" style="background:#e0f2fe; color:#0369a1; border:none; border-radius:6px; padding:4px 8px; font-size:0.72rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-pen"></i> تعديل</button>' +
+            '<button onclick="removeDictTerm(\'' + cat + '\', ' + index + ')" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.72rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-trash"></i> حذف</button>' +
+            '</div></div>'
+        ).join('') + 
+        '<div style="display:flex; gap:8px; margin-top:12px;">' +
+        '<div class="input-wrapper" style="flex:1;"><input type="text" id="newDictTermInput" placeholder="Add new term..."></div>' +
+        '<button class="btn-main" onclick="addNewDictTerm(\'' + cat + '\')" style="width:auto; padding:0 16px;">Add</button>' +
+        '</div>';
+}
+
+function editDictTerm(category, index) {
+    let dictKey = category;
+    if (category === 'chiefComplaint') dictKey = 'chief_complaint';
+    else if (category === 'historyPresentIllness') dictKey = 'history_present';
+    else if (category === 'reviewSystems') dictKey = 'review_systems';
+
+    const terms = medicalDict[dictKey] || [];
+    const currentTerm = terms[index] || '';
+    const newTerm = prompt('تعديل المصطلح الطبي:', currentTerm);
+    if (newTerm !== null && newTerm.trim() !== '') {
+        terms[index] = newTerm.trim();
+        saveSettingsToCloudAndLocal();
+        renderDictTerms();
+    }
+}
+
+function addNewDictTerm(cat) {
+    const input = document.getElementById('newDictTermInput');
+    if (!input) return;
+    const val = input.value.trim();
+    let dictKey = cat;
+    if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
+    else if (cat === 'historyPresentIllness') dictKey = 'history_present';
+    else if (cat === 'reviewSystems') dictKey = 'review_systems';
+
+    if (!medicalDict[dictKey]) {
+        medicalDict[dictKey] = [];
+    }
+
+    if (val && !medicalDict[dictKey].includes(val)) {
+        medicalDict[dictKey].push(val);
+        saveSettingsToCloudAndLocal();
+        renderDictTerms();
+    }
+}
+
+function removeDictTerm(category, index) {
+    let dictKey = category;
+    if (category === 'chiefComplaint') dictKey = 'chief_complaint';
+    else if (category === 'historyPresentIllness') dictKey = 'history_present';
+    else if (category === 'reviewSystems') dictKey = 'review_systems';
+
+    if (medicalDict[dictKey]) {
+        medicalDict[dictKey].splice(index, 1);
+        saveSettingsToCloudAndLocal();
+        renderDictTerms();
+    }
+}
+
+function openBulkAddModal() {
+    let modal = document.getElementById('bulkAddDictModal');
+    if (!modal) {
+        const modalDiv = document.createElement('div');
+        modalDiv.id = 'bulkAddDictModal';
+        modalDiv.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; justify-content:center; align-items:center;';
+        modalDiv.innerHTML = `
+            <div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:500px; box-shadow:0 4px 20px rgba(0,0,0,0.2);">
+                <h3 style="margin-top:0; color:#0f172a; font-size:1.1rem; margin-bottom:10px;"><i class="fa-solid fa-list-check"></i> إضافة مجموعة مصطلحات دفعة واحدة</h3>
+                <p style="font-size:0.8rem; color:#64748b; margin-bottom:10px;">قم لصق القائمة هنا (كل سطر علاج أو مصطلح في سطر مستقل):</p>
+                <div class="input-wrapper" style="margin-bottom:15px;">
+                    <textarea id="bulkDictInput" rows="6" placeholder="علاج 1&#10;علاج 2&#10;علاج 3" style="width:100%; padding:10px; border:1px solid #cbd5e1; border-radius:8px; font-size:0.9rem; outline:none;"></textarea>
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px;">
+                    <button type="button" onclick="closeBulkAddModal()" style="background:#e2e8f0; color:#334155; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">إلغاء</button>
+                    <button type="button" onclick="processAndSaveBulkDict()" style="background:#0d9488; color:#fff; border:none; border-radius:8px; padding:8px 16px; font-weight:700; cursor:pointer;">حفظ الكل</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalDiv);
+    }
+    
+    const inputEl = document.getElementById('bulkDictInput');
+    if (inputEl) inputEl.value = '';
+    document.getElementById('bulkAddDictModal').style.display = 'flex';
+}
+
+function closeBulkAddModal() {
+    const modal = document.getElementById('bulkAddDictModal');
+    if (modal) modal.style.display = 'none';
+}
+
+function processAndSaveBulkDict() {
+    const textElement = document.getElementById('bulkDictInput');
+    if (!textElement) {
+        alert('خطأ: حقل الإدخال غير موجود.');
+        return;
+    }
+    
+    const text = textElement.value;
+    if (!text.trim()) {
+        alert('الرجاء إدخال أو لصق القائمة أولاً.');
+        return;
+    }
+
+    const catSelect = document.getElementById('dictCategorySelect');
+    const cat = catSelect ? catSelect.value : 'drugs';
+    
+    let dictKey = cat;
+    if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
+    else if (cat === 'historyPresentIllness') dictKey = 'history_present';
+    else if (cat === 'reviewSystems') dictKey = 'review_systems';
+
+    if (!medicalDict[dictKey]) {
+        medicalDict[dictKey] = [];
+    }
+
+    let items = [];
+    if (text.includes('\n')) {
+        items = text.split('\n');
+    } else if (text.includes(',')) {
+        items = text.split(',');
+    } else {
+        items = [text];
+    }
+
+    let addedCount = 0;
+
+    items.forEach(item => {
+        const cleanItem = item.replace(/^\d+[\.\-\)]\s*/, '').trim();
+        if (cleanItem && !medicalDict[dictKey].includes(cleanItem)) {
+            medicalDict[dictKey].push(cleanItem);
+            addedCount++;
+        }
+    });
+
+    saveSettingsToCloudAndLocal();
+    closeBulkAddModal();
+    if (typeof renderDictTerms === 'function') {
+        renderDictTerms();
+    }
+    alert(`تمت إضافة (${addedCount}) عنصر جديد إلى القاموس بنجاح!`);
+}
+
+function saveNewPatient(e) {
+    e.preventDefault();
+    const rawName = document.getElementById('pName').value.trim();
+    const rawCity = document.getElementById('pCity') ? document.getElementById('pCity').value.trim() : '';
+
+    const nameExists = patients.some(p => p.name.toLowerCase() === rawName.toLowerCase());
+    if (nameExists) {
+        alert('⚠️ تنبيه: هذا الاسم مكرر تماماً! يرجى إضافة اسم الجد الرابع داخل نفس حقل الاسم (مثال: سيف قيس قاسم محمد) لكي يقبل النظام تخزين ملف المريض بنجاح.');
+        document.getElementById('pName').focus();
+        return;
+    }
+
+    const newPatient = {
+        id: Date.now(),
+        name: rawName,
+        city: rawCity,
+        age: Number(document.getElementById('pAge').value),
+        gender: document.getElementById('pGender').value || 'Unspecified',
+        marital: document.getElementById('pMarital').value || 'Single',
+        job: document.getElementById('pJob').value || 'Unspecified',
+        phone: document.getElementById('pPhone').value || 'N/A',
+        visits: [{ visitId: Date.now(), date: getTodayFormatted(), medHistory: {}, chiefComplaint: '', historyPresentIllness: '', reviewSystems: '', notes: '', attachments: [] }]
+    };
+    
+    // الحفظ المباشر في السحابة وتجاوز LocalStorage تماماً
+    savePatientToCloudAndLocal(newPatient);
+    openMedicalRecord(newPatient.id);
+}
+
+// الدالة المحدثة لعرض الأرشيف (تعرض تاريخ آخر مراجعة بدل الجنس)
 function renderPatientsList(list) {
     const container = document.getElementById('patientsList');
     container.innerHTML = list.length === 0 
@@ -2413,6 +3231,7 @@ function filterPatients() {
     try {
         const searchInput = document.getElementById('searchInput');
         const query = searchInput ? searchInput.value.toLowerCase() : '';
+        
         const genderEl = document.getElementById('filterGender');
         const ageGroupEl = document.getElementById('filterAgeGroup');
         const sortEl = document.getElementById('filterSort');
@@ -2479,14 +3298,23 @@ function renderVisits(visits, forceFullRender = true) {
         const mh = v.medHistory || {};
         let mhSummaryParts = [];
         
-        if (mh.conditions && mh.conditions.length > 0) mhSummaryParts.push('<b>الأمراض المزمنة:</b> ' + mh.conditions.join(', '));
+        if (mh.conditions && mh.conditions.length > 0) {
+            mhSummaryParts.push('<b>الأمراض المزمنة:</b> ' + mh.conditions.join(', '));
+        }
         if (mh.otherCondition) mhSummaryParts.push('<b>أخرى:</b> ' + mh.otherCondition);
         if (mh.admission) mhSummaryParts.push('<b>دخول المستشفى:</b> ' + mh.admission);
         if (mh.surgery) mhSummaryParts.push('<b>العمليات:</b> ' + mh.surgery);
+        if (mh.family) mhSummaryParts.push('<b>التاريخ العائلي:</b> ' + mh.family);
+        if (mh.allergy) mhSummaryParts.push('<b>حساسية الأدوية:</b> ' + mh.allergy);
+        if (mh.chronicDrugs) mhSummaryParts.push('<b>أدوية مزمنة:</b> ' + mh.chronicDrugs);
+        if (mh.smoking) mhSummaryParts.push('<b>التدخين:</b> ' + mh.smoking);
+        if (mh.alcohol) mhSummaryParts.push('<b>الكحول:</b> ' + mh.alcohol);
         if (mh.notes) mhSummaryParts.push('<b>ملاحظات:</b> ' + mh.notes);
+
         const mhSummaryText = mhSummaryParts.length > 0 ? mhSummaryParts.join(' | ') : 'لم يتم تسجيل تفاصيل التاريخ المرضي بعد.';
 
-        let bpSys = '', bpDias = '';
+        let bpSys = '';
+        let bpDias = '';
         if (v.bp && v.bp.includes('/')) {
             const parts = v.bp.split('/');
             bpSys = parts[0] !== '___' ? parts[0] : '';
@@ -2499,6 +3327,8 @@ function renderVisits(visits, forceFullRender = true) {
         if (v.bp) vitalsParts.push('BP: ' + v.bp);
         if (v.hr) vitalsParts.push('HR: ' + v.hr + ' bpm');
         if (v.temp) vitalsParts.push('Temp: ' + v.temp + ' °C');
+        if (v.bmiWeight) vitalsParts.push('Wt: ' + v.bmiWeight + ' kg');
+        if (v.bmiScore) vitalsParts.push('BMI: ' + v.bmiScore);
         const vitalsSummaryStr = vitalsParts.length > 0 ? vitalsParts.join(' | ') : 'لا توجد قراءات مسجلة (اضغط للفتح)';
 
         const cfg = specialtyConfig;
@@ -2520,11 +3350,184 @@ function renderVisits(visits, forceFullRender = true) {
             '</button>' +
             '<div class="medical-history-preview-card">' + mhSummaryText + '</div>' : '') +
 
+            (cfg.chiefComplaint ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Chief Complaint (الشكوى الرئيسية)</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vChiefComplaint-' + v.visitId + '" rows="1" placeholder="Write chief complaint..." oninput="handleCleanLiveInput(this, \'chiefComplaint\', ' + v.visitId + ')" onblur="hideSuggestions(\'chiefComplaint\', ' + v.visitId + ')">' + (v.chiefComplaint || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-chiefComplaint-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-chiefComplaint-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-chiefComplaint-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-chiefComplaint-' + v.visitId + '" onmousedown="saveLineToDict(event, \'chiefComplaint\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
+
+            (cfg.historyPresentIllness ? 
+            '<div class="field-box">' +
+            '<span class="field-label">History of Present Illness - HPI (تاريخ المرض الحالي)</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vHistoryPresentIllness-' + v.visitId + '" rows="2" placeholder="Write HPI details..." oninput="handleCleanLiveInput(this, \'historyPresentIllness\', ' + v.visitId + ')" onblur="hideSuggestions(\'historyPresentIllness\', ' + v.visitId + ')">' + (v.historyPresentIllness || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-historyPresentIllness-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-historyPresentIllness-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-historyPresentIllness-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-historyPresentIllness-' + v.visitId + '" onmousedown="saveLineToDict(event, \'historyPresentIllness\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
+
+            (cfg.reviewSystems ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Review of Other Systems - ROS (مراجعة الأجهزة والأنظمة)</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vReviewSystems-' + v.visitId + '" rows="2" placeholder="Write ROS details..." oninput="handleCleanLiveInput(this, \'reviewSystems\', ' + v.visitId + ')" onblur="hideSuggestions(\'reviewSystems\', ' + v.visitId + ')">' + (v.reviewSystems || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-reviewSystems-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-reviewSystems-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-reviewSystems-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-reviewSystems-' + v.visitId + '" onmousedown="saveLineToDict(event, \'reviewSystems\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
+
+            (cfg.vitals ? 
+            '<div style="margin-bottom: 12px; border: 1px solid #cbd5e1; border-radius: 10px; background: #ffffff; overflow: hidden;">' +
+            '<div onclick="toggleVitalsAccordion(' + v.visitId + ')" style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: #f0fdfa; cursor: pointer; border-bottom: 1px solid #e2e8f0;">' +
+            '<div style="display: flex; align-items: center; gap: 8px;">' +
+            '<i class="fa-solid fa-heart-pulse" style="color: #0d9488;"></i>' +
+            '<span style="font-weight: 700; color: #0f766e; font-size: 0.9rem;">العلامات الحيوية (Vital Signs)</span>' +
+            '<span id="vitalsSummaryText-' + v.visitId + '" style="font-size: 0.75rem; color: #64748b; font-weight: normal; margin-left: 8px;">' + vitalsSummaryStr + '</span>' +
+            '</div>' +
+            '<div style="display: flex; align-items: center; gap: 8px;">' +
+            '<button type="button" onclick="event.stopPropagation(); openBmiCalculator(' + v.visitId + ')" style="background:#e0f2fe; color:#0369a1; border:none; border-radius:6px; padding:2px 8px; font-size:0.75rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-calculator"></i> BMI: ' + (v.bmiScore || '—') + '</button>' +
+            '<i class="fa-solid fa-chevron-down" id="vitalsChevron-' + v.visitId + '" style="color: #0d9488;"></i>' +
+            '</div>' +
+            '</div>' +
+            '<div id="vitalsContent-' + v.visitId + '" style="display: none; padding: 12px;">' +
+            '<div class="vital-box" style="margin-bottom: 0;">' +
+            '<div class="vital-row">' +
+            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-arrow-trend-up"></i> Systolic BP (الضغط العالي)</span>' +
+            '<div class="vital-inputs"><input type="number" id="vBpSys-' + v.visitId + '" value="' + bpSys + '" placeholder="120" oninput="updateBpFields(' + v.visitId + ')"><span>mmHg</span></div></div>' +
+            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-arrow-trend-down"></i> Diastolic BP (الضغط الواطي)</span>' +
+            '<div class="vital-inputs"><input type="number" id="vBpDias-' + v.visitId + '" value="' + bpDias + '" placeholder="80" oninput="updateBpFields(' + v.visitId + ')"><span>mmHg</span></div></div>' +
+            '</div>' +
+            '<div class="vital-row">' +
+            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-heart"></i> Heart Rate (HR)</span>' +
+            '<div class="vital-inputs"><input type="number" value="' + (v.hr || '') + '" placeholder="75" oninput="updateVisitFieldData(' + v.visitId + ', \'hr\', this.value)"><span>bpm</span></div></div>' +
+            '<div class="vital-item"><span class="vital-label"><i class="fa-solid fa-temperature-high"></i> Temperature</span>' +
+            '<div class="vital-inputs"><input type="number" step="0.1" value="' + (v.temp || '') + '" placeholder="37.0" oninput="updateVisitFieldData(' + v.visitId + ', \'temp\', this.value)"><span>°C</span></div></div>' +
+            '</div>' +
+            '<div class="vital-row">' +
+            '<div class="vital-item" style="grid-column: span 2;"><span class="vital-label"><i class="fa-solid fa-weight-scale"></i> Weight</span>' +
+            '<div class="vital-inputs"><input type="number" value="' + (v.bmiWeight || '') + '" placeholder="70" oninput="updateVisitFieldData(' + v.visitId + ', \'bmiWeight\', this.value)"><span>kg</span></div></div>' +
+            '</div></div></div></div>' : '') +
+
+            (cfg.obsGyn ? 
+            '<div class="group-card" style="background:#fce7f3; border-color:#f472b6; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#be185d; display:block; margin-bottom:10px;"><i class="fa-solid fa-person-pregnant"></i> تفاصيل النسائية والتوليد (Obstetrics & Gynecology)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">LMP (آخر دورة)</span><div class="input-wrapper"><input type="date" id="obsLmp-' + v.visitId + '" value="' + (v.obsLmp || '') + '" oninput="handleLmpInput(' + v.visitId + ', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">EDD (موعد الولادة)</span><div class="input-wrapper"><input type="date" id="obsEdd-' + v.visitId + '" value="' + (v.obsEdd || '') + '" oninput="updateVisitFieldData(' + v.visitId + ', \'obsEdd\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Gravidity (G)</span><div class="input-wrapper"><input type="text" value="' + (v.obsG || '') + '" placeholder="G3" oninput="updateVisitFieldData(' + v.visitId + ', \'obsG\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Parity (P)</span><div class="input-wrapper"><input type="text" value="' + (v.obsP || '') + '" placeholder="P2" oninput="updateVisitFieldData(' + v.visitId + ', \'obsP\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Abortions (A)</span><div class="input-wrapper"><input type="text" value="' + (v.obsA || '') + '" placeholder="A1" oninput="updateVisitFieldData(' + v.visitId + ', \'obsA\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات السونار والفحص</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'obsNotes\', this.value)" style="font-size:0.85rem;">' + (v.obsNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.ortho ? 
+            '<div class="group-card" style="background:#fef3c7; border-color:#f59e0b; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#b45309; display:block; margin-bottom:10px;"><i class="fa-solid fa-bone"></i> العظام والمفاصل (Orthopedics)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">المفصل / الإصابة</span><div class="input-wrapper"><input type="text" value="' + (v.orthoJoint || '') + '" placeholder="الركبة اليمنى" oninput="updateVisitFieldData(' + v.visitId + ', \'orthoJoint\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">درجة الخشونة</span><div class="input-wrapper"><input type="text" value="' + (v.orthoGrade || '') + '" placeholder="Grade II" oninput="updateVisitFieldData(' + v.visitId + ', \'orthoGrade\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">مدى الحركة</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات الحركة..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'orthoNotes\', this.value)" style="font-size:0.85rem;">' + (v.orthoNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.neuro ? 
+            '<div class="group-card" style="background:#f3e8ff; border-color:#c084fc; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#7e22ce; display:block; margin-bottom:10px;"><i class="fa-solid fa-brain"></i> الجملة العصبية (Neurology)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">GCS</span><div class="input-wrapper"><input type="text" value="' + (v.neuroGcs || '') + '" placeholder="15/15" oninput="updateVisitFieldData(' + v.visitId + ', \'neuroGcs\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">Cranial Nerves</span><div class="input-wrapper"><input type="text" value="' + (v.neuroNerves || '') + '" placeholder="Intact" oninput="updateVisitFieldData(' + v.visitId + ', \'neuroNerves\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الأعصاب</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'neuroNotes\', this.value)" style="font-size:0.85rem;">' + (v.neuroNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.peds ? 
+            '<div class="group-card" style="background:#e0f2fe; border-color:#38bdf8; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#0369a1; display:block; margin-bottom:10px;"><i class="fa-solid fa-child"></i> فحص الأطفال والنمو (WHO Pediatrics)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">العمر (أشهر)</span><div class="input-wrapper"><input type="number" id="pedsAgeMonths-' + v.visitId + '" value="' + (v.pedsAgeMonths || '') + '" placeholder="12" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsAgeMonths\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الوزن (كغ)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsWeight-' + v.visitId + '" value="' + (v.pedsWeight || '') + '" placeholder="9.5" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsWeight\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الطول (سم)</span><div class="input-wrapper"><input type="number" step="0.1" id="pedsHeight-' + v.visitId + '" value="' + (v.pedsHeight || '') + '" placeholder="75" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsHeight\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div>' +
+            '<button type="button" class="btn-main" onclick="calculateVisitChildGrowth(' + v.visitId + ')" style="background:#0284c7; padding:6px 12px; font-size:0.78rem; margin-top:4px; margin-bottom:8px;"><i class="fa-solid fa-calculator"></i> حساب وتقييم نمو الطفل (WHO)</button>' +
+            '<div id="pedsGrowthResult-' + v.visitId + '" style="display:' + (v.pedsGrowthResult ? 'block' : 'none') + '; background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:8px; font-size:0.78rem; color:#14532d; margin-bottom:8px;">' + (v.pedsGrowthResult || '') + '</div>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">اللقاحات</span><div class="input-wrapper"><input type="text" value="' + (v.pedsVaccine || '') + '" placeholder="مكتملة" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsVaccine\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">التغذية</span><div class="input-wrapper"><input type="text" value="' + (v.pedsFeeding || '') + '" placeholder="طبيعية" oninput="updateVisitFieldData(' + v.visitId + ', \'pedsFeeding\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الأطفال</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'pedsNotes\', this.value)" style="font-size:0.85rem;">' + (v.pedsNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.derm ? 
+            '<div class="group-card" style="background:#ffedd5; border-color:#fb923c; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#c2410c; display:block; margin-bottom:10px;"><i class="fa-solid fa-hand-dots"></i> الجلدية والتناسلية (Dermatology)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">نوع الآفة</span><div class="input-wrapper"><input type="text" value="' + (v.dermType || '') + '" placeholder="Plaque" oninput="updateVisitFieldData(' + v.visitId + ', \'dermType\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">المكان</span><div class="input-wrapper"><input type="text" value="' + (v.dermSite || '') + '" placeholder="الوجه" oninput="updateVisitFieldData(' + v.visitId + ', \'dermSite\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات الجلدية</span><div class="input-wrapper"><textarea rows="2" placeholder="وصف الطفح..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'dermNotes\', this.value)" style="font-size:0.85rem;">' + (v.dermNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.ent ? 
+            '<div class="group-card" style="background:#ecfdf5; border-color:#34d399; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#047857; display:block; margin-bottom:10px;"><i class="fa-solid fa-ear-deaf"></i> الأذن والأنف والحنجرة (ENT)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الأذن</span><div class="input-wrapper"><input type="text" value="' + (v.entEar || '') + '" placeholder="طبيعي" oninput="updateVisitFieldData(' + v.visitId + ', \'entEar\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">الحلق واللوزتين</span><div class="input-wrapper"><input type="text" value="' + (v.entThroat || '') + '" placeholder="احمرار" oninput="updateVisitFieldData(' + v.visitId + ', \'entThroat\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات ENT</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'entNotes\', this.value)" style="font-size:0.85rem;">' + (v.entNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.ophthal ? 
+            '<div class="group-card" style="background:#e0e7ff; border-color:#818cf8; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#4338ca; display:block; margin-bottom:10px;"><i class="fa-solid fa-eye"></i> العيون (Ophthalmology)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">حدة البصر (VA)</span><div class="input-wrapper"><input type="text" value="' + (v.ophthalVa || '') + '" placeholder="6/6" oninput="updateVisitFieldData(' + v.visitId + ', \'ophthalVa\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ضغط العين (IOP)</span><div class="input-wrapper"><input type="text" value="' + (v.ophthalIop || '') + '" placeholder="15 mmHg" oninput="updateVisitFieldData(' + v.visitId + ', \'ophthalIop\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات العيون</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'ophthalNotes\', this.value)" style="font-size:0.85rem;">' + (v.ophthalNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.cardio ? 
+            '<div class="group-card" style="background:#fee2e2; border-color:#f87171; margin-bottom:12px; padding:12px;">' +
+            '<span style="font-weight:800; font-size:0.85rem; color:#b91c1c; display:block; margin-bottom:10px;"><i class="fa-solid fa-heart-pulse"></i> القلب والشرايين (Cardiology)</span>' +
+            '<div style="display:flex; gap:8px; margin-bottom:8px;">' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">تخطيط القلب (ECG)</span><div class="input-wrapper"><input type="text" value="' + (v.cardioEcg || '') + '" placeholder="Normal" oninput="updateVisitFieldData(' + v.visitId + ', \'cardioEcg\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '<div class="field-box" style="flex:1; margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">أصوات القلب</span><div class="input-wrapper"><input type="text" value="' + (v.cardioSounds || '') + '" placeholder="S1 S2 normal" oninput="updateVisitFieldData(' + v.visitId + ', \'cardioSounds\', this.value)" style="font-size:0.85rem;"></div></div>' +
+            '</div><div class="field-box" style="margin-bottom:0;"><span class="field-label" style="font-size:0.75rem;">ملاحظات القلب</span><div class="input-wrapper"><textarea rows="2" placeholder="ملاحظات..." oninput="autoResizeTextarea(this); updateVisitFieldData(' + v.visitId + ', \'cardioNotes\', this.value)" style="font-size:0.85rem;">' + (v.cardioNotes || '') + '</textarea></div></div></div>' : '') +
+
+            (cfg.labs ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Lab Tests</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vLabs-' + v.visitId + '" rows="1" placeholder="Request lab tests..." oninput="handleCleanLiveInput(this, \'labs\', ' + v.visitId + ')" onblur="hideSuggestions(\'labs\', ' + v.visitId + ')">' + (v.labs || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-labs-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-labs-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-labs-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-labs-' + v.visitId + '" onmousedown="saveLineToDict(event, \'labs\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
+
+            (cfg.scans ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Radiology & Scans</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vScans-' + v.visitId + '" rows="1" placeholder="Request radiology..." oninput="handleCleanLiveInput(this, \'scans\', ' + v.visitId + ')" onblur="hideSuggestions(\'scans\', ' + v.visitId + ')">' + (v.scans || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-scans-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-scans-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-scans-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-scans-' + v.visitId + '" onmousedown="saveLineToDict(event, \'scans\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
+
+            (cfg.notes ? 
+            '<div class="field-box">' +
+            '<span class="field-label">Diagnosis & Notes</span>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="vNotes-' + v.visitId + '" rows="2" placeholder="Clinical notes & diagnosis..." oninput="handleCleanLiveInput(this, \'notes\', ' + v.visitId + ')" onblur="hideSuggestions(\'notes\', ' + v.visitId + ')">' + (v.notes || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-notes-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-notes-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-notes-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-notes-' + v.visitId + '" onmousedown="saveLineToDict(event, \'notes\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' : '') +
+
             (cfg.rx ? 
             '<div class="field-box">' +
             '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; flex-wrap:wrap; gap:6px;">' +
             '<span class="field-label" style="margin-bottom:0;">Prescribed Medications (RX)</span>' +
-            '<button type="button" onclick="openRxModal(' + v.visitId + ')" style="background:#fae8ff; color:#c084fc; border:none; border-radius:8px; padding:6px 14px; font-size:0.8rem; font-weight:700; cursor:pointer;"><i class="fa-solid fa-file-prescription"></i> Print RX Prescription</button>' +
+            '<button type="button" onclick="printPrescriptionOnly(' + v.visitId + ')" style="background:#fae8ff; color:#c084fc; border:none; border-radius:8px; padding:6px 14px; font-size:0.8rem; font-weight:700; cursor:pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"><i class="fa-solid fa-file-prescription"></i> Print RX Prescription</button>' +
             '</div>' +
             '<div class="input-wrapper" style="position: relative;">' +
             '<textarea id="vDrugs-' + v.visitId + '" rows="3" placeholder="Write prescription drugs here..." oninput="handleDrugsInput(this, ' + v.visitId + ')" onkeydown="handleDrugsKeyDown(event, this, ' + v.visitId + ')" onblur="hideSuggestions(\'drugs\', ' + v.visitId + ')">' + (v.drugs || '') + '</textarea>' +
@@ -2549,7 +3552,7 @@ function renderVisits(visits, forceFullRender = true) {
             
             '<div style="margin-top: 10px; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; background: #ffffff;">' +
             '<div onclick="toggleMedicalReportInputs(' + v.visitId + ')" style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 700; color: #0d9488; font-size: 0.9rem;">' +
-            '<span><i class="fa-solid fa-file-medical"></i> تقرير طبي (مع خاصية القاموس الذكي)</span>' +
+            '<span><i class="fa-solid fa-file-medical"></i> تقرير طبي (محفوظ تلقائياً)</span>' +
             '<i class="fa-solid fa-chevron-down" id="repChevron_' + v.visitId + '"></i>' +
             '</div>' +
             '<div id="repContainer_' + v.visitId + '" style="display: none; margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">' +
@@ -2561,36 +3564,44 @@ function renderVisits(visits, forceFullRender = true) {
             '<span class="field-label">الجهة الموجه لها التقرير</span>' +
             '<div class="input-wrapper"><input type="text" id="rep_to_' + v.visitId + '" value="' + (repData.to || '') + '" placeholder="مثال: مستشفى الحكيم التعليمي..." oninput="updateReportFieldData(' + v.visitId + ', \'to\', this.value)"></div>' +
             '</div>' +
-            '<div class="field-box" style="margin-bottom: 10px; position: relative;">' +
-            '<span class="field-label">تفاصيل التقرير والحالة السريرية (يدعم القاموس الذكي)</span>' +
-            '<div class="input-wrapper">' +
-            '<textarea id="repDetails_' + v.visitId + '" rows="3" placeholder="اكتب تفاصيل التقرير هنا (اكتب حرفين لتظهر اقتراحاتك المخزنة)..." oninput="handleCleanLiveInput(this, \'repDetails\', ' + v.visitId + ')" onblur="hideSuggestions(\'repDetails\', ' + v.visitId + ')">' + (repData.details || '') + '</textarea>' +
-            '<div class="suggestions-box" id="suggestions-repDetails-' + v.visitId + '"></div>' +
-            '<div class="live-save-bar" id="save-bar-repDetails-' + v.visitId + '">' +
-            '<span>Save: "<strong id="line-text-repDetails-' + v.visitId + '"></strong>"</span>' +
-            '<button type="button" class="btn-live-save" id="btn-save-repDetails-' + v.visitId + '" onmousedown="saveLineToDict(event, \'repDetails\', ' + v.visitId + ')">Save</button>' +
-            '</div></div></div>' +
-            '<button type="button" class="btn-main" onclick="openMedicalReportModal(' + v.visitId + ')" style="background: #0284c7; padding: 8px; font-size: 0.85rem; margin-top: 6px;">' +
-            '<i class="fa-solid fa-print"></i> معاينة وطباعة التقرير الطبي' +
+            '<div class="field-box" style="margin-bottom: 10px;">' +
+            '<span class="field-label">تفاصيل التقرير والحالة السريرية</span>' +
+            '<div class="input-wrapper"><textarea id="rep_details_' + v.visitId + '" rows="3" placeholder="اكتب تفاصيل التقرير هنا..." oninput="updateReportFieldData(' + v.visitId + ', \'details\', this.value)">' + (repData.details || '') + '</textarea></div>' +
+            '</div>' +
+            '<button type="button" class="btn-main" onclick="openMedicalReportModal(' + v.visitId + ')" style="background: #0284c7; padding: 8px; font-size: 0.85rem;">' +
+            '<i class="fa-solid fa-print"></i> معاينة وطباعة التقرير الطبي (بروية الترويسة)' +
             '</button>' +
             '</div></div>' +
 
             '<div style="display:flex; flex-direction:column; gap:8px; margin-top:10px;" id="attachments-container-' + v.visitId + '">' +
             (v.attachments || []).map((att, aIdx) => {
-                if (!att || !att.dataUrl || att.dataUrl.length < 50) return '<div style="padding:6px; background:#fef2f2; color:#b91c1c; font-size:0.7rem;">⚠️ صورة تالفة</div>';
+                if (!att || !att.dataUrl || att.dataUrl.length < 50) {
+                    return '<div style="padding:6px 10px; background:#fef2f2; border:1px solid #fca5a5; border-radius:8px; font-size:0.7rem; color:#b91c1c;">⚠️ صورة تالفة</div>';
+                }
                 return `
                     <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; gap:10px;">
                         <div style="display:flex; align-items:center; gap:10px; overflow:hidden;">
-                            <img src="${att.dataUrl}" alt="مرفق" style="width:45px; height:45px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1; cursor:pointer;" onclick="viewAttachment('${att.dataUrl}', 'image')">
-                            <span style="font-size:0.8rem; color:#334155; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">${att.name || 'مرفق رقم ' + (aIdx + 1)}</span>
+                            <img src="${att.dataUrl}" alt="مرفق" style="width:45px; height:45px; object-fit:cover; border-radius:6px; border:1px solid #cbd5e1; cursor:pointer;" onclick="viewAttachment('${att.dataUrl}', 'image')" title="اضغط لتكبير الصورة">
+                            <span style="font-size:0.8rem; color:#334155; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:180px;">
+                                ${att.name || 'مرفق رقم ' + (aIdx + 1)}
+                            </span>
                         </div>
-                        <button type="button" onclick="viewAttachment('${att.dataUrl}', 'image')" style="background:#0284c7; color:white; border:none; border-radius:6px; padding:6px 14px; font-size:0.75rem; font-weight:700; cursor:pointer;">
-                            <i class="fa-solid fa-eye"></i> معاينة
-                        </button>
+                        <div style="display:flex; gap:6px; flex-shrink:0;">
+                            <button type="button" onclick="viewAttachment('${att.dataUrl}', 'image')" style="background:#0284c7; color:white; border:none; border-radius:6px; padding:6px 14px; font-size:0.75rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:4px;" title="معاينة المرفق">
+                                <i class="fa-solid fa-eye"></i> معاينة
+                            </button>
+                        </div>
                     </div>
                 `;
             }).join('') +
             '</div></div>' : '') +
             '</div>';
     }).join('');
+
+    visits.forEach(v => {
+        ['notes', 'drugs', 'labs', 'scans', 'chiefComplaint', 'historyPresentIllness', 'reviewSystems'].forEach(field => {
+            const el = document.getElementById('v' + field.charAt(0).toUpperCase() + field.slice(1) + '-' + v.visitId);
+            if (el) autoResizeTextarea(el);
+        });
+    });
 }
