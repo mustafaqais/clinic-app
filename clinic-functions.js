@@ -678,12 +678,10 @@ async function verifyActivationCode() {
     }
 }
 
-// دالة الحفظ المحدثة والمباشرة لـ Firestore (تتخطى مشاكل LocalStorage نهائياً)
 function savePatientToCloudAndLocal(patientObj) {
     if (!currentUserId || isSubscriptionExpired) return;
     const ownerUid = sessionStorage.getItem('target_doctor_uid') || currentUserId;
 
-    // تحديث المصفوفة محلياً في الذاكرة لتجاوز الحاجة لـ LocalStorage
     const idx = patients.findIndex(p => Number(p.id) === Number(patientObj.id));
     if (idx !== -1) {
         patients[idx] = patientObj;
@@ -691,7 +689,6 @@ function savePatientToCloudAndLocal(patientObj) {
         patients.unshift(patientObj);
     }
 
-    // الحفظ المباشر والسريع في فايربيس فايراستور
     if (navigator.onLine) {
         db.collection('users_data').doc(ownerUid).collection('patients').doc(String(patientObj.id)).set(patientObj)
             .catch(err => console.log("Cloud save error:", err));
@@ -2605,6 +2602,9 @@ function printPrescriptionDirectly() {
     }
 }
 
+// =========================================================================
+// الدالة المعدلة: طباعة التقرير الطبي مع الحفظ التلقائي ضمن المرفقات
+// =========================================================================
 function printMedicalReportDirectly() {
     injectPrintStyle('report');
 
@@ -2625,6 +2625,30 @@ function printMedicalReportDirectly() {
         rxWasOpen = true;
     }
     
+    // التخزين التلقائي للتقرير كصورة ضمن المرفقات قبل أو بالتزامن مع الطباعة
+    if (container && currentVisitIdForModal && currentPatientId) {
+        html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
+            const reportDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+            const patient = patients.find(p => Number(p.id) === Number(currentPatientId));
+            if (patient) {
+                const visit = patient.visits.find(v => Number(v.visitId) === Number(currentVisitIdForModal));
+                if (visit) {
+                    if (!visit.attachments) visit.attachments = [];
+                    // إضافة التقرير تلقائياً أو تحديثه إذا وجد تقرير سابق بنفس الاسم
+                    const titleVal = (visit.medicalReport && visit.medicalReport.title) ? visit.medicalReport.title : "تقرير طبي";
+                    visit.attachments.unshift({ 
+                        name: titleVal + "_" + getTodayFormatted() + ".jpg", 
+                        dataUrl: reportDataUrl 
+                    });
+                    savePatientToCloudAndLocal(patient);
+                    renderVisits(patient.visits, false);
+                }
+            }
+        }).catch(err => {
+            console.log("Auto-save report attachment error:", err);
+        });
+    }
+
     setTimeout(() => {
         window.print();
     }, 400);
@@ -3204,12 +3228,10 @@ function saveNewPatient(e) {
         visits: [{ visitId: Date.now(), date: getTodayFormatted(), medHistory: {}, chiefComplaint: '', historyPresentIllness: '', reviewSystems: '', notes: '', attachments: [] }]
     };
     
-    // الحفظ المباشر في السحابة وتجاوز LocalStorage تماماً
     savePatientToCloudAndLocal(newPatient);
     openMedicalRecord(newPatient.id);
 }
 
-// الدالة المحدثة لعرض الأرشيف (تعرض تاريخ آخر مراجعة بدل الجنس)
 function renderPatientsList(list) {
     const container = document.getElementById('patientsList');
     container.innerHTML = list.length === 0 
