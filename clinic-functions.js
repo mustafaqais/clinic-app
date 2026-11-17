@@ -346,6 +346,7 @@ window.addEventListener("DOMContentLoaded", () => {
                         if (!medicalDict.chief_complaint) medicalDict.chief_complaint = ["Cough and fever", "Severe headache", "Chest pain"];
                         if (!medicalDict.history_present) medicalDict.history_present = ["Started 3 days ago, progressive"];
                         if (!medicalDict.review_systems) medicalDict.review_systems = ["No fever, no shortness of breath"];
+                        if (!medicalDict.medical_report) medicalDict.medical_report = ["تقرير طبي", "إلى جهة الاختصاص", "حالة المريض مستقرة وتحت العلاج"];
                         localStorage.setItem('clinic_dict', JSON.stringify(medicalDict));
                     }
                     if (data.trashBin) {
@@ -1759,6 +1760,7 @@ function handleCleanLiveInput(textarea, category, visitId) {
         if (category === 'chiefComplaint') dictKey = 'chief_complaint';
         else if (category === 'historyPresentIllness') dictKey = 'history_present';
         else if (category === 'reviewSystems') dictKey = 'review_systems';
+        else if (category === 'medical_report') dictKey = 'medical_report';
 
         const terms = medicalDict[dictKey] || medicalDict[category] || [];
         const matches = terms.filter(t => t && t.toLowerCase().startsWith(currentLine.toLowerCase()) && t.toLowerCase() !== currentLine.toLowerCase());
@@ -1782,7 +1784,7 @@ function handleLiveInput(textarea, category, visitId) {
 }
 
 function selectSuggestion(category, visitId, term) {
-    const textarea = document.getElementById('v' + category.charAt(0).toUpperCase() + category.slice(1) + '-' + visitId);
+    const textarea = document.getElementById('v' + category.charAt(0).toUpperCase() + category.slice(1) + '-' + visitId) || document.getElementById(category + '_' + visitId);
     if (!textarea) return;
 
     const lines = textarea.value.split('\n');
@@ -1818,8 +1820,11 @@ function saveLineToDict(event, category, visitId) {
     if (category === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (category === 'historyPresentIllness') dictKey = 'history_present';
     else if (category === 'reviewSystems') dictKey = 'review_systems';
+    else if (category === 'medical_report') dictKey = 'medical_report';
 
-    if (lineText && medicalDict[dictKey] && !medicalDict[dictKey].includes(lineText)) {
+    if (!medicalDict[dictKey]) medicalDict[dictKey] = [];
+
+    if (lineText && !medicalDict[dictKey].includes(lineText)) {
         medicalDict[dictKey].push(lineText);
         saveSettingsToCloudAndLocal();
         const btn = document.getElementById('btn-save-' + category + '-' + visitId);
@@ -2602,9 +2607,6 @@ function printPrescriptionDirectly() {
     }
 }
 
-// =========================================================================
-// الدالة المعدلة: طباعة التقرير الطبي مع الحفظ التلقائي ضمن المرفقات
-// =========================================================================
 function printMedicalReportDirectly() {
     injectPrintStyle('report');
 
@@ -2625,7 +2627,6 @@ function printMedicalReportDirectly() {
         rxWasOpen = true;
     }
     
-    // التخزين التلقائي للتقرير كصورة ضمن المرفقات قبل أو بالتزامن مع الطباعة
     if (container && currentVisitIdForModal && currentPatientId) {
         html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
             const reportDataUrl = canvas.toDataURL('image/jpeg', 0.85);
@@ -2634,7 +2635,6 @@ function printMedicalReportDirectly() {
                 const visit = patient.visits.find(v => Number(v.visitId) === Number(currentVisitIdForModal));
                 if (visit) {
                     if (!visit.attachments) visit.attachments = [];
-                    // إضافة التقرير تلقائياً أو تحديثه إذا وجد تقرير سابق بنفس الاسم
                     const titleVal = (visit.medicalReport && visit.medicalReport.title) ? visit.medicalReport.title : "تقرير طبي";
                     visit.attachments.unshift({ 
                         name: titleVal + "_" + getTodayFormatted() + ".jpg", 
@@ -3046,6 +3046,7 @@ function renderDictTerms() {
     if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (cat === 'historyPresentIllness') dictKey = 'history_present';
     else if (cat === 'reviewSystems') dictKey = 'review_systems';
+    else if (cat === 'medical_report') dictKey = 'medical_report';
 
     if (!medicalDict[dictKey]) {
         medicalDict[dictKey] = [];
@@ -3076,6 +3077,7 @@ function editDictTerm(category, index) {
     if (category === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (category === 'historyPresentIllness') dictKey = 'history_present';
     else if (category === 'reviewSystems') dictKey = 'review_systems';
+    else if (category === 'medical_report') dictKey = 'medical_report';
 
     const terms = medicalDict[dictKey] || [];
     const currentTerm = terms[index] || '';
@@ -3095,6 +3097,7 @@ function addNewDictTerm(cat) {
     if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (cat === 'historyPresentIllness') dictKey = 'history_present';
     else if (cat === 'reviewSystems') dictKey = 'review_systems';
+    else if (cat === 'medical_report') dictKey = 'medical_report';
 
     if (!medicalDict[dictKey]) {
         medicalDict[dictKey] = [];
@@ -3112,6 +3115,7 @@ function removeDictTerm(category, index) {
     if (category === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (category === 'historyPresentIllness') dictKey = 'history_present';
     else if (category === 'reviewSystems') dictKey = 'review_systems';
+    else if (category === 'medical_report') dictKey = 'medical_report';
 
     if (medicalDict[dictKey]) {
         medicalDict[dictKey].splice(index, 1);
@@ -3172,6 +3176,7 @@ function processAndSaveBulkDict() {
     if (cat === 'chiefComplaint') dictKey = 'chief_complaint';
     else if (cat === 'historyPresentIllness') dictKey = 'history_present';
     else if (cat === 'reviewSystems') dictKey = 'review_systems';
+    else if (cat === 'medical_report') dictKey = 'medical_report';
 
     if (!medicalDict[dictKey]) {
         medicalDict[dictKey] = [];
@@ -3578,18 +3583,35 @@ function renderVisits(visits, forceFullRender = true) {
             '<i class="fa-solid fa-chevron-down" id="repChevron_' + v.visitId + '"></i>' +
             '</div>' +
             '<div id="repContainer_' + v.visitId + '" style="display: none; margin-top: 10px; border-top: 1px dashed #cbd5e1; padding-top: 10px;">' +
-            '<div class="field-box" style="margin-bottom: 8px;">' +
+            
+            // حقل عنوان التقرير مع دعم السيف والاقتراحات الذكية
+            '<div class="field-box" style="margin-bottom: 8px; position: relative;">' +
             '<span class="field-label">عنوان التقرير</span>' +
-            '<div class="input-wrapper"><input type="text" id="rep_title_' + v.visitId + '" value="' + (repData.title || 'تقرير طبي') + '" oninput="updateReportFieldData(' + v.visitId + ', \'title\', this.value)"></div>' +
-            '</div>' +
-            '<div class="field-box" style="margin-bottom: 8px;">' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<input type="text" id="rep_title_' + v.visitId + '" value="' + (repData.title || 'تقرير طبي') + '" oninput="updateReportFieldData(' + v.visitId + ', \'title\', this.value); handleCleanLiveInput(this, \'medical_report\', ' + v.visitId + ')" onblur="hideSuggestions(\'medical_report\', ' + v.visitId + ')">' +
+            '<div class="suggestions-box" id="suggestions-medical_report-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-medical_report-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-medical_report-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-medical_report-' + v.visitId + '" onmousedown="saveLineToDict(event, \'medical_report\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' +
+
+            // حقل الجهة الموجه لها التقرير
+            '<div class="field-box" style="margin-bottom: 8px; position: relative;">' +
             '<span class="field-label">الجهة الموجه لها التقرير</span>' +
             '<div class="input-wrapper"><input type="text" id="rep_to_' + v.visitId + '" value="' + (repData.to || '') + '" placeholder="مثال: مستشفى الحكيم التعليمي..." oninput="updateReportFieldData(' + v.visitId + ', \'to\', this.value)"></div>' +
             '</div>' +
-            '<div class="field-box" style="margin-bottom: 10px;">' +
+
+            // حقل تفاصيل التقرير مع دعم السيف والاقتراحات
+            '<div class="field-box" style="margin-bottom: 10px; position: relative;">' +
             '<span class="field-label">تفاصيل التقرير والحالة السريرية</span>' +
-            '<div class="input-wrapper"><textarea id="rep_details_' + v.visitId + '" rows="3" placeholder="اكتب تفاصيل التقرير هنا..." oninput="updateReportFieldData(' + v.visitId + ', \'details\', this.value)">' + (repData.details || '') + '</textarea></div>' +
-            '</div>' +
+            '<div class="input-wrapper" style="position: relative;">' +
+            '<textarea id="rep_details_' + v.visitId + '" rows="3" placeholder="اكتب تفاصيل التقرير هنا..." oninput="updateReportFieldData(' + v.visitId + ', \'details\', this.value); handleCleanLiveInput(this, \'medical_report\', ' + v.visitId + ')" onblur="hideSuggestions(\'medical_report\', ' + v.visitId + ')">' + (repData.details || '') + '</textarea>' +
+            '<div class="suggestions-box" id="suggestions-medical_report-' + v.visitId + '"></div>' +
+            '<div class="live-save-bar" id="save-bar-medical_report-' + v.visitId + '">' +
+            '<span>Save: "<strong id="line-text-medical_report-' + v.visitId + '"></strong>"</span>' +
+            '<button type="button" class="btn-live-save" id="btn-save-medical_report-' + v.visitId + '" onmousedown="saveLineToDict(event, \'medical_report\', ' + v.visitId + ')">Save</button>' +
+            '</div></div></div>' +
+
             '<button type="button" class="btn-main" onclick="openMedicalReportModal(' + v.visitId + ')" style="background: #0284c7; padding: 8px; font-size: 0.85rem;">' +
             '<i class="fa-solid fa-print"></i> معاينة وطباعة التقرير الطبي (بروية الترويسة)' +
             '</button>' +
