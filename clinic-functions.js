@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Complete, Unified & Updated Script
+// Clinic Master System - Complete, Unified & Updated Script (v17.81)
 // ==========================================
 
 window.targetNodeUidForNameEdit = window.targetNodeUidForNameEdit || null;
@@ -623,6 +623,9 @@ function restorePreviousScreenState() {
     }
 }
 
+// ========================================================
+// [تعديل تجديد الكود مع تراكم الأيام المتبقية بذكاء تام]
+// ========================================================
 async function verifyActivationCode() {
     const inputCode = document.getElementById('activationInput').value.trim().toUpperCase();
     if (!inputCode) { alert('Please enter an activation code.'); return; }
@@ -648,17 +651,30 @@ async function verifyActivationCode() {
         }
 
         const durationDays = keyData.durationDays || 14;
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + durationDays);
-        const expiryDateIso = expiryDate.toISOString();
+        const user = auth.currentUser;
+        
+        // التحقق الذكي لتراكم الأيام فوق الاشتراك الحالي إذا كان سارياً
+        let baseDate = new Date();
+        if (user) {
+            let existingExpiryStr = localStorage.getItem('sub_expiry_' + user.uid);
+            if (existingExpiryStr) {
+                let existingExpiryTime = new Date(existingExpiryStr).getTime();
+                let nowTime = new Date().getTime();
+                if (existingExpiryTime > nowTime) {
+                    baseDate = new Date(existingExpiryStr);
+                }
+            }
+        }
+
+        baseDate.setDate(baseDate.getDate() + durationDays);
+        const expiryDateIso = baseDate.toISOString();
 
         await keyRef.update({
             isUsed: true,
-            usedBy: auth.currentUser ? auth.currentUser.email : 'Unknown',
+            usedBy: user ? user.email : 'Unknown',
             usedAt: new Date().toISOString()
         });
 
-        const user = auth.currentUser;
         if (user) {
             localStorage.setItem('sub_expiry_' + user.uid, expiryDateIso);
             await db.collection('network_hierarchy').doc(user.uid).set({
@@ -671,7 +687,7 @@ async function verifyActivationCode() {
             }, { merge: true });
         }
 
-        alert('System activated / renewed successfully!');
+        alert('تم تجديد وتفعيل الاشتراك بنجاح وتراكم الأيام المتبقية!');
         document.getElementById('activationScreen').style.display = 'none';
         isSubscriptionExpired = false;
         setupClientInterfaceAfterAuth(expiryDateIso, false);
@@ -1159,7 +1175,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.80",
+        version: "17.81",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
