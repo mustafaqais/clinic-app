@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Complete, Unified & Updated Script (v17.81)
+// Clinic Master System - Complete, Unified & Updated Script (v17.82 - Founder Central Control)
 // ==========================================
 
 window.targetNodeUidForNameEdit = window.targetNodeUidForNameEdit || null;
@@ -39,39 +39,6 @@ function syncLocalDataToCloud() {
         specialtyConfig: specialtyConfig,
         updatedAt: new Date().toISOString()
     }, { merge: true }).catch(err => console.log("Settings sync error:", err));
-}
-
-function generateKey(type) {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let code = type + "-";
-    for (let i = 0; i < 8; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
-}
-
-async function generateNewKey(type) {
-    let prefix = "TRL";
-    let days = 14;
-    if (type === 'EXT') { prefix = "EXT"; days = 7; }
-    else if (type === 'ANNUAL') { prefix = "ANN"; days = 365; }
-
-    const newCode = generateKey(prefix);
-    const codeDocRef = db.collection('activation_keys').doc(newCode);
-
-    try {
-        await codeDocRef.set({
-            code: newCode,
-            type: type,
-            durationDays: days,
-            isUsed: false,
-            createdAt: new Date().toISOString()
-        });
-        document.getElementById('dynamicFounderCode').innerText = newCode;
-        document.getElementById('keyTypeHint').innerText = "Generated (" + type + ") valid for " + days + " days.";
-    } catch (e) {
-        alert('Error generating key: ' + e.message);
-    }
 }
 
 let screenHistory = ['mainScreen'];
@@ -460,7 +427,9 @@ async function checkUserSubscriptionStatus(uid, isSecretary = false) {
 
 function setupReadOnlyModeAfterExpiration(expiryDateIso) {
     document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('activationScreen').style.display = 'none';
+    if (document.getElementById('activationScreen')) {
+        document.getElementById('activationScreen').style.display = 'none';
+    }
     document.getElementById('appContainer').style.display = 'flex';
     document.getElementById('founderControlPanel').style.display = 'none';
     document.getElementById('networkMenuCard').style.display = 'none';
@@ -470,7 +439,7 @@ function setupReadOnlyModeAfterExpiration(expiryDateIso) {
     const cardNewPat = document.getElementById('cardNewPatient');
     cardNewPat.classList.add('disabled-card');
     cardNewPat.onclick = function() {
-        alert('⚠️ انتهت صلاحية الاشتراك. التطبيق يعمل في وضع القراءة فقط.');
+        alert('⚠️ انتهت صلاحية الاشتراك. يرجى التواصل مع إدارة النظام (المؤسس) لتجديد الاشتراك وتفعيله فوراً.');
         openSupportModal();
     };
 
@@ -480,7 +449,7 @@ function setupReadOnlyModeAfterExpiration(expiryDateIso) {
     banner.style.display = 'flex';
     banner.className = 'sub-status-banner expired';
     titleEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> انتهت صلاحية الاشتراك - وضع القراءة فقط';
-    textEl.innerText = 'انتهى اشتراكك. يمكنك تصفح الأرشيف وقراءة الملفات والتقارير بحرية تامة أو تجديد الكود.';
+    textEl.innerText = 'انتهى اشتراكك. يمكنك تصفح الأرشيف وقراءة الملفات والتقارير أو التواصل مع المؤسس لتجديد الاشتراك.';
 
     restorePreviousScreenState();
 }
@@ -488,7 +457,9 @@ function setupReadOnlyModeAfterExpiration(expiryDateIso) {
 function setupFounderInterfaceAfterAuth() {
     isSubscriptionExpired = false;
     document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('activationScreen').style.display = 'none';
+    if (document.getElementById('activationScreen')) {
+        document.getElementById('activationScreen').style.display = 'none';
+    }
     document.getElementById('appContainer').style.display = 'flex';
     document.getElementById('founderControlPanel').style.display = 'block';
     document.getElementById('networkMenuCard').style.display = 'flex';
@@ -509,7 +480,9 @@ function setupFounderInterfaceAfterAuth() {
 function setupClientInterfaceAfterAuth(expiryDateIso, isSecretary = false) {
     isSubscriptionExpired = false;
     document.getElementById('authScreen').style.display = 'none';
-    document.getElementById('activationScreen').style.display = 'none';
+    if (document.getElementById('activationScreen')) {
+        document.getElementById('activationScreen').style.display = 'none';
+    }
     document.getElementById('appContainer').style.display = 'flex';
     document.getElementById('founderControlPanel').style.display = 'none';
     document.getElementById('networkMenuCard').style.display = 'none';
@@ -547,8 +520,8 @@ function setupClientInterfaceAfterAuth(expiryDateIso, isSecretary = false) {
         const titleEl = document.getElementById('subBannerTitle');
         const textEl = document.getElementById('subBannerText');
         banner.style.display = 'flex';
-        titleEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> Active Subscription';
-        textEl.innerText = 'You have ' + diffDays + ' day(s) remaining.';
+        titleEl.innerHTML = '<i class="fa-solid fa-circle-check"></i> حالة الاشتراك';
+        textEl.innerText = 'لديك ' + diffDays + ' يوم(اً) متبقياً في اشتراكك الحالي.';
     }
 
     restorePreviousScreenState();
@@ -581,24 +554,14 @@ function executeMandatoryBackup() {
 function openSupportModal() {
     if (typeof window.openSupportModal === 'function') {
         window.openSupportModal();
+    } else {
+        alert('يرجى التواصل مع إدارة النظام (المؤسس) لتجديد الاشتراك وتفعيل حسابك.');
     }
 }
 
 function closeSupportModal() {
     const modal = document.getElementById('supportCustomModal');
     if (modal) modal.remove();
-}
-
-function openActivationScreenForRenewal() {
-    document.getElementById('appContainer').style.display = 'none';
-    document.getElementById('activationScreen').style.display = 'flex';
-    document.getElementById('activationInput').value = '';
-    document.getElementById('activationInput').focus();
-}
-
-function cancelRenewal() {
-    document.getElementById('activationScreen').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'flex';
 }
 
 function restorePreviousScreenState() {
@@ -620,80 +583,6 @@ function restorePreviousScreenState() {
         }
     } else {
         navigateTo('mainScreen', customBrandName, translations[currentLang].headerSub, false);
-    }
-}
-
-// ========================================================
-// [تعديل تجديد الكود مع تراكم الأيام المتبقية بذكاء تام]
-// ========================================================
-async function verifyActivationCode() {
-    const inputCode = document.getElementById('activationInput').value.trim().toUpperCase();
-    if (!inputCode) { alert('Please enter an activation code.'); return; }
-
-    if (!navigator.onLine) {
-        alert('Internet connection required.');
-        return;
-    }
-
-    try {
-        const keyRef = db.collection('activation_keys').doc(inputCode);
-        const keyDoc = await keyRef.get();
-
-        if (!keyDoc.exists) {
-            alert('Invalid activation code!');
-            return;
-        }
-
-        const keyData = keyDoc.data();
-        if (keyData.isUsed === true) {
-            alert('This activation code has already been used!');
-            return;
-        }
-
-        const durationDays = keyData.durationDays || 14;
-        const user = auth.currentUser;
-        
-        // التحقق الذكي لتراكم الأيام فوق الاشتراك الحالي إذا كان سارياً
-        let baseDate = new Date();
-        if (user) {
-            let existingExpiryStr = localStorage.getItem('sub_expiry_' + user.uid);
-            if (existingExpiryStr) {
-                let existingExpiryTime = new Date(existingExpiryStr).getTime();
-                let nowTime = new Date().getTime();
-                if (existingExpiryTime > nowTime) {
-                    baseDate = new Date(existingExpiryStr);
-                }
-            }
-        }
-
-        baseDate.setDate(baseDate.getDate() + durationDays);
-        const expiryDateIso = baseDate.toISOString();
-
-        await keyRef.update({
-            isUsed: true,
-            usedBy: user ? user.email : 'Unknown',
-            usedAt: new Date().toISOString()
-        });
-
-        if (user) {
-            localStorage.setItem('sub_expiry_' + user.uid, expiryDateIso);
-            await db.collection('network_hierarchy').doc(user.uid).set({
-                email: user.email,
-                password: pendingUserPass || 'Saved',
-                role: 'Client Node',
-                isActivated: true,
-                expiryDate: expiryDateIso,
-                activatedAt: new Date().toISOString()
-            }, { merge: true });
-        }
-
-        alert('تم تجديد وتفعيل الاشتراك بنجاح وتراكم الأيام المتبقية!');
-        document.getElementById('activationScreen').style.display = 'none';
-        isSubscriptionExpired = false;
-        setupClientInterfaceAfterAuth(expiryDateIso, false);
-
-    } catch (err) {
-        alert('Error during activation: ' + err.message);
     }
 }
 
@@ -828,12 +717,16 @@ async function handleAuthSubmit() {
                 currentUserId = res.user.uid;
                 
                 try {
+                    let initialExpiry = new Date();
+                    initialExpiry.setDate(initialExpiry.getDate() + 14); // منح 14 يوم تجريبي افتراضي عند التسجيل الجديد
+
                     await db.collection('network_hierarchy').doc(currentUserId).set({
                         email: finalEmail.toLowerCase(),
                         phone: phone || identifier,
                         password: pass,
                         role: finalEmail.toLowerCase() === founderMail ? 'Founder' : 'Client Node',
-                        isActivated: finalEmail.toLowerCase() === founderMail,
+                        isActivated: true,
+                        expiryDate: initialExpiry.toISOString(),
                         doctorName: "نظام عيادة ماستر",
                         createdAt: new Date().toISOString()
                     }, { merge: true });
@@ -847,8 +740,10 @@ async function handleAuthSubmit() {
                     localStorage.setItem('sub_expiry_' + res.user.uid, expiryDate.toISOString());
                     setupFounderInterfaceAfterAuth();
                 } else {
-                    document.getElementById('authScreen').style.display = 'none';
-                    document.getElementById('activationScreen').style.display = 'flex';
+                    let defaultExp = new Date();
+                    defaultExp.setDate(defaultExp.getDate() + 14);
+                    localStorage.setItem('sub_expiry_' + res.user.uid, defaultExp.toISOString());
+                    setupClientInterfaceAfterAuth(defaultExp.toISOString(), false);
                 }
             })
             .catch(err => alert('خطأ في التسجيل: ' + err.message));
@@ -893,7 +788,9 @@ async function handleAuthSubmit() {
                 await loadDoctorBranding(dataOwnerUid);
 
                 document.getElementById('authScreen').style.display = 'none';
-                document.getElementById('activationScreen').style.display = 'none';
+                if (document.getElementById('activationScreen')) {
+                    document.getElementById('activationScreen').style.display = 'none';
+                }
                 document.getElementById('appContainer').style.display = 'flex';
 
                 if (isSec) {
@@ -1175,7 +1072,7 @@ function openBackupManager() {
 function exportJsonBackup() {
     const backupData = {
         exportDate: new Date().toISOString(),
-        version: "17.81",
+        version: "17.82",
         patients: patients,
         trashBin: trashBin,
         medicalDict: medicalDict,
@@ -1388,27 +1285,48 @@ async function scanFromDesktopScanner(visitId) {
     }
 }
 
+// ========================================================
+// [إدارة الشبكة والمشتركين والتحكم المركزي بالتجديد للمؤسس]
+// ========================================================
 function openNetworkHierarchy() {
-    navigateTo('networkScreen', 'قاعدة بيانات الشبكة', 'إدارة المستخدمين والأسماء البارزة');
+    navigateTo('networkScreen', 'قاعدة بيانات المشتركين', 'إدارة الاشتراكات والتجديد المركزي');
     const container = document.getElementById('networkTreeContainer');
-    container.innerHTML = '<p style="text-align:center; color:#64748b;">Loading...</p>';
+    container.innerHTML = '<p style="text-align:center; color:#64748b;">جاري تحميل المشتركين...</p>';
 
     if (!navigator.onLine) {
-        container.innerHTML = '<p style="text-align:center; color:#b91c1c;">Internet required.</p>';
+        container.innerHTML = '<p style="text-align:center; color:#b91c1c;">الاتصال بالإنترنت مطلوب.</p>';
         return;
     }
 
     db.collection('network_hierarchy').get().then(snapshot => {
         if (snapshot.empty) {
-            container.innerHTML = '<p style="text-align:center; color:#64748b;">No users found.</p>';
+            container.innerHTML = '<p style="text-align:center; color:#64748b;">لا يوجد مشتركين حالياً.</p>';
             return;
         }
+
+        let usersList = [];
+        snapshot.forEach(doc => {
+            let data = doc.data();
+            data.uid = doc.id;
+            
+            let daysLeft = 0;
+            if (data.expiryDate) {
+                let diffTime = new Date(data.expiryDate).getTime() - new Date().getTime();
+                daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (daysLeft < 0) daysLeft = 0;
+            }
+            data.calculatedDaysLeft = daysLeft;
+            usersList.push(data);
+        });
+
+        // ترتيب المشتركين تصاعدياً حسب الأيام المتقية (الأقل في المقدمة)
+        usersList.sort((a, b) => a.calculatedDaysLeft - b.calculatedDaysLeft);
+
         container.innerHTML = '';
         
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const nodeUid = doc.id;
-            const userEmail = data.email || data.secretaryEmail || 'User';
+        usersList.forEach(data => {
+            const nodeUid = data.uid;
+            const userEmail = data.email || data.secretaryEmail || 'مستخدم';
             const currentDocName = data.doctorName || 'غير مسجل';
             const founderMail = (typeof FOUNDER_EMAIL !== 'undefined') ? FOUNDER_EMAIL.toLowerCase() : "admin@clinic.com";
             const isFounder = userEmail.toLowerCase() === founderMail;
@@ -1417,66 +1335,90 @@ function openNetworkHierarchy() {
 
             const card = document.createElement('div');
             card.className = 'node-card';
-            card.style.cssText = 'display:flex; flex-direction:column; margin-bottom:12px; padding:12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; gap:8px;';
+            card.style.cssText = 'display:flex; flex-direction:column; margin-bottom:12px; padding:14px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; gap:8px;';
             
-            let deleteBtnHtml = !isFounder ? '<button type="button" class="del-node-btn" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer;"><i class="fa-solid fa-trash"></i> حذف الحساب</button>' : '';
+            let daysBadgeColor = data.calculatedDaysLeft <= 7 ? '#fee2e2' : '#f0fdfa';
+            let daysTextColor = data.calculatedDaysLeft <= 7 ? '#b91c1c' : '#0f766e';
 
-            let secretaryInfoHtml = '';
-            if (data.secretaryEmail || data.secretaryPhone) {
-                const secLog = data.secretaryPhone || data.secretaryEmail;
-                const secPass = data.secretaryPassword || 'متاح';
-                secretaryInfoHtml = `
-                    <div style="margin-top:6px; padding:8px; background:#f0fdfa; border:1px dashed #0d9488; border-radius:8px;">
-                        <p style="margin:0; font-size:0.75rem; color:#0f766e;"><i class="fa-solid fa-user-tie"></i> <b>حساب السكرتير المرتبط:</b></p>
-                        <p style="margin:2px 0 0 0; font-size:0.75rem; color:#334155;">• معرف الدخول: <b>${secLog}</b> | كلمة المرور: <b>${secPass}</b></p>
-                    </div>
-                `;
-            } else {
-                secretaryInfoHtml = `
-                    <div style="margin-top:6px; padding:6px; background:#f1f5f9; border-radius:6px;">
-                        <p style="margin:0; font-size:0.72rem; color:#64748b;"><i class="fa-solid fa-circle-info"></i> لا يوجد سكرتير مرتبطة بهذا الطبيب حالياً.</p>
+            let actionsHtml = '';
+            if (!isFounder) {
+                actionsHtml = `
+                    <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; border-top:1px dashed #cbd5e1; pt:8px;">
+                        <button type="button" onclick="founderExtendSubscription('${nodeUid}', 7)" style="background:#e0f2fe; color:#0369a1; border:none; border-radius:6px; padding:6px 10px; font-size:0.75rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-plus"></i> أسبوع (7 أيام)</button>
+                        <button type="button" onclick="founderExtendSubscription('${nodeUid}', 14)" style="background:#ccfbf1; color:#0f766e; border:none; border-radius:6px; padding:6px 10px; font-size:0.75rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-plus"></i> أسبوعين (14 يوم)</button>
+                        <button type="button" onclick="founderExtendSubscription('${nodeUid}', 365)" style="background:#fef3c7; color:#d97706; border:none; border-radius:6px; padding:6px 10px; font-size:0.75rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-calendar-days"></i> سنة (365 يوم)</button>
+                        <button type="button" onclick="promptFounderEditName('${nodeUid}', '${currentDocName}', '${userEmail}')" style="background:#f1f5f9; color:#334155; border:none; border-radius:6px; padding:6px 10px; font-size:0.75rem; cursor:pointer;"><i class="fa-solid fa-pen"></i> تعديل الاسم</button>
+                        <button type="button" onclick="promptFounderDeleteNode('${nodeUid}', '${userEmail}')" style="background:#fee2e2; color:#ef4444; border:none; border-radius:6px; padding:6px 10px; font-size:0.75rem; cursor:pointer;"><i class="fa-solid fa-trash"></i> حذف</button>
                     </div>
                 `;
             }
 
             card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                     <div class="node-info">
-                        <h5 style="margin:0; font-size:0.85rem; color:#0f172a;"><i class="fa-solid fa-envelope" style="color:#0d9488;"></i> ${userEmail}</h5>
-                        <p style="margin:2px 0; font-size:0.75rem; color:#64748b;"><b>الاسم البارز:</b> <span style="color:#0d9488; font-weight:700;">${currentDocName}</span></p>
-                        <p style="margin:0; font-size:0.75rem; color:#64748b;"><b>Password:</b> ${data.password || 'N/A'}</p>
+                        <h5 style="margin:0; font-size:0.9rem; color:#0f172a;"><i class="fa-solid fa-user-doctor" style="color:#0d9488;"></i> ${currentDocName}</h5>
+                        <p style="margin:2px 0; font-size:0.78rem; color:#64748b;"><i class="fa-solid fa-envelope"></i> ${userEmail}</p>
+                        <p style="margin:0; font-size:0.75rem; color:#64748b;"><b>كلمة المرور:</b> ${data.password || 'N/A'}</p>
                     </div>
-                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
-                        <span class="node-badge" style="font-size:0.68rem; padding:2px 6px; background:#e0f2fe; color:#0369a1; border-radius:4px;">${data.role || 'Client'}</span>
-                        <div style="display:flex; gap:4px;">
-                            <button type="button" class="edit-node-btn" style="background:#ccfbf1; color:#0f766e; border:none; border-radius:6px; padding:4px 8px; font-size:0.7rem; cursor:pointer; font-weight:700;"><i class="fa-solid fa-pen"></i> اسم</button>
-                            ${deleteBtnHtml}
-                        </div>
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                        <span style="font-size:0.78rem; padding:3px 8px; background:${daysBadgeColor}; color:${daysTextColor}; border-radius:6px; font-weight:800;">
+                            ⏳ المتبقي: ${data.calculatedDaysLeft} يوم
+                        </span>
+                        <span style="font-size:0.68rem; color:#94a3b8;">${data.expiryDate ? 'ينتهي في: ' + data.expiryDate.split('T')[0] : 'غير مفعل'}</span>
                     </div>
                 </div>
-                ${secretaryInfoHtml}
+                ${actionsHtml}
             `;
-
-            const editBtn = card.querySelector('.edit-node-btn');
-            if (editBtn) {
-                editBtn.addEventListener('click', () => {
-                    promptFounderEditName(nodeUid, currentDocName, userEmail);
-                });
-            }
-
-            const delBtn = card.querySelector('.del-node-btn');
-            if (delBtn) {
-                delBtn.addEventListener('click', () => {
-                    promptFounderDeleteNode(nodeUid, userEmail);
-                });
-            }
-
             container.appendChild(card);
         });
     }).catch(err => {
-        container.innerHTML = '<p style="text-align:center; color:#b91c1c;">Error loading network data.</p>';
+        container.innerHTML = '<p style="text-align:center; color:#b91c1c;">خطأ في تحميل بيانات المشتركين.</p>';
         console.error("Network load error:", err);
     });
+}
+
+async function founderExtendSubscription(targetUid, daysToAdd) {
+    if (!navigator.onLine) {
+        alert('الاتصال بالإنترنت مطلوب لتجديد الاشتراك.');
+        return;
+    }
+
+    try {
+        const userDocRef = db.collection('network_hierarchy').doc(targetUid);
+        const docSnap = await userDocRef.get();
+
+        if (!docSnap.exists) {
+            alert('لم يتم العثور على بيانات هذا المستخدم.');
+            return;
+        }
+
+        const userData = docSnap.data();
+        let baseDate = new Date();
+
+        // نظام تراكم الأيام الذكي عند التجديد من لوحة المؤسس
+        if (userData.expiryDate) {
+            let existingExpiryTime = new Date(userData.expiryDate).getTime();
+            let nowTime = new Date().getTime();
+            if (existingExpiryTime > nowTime) {
+                baseDate = new Date(userData.expiryDate);
+            }
+        }
+
+        baseDate.setDate(baseDate.getDate() + Number(daysToAdd));
+        const newExpiryIso = baseDate.toISOString();
+
+        await userDocRef.set({
+            expiryDate: newExpiryIso,
+            isActivated: true,
+            extendedByFounderAt: new Date().toISOString()
+        }, { merge: true });
+
+        alert(`✅ تم تجديد الاشتراك بنجاح وإضافة (${daysToAdd} يوم) للمشترك!`);
+        openNetworkHierarchy();
+
+    } catch (err) {
+        alert('خطأ أثناء التجديد: ' + err.message);
+    }
 }
 
 function promptFounderEditName(nodeUid, currentName, userEmail) {
@@ -1797,10 +1739,6 @@ function handleCleanLiveInput(textarea, category, visitId) {
     }
 
     updateVisitFieldData(visitId, category, textarea.value);
-}
-
-function handleLiveInput(textarea, category, visitId) {
-    handleCleanLiveInput(textarea, category, visitId);
 }
 
 function selectSuggestion(category, visitId, term) {
