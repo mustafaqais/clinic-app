@@ -1,5 +1,5 @@
 // ==========================================
-// Clinic Master System - Complete & Unified Script (Cloud Firestore Native Mode)
+// Clinic Master System - Complete, Unified & Updated Script
 // ==========================================
 
 window.targetNodeUidForNameEdit = window.targetNodeUidForNameEdit || null;
@@ -3209,19 +3209,22 @@ function saveNewPatient(e) {
     openMedicalRecord(newPatient.id);
 }
 
+// الدالة المحدثة لعرض الأرشيف (تعرض تاريخ آخر مراجعة بدل الجنس)
 function renderPatientsList(list) {
     const container = document.getElementById('patientsList');
     container.innerHTML = list.length === 0 
         ? '<p style="text-align:center; color:#64748b;">No matching patients found.</p>'
-        : list.map(p => 
-            '<div class="patient-card" onclick="openMedicalRecord(' + p.id + ')" style="padding: 6px 10px !important; margin-bottom: 3px !important; min-height: 40px; display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer;">' +
+        : list.map(p => {
+            let lastVisitDate = p.visits && p.visits.length > 0 ? p.visits[0].date : getTodayFormatted();
+            
+            return '<div class="patient-card" onclick="openMedicalRecord(' + p.id + ')" style="padding: 6px 10px !important; margin-bottom: 3px !important; min-height: 40px; display: flex; align-items: center; justify-content: space-between; background: #fff; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer;">' +
             '<div class="patient-info" style="display: flex; align-items: center; gap: 8px; overflow: hidden;">' +
             '<h4 style="margin: 0; font-size: 0.82rem; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;">' + p.name + '</h4>' +
             '<p style="margin: 0; font-size: 0.68rem; color: #64748b; white-space: nowrap;">' + (p.city ? '(' + p.city + ') ' : '') + '<i class="fa-solid fa-phone" style="font-size:0.6rem;"></i> ' + p.phone + ' | Age: ' + p.age + '</p>' +
             '</div>' +
-            '<span class="badge-gender ' + (p.gender === 'Female' ? 'gender-female' : 'gender-male') + '" style="font-size: 0.62rem; padding: 1px 6px; border-radius: 4px; white-space: nowrap;">' + (p.gender || 'N/A') + '</span>' +
-            '</div>'
-        ).join('');
+            '<span style="font-size: 0.7rem; padding: 2px 8px; background: #f0fdfa; color: #0f766e; border: 1px solid #ccfbf1; border-radius: 6px; white-space: nowrap; font-weight: 700;"><i class="fa-regular fa-calendar-days"></i> ' + lastVisitDate + '</span>' +
+            '</div>';
+        }).join('');
 }
 
 function filterPatients() {
